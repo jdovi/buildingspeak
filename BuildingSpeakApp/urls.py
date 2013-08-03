@@ -1,0 +1,20 @@
+from django.conf.urls import patterns, include, url
+
+from BuildingSpeakApp import views
+
+# these url patterns deal only with BuildingSpeakApp/ web requests
+# each app has its own urls.py file, which is called by the site's urls.py file
+urlpatterns = patterns('',
+    url(r'^$', views.index, name='index'),
+    url(r'^login', 'django.contrib.auth.views.login', name='login'),
+    url(r'^logout', 'django.contrib.auth.views.logout_then_login', name='logout'),
+    url(r'^my-account$', views.my_account, name='my_account'),
+    url(r'^(?P<account_id>\d+)/$', views.account_detail, name='account_detail'),
+    url(r'^(?P<account_id>\d+)/buildings/(?P<building_id>\d+)$', views.building_detail,
+        name='building_detail'),
+    url(r'^(?P<account_id>\d+)/meters/(?P<meter_id>\d+)$', views.meter_detail,
+        name='meter_detail'),
+    url(r'^(?P<account_id>\d+)/equipments/(?P<equipment_id>\d+)$', views.equipment_detail,
+        name='equipment_detail'),
+    #url(r'^schedule/', include('schedule.urls')),
+)

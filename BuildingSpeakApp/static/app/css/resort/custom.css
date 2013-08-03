@@ -1,0 +1,54 @@
+/* 
+WOO CUSTOM STYLESHEET
+---------------------
+
+Instructions:
+
+Add your custom styles in this file instead of style.css so it 
+is easier to update the theme. Simply copy an existing style 
+from style.css to this file, and modify it to your liking. */
+
+
+/* 
+GLOBAL STYLES
+----------------
+Add styles beneath this line that you want to be applied across your entire site */
+#top-nav .account-selector { line-height: 30px; }
+#top-nav .account-selector select { margin: 0 9px 0 0; }
+#menu-left-menu { margin: 0; }
+#menu-left-menu a { display:block; color: #030f22; }
+#menu-left-menu a.active { background-color: #030f22; color: #eee; font-weight: bold; padding-left: 6px; }
+.site-title, .site-description { display: inline-block !important; }
+#header .site-title { margin-right: 9px; }
+.woo-sc-box.note { background-image: url(../../img/resort/icons/exclamation.png); }
+.woo-sc-box.large { padding-left: 66px; }
+.woo-sc-box { position: relative; }
+.woo-sc-box .dismiss { position: absolute; top: -12px; right: -12px; padding-left: 24px; width: 0; line-height: 24px; display: inline-block; overflow: hidden; background: url(../../img/resort/icons/alert-dismiss.png) 0 0 no-repeat; }
+.ui-datepicker-header { background-color: #1f3857; color: #eee; border-radius: 3px 3px 0 0; }
+.ui-datepicker a { color: #8a8a8a; }
+.ui-datepicker-prev { background: url(../../img/resort/icons/arrow-prev.png) 3px center no-repeat; }
+.ui-datepicker-next { background: url(../../img/resort/icons/arrow-next.png) 3px center no-repeat; }
+.event-date { width: 12%; margin-right: 10px; }
+.event-description { width: 60%; margin-right: 10px; }
+ul.tab_titles li.nav-tab a { outline: 0; }
+#slides img { max-height: 154px; max-width: 300px; }
+.form-item { line-height: 44px; }
+.form-item label { width: 8em; display: inline-block; }
+.form-item p { margin: 0; }
+.form-item.actions { padding-left: 116px; }
+.space-details .form-item, .chart-header { line-height: 16px; margin-bottom: 8px; }
+.space-details .form-item label { text-decoration: underline; text-align: right; padding-right: 9px; vertical-align: top; }
+.space-details .form-item span { display: inline-block; }
+.images { list-style-type: none; margin: 0; padding: 0; }
+.images li { display: inline-block; vertical-align: top; }
+.images img { max-width: 133px; max-height: 100px; }
+.fancybox-overlay { z-index: 9999; }
+
+/* 
+DESKTOP STYLES
+-----------------
+Add styles inside the media query below that you only want to be applied to the desktop layout of your site */
+
+@media only screen and (min-width: 768px) {
+	/* Desktop styles go here */
+}
