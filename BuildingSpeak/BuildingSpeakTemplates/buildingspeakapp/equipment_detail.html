@@ -1,0 +1,38 @@
+{% extends 'app_base.html' %}
+{% block body %}
+
+<h1><a href="/{{ account.id }}/">{{ account.name }}</a> - {{ equipment.name }}</h1>
+
+<img src="{{ equipment.image_file.url }}" alt="equipment image" width="400" height="300"/> <img src="{{ equipment.nameplate_file.url }}" alt="nameplate image" width="300" height="400"/>
+
+Equipment serves {{equipment.buildings.all.count }} building(s):
+<ul>
+{% for bldg in equipment.buildings.all %}
+    <li><a href="/{{ account.id }}/buildings/{{ bldg.id }}">{{ bldg.name }}</a></li>
+{% endfor %}
+</ul>
+
+Equipment connected to {{ equipment.meters.all.count }} meter(s):
+<ul>
+{% for meter in equipment.meters.all %}
+    <li><a href="/{{ account.id }}/meters/{{ meter.id }}">{{ meter.name }}</a></li>
+{% endfor %}
+</ul>
+
+<table>
+    <tr>
+        <td><u>Field</u></td>
+        <td><u>Value</u></td>
+    </tr>
+
+    {% for field,value in equipment_dict.items %}
+    <tr>
+        <td>{{field}}</td>
+        <td>{{value}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<li><a href="{{ equipment.data_file.url }}">{{ equipment.name }} - data file</a></li>
+
+{% endblock %}

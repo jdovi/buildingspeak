@@ -1,0 +1,555 @@
+{% extends 'app_base.html' %}
+{% block body %}
+
+<script>
+var charts = [];
+function addChart(arr) {
+  charts.push(arr);
+};
+</script>
+
+<header>
+  <h1>{{ building.name}}</h1>
+</header>
+
+<section class="entry">
+  <div class="shortcode-tabs default" id="tabs-11">
+    <ul class="tab_titles">
+      <li class="nav-tab"><a href="#tab-1">Overview</a></li>
+      <li class="nav-tab"><a href="#tab-2">Stats</a></li>
+      <li class="nav-tab"><a href="#tab-3">Details</a></li>
+    </ul> <!-- .nav-tabs -->
+
+    <div class="tab tab-overview">
+      <div class="row">
+        <div class="fivecol-two space-details">
+          {% if building.street_address %}
+            <div class="form-item">
+              <label>Address:</label>
+              <span>{{ building.street_address }}</span>
+            </div>
+          {% endif %}
+          {% if building.building_type %}
+            <div class="form-item">
+              <label>Type:</label>
+              <span>{{ building.building_type }}</span>
+            </div>
+          {% endif %}
+          {% if building.square_feet %}
+            <div class="form-item">
+              <label>Sq Footage:</label>
+              <span>{{ building.square_feet }}</span>
+            </div>
+          {% endif %}
+          {% if building.stories %}
+            <div class="form-item">
+              <label>Stories:</label>
+              <span>{{ building.stories }}</span>
+            </div>
+          {% endif %}
+          {% if building.year_built %}
+            <div class="form-item">
+              <label>Year Built:</label>
+              <span>{{ building.year_built }}</span>
+            </div>
+          {% endif %}
+          {% if building.max_occupancy %}
+            <div class="form-item">
+              <label>Max Occupancy:</label>
+              <span>{{ building.max_occupancy }}</span>
+            </div>
+          {% endif %}
+        </div>
+        <div class="fivecol-three last">
+          <ul class="images">
+            {% if building.image_file %}
+              <li>
+                <a rel="images" href="{{ building.image_file.url }}"><img src="{{ building.image_file.url }}" /></a>
+              </li>
+            {% endif %}
+          </ul>
+        </div> <!-- .fivecol-three -->
+      </div> <!-- .row -->
+
+      <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+      <div id="cost-by-month"></div>
+      <script>
+      addChart([
+        'cost-by-month',
+        'ComboChart',
+        [ // data
+          //        Cost in USD                        Degree Days
+          ['Month', 'Electricity', 'Gas', 'Water',     'Heat DD', 'Cool DD'],
+          ['Apr',   165,           938,   522,         190,       90    ],
+          ['May',   165,           938,   522,         27,        236   ],
+          ['Jun',   165,           938,   522,         11,        321   ],
+          ['Jul',   165,           938,   522,         0,         489   ],
+          ['Aug',   165,           938,   522,         3,         324   ],
+          ['Sep',   165,           938,   522,         35,        228   ],
+          ['Oct',   165,           938,   522,         200,       72    ],
+          ['Nov',   165,           938,   522,         456,       12    ],
+          ['Dec',   165,           938,   522,         503,       8     ],
+          ['Jan',   135,           1120,  599,         534,       5     ],
+          ['Feb',   157,           1167,  587,         573,       1     ],
+          ['Mar',   139,           1110,  615,         531,       13    ],
+          ['Apr',   136,           691,   629,         202,       80    ]
+        ],
+        { // options
+          title: 'Monthly cost by fuel type / Heating and cooling demand',
+          vAxes: {
+            0: { title: 'USD' },
+            1: { title: 'DD' }
+          },
+          seriesType: "bars",
+          series:     {
+            0: {type: "bar",  targetAxisIndex: 0, color: '#109618' },
+            1: {type: "bar",  targetAxisIndex: 0, color: '#ff9900' },
+            2: {type: "bar",  targetAxisIndex: 0, color: '#0099c6' },
+            3: {type: "line", targetAxisIndex: 1, color: '#dc3912' },
+            4: {type: "line", targetAxisIndex: 1, color: '#3366cc' }
+          }
+        }
+      ]);
+      </script>
+
+      <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+      {% if building.meter_set.all %}
+        <p>Meters</p>
+        <table>
+          <tbody>
+            {% for m in building.meter_set.all %}
+              <tr>
+                <td>Meter</td>
+                <td>{{ m.name }}</td>
+                <td><a href="/{{ account.id }}/meters/{{ m.id }}">view details</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      {% if building.equipment_set.all %}
+        <p>Equipment</p>
+        <table>
+          <tbody>
+            {% for e in building.equipment_set.all %}
+              <tr>
+                <td>Equipment</td>
+                <td>{{ e.name }}</td>
+                <td><a href="/{{ account.id }}/equipment/{{ e.id }}">view details</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      <p>Event Log:</p>
+      <table>
+        <tbody>
+          {% if building.event_set.all %}
+            {% for e in building.event_set.all %}
+              <tr>
+                <td>{{ e.when|date:"m/d/Y" }}</td>
+                <td>{{ e.name }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td>No events.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+      <p>Alerts:</p>
+      <table>
+        <tbody>
+          {% if alerts %}
+            {% for a in alerts %}
+              <tr>
+                <td>{{ a.when|date:"m/d/Y" }}</td>
+                <td>{{ a.subject }}</td>
+                <td>{{ a.comment }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td>No alerts.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      {% if adding_events_is_enabled %}
+        <p>Add an event for this space:</p>
+        <p>
+          <input class="event-date datepicker" type="text" value="{% now "m/d/Y" %}" />
+          <input class="event-description" type="text" placeholder="Click to enter event description" />
+          <a href="#" class="woo-sc-button custom small">
+            <span class="woo-bu">Add</span>
+          </a>
+        </p>
+      {% endif %}
+    </div> <!-- .tab-overview -->
+
+    <div class="tab tab-stats">
+      <p>
+        <strong><u>Currently viewing:</u></strong>
+        <input type="text" class="datepicker" value="{{ thirty_days_ago|date:"m/d/Y" }}" />
+        to
+        <input type="text" class="datepicker" value="{% now "m/d/Y" %}" />
+      </p>
+
+      <div id="electricity-over-time"></div>
+      <script>
+      addChart([
+        'electricity-over-time',
+        'LineChart',
+        [ // data
+          //        kWh
+          ['Month', 'Electricity' ],
+          ['4/25',   165,         ],
+          ['4/26',   135,         ],
+          ['4/27',   140,         ],
+          ['4/28',   165,         ],
+          ['4/29',   157,         ],
+          ['4/30',   135,         ],
+          ['5/1',    165,         ],
+          ['5/2',    157,         ],
+          ['5/3',    165,         ],
+          ['5/4',    135,         ],
+          ['5/5',    165,         ],
+          ['5/6',    140,         ],
+          ['5/7',    165,         ],
+          ['5/8',    135,         ],
+          ['5/9',    157,         ],
+          ['5/10',   139,         ],
+          ['5/11',   136,         ],
+          ['5/12',   165,         ],
+          ['5/13',   135,         ],
+          ['5/14',   165,         ],
+          ['5/15',   140,         ],
+          ['5/16',   157,         ],
+          ['5/17',   165,         ],
+          ['5/18',   135,         ],
+          ['5/19',   165,         ],
+          ['5/20',   140,         ],
+          ['5/21',   135,         ],
+          ['5/22',   157,         ],
+          ['5/23',   139,         ],
+          ['5/24',   136,         ]
+        ],
+        { // options
+          title:  'Electricity',
+          vAxis:  { title: 'kWh' },
+          legend: { position: 'none' },
+          hAxis:  { maxAlternation: 1 }
+        }
+      ]);
+      </script>
+
+      <div id="gas-over-time"></div>
+      <script>
+      addChart([
+        'gas-over-time',
+        'LineChart',
+        [ // data
+          //        CCFs
+          ['Month', 'Gas' ],
+          ['4/25',   165,         ],
+          ['4/26',   135,         ],
+          ['4/27',   140,         ],
+          ['4/28',   165,         ],
+          ['4/29',   157,         ],
+          ['4/30',   135,         ],
+          ['5/1',    165,         ],
+          ['5/2',    157,         ],
+          ['5/3',    165,         ],
+          ['5/4',    135,         ],
+          ['5/5',    165,         ],
+          ['5/6',    140,         ],
+          ['5/7',    165,         ],
+          ['5/8',    135,         ],
+          ['5/9',    157,         ],
+          ['5/10',   139,         ],
+          ['5/11',   136,         ],
+          ['5/12',   165,         ],
+          ['5/13',   135,         ],
+          ['5/14',   165,         ],
+          ['5/15',   140,         ],
+          ['5/16',   157,         ],
+          ['5/17',   165,         ],
+          ['5/18',   135,         ],
+          ['5/19',   165,         ],
+          ['5/20',   140,         ],
+          ['5/21',   135,         ],
+          ['5/22',   157,         ],
+          ['5/23',   139,         ],
+          ['5/24',   136,         ]
+        ],
+        { // options
+          title:  'Gas',
+          vAxis:  { title: 'CCFs' },
+          legend: { position: 'none' },
+          hAxis:  { maxAlternation: 1 }
+        }
+      ]);
+      </script>
+
+      <div id="water-over-time"></div>
+      <script>
+      addChart([
+        'water-over-time',
+        'LineChart',
+        [ // data
+          //        tons
+          ['Month', 'Water' ],
+          ['4/25',   165,         ],
+          ['4/26',   135,         ],
+          ['4/27',   140,         ],
+          ['4/28',   165,         ],
+          ['4/29',   157,         ],
+          ['4/30',   135,         ],
+          ['5/1',    165,         ],
+          ['5/2',    157,         ],
+          ['5/3',    165,         ],
+          ['5/4',    135,         ],
+          ['5/5',    165,         ],
+          ['5/6',    140,         ],
+          ['5/7',    165,         ],
+          ['5/8',    135,         ],
+          ['5/9',    157,         ],
+          ['5/10',   139,         ],
+          ['5/11',   136,         ],
+          ['5/12',   165,         ],
+          ['5/13',   135,         ],
+          ['5/14',   165,         ],
+          ['5/15',   140,         ],
+          ['5/16',   157,         ],
+          ['5/17',   165,         ],
+          ['5/18',   135,         ],
+          ['5/19',   165,         ],
+          ['5/20',   140,         ],
+          ['5/21',   135,         ],
+          ['5/22',   157,         ],
+          ['5/23',   139,         ],
+          ['5/24',   136,         ]
+        ],
+        { // options
+          title:  'Water',
+          vAxis:  { title: 'tons' },
+          legend: { position: 'none' },
+          hAxis:  { maxAlternation: 1 }
+        }
+      ]);
+      </script>
+
+      <div class="row">
+        <div id="by-end-use" style="display: inline-block; width: 49%;"></div>
+        <script>
+        addChart([
+          'by-end-use',
+          'PieChart',
+          [ // data
+            //            Common Units
+            [ 'End Use',  'Percent' ],
+            [ 'Cooling',         11 ],
+            [ 'Lighting',         3 ],
+            [ 'Heating',          1 ]
+          ],
+          { // options
+            title:  'By End Use',
+            slices: {
+              0: {color: '#3366cc'},
+              1: {color: '#ff9900'},
+              2: {color: '#dc3912'}
+            }
+          }
+        ]);
+        </script>
+
+        <div id="by-fuel-type" style="display: inline-block; width: 49%;"></div>
+        <script>
+        addChart([
+          'by-fuel-type',
+          'PieChart',
+          [ // data
+            //               Common Units
+            [ 'Fuel Type',   'Percent' ],
+            [ 'Electricity',        32 ],
+            [ 'Water',              11 ],
+            [ 'Natural Gas',         7 ]
+          ],
+          { // options
+            title:  'By Fuel Type',
+            slices: {
+              0: {color: '#109618'},
+              1: {color: '#0099c6'},
+              2: {color: '#ff9900'}
+            }
+          }
+        ]);
+        </script>
+      </div>
+
+      <div id="temperature-over-time"></div>
+      <script>
+      addChart([
+        'temperature-over-time',
+        'LineChart',
+        [ // data
+          //        degrees
+          ['Month', 'Temperature' ],
+          ['4/25',   165,         ],
+          ['4/26',   135,         ],
+          ['4/27',   140,         ],
+          ['4/28',   165,         ],
+          ['4/29',   157,         ],
+          ['4/30',   135,         ],
+          ['5/1',    165,         ],
+          ['5/2',    157,         ],
+          ['5/3',    165,         ],
+          ['5/4',    135,         ],
+          ['5/5',    165,         ],
+          ['5/6',    140,         ],
+          ['5/7',    165,         ],
+          ['5/8',    135,         ],
+          ['5/9',    157,         ],
+          ['5/10',   139,         ],
+          ['5/11',   136,         ],
+          ['5/12',   165,         ],
+          ['5/13',   135,         ],
+          ['5/14',   165,         ],
+          ['5/15',   140,         ],
+          ['5/16',   157,         ],
+          ['5/17',   165,         ],
+          ['5/18',   135,         ],
+          ['5/19',   165,         ],
+          ['5/20',   140,         ],
+          ['5/21',   135,         ],
+          ['5/22',   157,         ],
+          ['5/23',   139,         ],
+          ['5/24',   136,         ]
+        ],
+        { // options
+          title:  'Temperature / RH',
+          vAxis:  { title: 'degrees' },
+          legend: { position: 'none' },
+          hAxis:  { maxAlternation: 1 }
+        }
+      ]);
+      </script>
+
+      <div id="occupancy-over-time"></div>
+      <script>
+      addChart([
+        'occupancy-over-time',
+        'LineChart',
+        [ // data
+          //        occupants
+          ['Month', 'Occupancy' ],
+          ['4/25',   165,         ],
+          ['4/26',   135,         ],
+          ['4/27',   140,         ],
+          ['4/28',   165,         ],
+          ['4/29',   157,         ],
+          ['4/30',   135,         ],
+          ['5/1',    165,         ],
+          ['5/2',    157,         ],
+          ['5/3',    165,         ],
+          ['5/4',    135,         ],
+          ['5/5',    165,         ],
+          ['5/6',    140,         ],
+          ['5/7',    165,         ],
+          ['5/8',    135,         ],
+          ['5/9',    157,         ],
+          ['5/10',   139,         ],
+          ['5/11',   136,         ],
+          ['5/12',   165,         ],
+          ['5/13',   135,         ],
+          ['5/14',   165,         ],
+          ['5/15',   140,         ],
+          ['5/16',   157,         ],
+          ['5/17',   165,         ],
+          ['5/18',   135,         ],
+          ['5/19',   165,         ],
+          ['5/20',   140,         ],
+          ['5/21',   135,         ],
+          ['5/22',   157,         ],
+          ['5/23',   139,         ],
+          ['5/24',   136,         ]
+        ],
+        { // options
+          title:  'Occupancy',
+          vAxis:  { title: 'occupants' },
+          legend: { position: 'none' },
+          hAxis:  { maxAlternation: 1 }
+        }
+      ]);
+      </script>
+    </div> <!-- .tab-stats -->
+
+    <div class="tab tab-details">
+      <table>
+        <tr>
+          <th>Field</td>
+          <th>Value</td>
+        </tr>
+
+        {% for field,value in building_dict.items %}
+          <tr>
+            <td>{{field}}</td>
+            <td>{{value}}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div> <!-- .tab-details -->
+  </div>
+</section><!-- .entry -->
+
+<script type="text/javascript">
+google.load("visualization", "1", {packages:["corechart"]});
+function drawChart(id, chartType, data, options) {
+  if (!google || !google.visualization) return;
+  var el        = document.getElementById(id);
+  var dataTable = google.visualization.arrayToDataTable(data);
+  var chart     = new google.visualization[chartType](el);
+  chart.draw(dataTable, options);
+}
+
+function drawAllCharts() {
+  for (var i=0; i<charts.length; i++) {
+    var chart = charts[i];
+    drawChart.apply(this, chart);
+  }
+}
+google.setOnLoadCallback(drawAllCharts);
+$(function() {
+  $(window).resize($.debounce(250, drawAllCharts));
+  $(document).on('tabsactivate', drawAllCharts);
+});
+
+// Set up lightbox
+$(function() {
+  $('.images a').fancybox();
+});
+</script>
+{% endblock %}

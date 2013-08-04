@@ -1,0 +1,52 @@
+{% extends "app_base.html" %}
+
+{% block body %}
+<!--
+<header>
+  <h1>My Account</h1>
+</header>
+-->
+
+<section class="entry">
+  <div class="form-item">
+    <label>Contact Name:</label>
+    <input type="text" placeholder="John Smith">
+  </div>
+  <div class="form-item">
+    <label>Email:</label>
+    <input type="text" placeholder="john.smith@gmail.com">
+  </div>
+  <div class="form-item">
+    <label>Account Type:</label>
+    <span>Basic</span>
+  </div>
+  <div class="form-item">
+    <label>Customer Since:</label>
+    <span>February 12, 2013</span>
+  </div>
+  <div class="form-item">
+    <label>Address Line 1:</label>
+    <input type="text" placeholder="123 Main St">
+  </div>
+  <div class="form-item">
+    <label>Address Line 2:</label>
+    <input type="text" placeholder="">
+  </div>
+  <div class="form-item">
+    <label>City:</label>
+    <input type="text" placeholder="Atlanta">
+  </div>
+  <div class="form-item">
+    <label>State:</label>
+    <input type="text" placeholder="GA">
+  </div>
+  <div class="form-item">
+    <label>Zip:</label>
+    <input type="text" placeholder="30309">
+  </div>
+  <div class="form-item actions">
+    <input class="submit button" type="submit" value="Save">
+  </div>
+</section> <!-- .entry -->
+{% endblock %}
+

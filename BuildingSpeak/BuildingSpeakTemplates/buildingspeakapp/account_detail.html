@@ -1,0 +1,126 @@
+{% extends 'app_base.html' %}
+{% block body %}
+
+<script>
+var charts = [];
+function addChart(arr) {
+  charts.push(arr);
+};
+</script>
+
+<header>
+  <h1>{{ account.name }}</h1>
+</header>
+
+<section class="entry">
+  {% for bldg in account.building_set.all %}
+    <h2><a href="/{{ account.id }}/buildings/{{ bldg.id }}" title="{{ bldg.name }}">{{ bldg.name }}</a></h2>
+    <div class="row">
+      <div class="sixcol-two space-details">
+        {{ bldg.city }}
+        {% if bldg.street_address %}
+          <div class="form-item">
+            <label>Address:</label>
+            <span>{{ bldg.street_address }}</span> <!-- TODO: include city, state and zip here too -->
+          </div>
+        {% endif %}
+        {% if bldg.building_type %}
+          <div class="form-item">
+            <label>Type:</label>
+            <span>{{ bldg.building_type }}</span>
+          </div>
+        {% endif %}
+        {% if bldg.age %}
+          <div class="form-item">
+            <label>Year:</label>
+            <span>{{ bldg.age }}</span>
+          </div>
+        {% endif %}
+        {% if bldg.square_footage %}
+          <div class="form-item">
+            <label>Sq Footage:</label>
+            <span>{{ bldg.square_footage }}</span>
+          </div>
+        {% endif %}
+        {% if bldg.stories %}
+          <div class="form-item">
+            <label>Stories:</label>
+            <span>{{ bldg.stories }}</span>
+          </div>
+        {% endif %}
+      </div> <!-- .sixcol-two -->
+      <div class="sixcol-four last">
+        <div class="chart-header">Last month&#8217;s consumption</div>
+        <div class="row">
+          <div id="{{ bldg.id }}-by-end-use" style="display: inline-block; width: 49%;"></div>
+          <script>
+          addChart([
+            '{{ bldg.id }}-by-end-use',
+            'PieChart',
+            [ // data
+              //            Common Units
+              [ 'End Use',  'Percent' ],
+              [ 'Cooling',         11 ],
+              [ 'Lighting',         3 ],
+              [ 'Heating',          1 ]
+            ],
+            { // options
+              title:        'By End Use',
+              slices: {
+                0: {color: '#3366cc'},
+                1: {color: '#ff9900'},
+                2: {color: '#dc3912'}
+              }
+            }
+          ]);
+          </script>
+
+          <div id="{{ bldg.id }}-by-fuel-type" style="display: inline-block; width: 49%;"></div>
+          <script>
+          addChart([
+            '{{ bldg.id }}-by-fuel-type',
+            'PieChart',
+            [ // data
+              //               Common Units
+              [ 'Fuel Type',   'Percent' ],
+              [ 'Electricity',        32 ],
+              [ 'Water',              11 ],
+              [ 'Natural Gas',         7 ]
+            ],
+            { // options
+              title:  'By Fuel Type',
+              slices: {
+                0: {color: '#109618'},
+                1: {color: '#0099c6'},
+                2: {color: '#ff9900'}
+              }
+            }
+          ]);
+          </script>
+        </div>
+      </div> <!-- .sixcol-four -->
+    </div> <!-- .row -->
+
+    <div class="clear">
+      <!-- TODO: Hide the hr after the last space -->
+      <div class="woo-sc-hr"></div>
+    </div>
+  {% endfor %}
+</section> <!-- .entry -->
+
+<script type="text/javascript">
+google.load("visualization", "1", {packages:["corechart"]});
+google.setOnLoadCallback(function() {
+  for (var i=0; i<charts.length; i++) {
+    var chart = charts[i];
+    drawChart.apply(this, chart);
+  }
+});
+function drawChart(id, chartType, data, options) {
+  var el = document.getElementById(id);
+  var dataTable = google.visualization.arrayToDataTable(data);
+  var chart     = new google.visualization[chartType](el);
+  chart.draw(dataTable, options);
+}
+</script>
+{% endblock %}

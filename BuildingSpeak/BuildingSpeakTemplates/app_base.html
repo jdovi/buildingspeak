@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <title>BuildingSpeak</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name='robots' content='noindex,nofollow' />
+
+  <link rel='stylesheet' id='jquery-style-css'  href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/base/jquery.ui.base.css?ver=3.5.1' type='text/css' media='all' />
+
+  <!-- Stylesheets -->
+  <link href="{{ STATIC_URL }}app/css/jquery.fancybox.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_URL }}app/css/resort/style.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_URL }}app/css/resort/layout.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_URL }}app/css/resort/shortcodes.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_URL }}app/css/resort/default.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_URL }}app/css/resort/custom.css" rel="stylesheet" type="text/css" />
+
+  <!-- Javascripts -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="{{ STATIC_URL }}app/js/jquery.ui.core.min.js"></script>
+  <script src="{{ STATIC_URL }}app/js/jquery.ui.datepicker.min.js"></script>
+  <script src="{{ STATIC_URL }}app/js/jquery.ui.widget.min.js"></script>
+  <script src="{{ STATIC_URL }}app/js/jquery.ui.tabs.min.js"></script>
+  <script src="{{ STATIC_URL }}app/js/jquery.ba-throttle-debounce.min.js"></script>
+  <script src="{{ STATIC_URL }}app/js/comment-reply.min.js"></script>
+  <script src="{{ STATIC_URL }}app/js/jquery.fancybox.pack.js"></script>
+  <script src="{{ STATIC_URL }}app/js/resort/general.js"></script>
+  <script src="{{ STATIC_URL }}app/js/resort/shortcodes.js"></script>
+  <script src="{{ STATIC_URL }}app/js/resort/third-party.js"></script>
+
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <!--
+  <%= csrf_meta_tags %>
+  -->
+
+  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+  <!--  Mobile viewport scale | Disable user zooming as the layout is optimised -->
+  <meta content="initial-scale=1.0; maximum-scale=1.0; user-scalable=no" name="viewport"/>
+  <!--[if lt IE 9]>
+  <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <!-- Woo Custom Styling -->
+  <style type="text/css">
+  a.button, a.comment-reply-link, #commentform #submit, #contact-page .submit { background: #eed062 !important; border-color: #eed062 !important; }
+  a.button:hover, a.button.hover, a.button.active, a.comment-reply-link:hover, #commentform #submit:hover, #contact-page .submit:hover { background: #eed062 !important; opacity: 0.9; }
+  </style>
+
+  <!-- Google Webfonts -->
+  <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic" rel="stylesheet" type="text/css" />
+
+  <!-- Woo Custom Typography -->
+  <style type="text/css">
+  #header .site-title a {font:bold 1.6em/1em 'Lato', arial, sans-serif;color:#eed062;}
+  #header .site-description {font:normal 1em/1em "Helvetica Neue", Helvetica, sans-serif;color:#999999;}
+  </style>
+</head>
+
+<body class="page page-id-5 page-template-default unknown alt-style-default layout-right-content has-top-menu">
+
+<div id="wrapper">
+  <div id="top">
+    <nav class="col-full" role="navigation">
+    <a href="http://www.bldgspeak.com"><i>BuildingSpeak</i></a>...because your building wants to talk.
+      <ul id="top-nav" class="nav fr">
+        <li class="menu-item account-selector">
+          <select>
+            <option value="">Select an account...</option>
+            {% for acct in accounts %}
+              <option value="{{ acct.id }}" {% if acct.id == account.id %}selected{% endif %}>{{ acct.name }}</option>
+            {% endfor %}
+          </select>
+        </li>
+        <script>
+          $(function() {
+            var obj = $('.account-selector select');
+            obj.bind('change', function() {
+              var val = obj.val();
+              window.location = "/" + val;
+            });
+          });
+        </script>
+        <li class="menu-item">
+          <a href="/my-account">My Account</a>
+        </li>
+        <li class="menu-item">
+          <a href="/logout">Logout</a>
+        </li>
+      </ul> <!-- #top-nav -->
+    </nav> <!-- .col-full -->
+  </div> <!-- #top -->
+
+  <header id="header">
+    <div id="fixed-header">
+      <div class="col-full">
+        <hgroup>
+          <span class="nav-toggle"><a href="#navigation"><span>Navigation</span></a></span>
+		  {% if account.image_file %}
+            <h3 class="site-description">
+				<img src="{{ account.image_file.url }}" alt="organization image" width="60" height="50"/>
+            </h3>
+          {% endif %}
+		  {% if account.name %}
+		  <h1 class="site-title" ><a href="/{{ account.id }}">{{ account.name }}</a></h1>
+		  <br>
+          <h2 class="site-description">{{ account.city }}, {{ account.state }}</h2>
+          {% endif %}
+		  {% if not account.name %}
+		  <h1 class="site-title" ><a href="/my-account">My Account</a></h1>
+          {% endif %}
+		  
+        </hgroup>
+
+        <nav id="navigation" role="navigation">
+        </nav><!-- #navigation -->
+      </div><!-- .col-full -->
+    </div><!-- /#fixed-header -->
+  </header><!-- /#header -->
+
+  <div id="content" class="page col-full">
+    <div class="alerts">
+      {% for m in alerts %}
+	  <div class="{{ m.id }}">
+       <div class="woo-sc-box note large rounded full">
+        <a class="dismiss" href="#" onclick="jQuery('.{{ m.id }}').animate({ opacity: 0 }).slideUp();">Dismiss</a>
+		<strong>{{ m.subject }}</strong>
+        <div>
+          {{ m.comment }}
+        </div>
+	   </div>
+      </div>
+	  {% endfor %}
+    </div> <!-- .alerts -->
+
+    <section id="main" class="col-left">	
+      <article class="post-5 page type-page status-publish hentry">
+        <div class="inner">
+          {% block body %}
+          {% endblock %}
+        </div><!-- .inner -->
+      </article><!-- .post -->
+    </section><!-- #main -->
+
+	{% if account.name %}
+    <aside id="sidebar" class="col-right">
+      <div class="primary">
+        <div id="nav_menu-2" class="widget widget_nav_menu">
+          <div class="inner">
+            <div class="menu-left-menu-container">
+              <ul id="menu-left-menu" class="menu">
+                <li class="menu-item">
+                  <span>Buildings:</span>
+                  <ul>
+                    {% for b in account.building_set.all %}
+                      <li class="menu-item">
+                        <a href="/{{ account.id }}/buildings/{{ b.id }}" {% if b.id == building.id %}class="active"{% endif %}>
+                          {{ b.name }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </li>
+                <li class="menu-item">
+                  <span>Meters:</span>
+                  <ul>
+                    {% for m in account.meter_set.all %}
+                      <li class="menu-item {% if m.id == meter.id %}active{% endif %}">
+                        <a href="/{{ account.id }}/meters/{{ m.id }}" {% if m.id == meter.id %}class="active"{% endif %}>
+                          {{ m.name }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </li>
+              </ul>
+            </div>
+		  </div>
+        </div>
+      </div>
+    </aside><!-- /#sidebar -->
+    {% endif %}
+  </div><!-- /#content -->
+
+  <div id="footer-wrapper">
+    <footer id="footer" class="col-full">
+      <div id="credit" class="col-right"></div>
+      <div id="copyright" class="col-left">
+        <p>BuildingSpeak &copy; 2013. All Rights Reserved.</p>
+      </div>
+    </footer> <!-- #footer  -->
+  </div> <!-- #footer-wrapper -->
+</div><!-- #wrapper -->
+
+<script type="text/javascript">
+jQuery(function() {
+  jQuery('.datepicker').datepicker();
+});
+</script>
+
+<!--[if lt IE 9]>
+<script src="/wp-content/themes/resort/includes/js/respond.js"></script>
+<![endif]-->
+</body>
+</html>
+
