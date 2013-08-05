@@ -19,4 +19,4 @@ static==0.4
 wsgiref==0.1.2
 zope.interface==4.0.5
 pandas==0.12.0
-statsmodels==0.4.3
+
