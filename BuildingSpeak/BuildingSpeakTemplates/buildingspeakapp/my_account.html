@@ -9,40 +9,32 @@
 
 <section class="entry">
   <div class="form-item">
-    <label>Contact Name:</label>
-    <input type="text" placeholder="John Smith">
+    <label>Username:</label>
+    <input type="text" placeholder={{ user.username }}>
   </div>
   <div class="form-item">
     <label>Email:</label>
-    <input type="text" placeholder="john.smith@gmail.com">
+    <input type="text" placeholder={{ user.email }}>
   </div>
   <div class="form-item">
-    <label>Account Type:</label>
-    <span>Basic</span>
+    <label>First Name:</label>
+    <input type="text" placeholder={{ user.first_name }}>
   </div>
   <div class="form-item">
-    <label>Customer Since:</label>
-    <span>February 12, 2013</span>
+    <label>Last Name:</label>
+    <input type="text" placeholder={{ user.last_name }}>
   </div>
   <div class="form-item">
-    <label>Address Line 1:</label>
-    <input type="text" placeholder="123 Main St">
+    <label>User ID:</label>
+    <input type="text" placeholder={{ user.id }}>
   </div>
   <div class="form-item">
-    <label>Address Line 2:</label>
-    <input type="text" placeholder="">
+    <label>Last Login:</label>
+    <span>{{ user.last_login }}</span>
   </div>
   <div class="form-item">
-    <label>City:</label>
-    <input type="text" placeholder="Atlanta">
-  </div>
-  <div class="form-item">
-    <label>State:</label>
-    <input type="text" placeholder="GA">
-  </div>
-  <div class="form-item">
-    <label>Zip:</label>
-    <input type="text" placeholder="30309">
+    <label>Superuser?:</label>
+    <span>{{ user.is_superuser }}</span>
   </div>
   <div class="form-item actions">
     <input class="submit button" type="submit" value="Save">

@@ -91,6 +91,7 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     #DRA: if static files are stored in folders other than app/static, list those folders here
+
 )
 
 # List of finder classes that know how to find static files in

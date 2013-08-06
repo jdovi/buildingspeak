@@ -10,12 +10,20 @@ from decimal import Decimal
 
 @login_required
 def index(request):
+#    accounts = request.user.account_set.order_by('id')
+#    return redirect('/' + str(accounts[0].id))
+    context = {}
     accounts = request.user.account_set.order_by('id')
-    return redirect('/' + str(accounts[0].id))
+    if len(accounts)==0:
+        template_name = 'buildingspeakapp/my_account.html'
+    else:
+        template_name = request.user.account_set.order_by('id')
+    return render(request, template_name, context)
 
+@login_required
 def my_account(request):
     context  = {
-        'accounts': request.user.account_set.order_by('id')
+        'user': request.user,
     }
     return render(request, 'buildingspeakapp/my_account.html', context)
 
