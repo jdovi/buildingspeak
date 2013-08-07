@@ -15,27 +15,27 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
-
 #DATABASES = {
-#   'default': {
-#       'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-#       'NAME': 'bldgspeakdb2',                      # Or path to database file if using sqlite3.
-#       'USER': 'dashley',                      # Not used with sqlite3.
-#       'PASSWORD': 'Dryden030211!',                  # Not used with sqlite3.
-#       'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-#       'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
-#   }
+#    'default': {
+#        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+#        'NAME': '',                      # Or path to database file if using sqlite3.
+#        'USER': '',                      # Not used with sqlite3.
+#        'PASSWORD': '',                  # Not used with sqlite3.
+#        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+#        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+#    }
 #}
+
+DATABASES = {
+   'default': {
+       'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+       'NAME': 'bldgspeakdb2',                      # Or path to database file if using sqlite3.
+       'USER': 'dashley',                      # Not used with sqlite3.
+       'PASSWORD': 'Dryden030211!',                  # Not used with sqlite3.
+       'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+       'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
+   }
+}
 
 ###
 # Local time zone for this installation. Choices can be found here:
@@ -78,7 +78,7 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 #DRA: appears even with this as empty string, heroku puts files in
 #       /app/BuildingSpeakApp/static/ anyway, but also copies to S3 bucket
-STATIC_ROOT = ''
+STATIC_ROOT = '/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -91,7 +91,7 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     #DRA: if static files are stored in folders other than app/static, list those folders here
-
+    
 )
 
 # List of finder classes that know how to find static files in
@@ -190,5 +190,5 @@ LOGGING = {
 }
 
 # Parse database configuration from $DATABASE_URL
-import dj_database_url
-DATABASES['default'] =  dj_database_url.config()
+#import dj_database_url
+#DATABASES['default'] =  dj_database_url.config()
