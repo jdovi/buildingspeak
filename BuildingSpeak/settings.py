@@ -5,6 +5,7 @@ import django
 # used as starting points for various other paths
 DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+PROJECT_DIR = os.path.dirname(__file__)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -68,30 +69,30 @@ MEDIA_ROOT = ''
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-#DRA: same as STATIC_URL for now, because can't use subfolders on S3 without additional steps
-#   waiting to do these steps until later, since for now all files in one S3 bucket is fine
 MEDIA_URL = ''
+
+
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_ACCESS_KEY_ID = 'AKIAJOGG7W44H32J7LAA'
+AWS_SECRET_ACCESS_KEY = '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' 
+AWS_STORAGE_BUCKET_NAME = 'buildingspeak'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-#DRA: appears even with this as empty string, heroku puts files in
-#       /app/BuildingSpeakApp/static/ anyway, but also copies to S3 bucket
 STATIC_ROOT = '/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-#DRA: this is where the static files live and what needs to be called to access them from templates
-STATIC_URL = '/static/'
+STATIC_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    #DRA: if static files are stored in folders other than app/static, list those folders here
-    
+    os.path.join(PROJECT_DIR, 'static'),
 )
 
 # List of finder classes that know how to find static files in
@@ -102,10 +103,6 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = 'AKIAJOGG7W44H32J7LAA'
-AWS_SECRET_ACCESS_KEY = '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' 
-AWS_STORAGE_BUCKET_NAME = 'buildingspeak'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '51^-45as5jxejwjr+m!put_jy!xpnzvbncj@a6f$z19x39&amp;l6t'
