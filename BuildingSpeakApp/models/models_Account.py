@@ -23,7 +23,6 @@ class Account(models.Model):
     image logo file.  Parents
     Buildings and Meters."""
     name = models.CharField(max_length=200)
-    name2 = models.CharField(max_length=200)
     account_type = models.CharField(blank=True, max_length=200,
                                     choices=[('Commercial', 'Commercial'),
                                              ('Industrial', 'Industrial'),
