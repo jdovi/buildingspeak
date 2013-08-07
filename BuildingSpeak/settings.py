@@ -73,18 +73,20 @@ MEDIA_URL = ''
 
 
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = 'AKIAJOGG7W44H32J7LAA'
-AWS_SECRET_ACCESS_KEY = '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' 
-AWS_STORAGE_BUCKET_NAME = 'buildingspeak'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY') 
+AWS_STORAGE_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME')
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
+#DRA: seems this would be the heroku folder, but since S3 is used, this seems unused
 STATIC_ROOT = '/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
+#DRA: whatever is in local BuildingSpeakApp/static/ folder gets dumped here
 STATIC_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 
 # Additional locations of static files
