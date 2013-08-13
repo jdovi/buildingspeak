@@ -19,12 +19,13 @@ from django.db.models import Model
 
 from models_Message import Message
 from models_Account import Account
-from models_Building import Building
+from models_Building import Building, BuildingMeterApportionment
+from models_EfficiencyMeasure import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from models_Equipment import Equipment
-from models_Event import Event
-from models_Space import Space
+from models_Space import Space, SpaceMeterApportionment
 from models_Meter import Meter
-from models_RateSchedules import RateSchedule
+from models_MeterModels import MeterConsumptionModel, MeterPeakDemandModel
+from models_RateSchedules import RateSchedule, KnowsChild
 from models_Reader_ing import Reader
 from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule
@@ -57,7 +58,7 @@ class ManagementAction(models.Model):
     model_data_file_for_upload = models.FileField(null=True, blank=True,
                                    upload_to=upload_model_data_path,
                                    storage=S3BotoStorage(location='management_files'),
-                                   help_text='upload file containing model data or relationships here')
+                                  help_text='upload file containing model data or relationships here')
     processed_file = models.FileField(null=True, blank=True,
                                    upload_to=upload_processed_file_path,
                                    storage=S3BotoStorage(location='management_files'),
@@ -387,8 +388,6 @@ class ManagementAction(models.Model):
             fields_Equipment = [i.name for i in Equipment._meta.fields]
     #        m2ms_Space = [i.name for i in Space._meta.many_to_many]
             fields_Space = [i.name for i in Space._meta.fields]
-    #        m2ms_Event = [i.name for i in Event._meta.many_to_many]
-            fields_Event = [i.name for i in Event._meta.fields]
     #        m2ms_Reader = [i.name for i in Reader._meta.many_to_many]
             fields_Reader = [i.name for i in Reader._meta.fields]
     #        m2ms_RooftopUnit = [i.name for i in RooftopUnit._meta.many_to_many]
@@ -476,15 +475,6 @@ class ManagementAction(models.Model):
     #            df_Space[i] = None
     #            df_Space[i + '_value'] = None
             df_Space.to_excel(writer, sheet_name='Space')
-            
-            df_Event = pd.DataFrame()
-            for i in fields_Event:
-                df_Event[i] = None
-                df_Event[i + '_value'] = None
-    #        for i in m2ms_Event:
-    #            df_Event[i] = None
-    #            df_Event[i + '_value'] = None
-            df_Event.to_excel(writer, sheet_name='Event')
             
             df_Reader = pd.DataFrame()
             for i in fields_Reader:
