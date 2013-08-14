@@ -956,7 +956,7 @@ class WeatherStation(models.Model):
                             else:
                                 temperatureMaxTime = temperatureMaxTime.map(lambda x: None)
                             
-    
+                            
                             df = pd.DataFrame({'summary' : summary,
                                                'icon' : icon,
                                                'sunriseTime' : sunriseTime,
@@ -981,7 +981,7 @@ class WeatherStation(models.Model):
                                                'visibility' : visibility,
                                                'ozone' : ozone},
                                                index = t)
-                            df = df.tz_localize(UTC)
+                            df = df.tz_convert('UTC')
                             df = df.sort_index()
                             df = df.applymap(self.map_decimal)
                         except:
