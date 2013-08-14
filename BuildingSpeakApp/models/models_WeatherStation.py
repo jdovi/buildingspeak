@@ -867,9 +867,6 @@ class WeatherStation(models.Model):
                     else:
                         try:
                             rawtimes = [x.time for x in hourlypts.data]
-                            for i in range(0,len(rawtimes)): #forecastio duplicates or skips hour at DST, need to make index continuous and unique
-                                if rawtimes[i] == rawtimes[i-1]: rawtimes[i] = rawtimes[i] + timedelta(hours=1)
-                                if rawtimes[i] == (rawtimes[i-1] + timedelta(hours=2)): rawtimes[i] = rawtimes[i] - timedelta(hours=1)
                             station_timezone = tz(self.tz_name)
                             utc_tz_aware_times = [station_timezone.localize(x).astimezone(UTC) for x in rawtimes]
                             t = pd.Series(utc_tz_aware_times)
