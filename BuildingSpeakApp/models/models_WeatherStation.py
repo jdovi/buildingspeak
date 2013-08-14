@@ -1035,9 +1035,13 @@ class WeatherStation(models.Model):
             m.save()
             self.messages.add(m)
             print m
+            success = None
         else:
             try:
-                readbd['Days'] = readbd['Days'].apply(pd.to_datetime)
+                readbd['Days'] = readbd['Days'].apply(pd.to_datetime)   #make datetime
+                local_tz = pytz.timezone(self.tz_name)                  #create tz object
+                readbd['Days'] = readbd['Days'].apply(local_tz.localize)#make datetimes tz-aware
+                readbd['Days'] = readbd['Days'].apply(lambda x: x.astimezone(UTC)) #convert to UTC
             except:
                 m = Message(when=timezone.now(),
                             message_type='Code Error',
@@ -1046,6 +1050,7 @@ class WeatherStation(models.Model):
                 m.save()
                 self.messages.add(m)
                 print m
+                success = None
             else:
                 try:
                     storedbc = self.get_station_dataframe()
@@ -1057,6 +1062,7 @@ class WeatherStation(models.Model):
                     m.save()
                     self.messages.add(m)
                     print m
+                    success = None
                 else:
                     if storedbc is None:
                         try:
@@ -1070,6 +1076,7 @@ class WeatherStation(models.Model):
                             m.save()
                             self.messages.add(m)
                             print m
+                            success = None
                     else:
                         try:
                             storedbc_days = [x.date() for x in storedbc.index]
@@ -1083,6 +1090,7 @@ class WeatherStation(models.Model):
                             m.save()
                             self.messages.add(m)
                             print m
+                            success = None
         self.weather_data_import = False
         return success
     def save(self, *args, **kwargs):
