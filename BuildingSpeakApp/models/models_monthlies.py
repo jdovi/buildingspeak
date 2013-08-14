@@ -178,7 +178,6 @@ class Monther(models.Model):
     help_text = models.CharField(blank=True, max_length=200)
 
     #relationships
-    events = models.ManyToManyField('Event')
     messages = models.ManyToManyField('Message')
     meter = models.ForeignKey('Meter')
     consumption_model = models.ForeignKey('MeterConsumptionModel', null=True)
@@ -566,7 +565,6 @@ class Monthling(models.Model):
 
     #relationships
     monther = models.ForeignKey('Monther')
-    events = models.ManyToManyField('Event')
     #functions
     def monther_id_for_admin(self):
         return '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_monther_change',args=(self.monther.id,)), self.monther.id)

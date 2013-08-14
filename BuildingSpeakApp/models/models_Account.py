@@ -32,7 +32,6 @@ class Account(models.Model):
     messages = models.ManyToManyField('Message')
     users = models.ManyToManyField(User)
     readers = models.ManyToManyField('Reader')
-    events = models.ManyToManyField('Event')
     schedules = models.ManyToManyField('OperatingSchedule')
 
     

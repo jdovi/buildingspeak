@@ -22,7 +22,6 @@ class Utility(models.Model):
     
     #relationships
     messages = models.ManyToManyField('Message')
-    events = models.ManyToManyField('Event')
     
     #file-related attributes
     image_file = models.FileField(null=True, blank=True, upload_to=image_file_path_utility, 

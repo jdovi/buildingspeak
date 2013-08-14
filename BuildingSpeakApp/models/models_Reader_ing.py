@@ -43,7 +43,6 @@ class Reader(models.Model):
     expected_max = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                    help_text='upper limit (measured data above this value will be rejected and flagged)')
     #relationships
-    events = models.ManyToManyField('Event')
     messages = models.ManyToManyField('Message')
     #functions
     def __unicode__(self):
@@ -97,7 +96,6 @@ class Reading(models.Model):
     value = models.DecimalField(max_digits=20, decimal_places=3)
     #relationships
     reader = models.ForeignKey('Reader')
-    events = models.ManyToManyField('Event')
     #functions
     def __unicode__(self):
         return str(self.value)

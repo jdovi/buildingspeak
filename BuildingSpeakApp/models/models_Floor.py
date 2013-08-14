@@ -28,7 +28,6 @@ class Floor(models.Model):
     building = models.ForeignKey('Building')
     messages = models.ManyToManyField('Message')
     readers = models.ManyToManyField('Reader')
-    events = models.ManyToManyField('Event')
     schedules = models.ManyToManyField('OperatingSchedule')
     meters = models.ManyToManyField('Meter') #need way to apply fraction if one meter serves >1 bldg
     

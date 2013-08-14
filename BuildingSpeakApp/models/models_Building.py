@@ -121,7 +121,6 @@ class Building(models.Model):
     meters = models.ManyToManyField('Meter', through='BuildingMeterApportionment')
     messages = models.ManyToManyField('Message')
     readers = models.ManyToManyField('Reader')
-    events = models.ManyToManyField('Event')
     schedules = models.ManyToManyField('OperatingSchedule')
 
     

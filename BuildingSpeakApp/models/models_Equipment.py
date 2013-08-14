@@ -32,7 +32,6 @@ class Equipment(models.Model):
     buildings = models.ManyToManyField('Building')
     spaces = models.ManyToManyField('Space')
     readers = models.ManyToManyField('Reader')
-    events = models.ManyToManyField('Event')
     schedule = models.ForeignKey('OperatingSchedule')
 
     

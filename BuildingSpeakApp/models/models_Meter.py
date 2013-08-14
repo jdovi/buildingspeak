@@ -77,7 +77,6 @@ class Meter(models.Model):
     account = models.ForeignKey('Account')
     messages = models.ManyToManyField('Message')
     readers = models.ManyToManyField('Reader')
-    events = models.ManyToManyField('Event')
     schedules = models.ManyToManyField('OperatingSchedule')
     
     #file-related attributes

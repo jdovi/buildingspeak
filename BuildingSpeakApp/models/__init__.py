@@ -13,7 +13,7 @@ from models_Building import Building, BuildingMeterApportionment
 from models_EfficiencyMeasure import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from models_Equipment import Equipment
 #from models_Event import Event
-from models_Floor import Floor
+#from models_Floor import Floor
 from models_Space import Space, SpaceMeterApportionment
 from models_Meter import Meter
 from models_monthlies import BillingCycler, BillingCycle, Monther, Monthling

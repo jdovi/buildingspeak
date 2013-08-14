@@ -47,7 +47,6 @@ class Space(models.Model):
     building = models.ForeignKey('Building')
     messages = models.ManyToManyField('Message')
     readers = models.ManyToManyField('Reader')
-    events = models.ManyToManyField('Event')
     schedules = models.ManyToManyField('OperatingSchedule')
     meters = models.ManyToManyField('Meter', through='SpaceMeterApportionment')
     
