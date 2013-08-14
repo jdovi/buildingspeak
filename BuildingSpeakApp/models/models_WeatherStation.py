@@ -1039,7 +1039,7 @@ class WeatherStation(models.Model):
         else:
             try:
                 readbd['Days'] = readbd['Days'].apply(pd.to_datetime)   #make datetime
-                local_tz = pytz.timezone(self.tz_name)                  #create tz object
+                local_tz = tz(self.tz_name)                  #create tz object
                 readbd['Days'] = readbd['Days'].apply(local_tz.localize)#make datetimes tz-aware
                 readbd['Days'] = readbd['Days'].apply(lambda x: x.astimezone(UTC)) #convert to UTC
             except:
