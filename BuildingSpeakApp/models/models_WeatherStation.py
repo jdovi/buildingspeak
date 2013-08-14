@@ -828,188 +828,198 @@ class WeatherStation(models.Model):
         points from ForecastIO
         and loads into station."""
         try:
-            checktype = isinstance(date,datetime)
-        except:
-            m = Message(when=timezone.now(),
-                        message_type='Code Error',
-                        subject='Function received bad arguments.',
-                        comment='WeatherStation %s, load_weather_day function given non-datetime input, function aborted.' % self.id)
-            m.save()
-            self.messages.add(m)
-            print m
-            success = False
-        else:
-            if checktype:
-                try:
-                    forecast = Forecastio("10b931b8efd054dfd24502d9de6477ed")
-                    result = forecast.loadForecast(self.latitude,self.longitude, time=date, units='us', lazy=True)
-                    hourlypts = forecast.getHourly()
-                    dailypt = forecast.getDaily()
-                except:
-                    m = Message(when=timezone.now(),
-                                message_type='Code Error',
-                                subject='Retrieve data failed.',
-                                comment='WeatherStation %s, load_weather_day function unable to access weather data from Forecast API, function aborted.' % self.id)
-                    m.save()
-                    self.messages.add(m)
-                    print m
-                    success = False
-                else:
-                    if len(hourlypts.data) < 1 or len(dailypt.data) < 1:
+            try:
+                checktype = isinstance(date,datetime)
+            except:
+                m = Message(when=timezone.now(),
+                            message_type='Code Error',
+                            subject='Function received bad arguments.',
+                            comment='WeatherStation %s, load_weather_day function given non-datetime input, function aborted.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+                success = False
+            else:
+                if checktype:
+                    try:
+                        forecast = Forecastio("10b931b8efd054dfd24502d9de6477ed")
+                        result = forecast.loadForecast(self.latitude,self.longitude, time=date, units='us', lazy=True)
+                        hourlypts = forecast.getHourly()
+                        dailypt = forecast.getDaily()
+                    except:
                         m = Message(when=timezone.now(),
-                                    message_type='Code Warning',
-                                    subject='No data found.',
-                                    comment='WeatherStation %s load_weather_day function found no data from Forecast API for day %s, function aborted.' % (self.id, str(date)))
+                                    message_type='Code Error',
+                                    subject='Retrieve data failed.',
+                                    comment='WeatherStation %s, load_weather_day function unable to access weather data from Forecast API, function aborted.' % self.id)
                         m.save()
                         self.messages.add(m)
                         print m
                         success = False
                     else:
-                        try:
-                            rawtimes = [x.time for x in hourlypts.data]
-                            station_timezone = tz(self.tz_name)
-                            utc_tz_aware_times = [station_timezone.localize(x).astimezone(UTC) for x in rawtimes]
-                            t = pd.Series(utc_tz_aware_times)
-                            summary = pd.Series([x.summary for x in hourlypts.data],index=t)
-                            icon = pd.Series([x.icon for x in hourlypts.data],index=t)
-                            precipIntensity = pd.Series([x.precipIntensity for x in hourlypts.data],index=t)
-                            precipProbability = pd.Series([x.precipProbablility for x in hourlypts.data],index=t) #sic - it's misspelled on their end
-                            precipType = pd.Series([x.precipType for x in hourlypts.data],index=t)
-                            temperature = pd.Series([x.temperature for x in hourlypts.data],index=t)
-                            dewPoint = pd.Series([x.dewPoint for x in hourlypts.data],index=t)
-                            windSpeed = pd.Series([x.windspeed for x in hourlypts.data],index=t)
-                            windBearing = pd.Series([x.windbaring for x in hourlypts.data],index=t) #sic - it's misspelled on their end
-                            cloudCover = pd.Series([x.cloudcover for x in hourlypts.data],index=t)
-                            humidity = pd.Series([x.humidity for x in hourlypts.data],index=t)
-                            pressure = pd.Series([x.pressure for x in hourlypts.data],index=t)
-                            visibility = pd.Series([x.visbility for x in hourlypts.data],index=t) #sic - it's misspelled on their end
-                            ozone = pd.Series([x.ozone for x in hourlypts.data],index=t)
-                            
-                            x = pd.Series(t,index=t)
-                            
-                            sunriseTime = pd.Series(x,index=t)
-                            sunsetTime = pd.Series(x,index=t)
-                            precipIntensityMax = pd.Series(x,index=t)
-                            precipIntensityMaxTime = pd.Series(x,index=t)
-                            precipAccumulation = pd.Series(x,index=t)
-                            temperatureMin = pd.Series(x,index=t)
-                            temperatureMinTime = pd.Series(x,index=t)
-                            temperatureMax = pd.Series(x,index=t)
-                            temperatureMaxTime = pd.Series(x,index=t)
-    
-    #                        sunriseTime = sunriseTime.map(lambda x: UTC.localize(dailypt.data[0].sunriseTime))
-    #                        sunsetTime = sunsetTime.map(lambda x: UTC.localize(dailypt.data[0].sunsetTime))
-    #                        precipIntensityMax = precipIntensityMax.map(lambda x: dailypt.data[0].precipIntensityMax)
-    #                        precipIntensityMaxTime = precipIntensityMaxTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].precipIntensityMaxTime))))
-    #                        precipAccumulation = precipAccumulation.map(lambda x: dailypt.data[0].precipAccumulation)
-    #                        temperatureMin = temperatureMin.map(lambda x: dailypt.data[0].temperatureMin)
-    #                        temperatureMinTime = temperatureMinTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].temperatureMinTime))))
-    #                        temperatureMax = temperatureMax.map(lambda x: dailypt.data[0].temperatureMax)
-    #                        temperatureMaxTime = temperatureMaxTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].temperatureMaxTime))))
-    
-                            
-                            if dailypt.data[0].sunriseTime is not None:
-                                sunriseTime = sunriseTime.map(lambda x: UTC.localize(dailypt.data[0].sunriseTime))
-                            else:
-                                sunriseTime = sunriseTime.map(lambda x: None)
-                                
-                            if dailypt.data[0].sunsetTime is not None:
-                                sunsetTime = sunsetTime.map(lambda x: UTC.localize(dailypt.data[0].sunsetTime))
-                            else:
-                                sunsetTime = sunsetTime.map(lambda x: None)
-                            
-                            if dailypt.data[0].precipIntensityMax is not None:
-                                precipIntensityMax = precipIntensityMax.map(lambda x: dailypt.data[0].precipIntensityMax)
-                            else:
-                                precipIntensityMax = precipIntensityMax.map(lambda x: None)
-                            
-                            if dailypt.data[0].precipIntensityMaxTime is not None:
-                                precipIntensityMaxTime = precipIntensityMaxTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].precipIntensityMaxTime))))
-                            else:
-                                precipIntensityMaxTime = precipIntensityMaxTime.map(lambda x: None)
-                            
-                            if dailypt.data[0].precipAccumulation is not None:
-                                precipAccumulation = precipAccumulation.map(lambda x: dailypt.data[0].precipAccumulation)
-                            else:
-                                precipAccumulation = precipAccumulation.map(lambda x: None)
-                            
-                            if dailypt.data[0].temperatureMin is not None:
-                                temperatureMin = temperatureMin.map(lambda x: dailypt.data[0].temperatureMin)
-                            else:
-                                temperatureMin = temperatureMin.map(lambda x: None)
-                            
-                            if dailypt.data[0].temperatureMinTime is not None:
-                                temperatureMinTime = temperatureMinTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].temperatureMinTime))))
-                            else:
-                                temperatureMinTime = temperatureMinTime.map(lambda x: None)
-                            
-                            if dailypt.data[0].temperatureMax is not None:
-                                temperatureMax = temperatureMax.map(lambda x: dailypt.data[0].temperatureMax)
-                            else:
-                                temperatureMax = temperatureMax.map(lambda x: None)
-                            
-                            if dailypt.data[0].temperatureMaxTime is not None:
-                                temperatureMaxTime = temperatureMaxTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].temperatureMaxTime))))
-                            else:
-                                temperatureMaxTime = temperatureMaxTime.map(lambda x: None)
-                            
-                            
-                            df = pd.DataFrame({'summary' : summary,
-                                               'icon' : icon,
-                                               'sunriseTime' : sunriseTime,
-                                               'sunsetTime' : sunsetTime,
-                                               'precipIntensity' : precipIntensity,
-                                               'precipIntensityMax' : precipIntensityMax,
-                                               'precipIntensityMaxTime' : precipIntensityMaxTime,
-                                               'precipProbability' : precipProbability,
-                                               'precipType' : precipType,
-                                               'precipAccumulation' : precipAccumulation,
-                                               'temperature' : temperature,
-                                               'temperatureMin' : temperatureMin,
-                                               'temperatureMinTime' : temperatureMinTime,
-                                               'temperatureMax' : temperatureMax,
-                                               'temperatureMaxTime' : temperatureMaxTime,
-                                               'dewPoint' : dewPoint,
-                                               'windSpeed' : windSpeed,
-                                               'windBearing' : windBearing,
-                                               'cloudCover' : cloudCover,
-                                               'humidity' : humidity,
-                                               'pressure' : pressure,
-                                               'visibility' : visibility,
-                                               'ozone' : ozone},
-                                               index = t)
-                            df = df.tz_convert('UTC')
-                            df = df.sort_index()
-                            df = df.applymap(self.map_decimal)
-                        except:
+                        if len(hourlypts.data) < 1 or len(dailypt.data) < 1:
                             m = Message(when=timezone.now(),
-                                        message_type='Code Error',
-                                        subject='Create dataframe failed.',
-                                        comment='WeatherStation %s, load_weather_day function unable to create dataframe of retrieved weather data, function aborted.' % self.id)
+                                        message_type='Code Warning',
+                                        subject='No data found.',
+                                        comment='WeatherStation %s load_weather_day function found no data from Forecast API for day %s, function aborted.' % (self.id, str(date)))
                             m.save()
                             self.messages.add(m)
                             print m
                             success = False
                         else:
-                            loadsuccess = self.load_station_dataframe(df)
-                            if loadsuccess:
-                                m = Message(when=timezone.now(),
-                                            message_type='Code Success',
-                                            subject='Model updated.',
-                                            comment='WeatherStation %s, load_weather_day successfully loaded the following weather day: %s.' % (self.id, str(date)))
-                                m.save()
-                                self.messages.add(m)
-                                print m
-                                success = True
-                            else:
+                            try:
+                                rawtimes = [x.time for x in hourlypts.data]
+                                station_timezone = tz(self.tz_name)
+                                utc_tz_aware_times = [station_timezone.localize(x).astimezone(UTC) for x in rawtimes]
+                                t = pd.Series(utc_tz_aware_times)
+                                summary = pd.Series([x.summary for x in hourlypts.data],index=t)
+                                icon = pd.Series([x.icon for x in hourlypts.data],index=t)
+                                precipIntensity = pd.Series([x.precipIntensity for x in hourlypts.data],index=t)
+                                precipProbability = pd.Series([x.precipProbablility for x in hourlypts.data],index=t) #sic - it's misspelled on their end
+                                precipType = pd.Series([x.precipType for x in hourlypts.data],index=t)
+                                temperature = pd.Series([x.temperature for x in hourlypts.data],index=t)
+                                dewPoint = pd.Series([x.dewPoint for x in hourlypts.data],index=t)
+                                windSpeed = pd.Series([x.windspeed for x in hourlypts.data],index=t)
+                                windBearing = pd.Series([x.windbaring for x in hourlypts.data],index=t) #sic - it's misspelled on their end
+                                cloudCover = pd.Series([x.cloudcover for x in hourlypts.data],index=t)
+                                humidity = pd.Series([x.humidity for x in hourlypts.data],index=t)
+                                pressure = pd.Series([x.pressure for x in hourlypts.data],index=t)
+                                visibility = pd.Series([x.visbility for x in hourlypts.data],index=t) #sic - it's misspelled on their end
+                                ozone = pd.Series([x.ozone for x in hourlypts.data],index=t)
+                                
+                                x = pd.Series(t,index=t)
+                                
+                                sunriseTime = pd.Series(x,index=t)
+                                sunsetTime = pd.Series(x,index=t)
+                                precipIntensityMax = pd.Series(x,index=t)
+                                precipIntensityMaxTime = pd.Series(x,index=t)
+                                precipAccumulation = pd.Series(x,index=t)
+                                temperatureMin = pd.Series(x,index=t)
+                                temperatureMinTime = pd.Series(x,index=t)
+                                temperatureMax = pd.Series(x,index=t)
+                                temperatureMaxTime = pd.Series(x,index=t)
+        
+        #                        sunriseTime = sunriseTime.map(lambda x: UTC.localize(dailypt.data[0].sunriseTime))
+        #                        sunsetTime = sunsetTime.map(lambda x: UTC.localize(dailypt.data[0].sunsetTime))
+        #                        precipIntensityMax = precipIntensityMax.map(lambda x: dailypt.data[0].precipIntensityMax)
+        #                        precipIntensityMaxTime = precipIntensityMaxTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].precipIntensityMaxTime))))
+        #                        precipAccumulation = precipAccumulation.map(lambda x: dailypt.data[0].precipAccumulation)
+        #                        temperatureMin = temperatureMin.map(lambda x: dailypt.data[0].temperatureMin)
+        #                        temperatureMinTime = temperatureMinTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].temperatureMinTime))))
+        #                        temperatureMax = temperatureMax.map(lambda x: dailypt.data[0].temperatureMax)
+        #                        temperatureMaxTime = temperatureMaxTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].temperatureMaxTime))))
+        
+                                
+                                if dailypt.data[0].sunriseTime is not None:
+                                    sunriseTime = sunriseTime.map(lambda x: UTC.localize(dailypt.data[0].sunriseTime))
+                                else:
+                                    sunriseTime = sunriseTime.map(lambda x: None)
+                                    
+                                if dailypt.data[0].sunsetTime is not None:
+                                    sunsetTime = sunsetTime.map(lambda x: UTC.localize(dailypt.data[0].sunsetTime))
+                                else:
+                                    sunsetTime = sunsetTime.map(lambda x: None)
+                                
+                                if dailypt.data[0].precipIntensityMax is not None:
+                                    precipIntensityMax = precipIntensityMax.map(lambda x: dailypt.data[0].precipIntensityMax)
+                                else:
+                                    precipIntensityMax = precipIntensityMax.map(lambda x: None)
+                                
+                                if dailypt.data[0].precipIntensityMaxTime is not None:
+                                    precipIntensityMaxTime = precipIntensityMaxTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].precipIntensityMaxTime))))
+                                else:
+                                    precipIntensityMaxTime = precipIntensityMaxTime.map(lambda x: None)
+                                
+                                if dailypt.data[0].precipAccumulation is not None:
+                                    precipAccumulation = precipAccumulation.map(lambda x: dailypt.data[0].precipAccumulation)
+                                else:
+                                    precipAccumulation = precipAccumulation.map(lambda x: None)
+                                
+                                if dailypt.data[0].temperatureMin is not None:
+                                    temperatureMin = temperatureMin.map(lambda x: dailypt.data[0].temperatureMin)
+                                else:
+                                    temperatureMin = temperatureMin.map(lambda x: None)
+                                
+                                if dailypt.data[0].temperatureMinTime is not None:
+                                    temperatureMinTime = temperatureMinTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].temperatureMinTime))))
+                                else:
+                                    temperatureMinTime = temperatureMinTime.map(lambda x: None)
+                                
+                                if dailypt.data[0].temperatureMax is not None:
+                                    temperatureMax = temperatureMax.map(lambda x: dailypt.data[0].temperatureMax)
+                                else:
+                                    temperatureMax = temperatureMax.map(lambda x: None)
+                                
+                                if dailypt.data[0].temperatureMaxTime is not None:
+                                    temperatureMaxTime = temperatureMaxTime.map(lambda x: UTC.localize(datetime.fromtimestamp(int(dailypt.data[0].temperatureMaxTime))))
+                                else:
+                                    temperatureMaxTime = temperatureMaxTime.map(lambda x: None)
+                                
+                                
+                                df = pd.DataFrame({'summary' : summary,
+                                                   'icon' : icon,
+                                                   'sunriseTime' : sunriseTime,
+                                                   'sunsetTime' : sunsetTime,
+                                                   'precipIntensity' : precipIntensity,
+                                                   'precipIntensityMax' : precipIntensityMax,
+                                                   'precipIntensityMaxTime' : precipIntensityMaxTime,
+                                                   'precipProbability' : precipProbability,
+                                                   'precipType' : precipType,
+                                                   'precipAccumulation' : precipAccumulation,
+                                                   'temperature' : temperature,
+                                                   'temperatureMin' : temperatureMin,
+                                                   'temperatureMinTime' : temperatureMinTime,
+                                                   'temperatureMax' : temperatureMax,
+                                                   'temperatureMaxTime' : temperatureMaxTime,
+                                                   'dewPoint' : dewPoint,
+                                                   'windSpeed' : windSpeed,
+                                                   'windBearing' : windBearing,
+                                                   'cloudCover' : cloudCover,
+                                                   'humidity' : humidity,
+                                                   'pressure' : pressure,
+                                                   'visibility' : visibility,
+                                                   'ozone' : ozone},
+                                                   index = t)
+                                df = df.tz_convert('UTC')
+                                df = df.sort_index()
+                                df = df.applymap(self.map_decimal)
+                            except:
                                 m = Message(when=timezone.now(),
                                             message_type='Code Error',
-                                            subject='Model update failed.',
-                                            comment='WeatherStation %s, load_weather_day unable to load the following weather day: %s.' % (self.id, str(date)))
+                                            subject='Create dataframe failed.',
+                                            comment='WeatherStation %s, load_weather_day function unable to create dataframe of retrieved weather data, function aborted.' % self.id)
                                 m.save()
                                 self.messages.add(m)
                                 print m
                                 success = False
+                            else:
+                                loadsuccess = self.load_station_dataframe(df)
+                                if loadsuccess:
+                                    m = Message(when=timezone.now(),
+                                                message_type='Code Success',
+                                                subject='Model updated.',
+                                                comment='WeatherStation %s, load_weather_day successfully loaded the following weather day: %s.' % (self.id, str(date)))
+                                    m.save()
+                                    self.messages.add(m)
+                                    print m
+                                    success = True
+                                else:
+                                    m = Message(when=timezone.now(),
+                                                message_type='Code Error',
+                                                subject='Model update failed.',
+                                                comment='WeatherStation %s, load_weather_day unable to load the following weather day: %s.' % (self.id, str(date)))
+                                    m.save()
+                                    self.messages.add(m)
+                                    print m
+                                    success = False
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Model update failed.',
+                        comment='WeatherStation %s, load_weather_day unable to load the following weather day: %s.' % (self.id, str(date)))
+            m.save()
+            self.messages.add(m)
+            print m
+            success = False
         return success
 
     def load_weather_file(self, file_location=0):
