@@ -870,7 +870,7 @@ class WeatherStation(models.Model):
                             for i in range(0,len(rawtimes)): #forecastio duplicates or skips hour at DST, need to make index continuous and unique
                                 if rawtimes[i] == rawtimes[i-1]: rawtimes[i] = rawtimes[i] + timedelta(hours=1)
                                 if rawtimes[i] == (rawtimes[i-1] + timedelta(hours=2)): rawtimes[i] = rawtimes[i] - timedelta(hours=1)
-                            station_timezone = timezone(self.tz_name)
+                            station_timezone = tz(self.tz_name)
                             utc_tz_aware_times = [station_timezone.localize(x).astimezone(UTC) for x in rawtimes]
                             t = pd.Series(utc_tz_aware_times)
                             summary = pd.Series([x.summary for x in hourlypts.data],index=t)
@@ -979,7 +979,9 @@ class WeatherStation(models.Model):
                                                'humidity' : humidity,
                                                'pressure' : pressure,
                                                'visibility' : visibility,
-                                               'ozone' : ozone,})
+                                               'ozone' : ozone},
+                                               index = t)
+                            df = df.tz_localize(UTC)
                             df = df.sort_index()
                             df = df.applymap(self.map_decimal)
                         except:
