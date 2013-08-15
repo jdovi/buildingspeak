@@ -27,6 +27,23 @@ DATABASES = {
     }
 }
 
+RQ_QUEUES = {
+    'default': {
+        'HOST': '',
+        'PORT': '',
+        'DB': 0,
+        'PASSWORD': 'some-password',
+    },
+    'high': {
+        'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379'), # If you're on Heroku
+        'DB': 0,
+    },
+    'low': {
+        'HOST': '',
+        'PORT': '',
+        'DB': 0,
+    }
+}
 
 ###
 # Local time zone for this installation. Choices can be found here:
@@ -145,6 +162,7 @@ INSTALLED_APPS = (
     'BuildingSpeakApp',
     'storages',
     #'schedule',
+    'django-rq',
 )
 
 #TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.request')

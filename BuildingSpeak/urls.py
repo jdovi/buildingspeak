@@ -15,4 +15,5 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'BuildingSpeak.views.home', name='home'),
     url(r'', include('BuildingSpeakApp.urls')),
+    url(r'^django-rq/', include('django_rq.urls')),
 )
