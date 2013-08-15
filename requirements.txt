@@ -20,3 +20,7 @@ wsgiref==0.1.2
 zope.interface==4.0.5
 pandas==0.12.0
 statsmodels==0.4.3
+django-rq==0.5.1
+redis==2.7.6
+rq==0.3.8
+times==0.6.2
