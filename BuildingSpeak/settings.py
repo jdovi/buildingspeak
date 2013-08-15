@@ -32,7 +32,7 @@ RQ_QUEUES = {
         'HOST': '',
         'PORT': '',
         'DB': 0,
-        'PASSWORD': 'some-password',
+        'PASSWORD': '',
     },
     'high': {
         'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379'), # If you're on Heroku
