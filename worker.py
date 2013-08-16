@@ -1,4 +1,5 @@
 import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "BuildingSpeak.settings")
 
 import redis
 from rq import Worker, Queue, Connection
