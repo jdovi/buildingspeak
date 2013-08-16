@@ -27,17 +27,18 @@ def index(request):
 def user_account(request):
     UserAccountForm = modelform_factory(User)
     if request.method == 'POST': # If the form has been submitted...
-        form = UserAccountForm(request.POST) # A form bound to the POST data
+        form = UserAccountForm(request.POST, instance=request.user) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
-            # ...
+            form.save()
             return HttpResponseRedirect('/update-successful.html') # Redirect after POST
     else:
         form = UserAccountForm(instance=request.user) # An unbound form
-
-    return render(request, 'buildingspeakapp/user_account.html', {
-        'form': form,
-    })
+    context = {
+        'user':     request.user,
+        'accounts': request.user.account_set.order_by('id'),
+        'form':     form, }
+    return render(request, 'buildingspeakapp/user_account.html', context)
 
 def update_successful(request):
     context  = {'user': request.user}
@@ -45,9 +46,7 @@ def update_successful(request):
 
 @login_required
 def my_account(request):
-    context  = {
-        'user': request.user,
-    }
+    context  = {'user': request.user}
     return render(request, 'buildingspeakapp/my_account.html', context)
 
 def account_detail(request, account_id):
