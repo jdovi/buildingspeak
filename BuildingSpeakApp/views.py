@@ -1,12 +1,15 @@
 # Create your views here.
 from datetime import datetime, timedelta
-from django.http import HttpResponse, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
 from BuildingSpeakApp.models import Account, Building, Meter, Equipment
 import json
 from decimal import Decimal
+from django.forms.models import modelform_factory
+from django.contrib.auth.models import User
+
 
 @login_required
 def index(request):
@@ -19,6 +22,26 @@ def index(request):
     else:
         template_name = request.user.account_set.order_by('id')
     return render(request, template_name, context)
+
+@login_required
+def user_account(request):
+    UserAccountForm = modelform_factory(User)
+    if request.method == 'POST': # If the form has been submitted...
+        form = UserAccountForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            # Process the data in form.cleaned_data
+            # ...
+            return HttpResponseRedirect('/update-successful.html') # Redirect after POST
+    else:
+        form = UserAccountForm() # An unbound form
+
+    return render(request, 'buildingspeakapp/user_account.html', {
+        'form': form,
+    })
+
+def update_successful(request):
+    context  = {'user': request.user}
+    return render(request, 'buildingspeakapp/update_successful.html', context)
 
 @login_required
 def my_account(request):

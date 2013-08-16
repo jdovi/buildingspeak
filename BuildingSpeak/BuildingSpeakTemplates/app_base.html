@@ -108,8 +108,8 @@
 		  <br>
           <h2 class="site-description">{{ account.city }}, {{ account.state }}</h2>
           {% endif %}
-		  {% if not account.name %}
-		  <h1 class="site-title" ><a href="/my-account">My Account</a></h1>
+		  {% if user.name %}
+		  <h1 class="site-title" ><a href="/user-account">User: {{ user.username }}</a></h1>
           {% endif %}
 		  
         </hgroup>
