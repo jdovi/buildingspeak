@@ -13,6 +13,8 @@ from djorm_pgarray.fields import ArrayField
 from model_utils.managers import InheritanceManager
 from storages.backends.s3boto import S3BotoStorage
 from django.contrib.auth.models import User
+from rq import Queue
+from worker import conn
 
 
 from models_functions import *
@@ -1105,7 +1107,8 @@ class WeatherStation(models.Model):
     def save(self, *args, **kwargs):
         if self.weather_data_import:
             super(WeatherStation, self).save(*args, **kwargs)
-            self.load_weather_file()
+            q = Queue(connection=conn)
+            result = q.enqueue(self.load_weather_file)
         super(WeatherStation, self).save(*args, **kwargs)
     class Meta:
         app_label = 'BuildingSpeakApp'
