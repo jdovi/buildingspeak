@@ -30,7 +30,8 @@ def user_account(request):
         form = UserAccountForm(request.POST, instance=request.user) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
-            form.save()
+            calling_user = form.save()
+            calling_user.save()
             return HttpResponseRedirect('/update-successful.html') # Redirect after POST
     else:
         form = UserAccountForm(instance=request.user) # An unbound form
