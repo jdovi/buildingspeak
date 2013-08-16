@@ -32,7 +32,7 @@ def user_account(request):
             # Process the data in form.cleaned_data
             calling_user = form.save()
             calling_user.save()
-            return HttpResponseRedirect('/update-successful.html') # Redirect after POST
+            return HttpResponseRedirect('/update-successful') # Redirect after POST
     else:
         form = UserAccountForm(instance=request.user) # An unbound form
     context = {
