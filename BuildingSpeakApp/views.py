@@ -33,7 +33,7 @@ def user_account(request):
             # ...
             return HttpResponseRedirect('/update-successful.html') # Redirect after POST
     else:
-        form = UserAccountForm() # An unbound form
+        form = UserAccountForm(instance=request.user) # An unbound form
 
     return render(request, 'buildingspeakapp/user_account.html', {
         'form': form,
