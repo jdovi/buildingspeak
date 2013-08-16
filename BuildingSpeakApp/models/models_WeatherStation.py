@@ -1,7 +1,6 @@
 #import dbarray
 import pandas as pd
 from pytz import UTC
-from django_rq import job
 from pytz import timezone as tz
 from numpy import NaN, float64, int, float, int64
 from django.db import models
@@ -1023,7 +1022,6 @@ class WeatherStation(models.Model):
             success = False
         return success
     
-    @job
     def load_weather_file(self, file_location=0):
         """Inputs: filelocation
             (optional, default S3 upload)
