@@ -83,9 +83,16 @@
             });
           });
         </script>
-        <li class="menu-item">
-          <a href="/my-account">My Account</a>
-        </li>
+		{% if user.username %}
+		 <li class="menu-item">
+		   <a href="/user-account">{{ user.username }}</a>
+		 </li>
+		{% endif %}
+		{% if not user.username %}
+		 <li class="menu-item">
+		   <a href="/login">Login</a>
+		 </li>
+		{% endif %}
         <li class="menu-item">
           <a href="/logout">Logout</a>
         </li>

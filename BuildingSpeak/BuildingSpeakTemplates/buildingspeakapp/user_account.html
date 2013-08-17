@@ -11,7 +11,7 @@
     {% for field in form %}
 		<div class="form-item">
 			{{ field.errors }}
-			<label>{{ field.label_tag }}:</label>
+			{{ field.label_tag }}
 			<input type="text" placeholder={{ field }}>
 		</div>
     {% endfor %}
@@ -19,37 +19,3 @@
 </form>
 
 {% endblock %}
-
-<section class="entry">
-  <div class="form-item">
-    <label>Username:</label>
-    <input type="text" placeholder={{ user.username }}>
-  </div>
-  <div class="form-item">
-    <label>Email:</label>
-    <input type="text" placeholder={{ user.email }}>
-  </div>
-  <div class="form-item">
-    <label>First Name:</label>
-    <input type="text" placeholder={{ user.first_name }}>
-  </div>
-  <div class="form-item">
-    <label>Last Name:</label>
-    <input type="text" placeholder={{ user.last_name }}>
-  </div>
-  <div class="form-item">
-    <label>User ID:</label>
-    <input type="text" placeholder={{ user.id }}>
-  </div>
-  <div class="form-item">
-    <label>Last Login:</label>
-    <span>{{ user.last_login }}</span>
-  </div>
-  <div class="form-item">
-    <label>Superuser?:</label>
-    <span>{{ user.is_superuser }}</span>
-  </div>
-  <div class="form-item actions">
-    <input class="submit button" type="submit" value="Save">
-  </div>
-</section> <!-- .entry -->
