@@ -49,7 +49,7 @@ def update_successful(request):
 @login_required
 def my_account(request):
     context  = {'user': request.user}
-    return render(request, 'buildingspeakapp/my_account.html', context)
+    return render(request, 'buildingspeakapp/user_account.html', context)
 
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
