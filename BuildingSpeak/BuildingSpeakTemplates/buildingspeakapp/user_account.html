@@ -8,6 +8,7 @@
 -->
 
 <form class="entry" action="/user-account" method="post">{% csrf_token %}
+<!--
 	{{ form.non_field_errors }}
 	<div class="form-item">
 		{{ form.username.errors }}
@@ -29,6 +30,8 @@
 		{{ form.last_name.label_tag }}
 		<input type="text" value={{ form.last_name.value }}>
 	</div>
+-->
+	{{ form.as_ul }}
 <input type="submit" value="Update" />
 </form>
 

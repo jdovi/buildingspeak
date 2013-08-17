@@ -13,15 +13,12 @@ from django.contrib.auth.models import User
 
 @login_required
 def index(request):
-#    accounts = request.user.account_set.order_by('id')
-#    return redirect('/' + str(accounts[0].id))
-    context = {}
     accounts = request.user.account_set.order_by('id')
+    context = {}
     if len(accounts)==0:
-        template_name = 'buildingspeakapp/my_account.html'
+        return render(request, 'buildingspeakapp/user_account.html', context)
     else:
-        template_name = request.user.account_set.order_by('id')
-    return render(request, template_name, context)
+        return HttpResponseRedirect('/' + str(accounts[0].id))
 
 @login_required
 def user_account(request):
