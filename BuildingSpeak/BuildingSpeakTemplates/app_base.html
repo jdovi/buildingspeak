@@ -85,7 +85,7 @@
         </script>
 		{% if user.username %}
 		 <li class="menu-item">
-		   <a href="/user-account">{{ user.username }}'s settings</a>
+		   <a href="/user-account">{{ user.username }}</a>
 		 </li>
 		{% endif %}
 		{% if not user.username %}
@@ -116,7 +116,7 @@
           <h2 class="site-description">{{ account.city }}, {{ account.state }}</h2>
           {% endif %}
 		  {% if user.username %}
-		  <h1 class="site-title" ><a href="/user-account">User: {{ user.username }}</a></h1>
+		  <h1 class="site-title" ><a href="/user-account">{{ user.username }}'s settings</a></h1>
           {% endif %}
 		  
         </hgroup>

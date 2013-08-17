@@ -25,8 +25,7 @@ def index(request):
 
 @login_required
 def user_account(request):
-    UserAccountForm = modelform_factory(User,
-                                        fields=("username","email","first_name","last_name"))
+    UserAccountForm = modelform_factory(User)
     if request.method == 'POST': # If the form has been submitted...
         form = UserAccountForm(request.POST, instance=request.user) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass

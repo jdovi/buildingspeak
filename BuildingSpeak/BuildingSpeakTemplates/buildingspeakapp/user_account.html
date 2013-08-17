@@ -8,13 +8,27 @@
 -->
 
 <form class="entry" action="/user-account" method="post">{% csrf_token %}
-    {% for field in form %}
-		<div class="form-item">
-			{{ field.errors }}
-			{{ field.label_tag }}
-			<input type="text" value={{ field.value }}>
-		</div>
-    {% endfor %}
+	{{ form.non_field_errors }}
+	<div class="form-item">
+		{{ form.username.errors }}
+		{{ form.username.label_tag }}
+		<input type="text" value={{ form.username.value }}>
+	</div>
+	<div class="form-item">
+		{{ form.email.errors }}
+		{{ form.email.label_tag }}
+		<input type="text" value={{ form.email.value }}>
+	</div>
+	<div class="form-item">
+		{{ form.first_name.errors }}
+		{{ form.first_name.label_tag }}
+		<input type="text" value={{ form.first_name.value }}>
+	</div>
+	<div class="form-item">
+		{{ form.last_name.errors }}
+		{{ form.last_name.label_tag }}
+		<input type="text" value={{ form.last_name.value }}>
+	</div>
 <input type="submit" value="Update" />
 </form>
 
