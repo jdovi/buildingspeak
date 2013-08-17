@@ -27,8 +27,19 @@ def user_account(request):
         form = UserAccountForm(request.POST, instance=request.user) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
-            calling_user = form.save()
-            calling_user.save()
+#            calling_user = form.save()
+#            calling_user.save()
+            not_saved_user = form.save(commit=False)
+            calling_user = request.user
+            not_saved_user.password = calling_user.password
+            not_saved_user.groups = calling_user.groups
+            not_saved_user.user_permissions = calling_user.user_permissions
+            not_saved_user.is_staff = calling_user.is_staff
+            not_saved_user.is_active = calling_user.is_active
+            not_saved_user.is_superuser = calling_user.is_superuser
+            not_saved_user.last_login = calling_user.last_login
+            not_saved_user.date_joined = calling_user.date_joined
+            not_saved_user.save()
             return HttpResponseRedirect('/update-successful') # Redirect after POST
     else:
         form = UserAccountForm(instance=request.user) # An unbound form
