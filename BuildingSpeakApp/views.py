@@ -8,7 +8,7 @@ from BuildingSpeakApp.models import Account, Building, Meter, Equipment
 import json
 from decimal import Decimal
 from django.forms.models import modelform_factory
-from django.contrib.auth.models import User, Profile
+from django.contrib.auth.models import User
 
 
 @login_required
