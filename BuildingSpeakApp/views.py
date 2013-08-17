@@ -25,6 +25,7 @@ def user_account(request):
     UserAccountForm = modelform_factory(User)
     if request.method == 'POST': # If the form has been submitted...
         form = UserAccountForm(request.POST, instance=request.user) # A form bound to the POST data
+        print form.is_valid()
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
 #            calling_user = form.save()
@@ -39,7 +40,11 @@ def user_account(request):
             not_saved_user.is_superuser = calling_user.is_superuser
             not_saved_user.last_login = calling_user.last_login
             not_saved_user.date_joined = calling_user.date_joined
+            print 'check1'
             not_saved_user.save()
+            print 'check2'
+            form.save_m2m()
+            print 'check3'
             return HttpResponseRedirect('/update-successful') # Redirect after POST
     else:
         form = UserAccountForm(instance=request.user) # An unbound form
