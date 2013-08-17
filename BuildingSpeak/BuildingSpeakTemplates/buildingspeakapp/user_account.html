@@ -8,8 +8,13 @@
 -->
 
 <form action="/user-account" method="post">{% csrf_token %}
-{{ form.as_p }}
-<input type="submit" value="Submit" />
+    {% for field in form %}
+        <div class="fieldWrapper">
+            {{ field.errors }}
+            {{ field.label_tag }}: {{ field }}
+        </div>
+    {% endfor %}
+<input type="submit" value="Update" />
 </form>
 
 {% endblock %}
