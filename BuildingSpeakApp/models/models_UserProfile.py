@@ -35,7 +35,7 @@ class UserProfile(models.Model):
     def user_for_admin(self):
         user_name_value = self.user.username
         if user_name_value is None: user_name_value = '(empty)'
-        return '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_userprofile_change',args=(self.user.id,)), user_name_value)
+        return '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_userprofile_change',args=(self.id,)), user_name_value)
     user_for_admin.allow_tags = True
     user_for_admin.short_description = 'Username (from User)'
     def user_id_for_admin(self):
