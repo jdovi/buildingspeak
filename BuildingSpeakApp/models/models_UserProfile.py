@@ -27,7 +27,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     
     #file-related attributes
-    image_file = models.FileField(null=True, blank=True, upload_to=image_file_path_user, 
+    image_file = models.FileField(null=True, blank=True, upload_to=image_file_path_userprofile, 
                     storage=S3BotoStorage(location='user_data_files'),
                     help_text='link to file containing user image')
     
