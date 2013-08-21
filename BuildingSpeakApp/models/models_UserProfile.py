@@ -15,6 +15,7 @@ from storages.backends.s3boto import S3BotoStorage
 from django.contrib.auth.models import User
 
 from models_functions import *
+from models_Message import Message
 
 class UserProfile(models.Model):
     """Model for storing extra
