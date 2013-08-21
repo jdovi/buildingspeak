@@ -37,7 +37,7 @@ def user_account(request):
                     latest_image_file = None
                 else:
                     latest_image_file = current_user.userprofile.image_file
-            print 'post: latest_image_file = ' + latest_image_file
+            print 'post: latest_image_file is None: ' + str(latest_image_file is None)
             current_user.__setattr__('username', form.cleaned_data['username'])
             current_user.__setattr__('email', form.cleaned_data['email'])
             current_user.__setattr__('first_name', form.cleaned_data['first_name'])
@@ -52,8 +52,7 @@ def user_account(request):
             reloading = True
             print 'post end'
     elif request.method == 'GET':
-        print 'image_file = ' + current_user.userprofile.image_file
-        print 'image_file.url = ' + current_user.userprofile.image_file.url
+        print 'image_file is None: ' + str(current_user.userprofile.image_file is None)
         if current_user.userprofile.image_file is None:
             latest_image_file = None
         else:
