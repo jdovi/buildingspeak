@@ -37,6 +37,7 @@ def user_account(request):
                         latest_image_file = None
                     else:
                         latest_image_file = current_user.userprofile.image_file
+                print 'post: latest_image_file = ' + latest_image_file
                 current_user.__setattr__('username', form.cleaned_data['username'])
                 current_user.__setattr__('email', form.cleaned_data['email'])
                 current_user.__setattr__('first_name', form.cleaned_data['first_name'])
@@ -50,13 +51,15 @@ def user_account(request):
                 m = SuccessMessage()
                 m.comment = 'User settings have been updated.'
                 reloading = True
-                
-                #return HttpResponseRedirect('/update-successful') # Redirect after POST
+                print 'post end'
         elif request.method == 'GET':
+            print 'image_file = ' + current_user.userprofile.image_file
+            print 'image_file.url = ' + current_user.userprofile.image_file.url
             if current_user.userprofile.image_file is None:
                 latest_image_file = None
             else:
                 latest_image_file = current_user.userprofile.image_file
+            print latest_image_file
             form = UserSettingsForm({'username': current_user.username,
                                      'email': current_user.email,
                                      'first_name': current_user.first_name,
