@@ -12,6 +12,7 @@ from models_Account import Account
 from models_Building import Building, BuildingMeterApportionment
 from models_EfficiencyMeasure import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from models_Equipment import Equipment
+from models_Forms import UserSettingsForm
 #from models_Event import Event
 #from models_Floor import Floor
 from models_Space import Space, SpaceMeterApportionment
@@ -24,6 +25,7 @@ from models_Reader_ing import Reader, Reading
 from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule
 from models_Utility import Utility
+from models_UserProfile import UserProfile
 
 from models_ForecastIO import Forecastio
 from models_WeatherStation import WeatherStation, WeatherDataPoint

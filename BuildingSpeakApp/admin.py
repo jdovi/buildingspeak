@@ -3,7 +3,7 @@ from BuildingSpeakApp.models import RooftopUnit, Reader, Reading, Message
 from BuildingSpeakApp.models import UnitSchedule, OperatingSchedule, Utility, RateSchedule
 from BuildingSpeakApp.models import BillingCycler, BillingCycle, Monther, Monthling
 from BuildingSpeakApp.models import WeatherStation, WeatherDataPoint, ManagementAction
-#from BuildingSpeakApp.models import TestEquip
+from BuildingSpeakApp.models import UserProfile
 from django.contrib import admin
 
 class AccountAdmin(admin.ModelAdmin):
@@ -433,13 +433,14 @@ class ManagementActionAdmin(admin.ModelAdmin):
         ('Create Import Template', {'fields': ['create_a_new_import_file']}),
     ]
     list_display = ('name', 'latest_messages_for_admin')
-#    def save_model(self, request, obj, form, change):
-#        self.message_user(request, 'Successfully showing this message!')
 
-#    def make_published(self, request, queryset):
-        
-#    make_published.short_description = "Mark selected stories as published"
-#    actions = [make_published]
+class UserProfileAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ('User Profile Information', {'fields': ['user',
+                                                 'organization',
+                                                 'image_file']}),
+    ]
+    list_display = ('user_for_admin', 'user_id_for_admin', 'organization')
     
 admin.site.register(Account, AccountAdmin)
 admin.site.register(Building, BuildingAdmin)
@@ -449,17 +450,15 @@ admin.site.register(Space, SpaceAdmin)
 admin.site.register(RooftopUnit, RooftopUnitAdmin)
 admin.site.register(Reader, ReaderAdmin)
 admin.site.register(Reading, ReadingAdmin)
-#admin.site.register(Event, EventAdmin)
 admin.site.register(Message, MessageAdmin)
 admin.site.register(UnitSchedule, UnitScheduleAdmin)
 admin.site.register(OperatingSchedule, OperatingScheduleAdmin)
 admin.site.register(Utility, UtilityAdmin)
 admin.site.register(RateSchedule, RateScheduleAdmin)
-#admin.site.register(TestEquip, TestEquipAdmin)
 admin.site.register(BillingCycler, BillingCyclerAdmin)
 admin.site.register(BillingCycle, BillingCycleAdmin)
 admin.site.register(Monther, MontherAdmin)
 admin.site.register(Monthling, MonthlingAdmin)
 admin.site.register(WeatherStation, WeatherStationAdmin)
 admin.site.register(WeatherDataPoint, WeatherDataPointAdmin)
-admin.site.register(ManagementAction, ManagementActionAdmin)
+admin.site.register(UserProfile, UserProfileAdmin)

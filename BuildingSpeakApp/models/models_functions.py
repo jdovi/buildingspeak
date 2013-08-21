@@ -81,6 +81,10 @@ def image_file_path_equipment(instance, filename):
                      'equipments',
                      '%06d' % instance.pk + '_' + instance.name,
                      filename])
+def image_file_path_user(instance, filename):
+    return '/'.join(['users',
+                     '%06d' % instance.pk,
+                     filename])
 def image_file_path_account(instance, filename):
     return '/'.join(['%06d' % instance.pk,
                      filename])

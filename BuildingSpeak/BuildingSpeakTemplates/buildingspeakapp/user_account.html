@@ -7,34 +7,38 @@
 </header>
 -->
 
-<form class="entry" action="/user-account" method="post">{% csrf_token %}
+<form enctype="multipart/form-data" class="entry" action="/user-account" method="post">{% csrf_token %}
 	{{ form.non_field_errors }}
 	<div class="form-item">
 		{{ form.username.errors }}
 		{{ form.username.label_tag }}
-		<input name="username" type="text" value={{ form.username.value }}>
+		{{ form.username }}
 	</div>
 	<div class="form-item">
 		{{ form.email.errors }}
 		{{ form.email.label_tag }}
-		<input name="email" type="text" value={{ form.email.value }}>
+		{{ form.email }}
 	</div>
 	<div class="form-item">
 		{{ form.first_name.errors }}
 		{{ form.first_name.label_tag }}
-		<input name="first_name" type="text" value={{ form.first_name.value }}>
+		{{ form.first_name }}
 	</div>
 	<div class="form-item">
 		{{ form.last_name.errors }}
 		{{ form.last_name.label_tag }}
-		<input name="last_name" type="text" value={{ form.last_name.value }}>
+		{{ form.last_name }}
 	</div>
-
-<!--
-	{{ form.as_ul }}
--->
-
-	
+	<div class="form-item">
+		{{ form.organization.errors }}
+		{{ form.organization.label_tag }}
+		{{ form.organization }}
+	</div>
+	<div class="form-item">
+		{{ form.image_file.errors }}
+		{{ form.image_file.label_tag }}
+		{{ form.image_file }}
+	</div>
 	<input type="submit" value="Update" />
 </form>
 

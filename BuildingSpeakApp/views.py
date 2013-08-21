@@ -5,63 +5,81 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
 from BuildingSpeakApp.models import Account, Building, Meter, Equipment
+from BuildingSpeakApp.models import UserSettingsForm, Message
 import json
 from decimal import Decimal
 from django.forms.models import modelform_factory
 from django.contrib.auth.models import User
 
-
+class SuccessMessage(object):
+    id = 0
+    subject = 'Success!'
+    comment = ''
+    
 @login_required
 def index(request):
     accounts = request.user.account_set.order_by('id')
-    context = {}
     if len(accounts)==0:
-        return render(request, 'buildingspeakapp/user_account.html', context)
+        return HttpResponseRedirect('/user-account')
     else:
         return HttpResponseRedirect('/' + str(accounts[0].id))
 
 @login_required
 def user_account(request):
-    UserAccountForm = modelform_factory(User)
-    if request.method == 'POST': # If the form has been submitted...
-        form = UserAccountForm(request.POST, instance=request.user) # A form bound to the POST data
-        print form.is_valid()
-        if form.is_valid(): # All validation rules pass
-            # Process the data in form.cleaned_data
-#            calling_user = form.save()
-#            calling_user.save()
-            not_saved_user = form.save(commit=False)
-            calling_user = request.user
-            not_saved_user.password = calling_user.password
-            not_saved_user.groups = calling_user.groups
-            not_saved_user.user_permissions = calling_user.user_permissions
-            not_saved_user.is_staff = calling_user.is_staff
-            not_saved_user.is_active = calling_user.is_active
-            not_saved_user.is_superuser = calling_user.is_superuser
-            not_saved_user.last_login = calling_user.last_login
-            not_saved_user.date_joined = calling_user.date_joined
-            print 'check1'
-            not_saved_user.save()
-            print 'check2'
-            form.save_m2m()
-            print 'check3'
-            return HttpResponseRedirect('/update-successful') # Redirect after POST
-    else:
-        form = UserAccountForm(instance=request.user) # An unbound form
-    context = {
-        'user':     request.user,
-        'accounts': request.user.account_set.order_by('id'),
-        'form':     form, }
-    return render(request, 'buildingspeakapp/user_account.html', context)
-
+    try:
+        current_user = request.user
+        if request.method == 'POST': # If the form has been submitted...
+            form = UserSettingsForm(request.POST, request.FILES) # A form bound to the POST data
+            if form.is_valid(): # All validation rules pass
+                # Process the data in form.cleaned_data
+                if form.cleaned_data['image_file'] is None:
+                    if current_user.userprofile.image_file is None:
+                        latest_image_file = None
+                    else:
+                        latest_image_file = current_user.userprofile.image_file
+                current_user.__setattr__('username', form.cleaned_data['username'])
+                current_user.__setattr__('email', form.cleaned_data['email'])
+                current_user.__setattr__('first_name', form.cleaned_data['first_name'])
+                current_user.__setattr__('last_name', form.cleaned_data['last_name'])
+                current_user.userprofile.__setattr__('organization', form.cleaned_data['organization'])
+                current_user.userprofile.__setattr__('image_file', latest_image_file)
+                form.initial['image_file'] = latest_image_file
+                current_user.save()
+                current_user.userprofile.save()
+                success = True
+                m = SuccessMessage()
+                m.comment = 'User settings have been updated.'
+                reloading = True
+                
+                #return HttpResponseRedirect('/update-successful') # Redirect after POST
+        elif request.method == 'GET':
+            if current_user.userprofile.image_file is None:
+                latest_image_file = None
+            else:
+                latest_image_file = current_user.userprofile.image_file
+            form = UserSettingsForm({'username': current_user.username,
+                                     'email': current_user.email,
+                                     'first_name': current_user.first_name,
+                                     'last_name': current_user.last_name,
+                                     'organization': current_user.userprofile.organization},
+                                     {'image_file': latest_image_file})
+            reloading = False
+        context = {
+            'user':     request.user,
+            'accounts': request.user.account_set.order_by('id'),
+            'form':     form, }
+        if reloading: context['alerts'] = [m]
+        return render(request, 'buildingspeakapp/user_account.html', context)
+    except:
+        return HttpResponseRedirect('/application-error')
+        
 def update_successful(request):
     context  = {'user': request.user}
     return render(request, 'buildingspeakapp/update_successful.html', context)
 
-@login_required
-def my_account(request):
+def application_error(request):
     context  = {'user': request.user}
-    return render(request, 'buildingspeakapp/user_account.html', context)
+    return render(request, 'buildingspeakapp/application_error.html', context)
 
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
