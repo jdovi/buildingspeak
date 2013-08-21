@@ -37,6 +37,8 @@ def user_account(request):
                     latest_image_file = None
                 else:
                     latest_image_file = current_user.userprofile.image_file
+            else:
+                latest_image_file = form.cleaned_data['image_file']
             print 'post: latest_image_file is None: ' + str(latest_image_file is None)
             current_user.__setattr__('username', form.cleaned_data['username'])
             current_user.__setattr__('email', form.cleaned_data['email'])
