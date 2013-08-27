@@ -1,4 +1,5 @@
 #import dbarray
+import numpy as np
 import pandas as pd
 from pytz import UTC
 from numpy import NaN
@@ -127,3 +128,62 @@ def nameplate_file_path_meter(instance, filename):
                      'meters',
                      '%06d' % instance.pk + '_' + instance.name,
                      filename])
+
+#these are helper functions used in development, have minimal if any error checking and validation
+def assign_period_datetime(time_series=[], dates=[]):
+    """Inputs:
+        time_series or
+        dates (list of start/end datetimes)
+        
+    Returns datetime of first day of
+    most frequently occurring month in
+    a given time series spanning 25-35
+    days to use as basis for Period."""
+    
+    #raise error if empty inputs
+    if (len(time_series)==0 and len(dates)<>2) or type(dates[0])<>datetime or type(dates[1])<>datetime:
+        answer = None
+    else:
+        #need to pull 3 times in case 3 months are represented
+        if len(dates)==2:
+            t=[dates[0],
+               (dates[1]-dates[0])/2 + dates[0],
+               dates[1]]
+        if len(time_series)>0:
+            t=[time_series.index[0],
+               time_series.index[len(time_series)/2],
+               time_series.index[-1]]
+        #raise error if number of days is outside range
+        if (t[2]-t[0]).days < 25 or (t[2]-t[0]).days > 35:
+            answer = None
+        else:
+            i = {t[0].month:0, t[1].month:1, t[2].month:2}
+            m = [t[0].month, t[1].month, t[2].month]
+            y = [t[0].year, t[1].year, t[2].year]
+            c = [0, 0, 0]
+            j = t[0]
+            while j < t[2]:
+                c[i[j.month]] = c[i[j.month]] + 1
+                j = j + timedelta(days=1)
+            answer = datetime(year=y[c.index(max(c))], month=m[c.index(max(c))], day=1, tzinfo=UTC)
+    return answer
+
+def load_monthly_csv(file_loc):
+    readbd = pd.read_csv(file_loc,
+                         skiprows=0,
+                         usecols=['Start Date', 'End Date', 'Billing Demand',
+                                  'Peak Demand', 'Consumption', 'Cost'],
+                         dtype={'Billing Demand': np.float, 'Peak Demand': np.float,
+                                'Consumption': np.float, 'Cost': np.float})
+    readbd['Start Date'] = readbd['Start Date'].apply(pd.to_datetime) + timedelta(hours=11,minutes=11,seconds=11) #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
+    readbd['End Date'] = readbd['End Date'].apply(pd.to_datetime) + timedelta(hours=11,minutes=11,seconds=11) #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
+    readbd['Start Date'] = readbd['Start Date'].apply(UTC.localize)
+    readbd['End Date'] = readbd['End Date'].apply(UTC.localize)
+    readbd['Billing Demand'] = readbd['Billing Demand'].apply(Decimal)
+    readbd['Peak Demand'] = readbd['Peak Demand'].apply(Decimal)
+    readbd['Consumption'] = readbd['Consumption'].apply(Decimal)
+    readbd['Cost'] = readbd['Cost'].apply(Decimal)
+    t = [assign_period_datetime(dates=[readbd['Start Date'][i],
+                                       readbd['End Date'][i]]) for i in range(0,len(readbd))]
+    readbd.index = pd.PeriodIndex(t, freq='M')
+    return readbd

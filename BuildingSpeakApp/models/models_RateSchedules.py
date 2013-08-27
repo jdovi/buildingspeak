@@ -84,9 +84,9 @@ class RateSchedule(KnowsChild):
     themselves)."""
     name = models.CharField(blank=True, max_length=200)
     
-        
     #relationships
     utility = models.ForeignKey('Utility')
+    riders = models.ManyToManyField('RateScheduleRider')
     messages = models.ManyToManyField('Message')
     
     #file-related attributes
@@ -166,7 +166,7 @@ class RateScheduleRider(KnowsChild):
     name = models.CharField(blank=True, max_length=200)
 
     #relationships
-    rate_schedule = models.ForeignKey('RateSchedule')
+    utility = models.ForeignKey('Utility')
     messages = models.ManyToManyField('Message')
     
     #file-related attributes
