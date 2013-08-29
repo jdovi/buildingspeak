@@ -19,7 +19,7 @@ from models_Meter import Meter
 from models_monthlies import BillingCycler, BillingCycle, Monther, Monthling
 from models_MeterModels import MeterConsumptionModel, MeterPeakDemandModel
 from models_RateSchedules import KnowsChild, RateSchedule, RateScheduleRider
-from models_RatesGeorgiaPower import GAPowerPLS, GAPowerRider
+from models_RatesGeorgiaPower import GAPowerPandL, GAPowerRider
 from models_Reader_ing import Reader, Reading
 from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule

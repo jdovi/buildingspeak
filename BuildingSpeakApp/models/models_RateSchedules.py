@@ -103,6 +103,10 @@ class RateSchedule(KnowsChild):
         return '<br>'.join(['<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_meter_change',args=(meter.id,)), meter.name) for meter in self.meter_set.all()])
     connected_meter_names_for_admin.allow_tags = True
     connected_meter_names_for_admin.short_description = 'Connected Meters'
+    def connected_rider_names_for_admin(self):
+        return '<br>'.join(['<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_rateschedulerider_change',args=(rider.id,)), rider.name) for rider in self.riders.all()])
+    connected_rider_names_for_admin.allow_tags = True
+    connected_rider_names_for_admin.short_description = 'Connected Riders'
     
     #functions expected to be defined on all subclasses to enable universal
     #calling across all RateSchedules, regardless of subclass type
@@ -173,6 +177,15 @@ class RateScheduleRider(KnowsChild):
     rider_file = models.FileField(null=True, blank=True, upload_to=rate_file_path_rate_schedule, 
                     storage=S3BotoStorage(location='utility_files'),
                     help_text='link to rate schedule rider file')
+
+    def utility_name_for_admin(self):
+        return '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_utility_change',args=(self.utility.id,)), self.utility.name)
+    utility_name_for_admin.allow_tags = True
+    utility_name_for_admin.short_description = 'Provider'
+    def connected_rate_names_for_admin(self):
+        return '<br>'.join(['<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_rateschedule_change',args=(rate.id,)), rate.name) for rate in self.rateschedule_set.all()])
+    connected_rate_names_for_admin.allow_tags = True
+    connected_rate_names_for_admin.short_description = 'Connected Rate Schedules'
 
     #functions expected to be defined on all subclasses to enable universal
     #calling across all RateScheduleRiders, regardless of subclass type

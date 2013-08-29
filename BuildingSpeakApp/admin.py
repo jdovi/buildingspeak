@@ -1,9 +1,11 @@
 from BuildingSpeakApp.models import Account, Building, Meter, Equipment, Space
 from BuildingSpeakApp.models import RooftopUnit, Reader, Reading, Message
-from BuildingSpeakApp.models import UnitSchedule, OperatingSchedule, Utility, RateSchedule
+from BuildingSpeakApp.models import UnitSchedule, OperatingSchedule, Utility
+from BuildingSpeakApp.models import RateSchedule, RateScheduleRider
 from BuildingSpeakApp.models import BillingCycler, BillingCycle, Monther, Monthling
 from BuildingSpeakApp.models import WeatherStation, WeatherDataPoint, ManagementAction
 from BuildingSpeakApp.models import UserProfile
+from BuildingSpeakApp.models import GAPowerRider, GAPowerPandL
 from django.contrib import admin
 
 class AccountAdmin(admin.ModelAdmin):
@@ -323,10 +325,21 @@ class RateScheduleAdmin(admin.ModelAdmin):
                                     'name',
                                     'rate_file']}),
     ]
-    list_display = ('name', 'id', 'utility_name_for_admin', 'connected_meter_names_for_admin')
+    list_display = ('name', 'id', 'utility_name_for_admin', 'connected_meter_names_for_admin',
+                    'connected_rider_names_for_admin')
     search_fields = ['name', 'id']
     list_filter = ['utility']
     
+class RateScheduleRiderAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ('Information', {'fields': ['utility',
+                                    'name',
+                                    'rider_file']}),
+    ]
+    list_display = ('name', 'id', 'utility_name_for_admin', 'connected_rate_names_for_admin')
+    search_fields = ['name', 'id']
+    list_filter = ['utility']
+
 class BillingCyclerAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Information', {'fields': ['meter']}),
@@ -442,6 +455,27 @@ class UserProfileAdmin(admin.ModelAdmin):
     ]
     list_display = ('user_for_admin', 'user_id_for_admin', 'organization')
     
+class GAPowerRiderAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ('Rider Information', {'fields': ['name',
+                                          'percent_of_base_revenue',
+                                          'percent_of_total_revenue',
+                                          'summer_cost_per_kWh',
+                                          'winter_cost_per_kWh',
+                                          'apply_to_base_revenue',
+                                          'apply_to_total_revenue',
+                                          'apply_to_consumption']}),
+    ]
+    list_display = ('name',)
+
+class GAPowerPandLAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ('Rider Information', {'fields': ['name',
+                                          'basic_service_charge',
+                                          'tax_percentage']}),
+    ]
+    list_display = ('name',)
+
 admin.site.register(Account, AccountAdmin)
 admin.site.register(Building, BuildingAdmin)
 admin.site.register(Meter, MeterAdmin)
@@ -455,6 +489,7 @@ admin.site.register(UnitSchedule, UnitScheduleAdmin)
 admin.site.register(OperatingSchedule, OperatingScheduleAdmin)
 admin.site.register(Utility, UtilityAdmin)
 admin.site.register(RateSchedule, RateScheduleAdmin)
+admin.site.register(RateScheduleRider, RateScheduleRiderAdmin)
 admin.site.register(BillingCycler, BillingCyclerAdmin)
 admin.site.register(BillingCycle, BillingCycleAdmin)
 admin.site.register(Monther, MontherAdmin)
@@ -462,3 +497,5 @@ admin.site.register(Monthling, MonthlingAdmin)
 admin.site.register(WeatherStation, WeatherStationAdmin)
 admin.site.register(WeatherDataPoint, WeatherDataPointAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(GAPowerPandL, GAPowerPandLAdmin)
+admin.site.register(GAPowerRider, GAPowerRiderAdmin)

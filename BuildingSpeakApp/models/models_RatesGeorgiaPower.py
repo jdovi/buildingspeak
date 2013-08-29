@@ -18,13 +18,15 @@ from models_Message import Message
 from models_RateSchedules import RateSchedule, RateScheduleRider
 
 
-class GAPowerPLS(RateSchedule):
+class GAPowerPandL(RateSchedule):
+    use_input_billing_demand = models.BooleanField(blank=True, default=False,
+                    help_text='use input Billing Demand instead of Calculated Billing Demand?')
     basic_service_charge = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                               help_text='monthly basic service charge',
                               default=Decimal(0.0))
     tax_percentage = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=7,
                               help_text='tax percentage applied to grand total',
-                              default=Decimal(0.07))
+                              default=Decimal(0.08))
                               
     tier1 = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                               help_text='tier 1 limit: consumption < (X times billing demand)',
@@ -196,8 +198,11 @@ class GAPowerPLS(RateSchedule):
     lim_service_sliding_month_window = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                               help_text='number of previous months to use in calculating limitation of service',
                               default=Decimal(0.0))
-    limitation_of_service_kW = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
+    limitation_of_service_max_kW = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                               help_text='kW limit for service',
+                              default=Decimal(999999.0))
+    limitation_of_service_min_kW = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
+                              help_text='kW minimum for service',
                               default=Decimal(0.0))
     limitation_of_service_winter_percent = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                               help_text='limit of service % for current or previous demand in winter months',
@@ -220,21 +225,27 @@ class GAPowerPLS(RateSchedule):
         columns."""
         try:
             df = self.get_billing_demand_df(df=df)
-            if 'Billing Demand' not in df.columns: raise TypeError
+            if 'Calculated Billing Demand' not in df.columns: raise TypeError
         except:
             m = Message(when=timezone.now(),
                     message_type='Code Error',
                     subject='Calculation failed.',
-                    comment='GAPowerPLS %s get_cost_df unable to calculate billing demand, function aborted.' % self.id)
+                    comment='GAPowerPandL %s get_cost_df unable to calculate billing demand, function aborted.' % self.id)
             m.save()
             self.messages.add(m)
             print m
         else:
             try:
-                df['k1'] = [min(df['Billing Demand'][i]*self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
-                df['k2'] = [min(df['Billing Demand'][i]*(self.tier2-self.tier1),df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
-                df['k3'] = [min(df['Billing Demand'][i]*(self.tier3-self.tier2),df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
-                df['k4'] = [min(df['Billing Demand'][i]*(self.tier4-self.tier3),df['Consumption'][i]-df['k1'][i]-df['k2'][i]-df['k3'][i]) for i in range(0,len(df))]
+                if self.use_input_billing_demand:
+                    df['k1'] = [min(df['Billing Demand'][i]*self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
+                    df['k2'] = [min(df['Billing Demand'][i]*(self.tier2-self.tier1),df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
+                    df['k3'] = [min(df['Billing Demand'][i]*(self.tier3-self.tier2),df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
+                    df['k4'] = [min(df['Billing Demand'][i]*(self.tier4-self.tier3),df['Consumption'][i]-df['k1'][i]-df['k2'][i]-df['k3'][i]) for i in range(0,len(df))]
+                else:
+                    df['k1'] = [min(df['Calculated Billing Demand'][i]*self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
+                    df['k2'] = [min(df['Calculated Billing Demand'][i]*(self.tier2-self.tier1),df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
+                    df['k3'] = [min(df['Calculated Billing Demand'][i]*(self.tier3-self.tier2),df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
+                    df['k4'] = [min(df['Calculated Billing Demand'][i]*(self.tier4-self.tier3),df['Consumption'][i]-df['k1'][i]-df['k2'][i]-df['k3'][i]) for i in range(0,len(df))]
                 
                 df['k1a'] = [min(df['k1'][i],self.tier1a) for i in range(0,len(df))]
                 df['k1b'] = [min(df['k1'][i]-df['k1a'][i],self.tier1b-self.tier1a) for i in range(0,len(df))]
@@ -266,7 +277,7 @@ class GAPowerPLS(RateSchedule):
                     m = Message(when=timezone.now(),
                             message_type='Code Error',
                             subject='Calculation failed.',
-                            comment='GAPowerPLS %s get_cost_df computed tier consumptions that do not sum to total consumption, function aborted.' % self.id)
+                            comment='GAPowerPandL %s get_cost_df computed tier consumptions that do not sum to total consumption, function aborted.' % self.id)
                     m.save()
                     self.messages.add(m)
                     print m
@@ -284,19 +295,25 @@ class GAPowerPLS(RateSchedule):
                 m = Message(when=timezone.now(),
                         message_type='Code Warning',
                         subject='Calculation failed.',
-                        comment='GAPowerPLS %s get_cost_df unable to calculate consumption charges, function aborted.' % self.id)
+                        comment='GAPowerPandL %s get_cost_df unable to calculate consumption charges, function aborted.' % self.id)
                 m.save()
                 self.messages.add(m)
                 print m
             else:
                 try:
-                    df['Excess Demand'] = [max(df['Billing Demand'][i] - self.excess_kW_threshold, Decimal(0.0)) for i in range(0,len(df))]
-                    df['Excess Demand Cost'] = df['Excess Demand'] * self.excess_kW_rate
+                    df['Excess Demand'] = Decimal(0.0)
+                    df['Excess Demand Cost'] = Decimal(0.0)
+                    #--seems the straight per kW charge is only for calculating a minimum bill
+                    #--thus the following two lines don't belong here but would be used in a 
+                    #----different function to compare the default calculated cost against
+                    #----the minimum monthly bill from paragraph A. of the rate schedule
+                    #df['Excess Demand'] = [max(df['Calculated Billing Demand'][i] - self.excess_kW_threshold, Decimal(0.0)) for i in range(0,len(df))]
+                    #df['Excess Demand Cost'] = df['Excess Demand'] * self.excess_kW_rate
                 except:
                     m = Message(when=timezone.now(),
                             message_type='Code Error',
                             subject='Calculation failed.',
-                            comment='GAPowerPLS %s get_cost_df unable to calculate excess demand charges, function aborted.' % self.id)
+                            comment='GAPowerPandL %s get_cost_df unable to calculate excess demand charges, function aborted.' % self.id)
                     m.save()
                     self.messages.add(m)
                     print m
@@ -307,7 +324,7 @@ class GAPowerPLS(RateSchedule):
                         m = Message(when=timezone.now(),
                                 message_type='Code Error',
                                 subject='Calculation failed.',
-                                comment='GAPowerPLS %s get_cost_df unable to calculate base charges, function aborted.' % self.id)
+                                comment='GAPowerPandL %s get_cost_df unable to calculate base charges, function aborted.' % self.id)
                         m.save()
                         self.messages.add(m)
                         print m
@@ -317,17 +334,19 @@ class GAPowerPLS(RateSchedule):
                             df['Base Revenue Riders Cost'] = Decimal(0.0)
                             for base_rider in self.riders.all(): #can't use filter because of child class usage
                                 if base_rider.as_child().apply_to_base_revenue or base_rider.as_child().apply_to_consumption: #must instead check here to pull only base rev riders first
+                                    df[base_rider.as_child().name] = base_rider.as_child().get_cost_df(df)['Rider Cost']
                                     df['Base Revenue Riders Cost'] = df['Base Revenue Riders Cost'] + base_rider.as_child().get_cost_df(df)['Rider Cost']
                             df['Total Revenue Cost'] = df['Base Revenue Cost'] + df['Base Revenue Riders Cost']
                             df['Total Revenue Riders Cost'] = Decimal(0.0)
                             for total_rider in self.riders.all(): #can't use filter because of child class usage
                                 if total_rider.as_child().apply_to_total_revenue: #must instead check here to pull only total rev riders
+                                    df[total_rider.as_child().name] = total_rider.as_child().get_cost_df(df)['Rider Cost']
                                     df['Total Revenue Riders Cost'] = df['Total Revenue Riders Cost'] + total_rider.as_child().get_cost_df(df)['Rider Cost']
                         except:
                             m = Message(when=timezone.now(),
                                     message_type='Code Error',
                                     subject='Calculation failed.',
-                                    comment='GAPowerPLS %s get_cost_df unable to calculate rider charges, function aborted.' % self.id)
+                                    comment='GAPowerPandL %s get_cost_df unable to calculate rider charges, function aborted.' % self.id)
                             m.save()
                             self.messages.add(m)
                             print m
@@ -339,34 +358,47 @@ class GAPowerPLS(RateSchedule):
         return df
     def is_eligible(self, df):
         return self.pass_limitation_of_service(df=df)
-    def get_billing_demand_df(self, df):
+    def get_billing_demand_df(self, df):##WORK HERE: need to make this only look at previous 11 months while iterating through all months given
         """function(df)
         
         Given dataframe with
         monthly index, Peak
         Demand, and Consumption,
         returns dataframe with
-        new column of Billing
-        Demand."""
+        new column of Calculated
+        Billing Demand."""
         try:
             summer_months = self.get_summer_months()
             winter_months = self.get_winter_months()
-            df['Billing Demand'] = Decimal(0.0)
+            df['Calculated Billing Demand'] = Decimal(0.0)
             df = df.sort_index()
-            df = df[-1:-(int(self.billing_demand_sliding_month_window)+1):-1]
+            
             for i in range(0,len(df)):
+                df11 = df[max(0,i-int(self.billing_demand_sliding_month_window)):i]
+                
+                summer_peaks = df11['Peak Demand'][[x.month in summer_months for x in df11['End Date']]]
+                if len(summer_peaks)==0:
+                    summer_max = 0
+                else:
+                    summer_max = summer_peaks.max()
+                winter_peaks = df11['Peak Demand'][[x.month in winter_months for x in df11['End Date']]]
+                if len(winter_peaks)==0:
+                    winter_max = 0
+                else:
+                    winter_max = winter_peaks.max()
+                
                 if df['End Date'][i].month in summer_months: #might normally use df.index[i].month but GAPower uses meter read date
-                    df['Billing Demand'][i:i+1] = max(
+                    df['Calculated Billing Demand'][i:i+1] = max(
                             df['Peak Demand'][i],
-                            self.summer_summer_threshold * df['Peak Demand'][[x.month in summer_months for x in df['End Date']]].max(),
-                            self.summer_winter_threshold * df['Peak Demand'][[x.month in winter_months for x in df['End Date']]].max(),
+                            self.summer_summer_threshold * summer_max,
+                            self.summer_winter_threshold * winter_max,
                             self.contract_minimum_demand,
                             self.minimum_fraction_contract_capacity * self.excess_kW_threshold,
                             self.absolute_minimum_demand  )
                 if df['End Date'][i].month in winter_months:
-                    df['Billing Demand'][i:i+1] = max(
-                            self.winter_summer_threshold * df['Peak Demand'][[x.month in summer_months for x in df['End Date']]].max(),
-                            self.winter_winter_threshold * df['Peak Demand'][[x.month in winter_months for x in df['End Date']]].max(),
+                    df['Calculated Billing Demand'][i:i+1] = max(
+                            self.winter_summer_threshold * summer_max,
+                            self.winter_winter_threshold * winter_max,
                             self.contract_minimum_demand,
                             self.minimum_fraction_contract_capacity * self.excess_kW_threshold,
                             self.absolute_minimum_demand  )
@@ -374,7 +406,7 @@ class GAPowerPLS(RateSchedule):
             m = Message(when=timezone.now(),
                     message_type='Code Error',
                     subject='Calculation failed.',
-                    comment='GAPowerPLS %s get_billing_demand_df unable to calculate billing demand, function aborted.' % self.id)
+                    comment='GAPowerPandL %s get_billing_demand_df unable to calculate billing demand, function aborted.' % self.id)
             m.save()
             self.messages.add(m)
             print m
@@ -398,7 +430,7 @@ class GAPowerPLS(RateSchedule):
             m = Message(when=timezone.now(),
                     message_type='Code Error',
                     subject='Calculation failed.',
-                    comment='GAPowerPLS %s get_winter_months failed, function aborted.' % self.id)
+                    comment='GAPowerPandL %s get_winter_months failed, function aborted.' % self.id)
             m.save()
             self.messages.add(m)
             print m
@@ -421,7 +453,7 @@ class GAPowerPLS(RateSchedule):
             m = Message(when=timezone.now(),
                     message_type='Code Error',
                     subject='Calculation failed.',
-                    comment='GAPowerPLS %s get_summer_months failed, function aborted.' % self.id)
+                    comment='GAPowerPandL %s get_summer_months failed, function aborted.' % self.id)
             m.save()
             self.messages.add(m)
             print m
@@ -445,7 +477,7 @@ class GAPowerPLS(RateSchedule):
                 m = Message(when=timezone.now(),
                         message_type='Code Warning',
                         subject='Missing data.',
-                        comment='GAPowerPLS %s pass_limitation_of_service given too few peak demands, function aborted.' % self.id)
+                        comment='GAPowerPandL %s pass_limitation_of_service given too few peak demands, function aborted.' % self.id)
                 m.save()
                 self.messages.add(m)
                 print m
@@ -453,16 +485,17 @@ class GAPowerPLS(RateSchedule):
             else:
                 summer_months = self.get_summer_months()
                 limit_1 = self.limitation_of_service_winter_percent * max(
-                    df['Peak Demand'][[x.month not in summer_months for x in df['Peak Demand'].index]])
+                    df['Peak Demand'][[x.month not in summer_months for x in df['End Date']]])
                 
                 limit_2 = self.limitation_of_service_summer_percent * max(
-                    df['Peak Demand'][[x.month in summer_months for x in df['Peak Demand'].index]])
-                answer = (limitation_of_service_kW < max(limit_1, limit_2))
+                    df['Peak Demand'][[x.month in summer_months for x in df['End Date']]])
+                answer = ( (max(limit_1, limit_2) < self.limitation_of_service_max_kW) and
+                           (max(limit_1, limit_2) > self.limitation_of_service_min_kW) )
         except:
                 m = Message(when=timezone.now(),
                         message_type='Code Error',
                         subject='Calculation failed.',
-                        comment='GAPowerPLS %s pass_limitation_of_service unable to calculate, function aborted.' % self.id)
+                        comment='GAPowerPandL %s pass_limitation_of_service unable to calculate, function aborted.' % self.id)
                 m.save()
                 self.messages.add(m)
                 print m
@@ -499,9 +532,9 @@ class GAPowerRider(RateScheduleRider):
                 df['Rider Cost'] = df['Total Revenue Cost'] * self.percent_of_total_revenue
             elif self.apply_to_consumption:
                 for i in range(0,len(df)):
-                    if df.index[i].month in [6,7,8,9]:
+                    if df['End Date'][i].month in [6,7,8,9]:
                         df['Rider Cost'][i:i+1] = df['Consumption'][i:i+1] * self.summer_cost_per_kWh
-                    elif df.index[i].month in [1,2,3,4,5,10,11,12]:
+                    elif df['End Date'][i].month in [1,2,3,4,5,10,11,12]:
                         df['Rider Cost'][i:i+1] = df['Consumption'][i:i+1] * self.winter_cost_per_kWh
                     else:
                         raise TypeError
