@@ -358,7 +358,7 @@ class GAPowerPandL(RateSchedule):
         return df
     def is_eligible(self, df):
         return self.pass_limitation_of_service(df=df)
-    def get_billing_demand_df(self, df):##WORK HERE: need to make this only look at previous 11 months while iterating through all months given
+    def get_billing_demand_df(self, df):
         """function(df)
         
         Given dataframe with
