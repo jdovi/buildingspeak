@@ -355,7 +355,7 @@ class Monther(models.Model):
                 df = df[first_month:last_month]
                 df = df.sort_index()
         return df
-    def load_monther_period_dataframe(self, df):
+    def load_monther_period_dataframe(self, df, overwrite=False):
         """Inputs:
             df
               (columns:Billing Demand,Peak Demand,
@@ -365,9 +365,15 @@ class Monther(models.Model):
                  asave, esave; +deltas)
         
         Loads given dataframe into Monther
-        by adding Monthlings. Calling
+        by adding Monthlings.  Calling
         function should ensure match with
-        BillingCycler periods."""
+        BillingCycler periods.
+        
+        Only meter.update_bill_data()
+        should be calling this function,
+        as it deletes all existing
+        Monthlings because that function
+        handles overwrite logic from user."""
 
         if (('Billing Demand (asave)' in df.columns) and ('Cost (asave)' in df.columns) and
             ('Peak Demand (asave)' in df.columns) and ('Consumption (asave)' in df.columns) and
@@ -397,8 +403,140 @@ class Monther(models.Model):
             ('CDD_consumption' in df.columns) and ('HDD_consumption' in df.columns) and
             (len(df)>0) and (type(df.index)==pd.tseries.period.PeriodIndex)  ):
             df = df.sort_index()
-            self.monthling_set.all().delete()
+            #---------------------------------------------------
+            #for updates: this section added later than original meter.update_bill_data()
+            #the two methods conflict, so I went back to the original here which deletes
+            #all monthlings and loads the entire df in every time, because update_bill_data()
+            #has already done the logic based on the Overwrite column;
+            #prefer long term to avoid replacing all data by only calling out with get_monther_period_dataframe()
+            #those monthlings to be overwritten; then update_bill_data() would pass overwrite=True
+            #as its passed df would include new and to-be-overwritten data and would have left
+            #all not-to-be-overwritten data alone from the start
+#            try:
+#                monthling_dates = [x.when for x in self.monthling_set.all()]
+#                for i in range(0,len(df)):
+#                    per_date = UTC.localize(df.index[i].to_timestamp() + timedelta(days=10,hours=11,minutes=11,seconds=11)) #add days/hours/mins/secs to avoid crossing month boundary when adjusting timezones
+#                    if (per_date in monthling_dates) and overwrite: #this is probably redundant to meter.update_bill_data, which uses Overwrite column of incoming bill data
+#                        self.monthling_set.remove(self.monthling_set.get(when=per_date))
+#                        mlg = Monthling(
+#                                when = per_date,
+#                                cdd_peak_demand = Decimal(df['CDD_peak_demand'][i]),
+#                                hdd_peak_demand = Decimal(df['HDD_peak_demand'][i]),
+#                                cdd_consumption = Decimal(df['CDD_consumption'][i]),
+#                                hdd_consumption = Decimal(df['HDD_consumption'][i]),
+#                                base_billing_demand = Decimal(df['Billing Demand (base)'][i]),
+#                                base_peak_demand = Decimal(df['Peak Demand (base)'][i]),
+#                                base_consumption = Decimal(df['Consumption (base)'][i]),
+#                                base_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (base)'][i]),
+#                                base_kBtu_consumption = Decimal(df['kBtu Consumption (base)'][i]),
+#                                base_cost = Decimal(df['Cost (base)'][i]),
+#                                exp_billing_demand = Decimal(df['Billing Demand (exp)'][i]),
+#                                exp_peak_demand = Decimal(df['Peak Demand (exp)'][i]),
+#                                exp_consumption = Decimal(df['Consumption (exp)'][i]),
+#                                exp_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (exp)'][i]),
+#                                exp_kBtu_consumption = Decimal(df['kBtu Consumption (exp)'][i]),
+#                                exp_cost = Decimal(df['Cost (exp)'][i]),
+#                                act_billing_demand = Decimal(df['Billing Demand (act)'][i]),
+#                                act_peak_demand = Decimal(df['Peak Demand (act)'][i]),
+#                                act_consumption = Decimal(df['Consumption (act)'][i]),
+#                                act_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (act)'][i]),
+#                                act_kBtu_consumption = Decimal(df['kBtu Consumption (act)'][i]),
+#                                act_cost = Decimal(df['Cost (act)'][i]),
+#                                esave_billing_demand = Decimal(df['Billing Demand (esave)'][i]),
+#                                esave_peak_demand = Decimal(df['Peak Demand (esave)'][i]),
+#                                esave_consumption = Decimal(df['Consumption (esave)'][i]),
+#                                esave_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (esave)'][i]),
+#                                esave_kBtu_consumption = Decimal(df['kBtu Consumption (esave)'][i]),
+#                                esave_cost = Decimal(df['Cost (esave)'][i]),
+#                                asave_billing_demand = Decimal(df['Billing Demand (asave)'][i]),
+#                                asave_peak_demand = Decimal(df['Peak Demand (asave)'][i]),
+#                                asave_consumption = Decimal(df['Consumption (asave)'][i]),
+#                                asave_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (asave)'][i]),
+#                                asave_kBtu_consumption = Decimal(df['kBtu Consumption (asave)'][i]),
+#                                asave_cost = Decimal(df['Cost (asave)'][i]),
+#    
+#                                base_billing_demand_delta = Decimal(df['Billing Demand (base delta)'][i]),
+#                                base_peak_demand_delta = Decimal(df['Peak Demand (base delta)'][i]),
+#                                base_consumption_delta = Decimal(df['Consumption (base delta)'][i]),
+#                                base_kBtuh_peak_demand_delta = Decimal(df['kBtuh Peak Demand (base delta)'][i]),
+#                                base_kBtu_consumption_delta = Decimal(df['kBtu Consumption (base delta)'][i]),
+#                                base_cost_delta = Decimal(df['Cost (base delta)'][i]),
+#                                exp_billing_demand_delta = Decimal(df['Billing Demand (exp delta)'][i]),
+#                                exp_peak_demand_delta = Decimal(df['Peak Demand (exp delta)'][i]),
+#                                exp_consumption_delta = Decimal(df['Consumption (exp delta)'][i]),
+#                                exp_kBtuh_peak_demand_delta = Decimal(df['kBtuh Peak Demand (exp delta)'][i]),
+#                                exp_kBtu_consumption_delta = Decimal(df['kBtu Consumption (exp delta)'][i]),
+#                                exp_cost_delta = Decimal(df['Cost (exp delta)'][i]),
+#                                esave_billing_demand_delta = Decimal(df['Billing Demand (esave delta)'][i]),
+#                                esave_peak_demand_delta = Decimal(df['Peak Demand (esave delta)'][i]),
+#                                esave_consumption_delta = Decimal(df['Consumption (esave delta)'][i]),
+#                                esave_kBtuh_peak_demand_delta = Decimal(df['kBtuh Peak Demand (esave delta)'][i]),
+#                                esave_kBtu_consumption_delta = Decimal(df['kBtu Consumption (esave delta)'][i]),
+#                                esave_cost_delta = Decimal(df['Cost (esave delta)'][i]),
+#    
+#                                monther = self)
+#                        mlg.save()
+#                    elif per_date not in monthling_dates:
+#                        mlg = Monthling(
+#                                when = per_date,
+#                                cdd_peak_demand = Decimal(df['CDD_peak_demand'][i]),
+#                                hdd_peak_demand = Decimal(df['HDD_peak_demand'][i]),
+#                                cdd_consumption = Decimal(df['CDD_consumption'][i]),
+#                                hdd_consumption = Decimal(df['HDD_consumption'][i]),
+#                                base_billing_demand = Decimal(df['Billing Demand (base)'][i]),
+#                                base_peak_demand = Decimal(df['Peak Demand (base)'][i]),
+#                                base_consumption = Decimal(df['Consumption (base)'][i]),
+#                                base_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (base)'][i]),
+#                                base_kBtu_consumption = Decimal(df['kBtu Consumption (base)'][i]),
+#                                base_cost = Decimal(df['Cost (base)'][i]),
+#                                exp_billing_demand = Decimal(df['Billing Demand (exp)'][i]),
+#                                exp_peak_demand = Decimal(df['Peak Demand (exp)'][i]),
+#                                exp_consumption = Decimal(df['Consumption (exp)'][i]),
+#                                exp_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (exp)'][i]),
+#                                exp_kBtu_consumption = Decimal(df['kBtu Consumption (exp)'][i]),
+#                                exp_cost = Decimal(df['Cost (exp)'][i]),
+#                                act_billing_demand = Decimal(df['Billing Demand (act)'][i]),
+#                                act_peak_demand = Decimal(df['Peak Demand (act)'][i]),
+#                                act_consumption = Decimal(df['Consumption (act)'][i]),
+#                                act_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (act)'][i]),
+#                                act_kBtu_consumption = Decimal(df['kBtu Consumption (act)'][i]),
+#                                act_cost = Decimal(df['Cost (act)'][i]),
+#                                esave_billing_demand = Decimal(df['Billing Demand (esave)'][i]),
+#                                esave_peak_demand = Decimal(df['Peak Demand (esave)'][i]),
+#                                esave_consumption = Decimal(df['Consumption (esave)'][i]),
+#                                esave_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (esave)'][i]),
+#                                esave_kBtu_consumption = Decimal(df['kBtu Consumption (esave)'][i]),
+#                                esave_cost = Decimal(df['Cost (esave)'][i]),
+#                                asave_billing_demand = Decimal(df['Billing Demand (asave)'][i]),
+#                                asave_peak_demand = Decimal(df['Peak Demand (asave)'][i]),
+#                                asave_consumption = Decimal(df['Consumption (asave)'][i]),
+#                                asave_kBtuh_peak_demand = Decimal(df['kBtuh Peak Demand (asave)'][i]),
+#                                asave_kBtu_consumption = Decimal(df['kBtu Consumption (asave)'][i]),
+#                                asave_cost = Decimal(df['Cost (asave)'][i]),
+#    
+#                                base_billing_demand_delta = Decimal(df['Billing Demand (base delta)'][i]),
+#                                base_peak_demand_delta = Decimal(df['Peak Demand (base delta)'][i]),
+#                                base_consumption_delta = Decimal(df['Consumption (base delta)'][i]),
+#                                base_kBtuh_peak_demand_delta = Decimal(df['kBtuh Peak Demand (base delta)'][i]),
+#                                base_kBtu_consumption_delta = Decimal(df['kBtu Consumption (base delta)'][i]),
+#                                base_cost_delta = Decimal(df['Cost (base delta)'][i]),
+#                                exp_billing_demand_delta = Decimal(df['Billing Demand (exp delta)'][i]),
+#                                exp_peak_demand_delta = Decimal(df['Peak Demand (exp delta)'][i]),
+#                                exp_consumption_delta = Decimal(df['Consumption (exp delta)'][i]),
+#                                exp_kBtuh_peak_demand_delta = Decimal(df['kBtuh Peak Demand (exp delta)'][i]),
+#                                exp_kBtu_consumption_delta = Decimal(df['kBtu Consumption (exp delta)'][i]),
+#                                exp_cost_delta = Decimal(df['Cost (exp delta)'][i]),
+#                                esave_billing_demand_delta = Decimal(df['Billing Demand (esave delta)'][i]),
+#                                esave_peak_demand_delta = Decimal(df['Peak Demand (esave delta)'][i]),
+#                                esave_consumption_delta = Decimal(df['Consumption (esave delta)'][i]),
+#                                esave_kBtuh_peak_demand_delta = Decimal(df['kBtuh Peak Demand (esave delta)'][i]),
+#                                esave_kBtu_consumption_delta = Decimal(df['kBtu Consumption (esave delta)'][i]),
+#                                esave_cost_delta = Decimal(df['Cost (esave delta)'][i]),
+#    
+#                                monther = self)
+            #-------------------------------------------------------
             try:
+                self.monthling_set.all().delete()
                 for i in range(0,len(df)):
                     per_date = UTC.localize(df.index[i].to_timestamp() + timedelta(days=10,hours=11,minutes=11,seconds=11)) #add days/hours/mins/secs to avoid crossing month boundary when adjusting timezones
                     mlg = Monthling(

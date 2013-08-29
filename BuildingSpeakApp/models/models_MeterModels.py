@@ -1126,14 +1126,14 @@ class MeterPeakDemandModel(models.Model):
             current_model = self.get_available_models()[1][self.model_type]
             if current_model['wname'] == ['Days']:
                 df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
-            if 'CDD_demand/month' in current_model['xnames']:
-                df = df.drop(['CDD_demand/month'], axis = 1)
+            if 'CDD_demand' in current_model['xnames']:
+                df = df.drop(['CDD_demand'], axis = 1)
                 df = self.meter.weather_station.get_CDD_df(df, self.Tccp)
-                df.rename(columns={'CDD': 'CDD_demand/month'}, inplace = True)
-            if 'HDD_demand/month' in current_model['xnames']:
-                df = df.drop(['HDD_demand/month'], axis = 1)
+                df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
+            if 'HDD_demand' in current_model['xnames']:
+                df = df.drop(['HDD_demand'], axis = 1)
                 df = self.meter.weather_station.get_HDD_df(df, self.Thcp)
-                df.rename(columns={'HDD': 'HDD_demand/month'}, inplace = True)
+                df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
             if 'Peak Demand' in current_model['yname']:
                 if 'Peak Demand' not in df.columns: raise TypeError
         except:
@@ -1157,11 +1157,11 @@ class MeterPeakDemandModel(models.Model):
                    'yname': ['Peak Demand']},
             '2pc': {'include_intercept': True,
                     'wname': [],
-                    'xnames': ['CDD_demand/month'],
+                    'xnames': ['CDD_demand'],
                     'yname': ['Peak Demand']},
             '2ph': {'include_intercept': True,
                     'wname': [],
-                    'xnames': ['HDD_demand/month'],
+                    'xnames': ['HDD_demand'],
                     'yname': ['Peak Demand']}  }
         model_name_list = [x for x in model_dictionary]
         return [model_name_list, model_dictionary]
@@ -1377,11 +1377,11 @@ class MeterPeakDemandModel(models.Model):
             #as new models are added, need to add code here to make sure the new models are
             #    included in the search for the best fit model
             df = self.get_baseline_df()
-            df = df.drop(['CDD_demand/month', 'HDD_demand/month'], axis = 1)
+            df = df.drop(['CDD_demand', 'HDD_demand'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
-            df.rename(columns={'CDD': 'CDD_demand/month'}, inplace = True)
+            df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
             df = self.meter.weather_station.get_HDD_df(df, Thcp)
-            df.rename(columns={'HDD': 'HDD_demand/month'}, inplace = True)
+            df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
             df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
             #--------------------------------------------------------------------------
             df = df.sort_index()
@@ -1426,14 +1426,14 @@ class MeterPeakDemandModel(models.Model):
                     track_Tccp = pd.DataFrame()            
                     Thcp = 65
                     df = self.get_baseline_df()
-                    df = df.drop(['HDD_demand/month'], axis = 1)
+                    df = df.drop(['HDD_demand'], axis = 1)
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
-                    df.rename(columns={'HDD': 'HDD_demand/month'}, inplace = True)
+                    df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
                     for Tccp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['CDD_demand/month'], axis = 1)
+                        df = df.drop(['CDD_demand'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
-                        df.rename(columns={'CDD': 'CDD_demand/month'}, inplace = True)
+                        df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
                         results = self.set_model_print_results(df = df,
@@ -1465,14 +1465,14 @@ class MeterPeakDemandModel(models.Model):
                     Tccp = 65
                     df = self.get_baseline_df()
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
-                    df = df.drop(['CDD_demand/month'], axis = 1)
+                    df = df.drop(['CDD_demand'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
-                    df.rename(columns={'CDD': 'CDD_demand/month'}, inplace = True)
+                    df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
                     for Thcp in range(55, 80):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['HDD_demand/month'], axis = 1)
+                        df = df.drop(['HDD_demand'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
-                        df.rename(columns={'HDD': 'HDD_demand/month'}, inplace = True)
+                        df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
                         results = self.set_model_print_results(df = df,
