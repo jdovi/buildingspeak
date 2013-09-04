@@ -166,6 +166,8 @@ class Space(models.Model):
                                               ('Water Treatment and Distribution Utility', 'Water Treatment and Distribution Utility')])
     
     #functions
+    def __unicode__(self):
+        return self.name + ' (' + self.building + ')'
     def get_all_alerts(self, reverse_boolean):
         f = [self.messages.filter(message_type='Alert')]
         e = [x.messages.filter(message_type='Alert') for x in self.equipment_set.all()]

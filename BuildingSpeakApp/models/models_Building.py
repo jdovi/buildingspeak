@@ -199,7 +199,7 @@ class Building(models.Model):
         flat2 = [item for sublist in flat1 for item in sublist]
         return sorted(flat2, key=attrgetter('when'), reverse=reverse_boolean)
     def __unicode__(self):
-        return self.street_address
+        return self.name + ' - ' + self.street_address
     def account_for_admin(self):
         return '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_account_change',args=(self.account.id,)), self.account.name)
     account_for_admin.allow_tags = True

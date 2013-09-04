@@ -504,7 +504,10 @@ class Meter(models.Model):
                                     
                             #-----baseline values come from MeterModels
                                 if 'Billing Demand (base)' not in newbd.columns: newbd['Billing Demand (base)'] = NaN #ignore for now
-                                if 'Peak Demand (base)' not in newbd.columns: newbd['Peak Demand (base)'] = NaN #BaselineModel(CDD, HDD)
+                                if 'Peak Demand (base)' not in newbd.columns:
+                                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get('BILLx').peak_demand_model.current_model_predict_df(df=newbd)
+                                    newbd['Peak Demand (base)'] = predicted
+                                    newbd['Peak Demand (base delta)'] = predicted - lower_bound
                                 if 'Consumption (base)' not in newbd.columns:
                                     predicted,stderror,lower_bound,upper_bound = self.monther_set.get('BILLx').consumption_model.current_model_predict_df(df=newbd)
                                     newbd['Consumption (base)'] = predicted
@@ -583,13 +586,21 @@ class Meter(models.Model):
                                 
                             #----costs are based on Peak Demand and Consumption with RateSchedule
                                 if 'Cost (base)' not in newbd.columns:
-                                    newbd['Cost (base)'] = NaN #RateSchedule(Demand (base), Consumption (base))
+                                    newbd.rename(columns={'Consumption (base)': 'Consumption',
+                                                          'Peak Demand (base)': 'Peak Demand'},inplace=True)
+                                    newbd['Cost (base)'] = self.rate_schedule.get_cost_df(df=newbd)['Calculated Cost']
+                                    newbd.rename(columns={'Consumption': 'Consumption (base)',
+                                                          'Peak Demand': 'Peak Demand (base)'},inplace=True)
                                 if 'Cost (exp)' not in newbd.columns:
-                                    newbd['Cost (exp)'] = NaN #RateSchedule(Demand (exp), Consumption (exp))
+                                    newbd.rename(columns={'Consumption (exp)': 'Consumption',
+                                                          'Peak Demand (exp)': 'Peak Demand'},inplace=True)
+                                    newbd['Cost (exp)'] = self.rate_schedule.get_cost_df(df=newbd)['Calculated Cost']
+                                    newbd.rename(columns={'Consumption': 'Consumption (exp)',
+                                                          'Peak Demand': 'Peak Demand (exp)'},inplace=True)
                                 if 'Cost (esave)' not in newbd.columns:
-                                    newbd['Cost (esave)'] = NaN #Cost (base) - Cost (exp)
+                                    newbd['Cost (esave)'] = newbd['Cost (base)'] - newbd['Cost (exp)']
                                 if 'Cost (asave)' not in newbd.columns:
-                                    newbd['Cost (asave)'] = NaN #Cost (base) - Cost (act)
+                                    newbd['Cost (asave)'] = newbd['Cost (base)'] - newbd['Cost (act)']
                                 
                                 if 'CDD_peak_demand' not in newbd.columns: newbd['CDD_peak_demand'] = NaN
                                 if 'HDD_peak_demand' not in newbd.columns: newbd['HDD_peak_demand'] = NaN

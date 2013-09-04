@@ -92,24 +92,6 @@ class Account(models.Model):
                                        ('Inactive', 'Inactive')])
     monthly_payment = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
                                           help_text='total monthly payment due')
-    last_invoice_date = models.DateTimeField(null=True, blank=True,
-                                             help_text='date last invoice sent')
-    last_paid_date = models.DateTimeField(null=True, blank=True,
-                                          help_text='date last payment received')
-    next_invoice_date = models.DateTimeField(null=True, blank=True,
-                                             help_text='date next invoice scheduled to be sent')
-    bill_addressee = models.CharField(blank=True, max_length=200,
-                                      help_text='person to whom invoice is sent/addressed')
-    bill_email_address = models.EmailField(blank=True, max_length=75,
-                                           help_text='email address where invoice should be sent')
-    bill_street_address = models.CharField(blank=True, max_length=200)
-    bill_city = models.CharField(blank=True, max_length=200)
-    bill_state = models.CharField(blank=True, max_length=2)
-    bill_zip_code = models.CharField(blank=True, max_length=10)
-    bill_to_email = models.BooleanField(blank=True, default=True,
-                        help_text='send invoice as email attachment?')
-    bill_to_location = models.BooleanField(blank=True, default=True,
-                        help_text='send hard copy invoice to mailing address?')
     
     #functions
     def get_all_alerts(self, reverse_boolean):

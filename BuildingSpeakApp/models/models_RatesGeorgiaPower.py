@@ -214,17 +214,21 @@ class GAPowerPandL(RateSchedule):
     #functions expected by superclass RateSchedule
     def __unicode__(self):
         return self.name
-    def get_cost_df(self, df):
-        """function(df)
+    def get_cost_df(self, df, billx):
+        """function(df, billx)
         
         Given dataframe with monthly
         index and Peak Demand and
-        Consumption, returns
-        dataframe with Calculated
-        Cost and Billing Demand
-        columns."""
+        Consumption, along with a
+        BILLx Monther whose data
+        will be retrieved for use
+        in calculating billing
+        demand from historical data,
+        returns dataframe with
+        Calculated Cost and Billing
+        Demand columns."""
         try:
-            df = self.get_billing_demand_df(df=df)
+            df = self.get_billing_demand_df(df=df, billx=billx)
             if 'Calculated Billing Demand' not in df.columns: raise TypeError
         except:
             m = Message(when=timezone.now(),
@@ -358,14 +362,14 @@ class GAPowerPandL(RateSchedule):
         return df
     def is_eligible(self, df):
         return self.pass_limitation_of_service(df=df)
-    def get_billing_demand_df(self, df):
-        """function(df)
+    def get_billing_demand_df(self, df): #######need to make this function keep df and pull up to 11 months of existing data in BILLx monther to use for billing demand calc
+        """function(df, billx)
         
         Given dataframe with
         monthly index, Peak
         Demand, and Consumption,
-        returns dataframe with
-        new column of Calculated
+        returns dataframe with new
+        column of Calculated
         Billing Demand."""
         try:
             summer_months = self.get_summer_months()
