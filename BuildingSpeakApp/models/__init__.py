@@ -20,6 +20,8 @@ from models_monthlies import BillingCycler, BillingCycle, Monther, Monthling
 from models_MeterModels import MeterConsumptionModel, MeterPeakDemandModel
 from models_RateSchedules import KnowsChild, RateSchedule, RateScheduleRider
 from models_RatesGeorgiaPower import GAPowerPandL, GAPowerRider
+from models_RatesInfiniteEnergy import InfiniteEnergyGAGas
+from models_RatesCityofAtlantaDWM import CityOfATLWWW
 from models_Reader_ing import Reader, Reading
 from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule
