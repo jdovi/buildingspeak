@@ -17,11 +17,10 @@ function addChart(arr) {
     <h2><a href="/{{ account.id }}/buildings/{{ bldg.id }}" title="{{ bldg.name }}">{{ bldg.name }}</a></h2>
     <div class="row">
       <div class="sixcol-two space-details">
-        {{ bldg.city }}
         {% if bldg.street_address %}
           <div class="form-item">
-            <label>Address:</label>
-            <span>{{ bldg.street_address }}</span> <!-- TODO: include city, state and zip here too -->
+            <label>Location:</label>
+            <span>{{ bldg.street_address }}, {{ bldg.city }}, {{ bldg.state }}</span> <!-- TODO: include city, state and zip here too -->
           </div>
         {% endif %}
         {% if bldg.building_type %}

@@ -48,8 +48,7 @@ class AccountAdmin(admin.ModelAdmin):
                     'connected_meters_for_admin', 'connected_buildings_for_admin',
                     'connected_equipments_for_admin')
     search_fields = ['name', 'id', 'zip_code', 'account_type', 'status', 'monthly_payment']
-    list_filter = ['status', 'launch_date', 'last_invoice_date', 'last_paid_date',
-                   'next_invoice_date', 'zip_code']
+    list_filter = ['status', 'launch_date', 'zip_code']
     #date_heirarchy = 'launch_date'
     
 class BuildingAdmin(admin.ModelAdmin):

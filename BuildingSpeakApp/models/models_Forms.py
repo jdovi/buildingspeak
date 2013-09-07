@@ -28,3 +28,9 @@ class UserSettingsForm(forms.Form):
     last_name = forms.CharField(required=False, max_length=30)
     organization = forms.CharField(required=False, max_length=30)
     image_file = forms.FileField(required=False)
+    
+class MeterUploadForm(forms.Form):
+    """Form to upload Meter bill
+    data from Excel file."""
+    bill_data_file = forms.FileField(required=False)
+    

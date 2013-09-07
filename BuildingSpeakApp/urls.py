@@ -18,4 +18,5 @@ urlpatterns = patterns('',
         name='meter_detail'),
     url(r'^(?P<account_id>\d+)/equipments/(?P<equipment_id>\d+)$', views.equipment_detail,
         name='equipment_detail'),
+    url(r'^management/$', views.management, name='management'),
 )

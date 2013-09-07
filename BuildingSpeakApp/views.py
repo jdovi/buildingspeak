@@ -4,14 +4,20 @@ from django.http import HttpResponseRedirect, Http404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
-from BuildingSpeakApp.models import Account, Building, Meter, Equipment
-from BuildingSpeakApp.models import UserSettingsForm, Message
+from BuildingSpeakApp.models import Account, Building, Meter, Equipment, WeatherStation
+from BuildingSpeakApp.models import UserSettingsForm, MeterUploadForm, Message
 import json
 from decimal import Decimal
 from django.forms.models import modelform_factory
 from django.contrib.auth.models import User
+from rq import Queue
+from worker import conn
 
 class SuccessMessage(object):
+    """Used for generating user
+    feedback messages that do
+    not need to be stored as
+    messages in the database."""
     id = 0
     subject = 'Success!'
     comment = ''
@@ -39,7 +45,6 @@ def user_account(request):
                     latest_image_file = current_user.userprofile.image_file
             else:
                 latest_image_file = form.cleaned_data['image_file']
-            print 'post: latest_image_file is None: ' + str(latest_image_file is None)
             current_user.__setattr__('username', form.cleaned_data['username'])
             current_user.__setattr__('email', form.cleaned_data['email'])
             current_user.__setattr__('first_name', form.cleaned_data['first_name'])
@@ -52,14 +57,11 @@ def user_account(request):
             m = SuccessMessage()
             m.comment = 'User settings have been updated.'
             reloading = True
-            print 'post end'
     elif request.method == 'GET':
-        print 'image_file is None: ' + str(current_user.userprofile.image_file is None)
         if current_user.userprofile.image_file is None:
             latest_image_file = None
         else:
             latest_image_file = current_user.userprofile.image_file
-        print latest_image_file
         form = UserSettingsForm({'username': current_user.username,
                                  'email': current_user.email,
                                  'first_name': current_user.first_name,
@@ -76,6 +78,7 @@ def user_account(request):
 #    except:
 #        return HttpResponseRedirect('/application-error')
         
+@login_required
 def update_successful(request):
     context  = {'user': request.user}
     return render(request, 'buildingspeakapp/update_successful.html', context)
@@ -84,6 +87,7 @@ def application_error(request):
     context  = {'user': request.user}
     return render(request, 'buildingspeakapp/application_error.html', context)
 
+@login_required
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
     x = []
@@ -110,6 +114,7 @@ def account_detail(request, account_id):
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)
 
+@login_required
 def building_detail(request, account_id, building_id):
     account = get_object_or_404(Account, pk=account_id)
     building = get_object_or_404(Building, pk=building_id)
@@ -136,6 +141,7 @@ def building_detail(request, account_id, building_id):
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)
 
+@login_required
 def meter_detail(request, account_id, meter_id):
     account = get_object_or_404(Account, pk=account_id)
     meter = get_object_or_404(Meter, pk=meter_id)
@@ -153,7 +159,36 @@ def meter_detail(request, account_id, meter_id):
     if len(consumption_by_month) == 1: consumption_by_month = False
     demand_by_month = meter.get_dataframe_as_table(['Month','Peak Demand (exp)','Peak Demand (act)'])
     if len(demand_by_month) == 1: demand_by_month = False
+
+    if request.method == 'POST': # If the form has been submitted...
+        form = MeterUploadForm(request.POST, request.FILES) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            # Process the data in form.cleaned_data
+            if form.cleaned_data['bill_data_file'] is None:
+                if meter.bill_data_file is None:
+                    latest_bill_data_file = None
+                else:
+                    latest_bill_data_file = meter.bill_data_file
+            else:
+                latest_bill_data_file = form.cleaned_data['bill_data_file']
+            meter.__setattr__('bill_data_file', latest_bill_data_file)
+            form.initial['bill_data_file'] = latest_bill_data_file
+            meter.save()
+            q = Queue(connection=conn)
+            result = q.enqueue(meter.upload_bill_data)            
+            m = SuccessMessage()
+            m.comment = 'Bill data has been uploaded.'
+            reloading = True
+    elif request.method == 'GET':
+        if meter.bill_data_file is None:
+            latest_bill_data_file = None
+        else:
+            latest_bill_data_file = meter.bill_data_file
+        form = MeterUploadForm({}, {'bill_data_file': latest_bill_data_file})
+        reloading = False
     context = {
+        'user':                 request.user,
+        'form':                 form,
         'account':              account,
         'accounts':             request.user.account_set.order_by('id'),
         'meter':                meter,
@@ -170,8 +205,10 @@ def meter_detail(request, account_id, meter_id):
         template_name = 'buildingspeakapp/meter_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
+    if reloading: context['alerts'] = [m]
     return render(request, template_name, context)
 
+@login_required
 def equipment_detail(request, account_id, equipment_id):
     account = get_object_or_404(Account, pk=account_id)
     equipment = get_object_or_404(Equipment, pk=equipment_id)
@@ -200,3 +237,13 @@ def equipment_detail(request, account_id, equipment_id):
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)
 
+@login_required
+def management(request):
+    context = {
+        'weather_stations':      WeatherStation.objects.all(),
+    }
+    if request.user in User.objects.filter(is_active = True).filter(is_staff = True).filter(is_superuser = True):
+        template_name = 'buildingspeakapp/management.html'
+    else:
+        template_name = 'buildingspeakapp/access_denied.html'
+    return render(request, template_name, context)

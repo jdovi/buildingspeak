@@ -1,0 +1,28 @@
+{% extends "app_base.html" %}
+
+{% block body %}
+
+<form enctype="multipart/form-data" class="entry" action="/management/" method="post">{% csrf_token %}
+	{{ form.non_field_errors }}
+	<div class="form-item">
+        <li class="menu-item weatherstation-selector">
+          <select>
+            <option value="">Select a weather station...</option>
+            {% for ws in weather_stations %}
+              <option value="{{ ws.id }}" >{{ ws.name }}</option>
+            {% endfor %}
+          </select>
+        </li>
+        <script>
+          $(function() {
+            var obj = $('.weatherstation-selector select');
+            obj.bind('change', function() {
+              var val = obj.val();
+            });
+          });
+        </script>
+	</div>
+	<input type="submit" value="Update" />
+</form>
+
+{% endblock %}
