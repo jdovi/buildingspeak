@@ -240,7 +240,8 @@ def equipment_detail(request, account_id, equipment_id):
 @login_required
 def management(request):
     context = {
-        'weather_stations':      WeatherStation.objects.all(),
+        'weather_stations':     WeatherStation.objects.all(),
+        'accounts':             request.user.account_set.order_by('id'),
     }
     if request.user in User.objects.filter(is_active = True).filter(is_staff = True).filter(is_superuser = True):
         template_name = 'buildingspeakapp/management.html'
