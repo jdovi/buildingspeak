@@ -13,7 +13,7 @@ from models_Account import Account
 from models_Building import Building, BuildingMeterApportionment
 from models_EfficiencyMeasure import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from models_Equipment import Equipment
-from models_Forms import UserSettingsForm, MeterUploadForm
+from models_Forms import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm
 from models_Space import Space, SpaceMeterApportionment
 from models_Meter import Meter
 from models_monthlies import BillingCycler, BillingCycle, Monther, Monthling
@@ -30,4 +30,5 @@ from models_UserProfile import UserProfile
 
 from models_ForecastIO import Forecastio
 from models_WeatherStation import WeatherStation, WeatherDataPoint
+from models_Forms import WeatherDataUploadForm
 from models_dependent_functions import update_readers, ManagementAction

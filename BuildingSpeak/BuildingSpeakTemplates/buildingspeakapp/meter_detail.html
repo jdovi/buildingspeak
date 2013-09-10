@@ -566,8 +566,8 @@ function addChart(arr) {
         {% endfor %}
       </table>
     </div> <!-- .tab-details -->
-    <div class="tab tab-overview">
-		<form enctype="multipart/form-data" class="entry" action="/{{account.id}}/meters/{{meter.id}}" method="post">{% csrf_token %}
+    <div class="tab tab-upload">
+		<form enctype="multipart/form-data" class="entry" action="" method="post">{% csrf_token %}
 			{{ form.non_field_errors }}
 			<div class="form-item">
 				{{ form.bill_data_file.errors }}
@@ -576,7 +576,7 @@ function addChart(arr) {
 			</div>
 			<input type="submit" value="Upload Bill Data" />
 		</form>
-    </div> <!-- .tab-details -->
+    </div> <!-- .tab-upload -->
   </div>
 </section><!-- .entry -->
 

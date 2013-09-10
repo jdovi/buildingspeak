@@ -111,10 +111,18 @@ class BillingCycler(models.Model):
                 self.billingcycle_set.all().delete()
                 for i in range(0,len(df)):
                     per_date = UTC.localize(df.index[i].to_timestamp() + timedelta(days=10,hours=11,minutes=11,seconds=11)) #add days/hours/mins/secs to avoid crossing month boundary when adjusting timezones
+                    if df['Start Date'][i].tzinfo is None:
+                        start_i = UTC.localize(df['Start Date'][i])
+                    else:
+                        start_i = df['Start Date'][i]
+                    if df['End Date'][i].tzinfo is None:
+                        end_i = UTC.localize(df['End Date'][i])
+                    else:
+                        end_i = df['End Date'][i]
                     bc = BillingCycle(
                             period_date = per_date,
-                            start_date = UTC.localize(df['Start Date'][i] + timedelta(hours=11,minutes=11,seconds=11)), #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
-                            end_date = UTC.localize(df['End Date'][i] + timedelta(hours=11,minutes=11,seconds=11)), #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
+                            start_date = start_i + timedelta(hours=11,minutes=11,seconds=11), #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
+                            end_date = end_i + timedelta(hours=11,minutes=11,seconds=11), #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
                             billingcycler = self)
                     bc.save()
                 m = Message(when=timezone.now(),

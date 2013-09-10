@@ -1,46 +1,21 @@
 {% extends "app_base.html" %}
 
-  <header id="header">
-    <div id="fixed-header">
-      <div class="col-full">
-        <hgroup>
-          <span class="nav-toggle"><a href="#navigation"><span>Navigation</span></a></span>
-		  {% if account.image_file %}
-            <h3 class="site-description">
-				<img src="{{ account.image_file.url }}" alt="organization image" width="60" height="50"/>
-            </h3>
-          {% endif %}
-		  {% if account.name %}
-		  <h1 class="site-title" ><a href="/{{ account.id }}">{{ account.name }}</a></h1>
-		  <br>
-          <h2 class="site-description">{{ account.city }}, {{ account.state }}</h2>
-          {% else %}
-			  {% if user.username %}
-			  <h1 class="site-title" ><a href="/user-account">User Settings</a></h1>
-			  {% endif %}
-		  {% endif %}
-        </hgroup>
-
-        <nav id="navigation" role="navigation">
-        </nav><!-- #navigation -->
-      </div><!-- .col-full -->
-    </div><!-- /#fixed-header -->
-  </header><!-- /#header -->
-
 {% block body %}
 
 <form enctype="multipart/form-data" class="entry" action="/management/" method="post">{% csrf_token %}
 	{{ form.non_field_errors }}
 	<div class="form-item">
-        <li class="menu-item weatherstation-selector">
+        
+		<div class="menu-item weatherstation-selector">
           <select>
             <option value="">Select a weather station...</option>
             {% for ws in weather_stations %}
               <option value="{{ ws.id }}" >{{ ws.name }}</option>
             {% endfor %}
           </select>
-        </li>
-        <script>
+        </div>
+        
+		<script>
           $(function() {
             var obj = $('.weatherstation-selector select');
             obj.bind('change', function() {

@@ -5,15 +5,15 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
 from BuildingSpeakApp.models import Account, Building, Meter, Equipment, WeatherStation
-from BuildingSpeakApp.models import UserSettingsForm, MeterUploadForm, Message
+from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm, Message
 import json
 from decimal import Decimal
 from django.forms.models import modelform_factory
 from django.contrib.auth.models import User
-from rq import Queue
-from worker import conn
+#from rq import Queue
+#from worker import conn
 
-class SuccessMessage(object):
+class ResultsMessage(object):
     """Used for generating user
     feedback messages that do
     not need to be stored as
@@ -54,7 +54,7 @@ def user_account(request):
             form.initial['image_file'] = latest_image_file
             current_user.save()
             current_user.userprofile.save()
-            m = SuccessMessage()
+            m = ResultsMessage()
             m.comment = 'User settings have been updated.'
             reloading = True
     elif request.method == 'GET':
@@ -161,7 +161,7 @@ def meter_detail(request, account_id, meter_id):
     if len(demand_by_month) == 1: demand_by_month = False
 
     if request.method == 'POST': # If the form has been submitted...
-        form = MeterUploadForm(request.POST, request.FILES) # A form bound to the POST data
+        form = MeterDataUploadForm(request.POST, request.FILES) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
             if form.cleaned_data['bill_data_file'] is None:
@@ -174,17 +174,23 @@ def meter_detail(request, account_id, meter_id):
             meter.__setattr__('bill_data_file', latest_bill_data_file)
             form.initial['bill_data_file'] = latest_bill_data_file
             meter.save()
-            q = Queue(connection=conn)
-            result = q.enqueue(meter.upload_bill_data)            
-            m = SuccessMessage()
-            m.comment = 'Bill data has been uploaded.'
+            try:
+#               q = Queue(connection=conn)
+#               result = q.enqueue(meter.upload_bill_data)
+                meter.update_bill_data()
+                m = ResultsMessage()
+                m.comment = 'Bill data has been uploaded.'
+            except:
+                m = ResultsMessage()
+                m.subject = 'Error!'
+                m.comment = 'Bill data upload failed.'
             reloading = True
     elif request.method == 'GET':
         if meter.bill_data_file is None:
             latest_bill_data_file = None
         else:
             latest_bill_data_file = meter.bill_data_file
-        form = MeterUploadForm({}, {'bill_data_file': latest_bill_data_file})
+        form = MeterDataUploadForm({}, {'bill_data_file': latest_bill_data_file})
         reloading = False
     context = {
         'user':                 request.user,
