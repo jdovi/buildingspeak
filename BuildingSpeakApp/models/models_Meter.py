@@ -290,7 +290,7 @@ class Meter(models.Model):
                                 self.messages.add(m)
                                 print m
         return r
-    def update_bill_data(self, file_location=0):
+    def upload_bill_data(self, file_location=0):
         """Input:
             [file_location]
                 (default: MeterInstance.bill_data_url)
@@ -313,7 +313,163 @@ class Meter(models.Model):
             m = Message(when=timezone.now(),
                         message_type='Code Error',
                         subject='File not found.',
-                        comment='Meter %s failed on update_bill_data function when attempting to read Bill Data File.' % self.id)
+                        comment='Meter %s failed on upload_bill_data function when attempting to read Bill Data File.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+            success = False
+        else:
+            try:
+                if (('Start Date' in readbd.columns) and ('End Date' in readbd.columns) and
+                    ('Billing Demand' in readbd.columns) and ('Peak Demand' in readbd.columns) and
+                    ('Consumption' in readbd.columns) and ('Cost' in readbd.columns) and
+                    (len(readbd)>0) ):
+                    readbd['Start Date'] = readbd['Start Date'].apply(pd.to_datetime) + timedelta(hours=11,minutes=11,seconds=11) #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
+                    readbd['End Date'] = readbd['End Date'].apply(pd.to_datetime) + timedelta(hours=11,minutes=11,seconds=11) #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
+                    readbd['Start Date'] = readbd['Start Date'].apply(UTC.localize)
+                    readbd['End Date'] = readbd['End Date'].apply(UTC.localize)
+                    readbd['Billing Demand'] = readbd['Billing Demand'].apply(Decimal)
+                    readbd['Peak Demand'] = readbd['Peak Demand'].apply(Decimal)
+                    readbd['Consumption'] = readbd['Consumption'].apply(Decimal)
+                    readbd['Cost'] = readbd['Cost'].apply(Decimal)
+                    if 'Overwrite' not in readbd.columns:
+                        readbd['Overwrite'] = 0
+                    else:
+                        readbd['Overwrite'] = readbd['Overwrite'].apply(int)
+            except:
+                m = Message(when=timezone.now(),
+                            message_type='Code Error',
+                            subject='Model update failed.',
+                            comment='Meter %s upload_bill_data function failed to pre-process incoming data, function aborted.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+                success = False
+            else:
+                try:
+                    t = [self.assign_period_datetime(dates=[readbd['Start Date'][i],
+                                                            readbd['End Date'][i]]) for i in range(0,len(readbd))]
+                    if None in t: raise TypeError
+                except:
+                    m = Message(when=timezone.now(),
+                                message_type='Code Error',
+                                subject='Model update failed.',
+                                comment='Meter %s upload_bill_data function failed at assign_period_datetime, function aborted.' % self.id)
+                    m.save()
+                    self.messages.add(m)
+                    print m
+                    success = False
+                else:
+                    try:
+                        readbd.index = pd.PeriodIndex(t, freq='M')
+                        readbd = readbd.sort_index()
+                        
+                        #check if incoming data is self consistent in the Start(i)=End(i-1)+1
+                        contiguous_check = (readbd['End Date'].shift(1) + timedelta(days=1)) == readbd['Start Date']
+                    except:
+                        m = Message(when=timezone.now(),
+                                    message_type='Code Error',
+                                    subject='Model update failed.',
+                                    comment='Meter %s, upload_bill_data unable to check contiguity, function aborted.' % self.id)
+                        m.save()
+                        self.messages.add(m)
+                        print m
+                        success = False
+                    else:
+                        if False in contiguous_check[1:].values: #1st is always False due to shift, but if other False then abort
+                            m = Message(when=timezone.now(),
+                                        message_type='Code Error',
+                                        subject='Function received bad arguments.',
+                                        comment='Meter %s, upload_bill_data given non-contiguous data, function aborted.' % self.id)
+                            m.save()
+                            self.messages.add(m)
+                            print m
+                            success = False
+                        else:
+                            try:
+                                readbd['Exists'] = readbd.index
+                                readbd['Exists'] = readbd['Exists'].apply(lambda lamvar: lamvar in storedbd.index)
+                                
+                                #ignore data that Exists but not(Overwrite)
+                                #load data that not(Exists)
+                                readbd_a = readbd[readbd['Exists']==Decimal(0)]
+                                if len(readbd_a)>0:
+                                    success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe()
+                                    if not success_a: raise TypeError
+                            except:
+                                m = Message(when=timezone.now(),
+                                            message_type='Code Error',
+                                            subject='Model update failed.',
+                                            comment='Meter %s upload_bill_data failed to load new data, function aborted.' % self.id)
+                                m.save()
+                                self.messages.add(m)
+                                print m
+                                success_a = False
+                            else:
+                                try:
+                                    #retrieve and overwrite data that Exists and Overwrite
+                                    readbd_b = readbd[(readbd['Exists']==Decimal(1)) & (readbd['Overwrite']==Decimal(1))]
+                                    if len(readbd_b)>0:
+                                        for i in range(0,len(readbd_b)):
+                                            try:
+                                                month_i = None #setting here to avoid error in Except block
+                                                month_i = readbd_b.index[i]
+                                                per_date = UTC.localize(month_i.to_timestamp() + timedelta(days=10,hours=11,minutes=11,seconds=11))
+                                                mlg = Monthling.objects.get(when=per_date)
+                                                if mlg is None: raise TypeError
+                                                mlg.__setattr__('start_date',readbd_b['Start Date'][i])
+                                                mlg.__setattr__('end_date',readbd_b['End Date'][i])
+                                                mlg.__setattr__('act_billing_demand',readbd_b['Billing Demand'][i])
+                                                mlg.__setattr__('act_peak_demand',readbd_b['Peak Demand'][i])
+                                                mlg.__setattr__('act_consumption',readbd_b['Consumption'][i])
+                                                mlg.__setattr__('act_cost',readbd_b['Cost'][i])
+                                                mlg.flush_calculated_data()
+                                                mlg.save()
+                                                month_i = None #resetting to avoid carrying over incorrectly
+                                                success_b = True #set True if at least one mlg is loaded
+                                            except:
+                                                m = Message(when=timezone.now(),
+                                                            message_type='Code Error',
+                                                            subject='Model update failed.',
+                                                            comment='Meter %s upload_bill_data failed to overwrite existing month %s, function aborted.' % (self.id, str(month_i)))
+                                                m.save()
+                                                self.messages.add(m)
+                                                print m
+                                except:
+                                    m = Message(when=timezone.now(),
+                                                message_type='Code Error',
+                                                subject='Model update failed.',
+                                                comment='Meter %s upload_bill_data failed to overwrite existing data, function aborted.' % self.id)
+                                    m.save()
+                                    self.messages.add(m)
+                                    print m
+                                    success_b = False
+        return max(success, success_a, success_b)
+
+    def process_bill_data(self, file_location=0):##########################working here
+        """Input:
+            [file_location]
+                (default: MeterInstance.bill_data_url)
+        
+        Reads Bill Data File and loads into
+        Meter's BILLx Monther, respecting any
+        pre-existing data unless Overwrite
+        column in Bill Data File indicates
+        otherwise."""
+        if not(file_location): file_location = self.bill_data_file.url
+        
+        try:
+            readbd = pd.read_csv(file_location,
+                                 skiprows=0,
+                                 usecols=['Overwrite', 'Start Date', 'End Date', 'Billing Demand',
+                                          'Peak Demand', 'Consumption', 'Cost'],
+                                 dtype={'Billing Demand': np.float, 'Peak Demand': np.float,
+                                        'Consumption': np.float, 'Cost': np.float})
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='File not found.',
+                        comment='Meter %s failed on process_bill_data function when attempting to read Bill Data File.' % self.id)
             m.save()
             self.messages.add(m)
             print m
@@ -337,7 +493,7 @@ class Meter(models.Model):
                         m = Message(when=timezone.now(),
                                     message_type='Code Error',
                                     subject='Model update failed.',
-                                    comment='Meter %s failed on update_bill_data function at assign_period_datetime function, Bill Data File does not have appropriate dates.' % self.id)
+                                    comment='Meter %s failed on process_bill_data function at assign_period_datetime function, Bill Data File does not have appropriate dates.' % self.id)
                         m.save()
                         self.messages.add(m)
                         print m
@@ -370,7 +526,7 @@ class Meter(models.Model):
                                 m = Message(when=timezone.now(),
                                         message_type='Code Warning',
                                         subject='No new data to load.',
-                                        comment='Meter %s found no new Billing Cycles during update_bill_data function.' % self.id)
+                                        comment='Meter %s found no new Billing Cycles during process_bill_data function.' % self.id)
                                 m.save()
                                 self.messages.add(m)
                                 print m
@@ -381,7 +537,7 @@ class Meter(models.Model):
                                 m = Message(when=timezone.now(),
                                         message_type='Code Warning',
                                         subject='No new data to load.',
-                                        comment='Meter %s found no new Billing Cycles during update_bill_data function.' % self.id)
+                                        comment='Meter %s found no new Billing Cycles during process_bill_data function.' % self.id)
                                 m.save()
                                 self.messages.add(m)
                                 print m
@@ -413,7 +569,7 @@ class Meter(models.Model):
                                 m = Message(when=timezone.now(),
                                         message_type='Code Warning',
                                         subject='No new data to load.',
-                                        comment='Meter %s found no new Bill Data during update_bill_data function.' % self.id)
+                                        comment='Meter %s found no new Bill Data during process_bill_data function.' % self.id)
                                 m.save()
                                 self.messages.add(m)
                                 print m
@@ -424,7 +580,7 @@ class Meter(models.Model):
                                 m = Message(when=timezone.now(),
                                         message_type='Code Warning',
                                         subject='No new data to load.',
-                                        comment='Meter %s found no new Bill Data during update_bill_data function.' % self.id)
+                                        comment='Meter %s found no new Bill Data during process_bill_data function.' % self.id)
                                 m.save()
                                 self.messages.add(m)
                                 print m
@@ -608,29 +764,28 @@ class Meter(models.Model):
                                     if 'CDD_consumption' not in newbd.columns: newbd['CDD_consumption'] = NaN
                                     if 'HDD_consumption' not in newbd.columns: newbd['HDD_consumption'] = NaN
     
-                                    if success is not None: #only check success, if failed, convert function will report error
-                                        success = self.monther_set.get(name='BILLx').load_monther_period_dataframe(newbd)
-                                        if success:
-                                            m = Message(when=timezone.now(),
-                                                    message_type='Code Success',
-                                                    subject='Model updated.',
-                                                    comment='Meter %s updated its BILLx Monther.' % self.id)
-                                            m.save()
-                                            self.messages.add(m)
-                                            print m
-                                        else:
-                                            m = Message(when=timezone.now(),
-                                                    message_type='Code Error',
-                                                    subject='Model update failed.',
-                                                    comment='Meter %s was unable to update its BILLx Monther.' % self.id)
-                                            m.save()
-                                            self.messages.add(m)
-                                            print m
+                                    success = self.monther_set.get(name='BILLx').load_monther_period_dataframe(newbd)
+                                    if success:
+                                        m = Message(when=timezone.now(),
+                                                message_type='Code Success',
+                                                subject='Model updated.',
+                                                comment='Meter %s updated its BILLx Monther.' % self.id)
+                                        m.save()
+                                        self.messages.add(m)
+                                        print m
+                                    else:
+                                        m = Message(when=timezone.now(),
+                                                message_type='Code Error',
+                                                subject='Model update failed.',
+                                                comment='Meter %s was unable to update its BILLx Monther.' % self.id)
+                                        m.save()
+                                        self.messages.add(m)
+                                        print m
                 else:
                     m = Message(when=timezone.now(),
                                 message_type='Code Error',
                                 subject='Expected contents not found.',
-                                comment='Meter %s failed on update_bill_data function, Bill Data File does not have appropriate data.' % self.id)
+                                comment='Meter %s failed on process_bill_data function, Bill Data File does not have appropriate data.' % self.id)
                     m.save()
                     self.messages.add(m)
                     print m
@@ -638,7 +793,7 @@ class Meter(models.Model):
                 m = Message(when=timezone.now(),
                             message_type='Code Error',
                             subject='Unable to load data.',
-                            comment='Meter %s failed at update_bill_data, function aborted.' % self.id)
+                            comment='Meter %s failed at process_bill_data, function aborted.' % self.id)
                 m.save()
                 self.messages.add(m)
                 print m

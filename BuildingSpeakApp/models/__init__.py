@@ -30,5 +30,4 @@ from models_UserProfile import UserProfile
 
 from models_ForecastIO import Forecastio
 from models_WeatherStation import WeatherStation, WeatherDataPoint
-from models_Forms import WeatherDataUploadForm
 from models_dependent_functions import update_readers, ManagementAction
