@@ -16,7 +16,7 @@ from models_Equipment import Equipment
 from models_Forms import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm
 from models_Space import Space, SpaceMeterApportionment
 from models_Meter import Meter
-from models_monthlies import BillingCycler, BillingCycle, Monther, Monthling
+from models_monthlies import Monther, Monthling
 from models_MeterModels import MeterConsumptionModel, MeterPeakDemandModel
 from models_RateSchedules import KnowsChild, RateSchedule, RateScheduleRider
 from models_RatesGeorgiaPower import GAPowerPandL, GAPowerRider

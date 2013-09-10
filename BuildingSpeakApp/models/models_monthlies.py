@@ -19,157 +19,6 @@ from django.contrib.auth.models import User
 from models_functions import *
 from models_Message import Message
 
-#class BillingCycler(models.Model):
-#    """No attributes.
-#    
-#    Stores BillingCycles.  Must attach to
-#    Meter.
-#    
-#    Functions:
-#        get_billing_cycler_period_dataframe
-#        load_billing_cycler_period_dataframe"""
-#    #relationships
-#    meter = models.ForeignKey('Meter')
-#    messages = models.ManyToManyField('Message')
-#    #functions
-#    def meter_for_admin(self):
-#        return '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_meter_change',args=(self.meter.id,)), self.meter.name)
-#    meter_for_admin.allow_tags = True
-#    meter_for_admin.short_description = 'Meter'
-#    def billing_cycles_for_admin(self):
-#        return '<br>'.join(['<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_billingcycle_change',args=(bcyc.id,)), bcyc.period_date) for bcyc in self.billingcycle_set.order_by('when')])
-#    billing_cycles_for_admin.allow_tags = True
-#    billing_cycles_for_admin.short_description = 'Billing Cycles'
-#    def get_billing_cycler_period_dataframe(self, first_month='', last_month=''):
-#        """Optional inputs:
-#              first_month
-#              last_month
-#                  as 'mm/yyyy'
-#        
-#        Returns BillingCycler's dataframe."""
-#        
-#        if self.billingcycle_set.count() == 0:
-#            m = Message(when=timezone.now(),
-#                                      message_type='Code Warning',
-#                                      subject='Nothing to return.',
-#                                      comment='BillingCycler %s, get_billing_cycler_period_dataframe called when no BillingCycles present.' % self.id)
-#            m.save()
-#            self.messages.add(m)
-#            print m
-#            df = None
-#        else:
-#            pdates = pd.Series([x.period_date for x in self.billingcycle_set.order_by('period_date')])
-#            sdates = pd.Series([x.start_date for x in self.billingcycle_set.order_by('period_date')],
-#                                index = pdates)
-#            edates = pd.Series([x.end_date for x in self.billingcycle_set.order_by('period_date')],
-#                                index = pdates)
-#            df = pd.DataFrame({'Start Date' : sdates,
-#                               'End Date' : edates})
-#            df.index = df.index.to_period(freq='M')
-#            df = df.sort_index()
-#            
-#            dfa = df.index[0]
-#            dfz = df.index[-1]
-#            if first_month == '': first_month = dfa
-#            if last_month == '': last_month = dfz
-#            if (pd.Period(first_month, freq='M') - dfa < 0) or (pd.Period(last_month, freq='M') - dfz > 0):
-#                m = Message(when=timezone.now(),
-#                                          message_type='Code Warning',
-#                                          subject='Out of range.',
-#                                          comment='BillingCycler %s get_billing_cycler_period_dataframe given date request outside available data date range.' % self.id)
-#                m.save()
-#                self.messages.add(m)
-#                print m
-#                df = None
-#            else:
-#                df = df[first_month:last_month]
-#        return df
-#    
-#    def load_billing_cycler_period_dataframe(self, df):
-#        """Inputs: 
-#            dataframe (in BillingCycler format)
-#            
-#        Stores the provided dataframe in
-#        itself by adding BillingCycles.
-#        Each new Start Date must be +1
-#        day from the previous End Date."""
-#        
-#        if (('Start Date' in df.columns) and (len(df)>0) and
-#            ('End Date' in df.columns)   and (type(df.index)==pd.tseries.period.PeriodIndex)):
-#            df = df.sort_index()
-#            contiguous_check = (df['End Date'].shift(1) + timedelta(days=1)) == df['Start Date'] #start check on month 2
-#            if False in contiguous_check[1:].values: #1st is always False due to shift, but if other False then abort
-#                m = Message(when=timezone.now(),
-#                            message_type='Code Error',
-#                            subject='Function received bad arguments.',
-#                            comment='BillingCycler %s, load_billing_cycler_period_dataframe function given noncontiguous billing cycles, function aborted.' % self.id)
-#                m.save()
-#                self.messages.add(m)
-#                print m
-#                success = False
-#            else:
-#                self.billingcycle_set.all().delete()
-#                for i in range(0,len(df)):
-#                    per_date = UTC.localize(df.index[i].to_timestamp() + timedelta(days=10,hours=11,minutes=11,seconds=11)) #add days/hours/mins/secs to avoid crossing month boundary when adjusting timezones
-#                    if df['Start Date'][i].tzinfo is None:
-#                        start_i = UTC.localize(df['Start Date'][i])
-#                    else:
-#                        start_i = df['Start Date'][i]
-#                    if df['End Date'][i].tzinfo is None:
-#                        end_i = UTC.localize(df['End Date'][i])
-#                    else:
-#                        end_i = df['End Date'][i]
-#                    bc = BillingCycle(
-#                            period_date = per_date,
-#                            start_date = start_i + timedelta(hours=11,minutes=11,seconds=11), #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
-#                            end_date = end_i + timedelta(hours=11,minutes=11,seconds=11), #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
-#                            billingcycler = self)
-#                    bc.save()
-#                m = Message(when=timezone.now(),
-#                            message_type='Code Success',
-#                            subject='Model updated.',
-#                            comment='Loaded dataframe into BillingCycler %s.' % self.id)
-#                m.save()
-#                self.messages.add(m)
-#                print m
-#                success = True
-#        else:
-#            m = Message(when=timezone.now(),
-#                        message_type='Code Error',
-#                        subject='Function received bad arguments.',
-#                        comment='BillingCycler %s, load_billing_cycler_period_dataframe given improper dataframe input, function aborted.' % self.id)
-#            m.save()
-#            self.messages.add(m)
-#            print m
-#            success = False
-#        return success
-#    class Meta:
-#        app_label = 'BuildingSpeakApp'
-#    
-#class BillingCycle(models.Model):
-#    """Attributes (all datetimes):
-#        period_date
-#        start_date
-#        end_date
-#        
-#    Stores billing cycle start/end dates
-#    and date representing period.  Must
-#    attach to BillingCycler."""
-#    
-#    period_date = models.DateTimeField(help_text='datetime representation of month, with day/hour/min/sec set to 11 to avoid crossing month boundary when converting from UTC to local time')  #date used to represent pandas Period
-#    start_date = models.DateTimeField(help_text='datetime representation of day, with hour/min/sec set to 11 to avoid crossing day boundary when converting from UTC to local time')
-#    end_date = models.DateTimeField(help_text='datetime representation of day, with hour/min/sec set to 11 to avoid crossing day boundary when converting from UTC to local time')
-#    #relationships
-#    billingcycler = models.ForeignKey('BillingCycler')
-#    messages = models.ManyToManyField('Message')
-#    #functions
-#    def billing_cycler_for_admin(self):
-#        return '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_billingcycler_change',args=(self.billingcycler.id,)), 'BillingCycler')
-#    billing_cycler_for_admin.allow_tags = True
-#    billing_cycler_for_admin.short_description = 'Billing Cycler'
-#
-#    class Meta:
-#        app_label = 'BuildingSpeakApp'
 
 class Monther(models.Model):
     """No attributes.
@@ -384,6 +233,67 @@ class Monther(models.Model):
             print m
             df = None
         return df
+    def create_calculated_columns(self, df):
+        """Inputs:
+            df
+              (columns:Start Date, End Date,
+                 Billing Demand,Peak Demand,
+                 Consumption, Cost)
+        
+        Adds empty necessary columns to
+        load df into Monthlings via
+        load_monther_period_dataframe."""
+        
+        df['Billing Demand (asave)'] = Decimal(0)
+        df['Cost (asave)'] = Decimal(0)
+        df['Peak Demand (asave)'] = Decimal(0)
+        df['Consumption (asave)'] = Decimal(0)
+        df['kBtuh Peak Demand (asave)'] = Decimal(0)
+        df['kBtu Consumption (asave)'] = Decimal(0)
+        df['Billing Demand (esave)'] = Decimal(0)
+        df['Cost (esave)'] = Decimal(0)
+        df['Peak Demand (esave)'] = Decimal(0)
+        df['Consumption (esave)'] = Decimal(0)
+        df['kBtuh Peak Demand (esave)'] = Decimal(0)
+        df['kBtu Consumption (esave)'] = Decimal(0)
+        df['Billing Demand (base)'] = Decimal(0)
+        df['Cost (base)'] = Decimal(0)
+        df['Peak Demand (base)'] = Decimal(0)
+        df['Consumption (base)'] = Decimal(0)
+        df['kBtuh Peak Demand (base)'] = Decimal(0)
+        df['kBtu Consumption (base)'] = Decimal(0)
+        df['Billing Demand (exp)'] = Decimal(0)
+        df['Cost (exp)'] = Decimal(0)
+        df['Peak Demand (exp)'] = Decimal(0)
+        df['Consumption (exp)'] = Decimal(0)
+        df['kBtuh Peak Demand (exp)'] = Decimal(0)
+        df['kBtu Consumption (exp)'] = Decimal(0)
+        df['Billing Demand (esave delta)'] = Decimal(0)
+        df['Cost (esave delta)'] = Decimal(0)
+        df['Peak Demand (esave delta)'] = Decimal(0)
+        df['Consumption (esave delta)'] = Decimal(0)
+        df['kBtuh Peak Demand (esave delta)'] = Decimal(0)
+        df['kBtu Consumption (esave delta)'] = Decimal(0)
+        df['Billing Demand (base delta)'] = Decimal(0)
+        df['Cost (base delta)'] = Decimal(0)
+        df['Peak Demand (base delta)'] = Decimal(0)
+        df['Consumption (base delta)'] = Decimal(0)
+        df['kBtuh Peak Demand (base delta)'] = Decimal(0)
+        df['kBtu Consumption (base delta)'] = Decimal(0)
+        df['Billing Demand (exp delta)'] = Decimal(0)
+        df['Cost (exp delta)'] = Decimal(0)
+        df['Peak Demand (exp delta)'] = Decimal(0)
+        df['Consumption (exp delta)'] = Decimal(0)
+        df['kBtuh Peak Demand (exp delta)'] = Decimal(0)
+        df['kBtu Consumption (exp delta)'] = Decimal(0)
+        df['kBtuh Peak Demand (act)'] = Decimal(0)
+        df['kBtu Consumption (act)'] = Decimal(0)
+        df['CDD (peak demand)'] = Decimal(0)
+        df['HDD (peak demand)'] = Decimal(0)
+        df['CDD (consumption)'] = Decimal(0)
+        df['HDD (consumption)'] = Decimal(0)
+        return df.sort_index()
+        
     def load_monther_period_dataframe(self, df):
         """Inputs:
             df
@@ -574,8 +484,8 @@ class Monthling(models.Model):
     costs.  Must attach to Monther."""
     
     when = models.DateTimeField(help_text='datetime representation of month, with day/hour/min/sec set to 11 to avoid crossing month boundary when converting from UTC to local time')
-    start_date = models.DateTimeField(help_text='datetime representation of start day, with hour/min/sec set to 11 to avoid crossing day boundary when converting from UTC to local time')
-    end_date = models.DateTimeField(help_text='datetime representation of end day, with hour/min/sec set to 11 to avoid crossing day boundary when converting from UTC to local time')
+    start_date = models.DateTimeField(null=True, blank=True, help_text='datetime representation of start day, with hour/min/sec set to 11 to avoid crossing day boundary when converting from UTC to local time')
+    end_date = models.DateTimeField(null=True, blank=True, help_text='datetime representation of end day, with hour/min/sec set to 11 to avoid crossing day boundary when converting from UTC to local time')
 
     hdd_peak_demand = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3)
     cdd_peak_demand = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3)

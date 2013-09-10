@@ -18,7 +18,7 @@ from django.contrib.auth.models import User
 from models_functions import *
 from models_Message import Message
 from models_Reader_ing import Reader
-from models_monthlies import BillingCycler, Monther
+from models_monthlies import Monther
 
 class Meter(models.Model):
     """Model for any fuel or water
@@ -118,9 +118,6 @@ class Meter(models.Model):
     nameplate_file = models.FileField(null=True, blank=True, upload_to=nameplate_file_path_meter, 
                     storage=S3BotoStorage(location='user_data_files'),
                     help_text='link to file containing meter nameplate image')
-#    billing_cycle_file = models.FileField(null=True, blank=True, upload_to=data_file_path_meter, 
-#                    storage=S3BotoStorage(location='user_data_files'),
-#                    help_text='link to text file containing billing cycle start and end dates; must be formatted correctly')
     bill_data_file = models.FileField(null=True, blank=True, upload_to=bill_data_file_path_meter, 
                     storage=S3BotoStorage(location='user_data_files'),
                     help_text='link to text file containing monthly bill data; must be formatted correctly')
@@ -139,11 +136,6 @@ class Meter(models.Model):
         return sorted(self.messages.filter(message_type='Alert'), key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_messages(self, reverse_boolean):
         return sorted(self.messages.all(), key=attrgetter('when'), reverse=reverse_boolean)
-    def get_billing_cycler_period_dataframe(self, first_month='', last_month=''):
-        """No inputs.
-        
-        Returns the Meter's BillingCycler's dataframe."""
-        return self.billingcycler_set.get(meter=self).get_billing_cycler_period_dataframe(first_month=first_month, last_month=last_month)
     def update_monthers(self):
         """No inputs.
         
@@ -192,31 +184,16 @@ class Meter(models.Model):
             print m
         return df
     def get_bill_data_period_dataframe(self, first_month='', last_month=''): #add months here for range, like get_monther_period_dataframe has-------*******
-        bcdf = self.get_billing_cycler_period_dataframe(first_month=first_month, last_month=last_month)
         mdf = self.monther_set.get(name='BILLx').get_monther_period_dataframe(first_month=first_month, last_month=last_month)
-        if bcdf is None and mdf is None:
+        if mdf is None:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
                         subject='Retrieve data failed.',
-                        comment='Meter %s get_bill_data_period_dataframe function found no bill data and no billing cycler data, aborting and returning None.' % self.id)
+                        comment='Meter %s get_bill_data_period_dataframe function found no bill data, aborting and returning None.' % self.id)
             m.save()
             self.messages.add(m)
             print m
-            result = None
-        elif bcdf is None and mdf is not None:
-            m = Message(when=timezone.now(),
-                        message_type='Code Error',
-                        subject='Retrieve data failed.',
-                        comment='Meter %s get_bill_data_period_dataframe function found bill data with no billing cycler data, aborting and returning None.' % self.id)
-            m.save()
-            self.messages.add(m)
-            print m
-            result = None
-        elif bcdf is not None and mdf is None:
-            result = bcdf
-        else:
-            result = pd.concat([bcdf, mdf], axis = 1)
-        return result
+        return mdf
     def get_dataframe_as_table(self, columnlist, number_of_recent_months=13):
         r = []
         try:
@@ -388,13 +365,22 @@ class Meter(models.Model):
                         else:
                             try:
                                 readbd['Exists'] = readbd.index
-                                readbd['Exists'] = readbd['Exists'].apply(lambda lamvar: lamvar in storedbd.index)
+                                storedbd = self.monther_set.get(name='BILLx').get_monther_period_dataframe()
+                                if storedbd is None or len(storedbd)<1:
+                                    readbd['Exists'] = 0
+                                else:
+                                    readbd['Exists'] = readbd['Exists'].apply(lambda lamvar: lamvar in storedbd.index)
                                 
                                 #ignore data that Exists but not(Overwrite)
                                 #load data that not(Exists)
-                                readbd_a = readbd[readbd['Exists']==Decimal(0)]
+                                readbd_a = readbd[readbd['Exists']==0]
                                 if len(readbd_a)>0:
-                                    success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe()
+                                    readbd_a.rename(columns={'Billing Demand': 'Billing Demand (act)',
+                                                              'Peak Demand': 'Peak Demand (act)',
+                                                              'Consumption': 'Consumption (act)',
+                                                              'Cost': 'Cost (act)'}, inplace = True)
+                                    readbd_a = self.monther_set.get(name='BILLx').create_calculated_columns(readbd_a)
+                                    success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe(readbd_a)
                                     if not success_a: raise TypeError
                             except:
                                 m = Message(when=timezone.now(),
@@ -408,7 +394,7 @@ class Meter(models.Model):
                             else:
                                 try:
                                     #retrieve and overwrite data that Exists and Overwrite
-                                    readbd_b = readbd[(readbd['Exists']==Decimal(1)) & (readbd['Overwrite']==Decimal(1))]
+                                    readbd_b = readbd[(readbd['Exists']==1) & (readbd['Overwrite']==1)]
                                     if len(readbd_b)>0:
                                         for i in range(0,len(readbd_b)):
                                             try:
@@ -456,437 +442,204 @@ class Meter(models.Model):
         pre-existing data unless Overwrite
         column in Bill Data File indicates
         otherwise."""
-        if not(file_location): file_location = self.bill_data_file.url
-        
-        try:
-            readbd = pd.read_csv(file_location,
-                                 skiprows=0,
-                                 usecols=['Overwrite', 'Start Date', 'End Date', 'Billing Demand',
-                                          'Peak Demand', 'Consumption', 'Cost'],
-                                 dtype={'Billing Demand': np.float, 'Peak Demand': np.float,
-                                        'Consumption': np.float, 'Cost': np.float})
-        except:
-            m = Message(when=timezone.now(),
-                        message_type='Code Error',
-                        subject='File not found.',
-                        comment='Meter %s failed on process_bill_data function when attempting to read Bill Data File.' % self.id)
-            m.save()
-            self.messages.add(m)
-            print m
-        else:
-            try:
-                if (('Start Date' in readbd.columns) and ('End Date' in readbd.columns) and
-                    ('Billing Demand' in readbd.columns) and ('Peak Demand' in readbd.columns) and
-                    ('Consumption' in readbd.columns) and ('Cost' in readbd.columns) and
-                    (len(readbd)>0) ):
-                    readbd['Start Date'] = readbd['Start Date'].apply(pd.to_datetime) + timedelta(hours=11,minutes=11,seconds=11) #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
-                    readbd['End Date'] = readbd['End Date'].apply(pd.to_datetime) + timedelta(hours=11,minutes=11,seconds=11) #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
-                    readbd['Start Date'] = readbd['Start Date'].apply(UTC.localize)
-                    readbd['End Date'] = readbd['End Date'].apply(UTC.localize)
-                    readbd['Billing Demand'] = readbd['Billing Demand'].apply(Decimal)
-                    readbd['Peak Demand'] = readbd['Peak Demand'].apply(Decimal)
-                    readbd['Consumption'] = readbd['Consumption'].apply(Decimal)
-                    readbd['Cost'] = readbd['Cost'].apply(Decimal)
-                    t = [self.assign_period_datetime(dates=[readbd['Start Date'][i],
-                                                            readbd['End Date'][i]]) for i in range(0,len(readbd))]
-                    if None in t:
-                        m = Message(when=timezone.now(),
-                                    message_type='Code Error',
-                                    subject='Model update failed.',
-                                    comment='Meter %s failed on process_bill_data function at assign_period_datetime function, Bill Data File does not have appropriate dates.' % self.id)
-                        m.save()
-                        self.messages.add(m)
-                        print m
-                    else:
-                        readbd.index = pd.PeriodIndex(t, freq='M')
-                        
-                        storedbc = self.billingcycler_set.get(meter=self).get_billing_cycler_period_dataframe()
-                        if storedbc is None:
-                            newbc = readbd[['Start Date','End Date']] #no logic required, keep all rows for storage
-                            newbc = newbc.sort_index()
-                        else:
-                            #the approach here was used because dataframe.combine_first fails when a df only has one row
-                            #boolean vector for "is period not in stored billing cycler?"
-                            notinstoredbc = [readbd.index[i] not in storedbc.index for i in range(0,len(readbd))]
-                            #boolean vector for "overwrite?; use Overwrite from file, otherwise set all to False
-                            try:
-                                overwrite = [(True and b or False) and True for b in readbd['Overwrite'].values]
-                            except:
-                                overwrite = [False for b in readbd['Start Date'].values]
-                            v = [] #we want to exclude periods in readbd that are in storedbc but have overwrite = 0
-                            for i in range(0,len(notinstoredbc)):
-                                v.append(notinstoredbc[i] or overwrite[i])
-                            keepfromreadbd = readbd[['Start Date','End Date']][v] #readbd's 'never-stored' and 'to-be-overwritten' periods
-                            keepfromstored = storedbc[[storedbc.index[i] not in keepfromreadbd.index for i in range(0,len(storedbc))]]
-                            #now combine with keepfromstored
-                            if len(keepfromstored)==0 and len(keepfromreadbd)>0:
-                                newbc = keepfromreadbd
-                            elif len(keepfromstored)>0 and len(keepfromreadbd)==0:
-                                newbc = keepfromstored
-                                m = Message(when=timezone.now(),
-                                        message_type='Code Warning',
-                                        subject='No new data to load.',
-                                        comment='Meter %s found no new Billing Cycles during process_bill_data function.' % self.id)
-                                m.save()
-                                self.messages.add(m)
-                                print m
-                            elif len(keepfromstored)>0 and len(keepfromreadbd)>0:
-                                newbc = pd.concat([keepfromreadbd, keepfromstored])
-                            else:
-                                newbc = keepfromstored
-                                m = Message(when=timezone.now(),
-                                        message_type='Code Warning',
-                                        subject='No new data to load.',
-                                        comment='Meter %s found no new Billing Cycles during process_bill_data function.' % self.id)
-                                m.save()
-                                self.messages.add(m)
-                                print m
-                            newbc = newbc.sort_index()
-                        
-                        storedbd = self.monther_set.get(name='BILLx').get_monther_period_dataframe()
-                        if storedbd is None:
-                            newbd = readbd[['Billing Demand', 'Peak Demand', 'Consumption', 'Cost']] #no logic required, keep all rows for storage
-                            newbd = newbd.sort_index()
-                        else:
-                            #the approach here was used because dataframe.combine_first fails when a df only has one row
-                            #boolean vector for "is period not in stored bill data?"
-                            notinstoredbd = [readbd.index[i] not in storedbd.index for i in range(0,len(readbd))]
-                            #boolean vector for "overwrite?; use Overwrite from file, otherwise set all to False
-                            try:
-                                overwrite = [(True and b or False) and True for b in readbd['Overwrite'].values]
-                            except:
-                                overwrite = [False for b in readbd['Start Date'].values]
-                            v = [] #we want to exclude periods in readbd that are in storedbd but have overwrite = 0
-                            for i in range(0,len(notinstoredbd)):
-                                v.append(notinstoredbd[i] or overwrite[i])
-                            keepfromreadbd = readbd[['Billing Demand', 'Peak Demand', 'Consumption', 'Cost']][v] #readbd's 'never-stored' and 'to-be-overwritten' periods
-                            keepfromstored = storedbd[[storedbd.index[i] not in keepfromreadbd.index for i in range(0,len(storedbd))]]
-                            #now combine with keepfromstored
-                            if len(keepfromstored)==0 and len(keepfromreadbd)>0:
-                                newbd = keepfromreadbd
-                            elif len(keepfromstored)>0 and len(keepfromreadbd)==0:
-                                newbd = keepfromstored
-                                m = Message(when=timezone.now(),
-                                        message_type='Code Warning',
-                                        subject='No new data to load.',
-                                        comment='Meter %s found no new Bill Data during process_bill_data function.' % self.id)
-                                m.save()
-                                self.messages.add(m)
-                                print m
-                            elif len(keepfromstored)>0 and len(keepfromreadbd)>0:
-                                newbd = pd.concat([keepfromreadbd, keepfromstored])
-                            else:
-                                newbd = keepfromstored
-                                m = Message(when=timezone.now(),
-                                        message_type='Code Warning',
-                                        subject='No new data to load.',
-                                        comment='Meter %s found no new Bill Data during process_bill_data function.' % self.id)
-                                m.save()
-                                self.messages.add(m)
-                                print m
-                            newbd = newbd.sort_index()
-                        
-                        if len(newbc)>0:
-                            success = self.billingcycler_set.get(meter=self).load_billing_cycler_period_dataframe(newbc)
-                            if success: #only check success, if failed, BillingCycler will report error
-                                m = Message(when=timezone.now(),
-                                        message_type='Code Success',
-                                        subject='Model updated.',
-                                        comment='Meter %s updated its Billing Cycler.' % self.id)
-                                m.save()
-                                self.messages.add(m)
-                                print m
-                                
-                                #this whole block moved under first 'success' block so that if periods
-                                #don't line up and load_billing_cycler_period_dataframe fails, we
-                                #don't run load_monther_period_dataframe (which doesn't have the
-                                #contiguous dates check)
-                                if len(newbd)>0:
-                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-                                    if success is not None: newbd = success
-                                    
-                                    newbd.rename(columns={'Billing Demand': 'Billing Demand (act)',
-                                                          'Peak Demand': 'Peak Demand (act)',
-                                                          'Consumption': 'Consumption (act)',
-                                                          'kBtu Consumption': 'kBtu Consumption (act)',
-                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (act)',
-                                                          'Cost': 'Cost (act)'}, inplace = True)
-                                    #newbd is only bill data without billing cycle data of Start Date and End Date, so we need to add it in to run newer get_XDD_df functions
-                                    newbd['Start Date'] = newbc['Start Date']
-                                    newbd['End Date'] = newbc['End Date']
-                                    if self.monther_set.get(name='BILLx').consumption_model.Tccp is not None:
-                                        newbd = self.weather_station.get_CDD_df(newbd, self.monther_set.get(name='BILLx').consumption_model.Tccp)
-                                        newbd.rename(columns={'CDD': 'CDD_consumption'}, inplace = True)
-                                    else:
-                                        m = Message(when=timezone.now(),
-                                                message_type='Code Warning',
-                                                subject='Missing parameters.',
-                                                comment='Meter %s missing Tccp on MeterConsumptionModel, unable to retrieve degree days.' % self.id)
-                                        m.save()
-                                        self.messages.add(m)
-                                        print m
-                                    if self.monther_set.get(name='BILLx').consumption_model.Thcp is not None:
-                                        newbd = self.weather_station.get_HDD_df(newbd, self.monther_set.get(name='BILLx').consumption_model.Thcp)
-                                        newbd.rename(columns={'HDD': 'HDD_consumption'}, inplace = True)
-                                    else:
-                                        m = Message(when=timezone.now(),
-                                                message_type='Code Warning',
-                                                subject='Missing parameters.',
-                                                comment='Meter %s missing Thcp on MeterConsumptionModel, unable to retrieve degree days.' % self.id)
-                                        m.save()
-                                        self.messages.add(m)
-                                        print m
-                                    if self.monther_set.get(name='BILLx').peak_demand_model.Tccp is not None:
-                                        newbd = self.weather_station.get_CDD_df(newbd, self.monther_set.get(name='BILLx').peak_demand_model.Tccp)
-                                        newbd.rename(columns={'CDD': 'CDD_peak_demand'}, inplace = True)
-                                    else:
-                                        m = Message(when=timezone.now(),
-                                                message_type='Code Warning',
-                                                subject='Missing parameters.',
-                                                comment='Meter %s missing Tccp on MeterPeakDemandModel, unable to retrieve degree days.' % self.id)
-                                        m.save()
-                                        self.messages.add(m)
-                                        print m
-                                    if self.monther_set.get(name='BILLx').peak_demand_model.Thcp is not None:
-                                        newbd = self.weather_station.get_HDD_df(newbd, self.monther_set.get(name='BILLx').peak_demand_model.Thcp)
-                                        newbd.rename(columns={'HDD': 'HDD_peak_demand'}, inplace = True)
-                                    else:
-                                        m = Message(when=timezone.now(),
-                                                message_type='Code Warning',
-                                                subject='Missing parameters.',
-                                                comment='Meter %s missing Thcp on MeterPeakDemandModel, unable to retrieve degree days.' % self.id)
-                                        m.save()
-                                        self.messages.add(m)
-                                        print m
-                                        
-                                #-----baseline values come from MeterModels
-                                    if 'Billing Demand (base)' not in newbd.columns: newbd['Billing Demand (base)'] = NaN #ignore for now
-                                    if 'Peak Demand (base)' not in newbd.columns:
-                                        predicted,stderror,lower_bound,upper_bound = self.monther_set.get('BILLx').peak_demand_model.current_model_predict_df(df=newbd)
-                                        newbd['Peak Demand (base)'] = predicted
-                                        newbd['Peak Demand (base delta)'] = predicted - lower_bound
-                                    if 'Consumption (base)' not in newbd.columns:
-                                        predicted,stderror,lower_bound,upper_bound = self.monther_set.get('BILLx').consumption_model.current_model_predict_df(df=newbd)
-                                        newbd['Consumption (base)'] = predicted
-                                        newbd['Consumption (base delta)'] = predicted - lower_bound
-                                        
-                                    #now run (base) Con/Dem pair through add_kBtu_kBtuh function and then set names back
-                                    newbd.rename(columns={'Consumption (base)': 'Consumption',
-                                                          'Peak Demand (base)': 'Peak Demand'},inplace=True)
-                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-                                    if success is not None: newbd = success
-                                    newbd.rename(columns={'Consumption': 'Consumption (base)',
-                                                          'Peak Demand': 'Peak Demand (base)',
-                                                          'kBtu Consumption': 'kBtu Consumption (base)',
-                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (base)'},inplace=True)
-                                    #now run (base delta) Con/Dem pair through add_kBtu_kBtuh function and then set names back
-                                    newbd.rename(columns={'Consumption (base delta)': 'Consumption',
-                                                          'Peak Demand (base delta)': 'Peak Demand'},inplace=True)
-                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-                                    if success is not None: newbd = success
-                                    newbd.rename(columns={'Consumption': 'Consumption (base delta)',
-                                                          'Peak Demand': 'Peak Demand (base delta)',
-                                                          'kBtu Consumption': 'kBtu Consumption (base delta)',
-                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (base delta)'},inplace=True)
-                                    
-                                #-----expected savings values come from EfficiencyMeasure models
-                                    if 'Billing Demand (esave)' not in newbd.columns: newbd['Billing Demand (esave)'] = NaN #ignore for now
-                                    if ('Consumption (esave)' not in newbd.columns or 
-                                        'Peak Demand (esave)' not in newbd.columns or
-                                        'Cost (esave)' not in newbd.columns):
-                                        newbd = self.get_all_savings(df=newbd)
-                                        newbd['Consumption (esave)'] = newbd['Consumption Savings']
-                                        newbd['Peak Demand (esave)'] = newbd['Peak Demand Savings']
-                                        #using RateSchedule(demand, consumption) instead of the following line
-                                        #newbd['Cost (esave)'] = newbd['Cost Savings']
-                                    newbd = newbd.drop(['Consumption Savings',
-                                                        'Peak Demand Savings',
-                                                        'Cost Savings'], axis = 1)
-                                    newbd.rename(columns={'Consumption (esave)': 'Consumption',
-                                                          'Peak Demand (esave)': 'Peak Demand'},inplace=True)
-                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-                                    if success is not None: newbd = success
-                                    newbd.rename(columns={'Consumption': 'Consumption (esave)',
-                                                          'Peak Demand': 'Peak Demand (esave)',
-                                                          'kBtu Consumption': 'kBtu Consumption (esave)',
-                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (esave)'},inplace=True)
-                                    
-                                #-----expected values are baselines minus expected savings
-                                    if 'Billing Demand (exp)' not in newbd.columns: newbd['Billing Demand (exp)'] = NaN #ignore for now
-                                    if 'Peak Demand (exp)' not in newbd.columns:
-                                        newbd['Peak Demand (exp)'] = newbd['Peak Demand (base)'] - newbd['Peak Demand (esave)']
-                                    if 'Consumption (exp)' not in newbd.columns:
-                                        newbd['Consumption (exp)'] = newbd['Consumption (base)'] - newbd['Consumption (esave)']
-                                    newbd.rename(columns={'Consumption (exp)': 'Consumption',
-                                                          'Peak Demand (exp)': 'Peak Demand'},inplace=True)
-                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-                                    if success is not None: newbd = success
-                                    newbd.rename(columns={'Consumption': 'Consumption (exp)',
-                                                          'Peak Demand': 'Peak Demand (exp)',
-                                                          'kBtu Consumption': 'kBtu Consumption (exp)',
-                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (exp)'},inplace=True)
-                                    
-                                #-----actual savings are baselines minus actuals
-                                    if 'Billing Demand (asave)' not in newbd.columns: newbd['Billing Demand (asave)'] = NaN #ignore for now
-                                    if 'Peak Demand (asave)' not in newbd.columns:
-                                        newbd['Peak Demand (asave)'] = newbd['Peak Demand (base)'] - newbd['Peak Demand (act)']
-                                    if 'Consumption (asave)' not in newbd.columns:
-                                        newbd['Consumption (asave)'] = newbd['Consumption (base)'] - newbd['Consumption (act)']
-                                    newbd.rename(columns={'Consumption (asave)': 'Consumption',
-                                                          'Peak Demand (asave)': 'Peak Demand'},inplace=True)
-                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-                                    if success is not None: newbd = success
-                                    newbd.rename(columns={'Consumption': 'Consumption (asave)',
-                                                          'Peak Demand': 'Peak Demand (asave)',
-                                                          'kBtu Consumption': 'kBtu Consumption (asave)',
-                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (asave)'},inplace=True)
-                                    
-                                #----costs are based on Peak Demand and Consumption with RateSchedule
-                                    if 'Cost (base)' not in newbd.columns:
-                                        newbd.rename(columns={'Consumption (base)': 'Consumption',
-                                                              'Peak Demand (base)': 'Peak Demand'},inplace=True)
-                                        newbd['Cost (base)'] = self.rate_schedule.get_cost_df(df=newbd)['Calculated Cost']
-                                        newbd.rename(columns={'Consumption': 'Consumption (base)',
-                                                              'Peak Demand': 'Peak Demand (base)'},inplace=True)
-                                    if 'Cost (exp)' not in newbd.columns:
-                                        newbd.rename(columns={'Consumption (exp)': 'Consumption',
-                                                              'Peak Demand (exp)': 'Peak Demand'},inplace=True)
-                                        newbd['Cost (exp)'] = self.rate_schedule.get_cost_df(df=newbd)['Calculated Cost']
-                                        newbd.rename(columns={'Consumption': 'Consumption (exp)',
-                                                              'Peak Demand': 'Peak Demand (exp)'},inplace=True)
-                                    if 'Cost (esave)' not in newbd.columns:
-                                        newbd['Cost (esave)'] = newbd['Cost (base)'] - newbd['Cost (exp)']
-                                    if 'Cost (asave)' not in newbd.columns:
-                                        newbd['Cost (asave)'] = newbd['Cost (base)'] - newbd['Cost (act)']
-                                    
-                                    if 'CDD_peak_demand' not in newbd.columns: newbd['CDD_peak_demand'] = NaN
-                                    if 'HDD_peak_demand' not in newbd.columns: newbd['HDD_peak_demand'] = NaN
-                                    if 'CDD_consumption' not in newbd.columns: newbd['CDD_consumption'] = NaN
-                                    if 'HDD_consumption' not in newbd.columns: newbd['HDD_consumption'] = NaN
-    
-                                    success = self.monther_set.get(name='BILLx').load_monther_period_dataframe(newbd)
-                                    if success:
-                                        m = Message(when=timezone.now(),
-                                                message_type='Code Success',
-                                                subject='Model updated.',
-                                                comment='Meter %s updated its BILLx Monther.' % self.id)
-                                        m.save()
-                                        self.messages.add(m)
-                                        print m
-                                    else:
-                                        m = Message(when=timezone.now(),
-                                                message_type='Code Error',
-                                                subject='Model update failed.',
-                                                comment='Meter %s was unable to update its BILLx Monther.' % self.id)
-                                        m.save()
-                                        self.messages.add(m)
-                                        print m
-                else:
-                    m = Message(when=timezone.now(),
-                                message_type='Code Error',
-                                subject='Expected contents not found.',
-                                comment='Meter %s failed on process_bill_data function, Bill Data File does not have appropriate data.' % self.id)
-                    m.save()
-                    self.messages.add(m)
-                    print m
-            except:
-                m = Message(when=timezone.now(),
-                            message_type='Code Error',
-                            subject='Unable to load data.',
-                            comment='Meter %s failed at process_bill_data, function aborted.' % self.id)
-                m.save()
-                self.messages.add(m)
-                print m
-        self.bill_data_import = False
-        
-    def update_billing_cycler(self, file_location):
-        """DEPRECATED: absorbed into
-        update_bill_data function.
-        
-        Input: file_location
-        
-        Reads Billing Cycle File and loads into
-        Meter's BillingCycler, respecting any
-        pre-existing data unless Overwrite
-        column in Billing Cycle File indicates
-        otherwise."""
-        pass
-#        try:
-#            readbc = pd.read_csv(file_location,
-#                                 skiprows=0,
-#                                 usecols=['Overwrite', 'Start Date', 'End Date'])
-#        except:
-#            m = Message(when=timezone.now(),
-#                        message_type='Code Error',
-#                        subject='File not found.',
-#                        comment='Meter %s failed on update_billing_cycler function when attempting to read Billing Cycle File.' % self.id)
-#            m.save()
-#            self.messages.add(m)
-#            print m
-#        else:
-#            if (len(readbc)>0) and ('Start Date' in readbc.columns) and ('End Date' in readbc.columns):
-#                readbc['Start Date'] = readbc['Start Date'].apply(pd.to_datetime)
-#                readbc['End Date'] = readbc['End Date'].apply(pd.to_datetime)
-#                readbc['Start Date'] = readbc['Start Date'].apply(UTC.localize)
-#                readbc['End Date'] = readbc['End Date'].apply(UTC.localize)
-#                t = [self.assign_period_datetime(dates=[readbc['Start Date'][i],
-#                                                        readbc['End Date'][i]]) for i in range(0,len(readbc))]
-#                if None in t:
+#                                if len(newbd)>0:
+#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
+#                                    if success is not None: newbd = success
+#                                    
+#                                    newbd.rename(columns={'Billing Demand': 'Billing Demand (act)',
+#                                                          'Peak Demand': 'Peak Demand (act)',
+#                                                          'Consumption': 'Consumption (act)',
+#                                                          'kBtu Consumption': 'kBtu Consumption (act)',
+#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (act)',
+#                                                          'Cost': 'Cost (act)'}, inplace = True)
+#                                    #newbd is only bill data without billing cycle data of Start Date and End Date, so we need to add it in to run newer get_XDD_df functions
+#                                    newbd['Start Date'] = newbc['Start Date']
+#                                    newbd['End Date'] = newbc['End Date']
+#                                    if self.monther_set.get(name='BILLx').consumption_model.Tccp is not None:
+#                                        newbd = self.weather_station.get_CDD_df(newbd, self.monther_set.get(name='BILLx').consumption_model.Tccp)
+#                                        newbd.rename(columns={'CDD': 'CDD_consumption'}, inplace = True)
+#                                    else:
+#                                        m = Message(when=timezone.now(),
+#                                                message_type='Code Warning',
+#                                                subject='Missing parameters.',
+#                                                comment='Meter %s missing Tccp on MeterConsumptionModel, unable to retrieve degree days.' % self.id)
+#                                        m.save()
+#                                        self.messages.add(m)
+#                                        print m
+#                                    if self.monther_set.get(name='BILLx').consumption_model.Thcp is not None:
+#                                        newbd = self.weather_station.get_HDD_df(newbd, self.monther_set.get(name='BILLx').consumption_model.Thcp)
+#                                        newbd.rename(columns={'HDD': 'HDD_consumption'}, inplace = True)
+#                                    else:
+#                                        m = Message(when=timezone.now(),
+#                                                message_type='Code Warning',
+#                                                subject='Missing parameters.',
+#                                                comment='Meter %s missing Thcp on MeterConsumptionModel, unable to retrieve degree days.' % self.id)
+#                                        m.save()
+#                                        self.messages.add(m)
+#                                        print m
+#                                    if self.monther_set.get(name='BILLx').peak_demand_model.Tccp is not None:
+#                                        newbd = self.weather_station.get_CDD_df(newbd, self.monther_set.get(name='BILLx').peak_demand_model.Tccp)
+#                                        newbd.rename(columns={'CDD': 'CDD_peak_demand'}, inplace = True)
+#                                    else:
+#                                        m = Message(when=timezone.now(),
+#                                                message_type='Code Warning',
+#                                                subject='Missing parameters.',
+#                                                comment='Meter %s missing Tccp on MeterPeakDemandModel, unable to retrieve degree days.' % self.id)
+#                                        m.save()
+#                                        self.messages.add(m)
+#                                        print m
+#                                    if self.monther_set.get(name='BILLx').peak_demand_model.Thcp is not None:
+#                                        newbd = self.weather_station.get_HDD_df(newbd, self.monther_set.get(name='BILLx').peak_demand_model.Thcp)
+#                                        newbd.rename(columns={'HDD': 'HDD_peak_demand'}, inplace = True)
+#                                    else:
+#                                        m = Message(when=timezone.now(),
+#                                                message_type='Code Warning',
+#                                                subject='Missing parameters.',
+#                                                comment='Meter %s missing Thcp on MeterPeakDemandModel, unable to retrieve degree days.' % self.id)
+#                                        m.save()
+#                                        self.messages.add(m)
+#                                        print m
+#                                        
+#                                #-----baseline values come from MeterModels
+#                                    if 'Billing Demand (base)' not in newbd.columns: newbd['Billing Demand (base)'] = NaN #ignore for now
+#                                    if 'Peak Demand (base)' not in newbd.columns:
+#                                        predicted,stderror,lower_bound,upper_bound = self.monther_set.get('BILLx').peak_demand_model.current_model_predict_df(df=newbd)
+#                                        newbd['Peak Demand (base)'] = predicted
+#                                        newbd['Peak Demand (base delta)'] = predicted - lower_bound
+#                                    if 'Consumption (base)' not in newbd.columns:
+#                                        predicted,stderror,lower_bound,upper_bound = self.monther_set.get('BILLx').consumption_model.current_model_predict_df(df=newbd)
+#                                        newbd['Consumption (base)'] = predicted
+#                                        newbd['Consumption (base delta)'] = predicted - lower_bound
+#                                        
+#                                    #now run (base) Con/Dem pair through add_kBtu_kBtuh function and then set names back
+#                                    newbd.rename(columns={'Consumption (base)': 'Consumption',
+#                                                          'Peak Demand (base)': 'Peak Demand'},inplace=True)
+#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
+#                                    if success is not None: newbd = success
+#                                    newbd.rename(columns={'Consumption': 'Consumption (base)',
+#                                                          'Peak Demand': 'Peak Demand (base)',
+#                                                          'kBtu Consumption': 'kBtu Consumption (base)',
+#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (base)'},inplace=True)
+#                                    #now run (base delta) Con/Dem pair through add_kBtu_kBtuh function and then set names back
+#                                    newbd.rename(columns={'Consumption (base delta)': 'Consumption',
+#                                                          'Peak Demand (base delta)': 'Peak Demand'},inplace=True)
+#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
+#                                    if success is not None: newbd = success
+#                                    newbd.rename(columns={'Consumption': 'Consumption (base delta)',
+#                                                          'Peak Demand': 'Peak Demand (base delta)',
+#                                                          'kBtu Consumption': 'kBtu Consumption (base delta)',
+#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (base delta)'},inplace=True)
+#                                    
+#                                #-----expected savings values come from EfficiencyMeasure models
+#                                    if 'Billing Demand (esave)' not in newbd.columns: newbd['Billing Demand (esave)'] = NaN #ignore for now
+#                                    if ('Consumption (esave)' not in newbd.columns or 
+#                                        'Peak Demand (esave)' not in newbd.columns or
+#                                        'Cost (esave)' not in newbd.columns):
+#                                        newbd = self.get_all_savings(df=newbd)
+#                                        newbd['Consumption (esave)'] = newbd['Consumption Savings']
+#                                        newbd['Peak Demand (esave)'] = newbd['Peak Demand Savings']
+#                                        #using RateSchedule(demand, consumption) instead of the following line
+#                                        #newbd['Cost (esave)'] = newbd['Cost Savings']
+#                                    newbd = newbd.drop(['Consumption Savings',
+#                                                        'Peak Demand Savings',
+#                                                        'Cost Savings'], axis = 1)
+#                                    newbd.rename(columns={'Consumption (esave)': 'Consumption',
+#                                                          'Peak Demand (esave)': 'Peak Demand'},inplace=True)
+#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
+#                                    if success is not None: newbd = success
+#                                    newbd.rename(columns={'Consumption': 'Consumption (esave)',
+#                                                          'Peak Demand': 'Peak Demand (esave)',
+#                                                          'kBtu Consumption': 'kBtu Consumption (esave)',
+#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (esave)'},inplace=True)
+#                                    
+#                                #-----expected values are baselines minus expected savings
+#                                    if 'Billing Demand (exp)' not in newbd.columns: newbd['Billing Demand (exp)'] = NaN #ignore for now
+#                                    if 'Peak Demand (exp)' not in newbd.columns:
+#                                        newbd['Peak Demand (exp)'] = newbd['Peak Demand (base)'] - newbd['Peak Demand (esave)']
+#                                    if 'Consumption (exp)' not in newbd.columns:
+#                                        newbd['Consumption (exp)'] = newbd['Consumption (base)'] - newbd['Consumption (esave)']
+#                                    newbd.rename(columns={'Consumption (exp)': 'Consumption',
+#                                                          'Peak Demand (exp)': 'Peak Demand'},inplace=True)
+#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
+#                                    if success is not None: newbd = success
+#                                    newbd.rename(columns={'Consumption': 'Consumption (exp)',
+#                                                          'Peak Demand': 'Peak Demand (exp)',
+#                                                          'kBtu Consumption': 'kBtu Consumption (exp)',
+#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (exp)'},inplace=True)
+#                                    
+#                                #-----actual savings are baselines minus actuals
+#                                    if 'Billing Demand (asave)' not in newbd.columns: newbd['Billing Demand (asave)'] = NaN #ignore for now
+#                                    if 'Peak Demand (asave)' not in newbd.columns:
+#                                        newbd['Peak Demand (asave)'] = newbd['Peak Demand (base)'] - newbd['Peak Demand (act)']
+#                                    if 'Consumption (asave)' not in newbd.columns:
+#                                        newbd['Consumption (asave)'] = newbd['Consumption (base)'] - newbd['Consumption (act)']
+#                                    newbd.rename(columns={'Consumption (asave)': 'Consumption',
+#                                                          'Peak Demand (asave)': 'Peak Demand'},inplace=True)
+#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
+#                                    if success is not None: newbd = success
+#                                    newbd.rename(columns={'Consumption': 'Consumption (asave)',
+#                                                          'Peak Demand': 'Peak Demand (asave)',
+#                                                          'kBtu Consumption': 'kBtu Consumption (asave)',
+#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (asave)'},inplace=True)
+#                                    
+#                                #----costs are based on Peak Demand and Consumption with RateSchedule
+#                                    if 'Cost (base)' not in newbd.columns:
+#                                        newbd.rename(columns={'Consumption (base)': 'Consumption',
+#                                                              'Peak Demand (base)': 'Peak Demand'},inplace=True)
+#                                        newbd['Cost (base)'] = self.rate_schedule.get_cost_df(df=newbd)['Calculated Cost']
+#                                        newbd.rename(columns={'Consumption': 'Consumption (base)',
+#                                                              'Peak Demand': 'Peak Demand (base)'},inplace=True)
+#                                    if 'Cost (exp)' not in newbd.columns:
+#                                        newbd.rename(columns={'Consumption (exp)': 'Consumption',
+#                                                              'Peak Demand (exp)': 'Peak Demand'},inplace=True)
+#                                        newbd['Cost (exp)'] = self.rate_schedule.get_cost_df(df=newbd)['Calculated Cost']
+#                                        newbd.rename(columns={'Consumption': 'Consumption (exp)',
+#                                                              'Peak Demand': 'Peak Demand (exp)'},inplace=True)
+#                                    if 'Cost (esave)' not in newbd.columns:
+#                                        newbd['Cost (esave)'] = newbd['Cost (base)'] - newbd['Cost (exp)']
+#                                    if 'Cost (asave)' not in newbd.columns:
+#                                        newbd['Cost (asave)'] = newbd['Cost (base)'] - newbd['Cost (act)']
+#                                    
+#                                    if 'CDD_peak_demand' not in newbd.columns: newbd['CDD_peak_demand'] = NaN
+#                                    if 'HDD_peak_demand' not in newbd.columns: newbd['HDD_peak_demand'] = NaN
+#                                    if 'CDD_consumption' not in newbd.columns: newbd['CDD_consumption'] = NaN
+#                                    if 'HDD_consumption' not in newbd.columns: newbd['HDD_consumption'] = NaN
+#    
+#                                    success = self.monther_set.get(name='BILLx').load_monther_period_dataframe(newbd)
+#                                    if success:
+#                                        m = Message(when=timezone.now(),
+#                                                message_type='Code Success',
+#                                                subject='Model updated.',
+#                                                comment='Meter %s updated its BILLx Monther.' % self.id)
+#                                        m.save()
+#                                        self.messages.add(m)
+#                                        print m
+#                                    else:
+#                                        m = Message(when=timezone.now(),
+#                                                message_type='Code Error',
+#                                                subject='Model update failed.',
+#                                                comment='Meter %s was unable to update its BILLx Monther.' % self.id)
+#                                        m.save()
+#                                        self.messages.add(m)
+#                                        print m
+#                else:
 #                    m = Message(when=timezone.now(),
 #                                message_type='Code Error',
-#                                subject='Update model failed.',
-#                                comment='Meter %s failed on update_billing_cycler function at assign_period_datetime function, Billing Cycle File does not have appropriate data.' % self.id)
+#                                subject='Expected contents not found.',
+#                                comment='Meter %s failed on process_bill_data function, Bill Data File does not have appropriate data.' % self.id)
 #                    m.save()
 #                    self.messages.add(m)
 #                    print m
-#                else:
-#                    readbc.index = pd.PeriodIndex(t, freq='M')
-#                    
-#                    storedbc = self.billingcycler_set.get(meter=self).get_billing_cycler_period_dataframe()
-#                    if storedbc is None:
-#                        newbc = readbc[['Start Date','End Date']] #no logic required, keep all of readbc for storage
-#                        newbc = newbc.sort_index()
-#                    else:
-#                        #the approach here was used because dataframe.combine_first fails when a df only has one row
-#                        #boolean vector for "is period not in stored billing cycler?"
-#                        notinstoredbc = [readbc.index[i] not in storedbc.index for i in range(0,len(readbc))]
-#                        #boolean vector for "overwrite?; use Overwrite from file, otherwise set all to False
-#                        try:
-#                            overwrite = [(True and b or False) and True for b in readbc['Overwrite'].values]
-#                        except:
-#                            overwrite = [False for b in readbc['Start Date'].values]
-#                        v = [] #we want to exclude periods in readbc that are in storedbc but have overwrite = 0
-#                        for i in range(0,len(notinstoredbc)):
-#                            v.append(notinstoredbc[i] or overwrite[i])
-#                        readbc = readbc[v] #readbc now has only 'never-stored' and 'to-be-overwritten' periods
-#                        keepfromstored = storedbc[[storedbc.index[i] not in readbc.index for i in range(0,len(storedbc))]]
-#                        newbc = pd.concat([readbc[['Start Date','End Date']], keepfromstored])
-#                        newbc = newbc.sort_index()
-#                    success = self.billingcycler_set.get(meter=self).load_billing_cycler_period_dataframe(newbc)
-#                    if success:
-#                        m = Message(when=timezone.now(),
-#                                message_type='Code Success',
-#                                subject='Model updated.',
-#                                comment='Meter %s updated its Billing Cycler.' % self.id)
-#                        m.save()
-#                        self.messages.add(m)
-#                        print m
-#                    else:
-#                        m = Message(when=timezone.now(),
-#                                message_type='Code Error',
-#                                subject='Model update failed.',
-#                                comment='Meter %s was unable to update its Billing Cycler.' % self.id)
-#                        m.save()
-#                        self.messages.add(m)
-#                        print m
-#            else:
+#            except:
 #                m = Message(when=timezone.now(),
 #                            message_type='Code Error',
-#                            subject='Expected contents not found.',
-#                            comment='Meter %s failed on update_billing_cycler function, Billing Cycle File does not have appropriate data.' % self.id)
+#                            subject='Unable to load data.',
+#                            comment='Meter %s failed at process_bill_data, function aborted.' % self.id)
 #                m.save()
 #                self.messages.add(m)
 #                print m
+#        self.bill_data_import = False
+        pass
         
     def assign_period_datetime(self, time_series=[], dates=[]):
         """Inputs:
@@ -1389,8 +1142,6 @@ class Meter(models.Model):
             s.save()
             self.readers.add(s)
             
-            b = BillingCycler(meter=self)
-            b.save()
             mthr = Monther(meter=self,name='MNTHo',help_text='monthly values observed by local sensors')
             mthr.save()
             mthr = Monther(meter=self,name='MNTHp',help_text='monthly values provided by remote source (e.g. utility company)')

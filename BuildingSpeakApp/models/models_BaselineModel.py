@@ -182,8 +182,6 @@ class BaselineModel(models.Model):
         try:
             if Tccp is None: Tccp = self.Tccp
             if Thcp is None: Thcp = self.Thcp
-            #df = self.meter.billingcycler_set.all()[0].get_billing_cycler_period_dataframe(first_month = self.first_month,
-            #                                                                  last_month = self.last_month)
             df = self.meter.monther_set.get(name='BILLx').get_monther_period_dataframe(first_month = self.first_month,
                                                                               last_month = self.last_month)
             df = self.meter.weather_station.get_CDD_df(df, base_temp_CDD=Tccp)

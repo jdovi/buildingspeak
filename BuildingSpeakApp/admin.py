@@ -2,7 +2,7 @@ from BuildingSpeakApp.models import Account, Building, Meter, Equipment, Space
 from BuildingSpeakApp.models import RooftopUnit, Reader, Reading, Message
 from BuildingSpeakApp.models import UnitSchedule, OperatingSchedule, Utility
 from BuildingSpeakApp.models import RateSchedule, RateScheduleRider
-from BuildingSpeakApp.models import BillingCycler, BillingCycle, Monther, Monthling
+from BuildingSpeakApp.models import Monther, Monthling
 from BuildingSpeakApp.models import WeatherStation, WeatherDataPoint, ManagementAction
 from BuildingSpeakApp.models import UserProfile
 from BuildingSpeakApp.models import GAPowerRider, GAPowerPandL
@@ -327,22 +327,6 @@ class RateScheduleRiderAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'utility_name_for_admin', 'connected_rate_names_for_admin')
     search_fields = ['name', 'id']
     list_filter = ['utility']
-
-class BillingCyclerAdmin(admin.ModelAdmin):
-    fieldsets = [
-        ('Information', {'fields': ['meter']}),
-    ]
-    list_display = ('id', 'meter_for_admin', 'billing_cycles_for_admin')
-    
-class BillingCycleAdmin(admin.ModelAdmin):
-    fieldsets = [
-        ('Information', {'fields': ['period_date',
-                                    'start_date',
-                                    'end_date']}),
-    ]
-    list_display = ('id', 'billing_cycler_for_admin', 'period_date', 'start_date', 'end_date')
-    search_fields = ['id', 'period_date', 'start_date', 'end_date']
-    list_filter = ['period_date', 'start_date', 'end_date']
     
 class MontherAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -478,8 +462,6 @@ admin.site.register(OperatingSchedule, OperatingScheduleAdmin)
 admin.site.register(Utility, UtilityAdmin)
 admin.site.register(RateSchedule, RateScheduleAdmin)
 admin.site.register(RateScheduleRider, RateScheduleRiderAdmin)
-admin.site.register(BillingCycler, BillingCyclerAdmin)
-admin.site.register(BillingCycle, BillingCycleAdmin)
 admin.site.register(Monther, MontherAdmin)
 admin.site.register(Monthling, MonthlingAdmin)
 admin.site.register(WeatherStation, WeatherStationAdmin)

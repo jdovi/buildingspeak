@@ -177,7 +177,7 @@ def meter_detail(request, account_id, meter_id):
             try:
 #               q = Queue(connection=conn)
 #               result = q.enqueue(meter.upload_bill_data)
-                meter.update_bill_data()
+                meter.upload_bill_data()
                 m = ResultsMessage()
                 m.comment = 'Bill data has been uploaded.'
             except:
