@@ -96,6 +96,14 @@ function addChart(arr) {
 	  {% if demand_by_month == 'false' %}
 	    No demand data to display. <br>
 	  {% endif %}
+
+      <p>
+        <strong><u>Currently viewing:</u></strong>
+        <input type="text" class="datepicker" />
+        to
+        <input type="text" class="datepicker" />
+		<input type="submit" value="Refresh" />
+      </p>
 	  
       <div id="cost-by-month"></div>
 	  <script>
@@ -108,8 +116,11 @@ function addChart(arr) {
           vAxes: { 0: { title: 'USD' } },
           seriesType: "bars",
           series:     {
-            0: {type: "bar",  targetAxisIndex: 0, color: '#109618' },
-            1: {type: "line", targetAxisIndex: 1, color: '#dc3912' },
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
           }
         }
       ]);
@@ -130,8 +141,11 @@ function addChart(arr) {
           vAxes: { 0: { title: {{ consumption_units|safe }} } },
           seriesType: "bars",
           series:     {
-            0: {type: "bar",  targetAxisIndex: 0, color: '#109618' },
-            1: {type: "line", targetAxisIndex: 1, color: '#dc3912' },
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
           }
         }
       ]);
@@ -152,8 +166,11 @@ function addChart(arr) {
           vAxes: { 0: { title: {{ demand_units|safe }} } },
           seriesType: "bars",
           series:     {
-            0: {type: "bar",  targetAxisIndex: 0, color: '#109618' },
-            1: {type: "line", targetAxisIndex: 1, color: '#dc3912' },
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
           }
         }
       ]);
@@ -163,15 +180,15 @@ function addChart(arr) {
         <div class="woo-sc-hr"></div>
       </div>
 
-      {% if building.meter_set.all %}
-        <p>Meters</p>
+      {% if meter.building_set.all %}
+        <p>Buildings</p>
         <table>
           <tbody>
-            {% for m in building.meter_set.all %}
+            {% for b in meter.building_set.all %}
               <tr>
-                <td>Meter</td>
-                <td>{{ m.name }}</td>
-                <td><a href="/{{ account.id }}/meters/{{ m.id }}">view details</a></td>
+                <td>Building</td>
+                <td>{{ b.name }}</td>
+                <td><a href="/{{ account.id }}/buildings/{{ b.id }}">view details</a></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -182,11 +199,11 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      {% if building.equipment_set.all %}
+      {% if meter.equipment_set.all %}
         <p>Equipment</p>
         <table>
           <tbody>
-            {% for e in building.equipment_set.all %}
+            {% for e in meter.equipment_set.all %}
               <tr>
                 <td>Equipment</td>
                 <td>{{ e.name }}</td>
@@ -257,9 +274,9 @@ function addChart(arr) {
     <div class="tab tab-stats">
       <p>
         <strong><u>Currently viewing:</u></strong>
-        <input type="text" class="datepicker" value="{{ thirty_days_ago|date:"m/d/Y" }}" />
+        <input type="text" class="datepicker" />
         to
-        <input type="text" class="datepicker" value="{% now "m/d/Y" %}" />
+        <input type="text" class="datepicker" />
       </p>
 
       <div id="electricity-over-time"></div>

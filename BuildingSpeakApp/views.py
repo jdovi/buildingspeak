@@ -7,6 +7,8 @@ from django.shortcuts import render, get_object_or_404, get_list_or_404, redirec
 from BuildingSpeakApp.models import Account, Building, Meter, Equipment, WeatherStation
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm, Message
 import json
+import pandas as pd
+from django.utils import timezone
 from decimal import Decimal
 from django.forms.models import modelform_factory
 from django.contrib.auth.models import User
@@ -102,6 +104,8 @@ def account_detail(request, account_id):
     
     context = {
         'account':      account,
+        'buildings':      account.building_set.order_by('name'),
+        'meters':         account.meter_set.order_by('name'),
         'accounts':     request.user.account_set.order_by('id'),
         'equipcount':   equipcount,
         'account_dict': account_dict,
@@ -131,6 +135,8 @@ def building_detail(request, account_id, building_id):
         'building_dict':   building_dict,
         'accounts':        request.user.account_set.order_by('id'),
         'account':         building.account,
+        'buildings':      account.building_set.order_by('name'),
+        'meters':         account.meter_set.order_by('name'),
         'thirty_days_ago': (datetime.now() + timedelta(-30)),
         'alerts':          building.get_all_alerts(reverse_boolean=True)
     }
@@ -153,11 +159,28 @@ def meter_detail(request, account_id, meter_id):
             meter_dict[z.replace('_',' ')] = meter.__getattribute__(z)
         except AttributeError:
             pass
-    cost_by_month = meter.get_dataframe_as_table(['Month','Cost (exp)','Cost (act)'])
+    this_month = pd.Period(timezone.now(),freq='M')
+    bill_data = meter.get_bill_data_period_dataframe(first_month=(this_month-12).strftime('%m/%Y'), last_month=this_month.strftime('%m/%Y')).sort_index() ######use # of months here!!!!!!!!!!!!!!!!!!!
+    cost_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
+                                                                           'Cost (base)',
+                                                                           'Cost (exp)',
+                                                                           'Cost (esave)',
+                                                                           'Cost (act)',
+                                                                           'Cost (asave)'])
     if len(cost_by_month) == 1: cost_by_month = False
-    consumption_by_month = meter.get_dataframe_as_table(['Month','Consumption (exp)','Consumption (act)'])
+    consumption_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
+                                                                                  'Consumption (base)',
+                                                                                  'Consumption (exp)',
+                                                                                  'Consumption (esave)',
+                                                                                  'Consumption (act)',
+                                                                                  'Consumption (asave)'])
     if len(consumption_by_month) == 1: consumption_by_month = False
-    demand_by_month = meter.get_dataframe_as_table(['Month','Peak Demand (exp)','Peak Demand (act)'])
+    demand_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
+                                                                             'Peak Demand (base)',
+                                                                             'Peak Demand (exp)',
+                                                                             'Peak Demand (esave)',
+                                                                             'Peak Demand (act)',
+                                                                             'Peak Demand (asave)'])
     if len(demand_by_month) == 1: demand_by_month = False
 
     if request.method == 'POST': # If the form has been submitted...
@@ -196,6 +219,8 @@ def meter_detail(request, account_id, meter_id):
         'user':                 request.user,
         'form':                 form,
         'account':              account,
+        'buildings':            account.building_set.order_by('name'),
+        'meters':               account.meter_set.order_by('name'),
         'accounts':             request.user.account_set.order_by('id'),
         'meter':                meter,
         'meter_dict':           meter_dict,
@@ -234,7 +259,9 @@ def equipment_detail(request, account_id, equipment_id):
         'accounts':       request.user.account_set.order_by('id'),
         'equipment':      equipment,
         'equipment_dict': equipment_dict,
-        'alerts':         equipment.get_all_alerts(reverse_boolean=True)
+        'alerts':         equipment.get_all_alerts(reverse_boolean=True),
+        'buildings':      account.building_set.order_by('name'),
+        'meters':         account.meter_set.order_by('name'),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:

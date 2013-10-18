@@ -185,7 +185,7 @@
                 <li class="menu-item">
                   <span>Buildings:</span>
                   <ul>
-                    {% for b in account.building_set.all %}
+                    {% for b in buildings %}
                       <li class="menu-item">
                         <a href="/{{ account.id }}/buildings/{{ b.id }}" {% if b.id == building.id %}class="active"{% endif %}>
                           {{ b.name }}
@@ -197,7 +197,7 @@
                 <li class="menu-item">
                   <span>Meters:</span>
                   <ul>
-                    {% for m in account.meter_set.all %}
+                    {% for m in meters %}
                       <li class="menu-item {% if m.id == meter.id %}active{% endif %}">
                         <a href="/{{ account.id }}/meters/{{ m.id }}" {% if m.id == meter.id %}class="active"{% endif %}>
                           {{ m.name }}

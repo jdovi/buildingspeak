@@ -163,16 +163,16 @@ class MeterConsumptionModel(models.Model):
             current_model = self.get_available_models()[1][self.model_type]
             if current_model['wname'] == ['Days']:
                 df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
-            if 'CDD_consumption/day' in current_model['xnames']:
-                df = df.drop(['CDD_consumption'], axis = 1)
+            if 'CDD (consumption)/day' in current_model['xnames']:
+                df = df.drop(['CDD (consumption)'], axis = 1)
                 df = self.meter.weather_station.get_CDD_df(df, self.Tccp)
-                df.rename(columns={'CDD': 'CDD_consumption'}, inplace = True)
-                df['CDD_consumption/day'] = df['CDD_consumption']/df['Days']
-            if 'HDD_consumption/day' in current_model['xnames']:
-                df = df.drop(['HDD_consumption'], axis = 1)
+                df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
+                df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
+            if 'HDD (consumption)/day' in current_model['xnames']:
+                df = df.drop(['HDD (consumption)'], axis = 1)
                 df = self.meter.weather_station.get_HDD_df(df, self.Thcp)
-                df.rename(columns={'HDD': 'HDD_consumption'}, inplace = True)
-                df['HDD_consumption/day'] = df['HDD_consumption']/df['Days']
+                df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
+                df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
             if 'consumption/day' in current_model['yname']:
                 df['consumption/day'] = df['Consumption (act)']/df['Days']
         except:
@@ -196,11 +196,11 @@ class MeterConsumptionModel(models.Model):
                    'yname': ['consumption/day']},
             '2pc': {'include_intercept': True,
                     'wname': ['Days'],
-                    'xnames': ['CDD_consumption/day'],
+                    'xnames': ['CDD (consumption)/day'],
                     'yname': ['consumption/day']},
             '2ph': {'include_intercept': True,
                     'wname': ['Days'],
-                    'xnames': ['HDD_consumption/day'],
+                    'xnames': ['HDD (consumption)/day'],
                     'yname': ['consumption/day']}  }
         model_name_list = [x for x in model_dictionary]
         return [model_name_list, model_dictionary]
@@ -258,27 +258,37 @@ class MeterConsumptionModel(models.Model):
             if Tccp is None: Tccp = self.Tccp
             if Thcp is None: Thcp = self.Thcp
             df = self.get_baseline_df()
-            df = df.drop(['CDD_consumption', 'HDD_consumption'], axis = 1)
+            df = df.drop(['CDD (consumption)', 'HDD (consumption)'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
-            df.rename(columns={'CDD': 'CDD_consumption'}, inplace = True)
+            df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
             df = self.meter.weather_station.get_HDD_df(df, Thcp)
-            df.rename(columns={'HDD': 'HDD_consumption'}, inplace = True)
-            
-            df = df.sort_index()
-            df_avg = df[0:12]
-            for i in range(0,12):
-                df_avg['CDD_consumption'][i:i+1] = df['CDD_consumption'][[x.month==df.index[i].month for x in df.index]].mean()
-                df_avg['HDD_consumption'][i:i+1] = df['HDD_consumption'][[x.month==df.index[i].month for x in df.index]].mean()
-            df_avg = df_avg.sort_index()
+            df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
                         subject='Calculation failed.',
-                        comment='MeterConsumptionModel %s, get_average_baseline_degree_days failed, function aborted.' % self.id)
+                        comment='MeterConsumptionModel %s get_average_baseline_degree_days failed to calculate or load degree days into dataframe, function aborted.' % self.id)
             m.save()
             self.messages.add(m)
             print m
             df_avg = None
+        else:
+            if len(df)<12:
+                m = Message(when=timezone.now(),
+                            message_type='Code Error',
+                            subject='Calculation failed.',
+                            comment='MeterConsumptionModel %s get_average_baseline_degree_days found less than 12-month baseline period, function aborted.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+                df_avg = None
+            else:
+                df = df.sort_index()
+                df_avg = df[0:12]
+                for i in range(0,12):
+                    df_avg['CDD (consumption)'][i:i+1] = df['CDD (consumption)'][[x.month==df.index[i].month for x in df.index]].mean()
+                    df_avg['HDD (consumption)'][i:i+1] = df['HDD (consumption)'][[x.month==df.index[i].month for x in df.index]].mean()
+                df_avg = df_avg.sort_index()
         return df_avg
          
     def get_baseline_df(self):
@@ -410,20 +420,23 @@ class MeterConsumptionModel(models.Model):
         
         available_models = self.get_available_models()
         track_runs = pd.DataFrame()
+        track_Tccp = pd.DataFrame()
+        track_Thcp = pd.DataFrame()
+        best_run_results = None
         try:
             Tccp = Thcp = 65
             #not using prep_df, instead loading all needed columns once and then cycling through
             #as new models are added, need to add code here to make sure the new models are
             #    included in the search for the best fit model
             df = self.get_baseline_df()
-            df = df.drop(['CDD_consumption', 'HDD_consumption'], axis = 1)
+            df = df.drop(['CDD (consumption)', 'HDD (consumption)'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
-            df.rename(columns={'CDD': 'CDD_consumption'}, inplace = True)
+            df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
             df = self.meter.weather_station.get_HDD_df(df, Thcp)
-            df.rename(columns={'HDD': 'HDD_consumption'}, inplace = True)
+            df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
             df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
-            df['CDD_consumption/day'] = df['CDD_consumption']/df['Days']
-            df['HDD_consumption/day'] = df['HDD_consumption']/df['Days']
+            df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
+            df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
             df['consumption/day'] = df['Consumption (act)']/df['Days']
             #--------------------------------------------------------------------------
             df = df.sort_index()
@@ -436,11 +449,12 @@ class MeterConsumptionModel(models.Model):
                                             xnames = available_models[1][run]['xnames'],
                                             yname = available_models[1][run]['yname'],
                                             include_intercept = available_models[1][run]['include_intercept'])
-                    track_runs = track_runs.append(pd.DataFrame({'id': run,
-                                                                 'Tccp': Tccp,
-                                                                 'Thcp': Thcp,
-                                                                 'acceptance_score': self.acceptance_score},
-                                                                 index=[run + str(Tccp) + str(Thcp)]))
+                    if results is not None:
+                        track_runs = track_runs.append(pd.DataFrame({'id': run,
+                                                                     'Tccp': Tccp,
+                                                                     'Thcp': Thcp,
+                                                                     'acceptance_score': self.acceptance_score},
+                                                                     index=[run + str(Tccp) + str(Thcp)]))
                 except:
                     m = Message(when=timezone.now(),
                                 message_type='Code Error',
@@ -470,16 +484,16 @@ class MeterConsumptionModel(models.Model):
                     df = self.get_baseline_df()
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['consumption/day'] = df['Consumption (act)']/df['Days']
-                    df = df.drop(['HDD_consumption'], axis = 1)
+                    df = df.drop(['HDD (consumption)'], axis = 1)
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
-                    df.rename(columns={'HDD': 'HDD_consumption'}, inplace = True)
-                    df['HDD_consumption/day'] = df['HDD_consumption']/df['Days']
+                    df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
+                    df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
                     for Tccp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['CDD_consumption'], axis = 1)
+                        df = df.drop(['CDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
-                        df.rename(columns={'CDD': 'CDD_consumption'}, inplace = True)
-                        df['CDD_consumption/day'] = df['CDD_consumption']/df['Days']
+                        df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
+                        df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
                         results = self.set_model_print_results(df = df,
@@ -512,15 +526,15 @@ class MeterConsumptionModel(models.Model):
                     df = self.get_baseline_df()
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['consumption/day'] = df['Consumption (act)']/df['Days']
-                    df = df.drop(['CDD_consumption'], axis = 1)
+                    df = df.drop(['CDD (consumption)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
-                    df.rename(columns={'CDD': 'CDD_consumption'}, inplace = True)
+                    df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
                     for Thcp in range(55, 80):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['HDD_consumption'], axis = 1)
+                        df = df.drop(['HDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
-                        df.rename(columns={'HDD': 'HDD_consumption'}, inplace = True)
-                        df['HDD_consumption/day'] = df['HDD_consumption']/df['Days']
+                        df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
+                        df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
                         results = self.set_model_print_results(df = df,
@@ -831,8 +845,8 @@ class MeterConsumptionModel(models.Model):
                 
                 self.nbe = np.sum(df[yname[0]].apply(float)*df[wname[0]].apply(float)-results.fittedvalues*df[wname[0]].apply(float))/np.sum(df[yname[0]].apply(float)*df[wname[0]].apply(float))
                 
-                self.first_month = str(df.index[0])
-                self.last_month = str(df.index[-1])
+                self.first_month = df.index[0].strftime('%m/%Y')
+                self.last_month = df.index[-1].strftime('%m/%Y')
                 
                 self.set_accept_score()
         self.save()
@@ -985,8 +999,8 @@ class MeterConsumptionModel(models.Model):
 
 class MeterPeakDemandModel(models.Model):
     """Regression model for use
-    with monthly bill
-    peak demand data.
+    with monthly bill peak
+    demand data.
     
     Minimum first_month and
     last_month, then call
@@ -1126,16 +1140,18 @@ class MeterPeakDemandModel(models.Model):
             current_model = self.get_available_models()[1][self.model_type]
             if current_model['wname'] == ['Days']:
                 df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
-            if 'CDD_demand' in current_model['xnames']:
-                df = df.drop(['CDD_demand'], axis = 1)
+            if 'CDD (peak demand)/day' in current_model['xnames']:
+                df = df.drop(['CDD (peak demand)'], axis = 1)
                 df = self.meter.weather_station.get_CDD_df(df, self.Tccp)
-                df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
-            if 'HDD_demand' in current_model['xnames']:
-                df = df.drop(['HDD_demand'], axis = 1)
+                df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
+                df['CDD (peak demand)/day'] = df['CDD (peak demand)']/df['Days']
+            if 'HDD (peak demand)/day' in current_model['xnames']:
+                df = df.drop(['HDD (peak demand)'], axis = 1)
                 df = self.meter.weather_station.get_HDD_df(df, self.Thcp)
-                df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
-            if 'Peak Demand' in current_model['yname']:
-                if 'Peak Demand' not in df.columns: raise TypeError
+                df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
+                df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
+            if 'peak demand/day' in current_model['yname']:
+                df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -1152,17 +1168,17 @@ class MeterPeakDemandModel(models.Model):
         model types."""
         model_dictionary = {
             '1p': {'include_intercept': True,
-                   'wname': [],
+                   'wname': ['Days'],
                    'xnames': [],
-                   'yname': ['Peak Demand']},
+                   'yname': ['peak demand/day']},
             '2pc': {'include_intercept': True,
-                    'wname': [],
-                    'xnames': ['CDD_demand'],
-                    'yname': ['Peak Demand']},
+                    'wname': ['Days'],
+                    'xnames': ['CDD (peak demand)/day'],
+                    'yname': ['peak demand/day']},
             '2ph': {'include_intercept': True,
-                    'wname': [],
-                    'xnames': ['HDD_demand'],
-                    'yname': ['Peak Demand']}  }
+                    'wname': ['Days'],
+                    'xnames': ['HDD (peak demand)/day'],
+                    'yname': ['peak demand/day']}  }
         model_name_list = [x for x in model_dictionary]
         return [model_name_list, model_dictionary]
     def get_model_specs(self, model_type=None):
@@ -1219,27 +1235,37 @@ class MeterPeakDemandModel(models.Model):
             if Tccp is None: Tccp = self.Tccp
             if Thcp is None: Thcp = self.Thcp
             df = self.get_baseline_df()
-            df = df.drop(['CDD_demand', 'HDD_demand'], axis = 1)
+            df = df.drop(['CDD (peak demand)', 'HDD (peak demand)'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
-            df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
+            df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
             df = self.meter.weather_station.get_HDD_df(df, Thcp)
-            df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
-            
-            df = df.sort_index()
-            df_avg = df[0:12]
-            for i in range(0,12):
-                df_avg['CDD_demand'][i:i+1] = df['CDD_demand'][[x.month==df.index[i].month for x in df.index]].mean()
-                df_avg['HDD_demand'][i:i+1] = df['HDD_demand'][[x.month==df.index[i].month for x in df.index]].mean()
-            df_avg = df_avg.sort_index()
+            df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
                         subject='Calculation failed.',
-                        comment='MeterPeakDemandModel %s, get_average_baseline_degree_days failed, function aborted.' % self.id)
+                        comment='MeterPeakDemandModel %s get_average_baseline_degree_days failed to calculate or load degree days into dataframe, function aborted.' % self.id)
             m.save()
             self.messages.add(m)
             print m
             df_avg = None
+        else:
+            if len(df)<12:
+                m = Message(when=timezone.now(),
+                            message_type='Code Error',
+                            subject='Calculation failed.',
+                            comment='MeterPeakDemandModel %s get_average_baseline_degree_days found less than 12-month baseline period, function aborted.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+                df_avg = None
+            else:
+                df = df.sort_index()
+                df_avg = df[0:12]
+                for i in range(0,12):
+                    df_avg['CDD (peak demand)'][i:i+1] = df['CDD (peak demand)'][[x.month==df.index[i].month for x in df.index]].mean()
+                    df_avg['HDD (peak demand)'][i:i+1] = df['HDD (peak demand)'][[x.month==df.index[i].month for x in df.index]].mean()
+                df_avg = df_avg.sort_index()
         return df_avg
          
     def get_baseline_df(self):
@@ -1371,18 +1397,24 @@ class MeterPeakDemandModel(models.Model):
         
         available_models = self.get_available_models()
         track_runs = pd.DataFrame()
+        track_Tccp = pd.DataFrame()
+        track_Thcp = pd.DataFrame()
+        best_run_results = None
         try:
             Tccp = Thcp = 65
             #not using prep_df, instead loading all needed columns once and then cycling through
             #as new models are added, need to add code here to make sure the new models are
             #    included in the search for the best fit model
             df = self.get_baseline_df()
-            df = df.drop(['CDD_demand', 'HDD_demand'], axis = 1)
+            df = df.drop(['CDD (peak demand)', 'HDD (peak demand)'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
-            df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
+            df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
             df = self.meter.weather_station.get_HDD_df(df, Thcp)
-            df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
+            df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
             df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
+            df['CDD (peak demand)/day'] = df['CDD (peak demand)']/df['Days']
+            df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
+            df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
             #--------------------------------------------------------------------------
             df = df.sort_index()
             
@@ -1394,11 +1426,12 @@ class MeterPeakDemandModel(models.Model):
                                             xnames = available_models[1][run]['xnames'],
                                             yname = available_models[1][run]['yname'],
                                             include_intercept = available_models[1][run]['include_intercept'])
-                    track_runs = track_runs.append(pd.DataFrame({'id': run,
-                                                                 'Tccp': Tccp,
-                                                                 'Thcp': Thcp,
-                                                                 'acceptance_score': self.acceptance_score},
-                                                                 index=[run + str(Tccp) + str(Thcp)]))
+                    if results is not None:
+                        track_runs = track_runs.append(pd.DataFrame({'id': run,
+                                                                     'Tccp': Tccp,
+                                                                     'Thcp': Thcp,
+                                                                     'acceptance_score': self.acceptance_score},
+                                                                     index=[run + str(Tccp) + str(Thcp)]))
                 except:
                     m = Message(when=timezone.now(),
                                 message_type='Code Error',
@@ -1426,14 +1459,18 @@ class MeterPeakDemandModel(models.Model):
                     track_Tccp = pd.DataFrame()            
                     Thcp = 65
                     df = self.get_baseline_df()
-                    df = df.drop(['HDD_demand'], axis = 1)
+                    df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
+                    df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
+                    df = df.drop(['HDD (peak demand)'], axis = 1)
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
-                    df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
+                    df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
+                    df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
                     for Tccp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['CDD_demand'], axis = 1)
+                        df = df.drop(['CDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
-                        df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
+                        df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
+                        df['CDD (peak demand)/day'] = df['CDD (peak demand)']/df['Days']
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
                         results = self.set_model_print_results(df = df,
@@ -1465,14 +1502,16 @@ class MeterPeakDemandModel(models.Model):
                     Tccp = 65
                     df = self.get_baseline_df()
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
-                    df = df.drop(['CDD_demand'], axis = 1)
+                    df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
+                    df = df.drop(['CDD (peak demand)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
-                    df.rename(columns={'CDD': 'CDD_demand'}, inplace = True)
+                    df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
                     for Thcp in range(55, 80):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['HDD_demand'], axis = 1)
+                        df = df.drop(['HDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
-                        df.rename(columns={'HDD': 'HDD_demand'}, inplace = True)
+                        df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
+                        df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
                         results = self.set_model_print_results(df = df,
@@ -1783,8 +1822,8 @@ class MeterPeakDemandModel(models.Model):
                 
                 self.nbe = np.sum(df[yname[0]].apply(float)*df[wname[0]].apply(float)-results.fittedvalues*df[wname[0]].apply(float))/np.sum(df[yname[0]].apply(float)*df[wname[0]].apply(float))
                 
-                self.first_month = str(df.index[0])
-                self.last_month = str(df.index[-1])
+                self.first_month = df.index[0].strftime('%m/%Y')
+                self.last_month = df.index[-1].strftime('%m/%Y')
                 
                 self.set_accept_score()
         self.save()
@@ -1932,6 +1971,5 @@ class MeterPeakDemandModel(models.Model):
             print m
             predicted = predstd = interval_l = interval_u = None
         return predicted, predstd, interval_l, interval_u
-
     class Meta:
         app_label = 'BuildingSpeakApp'

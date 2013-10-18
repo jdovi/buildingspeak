@@ -390,7 +390,8 @@ class WeatherStationAdmin(admin.ModelAdmin):
                         'classes': ['collapse']}),
     ]
     list_display = ('name', 'id', 'description', 'latitude', 'longitude',
-                    'oldest_data_point_for_admin', 'connected_buildings_for_admin',
+                    'oldest_data_point_for_admin', 'get_duplicates_for_admin',
+                    'missing_hours_for_admin', 'connected_buildings_for_admin',
                     'connected_meters_for_admin')
     search_fields = ['name', 'id', 'description', 'latitude', 'longitude']
     list_filter = ['name', 'tz_name']

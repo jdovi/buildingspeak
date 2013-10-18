@@ -143,10 +143,15 @@ class WeatherStation(models.Model):
                 self.messages.add(m)
                 print m
             else:
+                #removing the 11:11:11 added to the month start/end dates to align with
+                #weather data points stored on the hour mark
+                if df['Start Date'][0].hour == df['Start Date'][0].minute == df['Start Date'][0].second == 11:
+                    df['Start Date'] = df['Start Date'] - timedelta(hours=11,minutes=11,seconds=11)
+                    df['End Date'] = df['End Date'] - timedelta(hours=11,minutes=11,seconds=11)
                 for i in range(0,len(df)):
                     try:
                         df['CDD'][i:i+1] = self.get_CDD(start_date = df['Start Date'][i],
-                                                    end_date = df['End Date'][i],
+                                                        end_date = df['End Date'][i],
                                                     base_temp = base_temp_CDD)[0]
                     except:
                         m = Message(when=timezone.now(),
@@ -338,7 +343,8 @@ class WeatherStation(models.Model):
             result = None
         else:
             try:
-                df = self.get_station_dataframe(start = start_date, end = end_date)
+                df = self.get_station_dataframe(start = start_date,
+                                                end = end_date)
                 df = df.sort_index()
                 df = df['temperature']
             except:
@@ -532,6 +538,18 @@ class WeatherStation(models.Model):
         return x
     def __unicode__(self):
         return self.name
+    def get_duplicates_for_admin(self):
+        try:
+            duplicates = self.get_station_dataframe().index.get_duplicates()
+            if len(duplicates)==0:
+                answer = 'None.'
+            else:
+                answer = '<br>'.join([str(x) for x in duplicates])
+        except:
+            answer = 'Unable to determine.'
+        return answer
+    get_duplicates_for_admin.allow_tags = True
+    get_duplicates_for_admin.short_description = 'Duplicates (UTC)'
     def connected_buildings_for_admin(self):
         return '<br>'.join(['<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_building_change',args=(bldg.id,)), bldg.name) for bldg in self.building_set.all()])
     connected_buildings_for_admin.allow_tags = True
@@ -541,7 +559,7 @@ class WeatherStation(models.Model):
     connected_meters_for_admin.allow_tags = True
     connected_meters_for_admin.short_description = 'Connected Meters'
     def missing_hours_for_admin(self):
-        """Missing hours
+        """Days with missing hours
         in weather data."""
         try:
             start_date = self.get_oldest_date().time
@@ -555,13 +573,18 @@ class WeatherStation(models.Model):
                 wdpts = wdpts.sort_index()
                 full_set = wdpts.reindex(pd.date_range(start = start_date, end = end_date, freq = 'h'),
                                          fill_value = NaN)
-                missing_hours = full_set[pd.isnull(full_set)['blank']]
-                answer = '<br>'.join([str(x) for x in missing_hours.index])
+                missing_hours = full_set[pd.isnull(full_set)]
+                station_timezone = tz(self.tz_name)
+                days_with_missing_hours = pd.Series(missing_hours.index).map(lambda xx: xx.tz_localize(UTC).astimezone(station_timezone)).map(pd.Timestamp.date).unique()
+                if len(days_with_missing_hours)>10:
+                    answer = 'Total = ' + str(len(days_with_missing_hours)) + ':<br>' + '<br>'.join([str(x) for x in days_with_missing_hours[0:9]]) + '<br>...'
+                else:
+                    answer = '<br>'.join([str(x) for x in days_with_missing_hours])
         except:
             answer = 'Unable to retrieve.'
         return answer
     missing_hours_for_admin.allow_tags = True
-    missing_hours_for_admin.short_description = 'Missing Hours'
+    missing_hours_for_admin.short_description = 'Days Missing Hour(s) (local time)'
     def number_of_missing_hours_for_admin(self):
         """Number of missing hours
         in weather data."""
@@ -588,7 +611,7 @@ class WeatherStation(models.Model):
             result = '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_weatherdatapoint_change',args=(datapoint.id,)), str(datapoint.time))
         return result
     newest_data_point_for_admin.allow_tags = True
-    newest_data_point_for_admin.short_description = 'Newest WeatherDataPoint'
+    newest_data_point_for_admin.short_description = 'Newest WeatherDataPoint (UTC)'
     def oldest_data_point_for_admin(self):
         """Return oldest datapoint's time."""
         dplist = self.weatherdatapoint_set.order_by('time')
@@ -599,7 +622,7 @@ class WeatherStation(models.Model):
             result = '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_weatherdatapoint_change',args=(datapoint.id,)), str(datapoint.time))
         return result
     oldest_data_point_for_admin.allow_tags = True
-    oldest_data_point_for_admin.short_description = 'Oldest WeatherDataPoint'
+    oldest_data_point_for_admin.short_description = 'Oldest WeatherDataPoint (UTC)'
     def get_station_dataframe(self, start=[], end=[]):
         """Inputs:
             start (datetime, optional)
@@ -872,6 +895,9 @@ class WeatherStation(models.Model):
                                 rawtimes = [x.time for x in hourlypts.data]
                                 station_timezone = tz(self.tz_name)
                                 utc_tz_aware_times = [station_timezone.localize(x).astimezone(UTC) for x in rawtimes]
+                                for i in range(0,len(utc_tz_aware_times)-1): #conversion seems to fix Spring but not Fall
+                                    if utc_tz_aware_times[i] == utc_tz_aware_times[i+1]:
+                                        utc_tz_aware_times[i] = utc_tz_aware_times[i] - timedelta(hours=1)
                                 t = pd.Series(utc_tz_aware_times)
                                 summary = pd.Series([x.summary for x in hourlypts.data],index=t)
                                 icon = pd.Series([x.icon for x in hourlypts.data],index=t)
@@ -981,7 +1007,7 @@ class WeatherStation(models.Model):
                                                    'visibility' : visibility,
                                                    'ozone' : ozone},
                                                    index = t)
-                                df = df.tz_convert('UTC')
+                                if df.index.tzinfo is None: df = df.tz_localize('UTC')
                                 df = df.sort_index()
                                 df = df.applymap(self.map_decimal)
                             except:

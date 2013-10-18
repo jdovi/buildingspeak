@@ -151,7 +151,8 @@ class Meter(models.Model):
         columns for the sums
         from all attached
         EfficiencyMeasures for
-        consumption, demand, and
+        consumption, demand,
+        their deltas, and
         cost savings.
         
         WARNING: only adds 
@@ -161,19 +162,26 @@ class Meter(models.Model):
         try:
             df['Consumption Savings_sum'] = Decimal(0.0)
             df['Peak Demand Savings_sum'] = Decimal(0.0)
+            df['Consumption Savings_sum_delta'] = Decimal(0.0)
+            df['Peak Demand Savings_sum_delta'] = Decimal(0.0)
             df['Cost Savings_sum'] = Decimal(0.0)
             
-            for emma in self.emmeterapportionment_set.all():
-                if ( (emma.efficiency_measure.utility_type == self.utility_type) and
-                     (emma.efficiency_measure.units == self.units)  ):
-                    df = emma.efficiency_measure.get_savings_df(df=df)
-                    df['Consumption Savings_sum'] = df['Consumption Savings_sum'] + df['Consumption Savings']
-                    df['Peak Demand Savings_sum'] = df['Peak Demand Savings_sum'] + df['Peak Demand Savings']
-                    df['Cost Savings_sum'] = df['Cost Savings_sum'] + df['Cost Savings']
-            df = df.drop(['Cost Savings', 'Peak Demand Savings', 'Consumption Savings'], axis = 1)
-            df.rename(columns={'Cost Savings_sum': 'Cost Savings',
-                               'Peak Demand Savings_sum': 'Peak Demand Savings',
-                               'Consumption Savings_sum': 'Consumption Savings'}, inplace = True)
+            if len(self.emmeterapportionment_set.all()) > 0:
+                for emma in self.emmeterapportionment_set.all():
+                    if ( (emma.efficiency_measure.utility_type == self.utility_type) and
+                         (emma.efficiency_measure.units == self.units)  ):
+                        df = emma.efficiency_measure.get_savings_df(df=df)
+                        df['Consumption Savings_sum'] = df['Consumption Savings_sum'] + df['Consumption Savings']
+                        df['Peak Demand Savings_sum'] = df['Peak Demand Savings_sum'] + df['Peak Demand Savings']
+                        df['Consumption Savings_sum_delta'] = df['Consumption Savings_sum'] + df['Consumption Savings']*emma.efficiency_measure.percent_uncertainty
+                        df['Peak Demand Savings_sum_delta'] = df['Peak Demand Savings_sum'] + df['Peak Demand Savings']*emma.efficiency_measure.percent_uncertainty
+                        df['Cost Savings_sum'] = df['Cost Savings_sum'] + df['Cost Savings']
+                    df = df.drop(['Cost Savings', 'Peak Demand Savings', 'Consumption Savings'], axis = 1)
+            df.rename(columns={'Cost Savings_sum': 'Cost (esave)',
+                               'Peak Demand Savings_sum': 'Peak Demand (esave)',
+                               'Consumption Savings_sum': 'Consumption (esave)',
+                               'Peak Demand Savings_sum_delta': 'Peak Demand (esave delta)',
+                               'Consumption Savings_sum_delta': 'Consumption (esave delta)'}, inplace = True)
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -183,7 +191,13 @@ class Meter(models.Model):
             self.messages.add(m)
             print m
         return df
-    def get_bill_data_period_dataframe(self, first_month='', last_month=''): #add months here for range, like get_monther_period_dataframe has-------*******
+    def get_bill_data_period_dataframe(self, first_month='', last_month=''):
+        """function(first_month,last_month)
+            (optional inputs)
+            
+        Takes mm/yyyy strings and returns
+        a dataframe of bill data for that
+        range."""
         mdf = self.monther_set.get(name='BILLx').get_monther_period_dataframe(first_month=first_month, last_month=last_month)
         if mdf is None:
             m = Message(when=timezone.now(),
@@ -194,7 +208,13 @@ class Meter(models.Model):
             self.messages.add(m)
             print m
         return mdf
-    def get_dataframe_as_table(self, columnlist, number_of_recent_months=13):
+    def get_dataframe_as_table(self, df, columnlist):
+        """function(df,columnlist)
+        
+        Takes dataframe and a list
+        of column names to include
+        in the output.  Index put
+        in first column as Month."""
         r = []
         try:
             r.append(columnlist)
@@ -208,7 +228,7 @@ class Meter(models.Model):
             print m
         else:
             try:
-                df_dec = self.get_bill_data_period_dataframe()
+                df_dec = df
             except:
                 m = Message(when=timezone.now(),
                             message_type='Code Error',
@@ -249,7 +269,6 @@ class Meter(models.Model):
                             print m
                         else:
                             try:
-                                df = df[-1:-(number_of_recent_months+1):-1]
                                 df = df.sort_index()
                                 for i in range(0,len(df)):
                                     r_1 = [str(df.index[i])]
@@ -278,7 +297,7 @@ class Meter(models.Model):
         column in Bill Data File indicates
         otherwise."""
         if not(file_location): file_location = self.bill_data_file.url
-        
+        success = success_a = success_b = None
         try:
             readbd = pd.read_csv(file_location,
                                  skiprows=0,
@@ -401,7 +420,7 @@ class Meter(models.Model):
                                                 month_i = None #setting here to avoid error in Except block
                                                 month_i = readbd_b.index[i]
                                                 per_date = UTC.localize(month_i.to_timestamp() + timedelta(days=10,hours=11,minutes=11,seconds=11))
-                                                mlg = Monthling.objects.get(when=per_date)
+                                                mlg = Monthling.objects.filter(monther=self.monther_set.get(name='BILLx')).get(when=per_date)
                                                 if mlg is None: raise TypeError
                                                 mlg.__setattr__('start_date',readbd_b['Start Date'][i])
                                                 mlg.__setattr__('end_date',readbd_b['End Date'][i])
@@ -432,214 +451,443 @@ class Meter(models.Model):
                                     success_b = False
         return max(success, success_a, success_b)
 
-    def process_bill_data(self, file_location=0):##########################working here
-        """Input:
-            [file_location]
-                (default: MeterInstance.bill_data_url)
+    def bill_data_calc_kbtu(self, df):
+        """function(df)
         
-        Reads Bill Data File and loads into
-        Meter's BILLx Monther, respecting any
-        pre-existing data unless Overwrite
-        column in Bill Data File indicates
-        otherwise."""
-#                                if len(newbd)>0:
-#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-#                                    if success is not None: newbd = success
-#                                    
-#                                    newbd.rename(columns={'Billing Demand': 'Billing Demand (act)',
-#                                                          'Peak Demand': 'Peak Demand (act)',
-#                                                          'Consumption': 'Consumption (act)',
-#                                                          'kBtu Consumption': 'kBtu Consumption (act)',
-#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (act)',
-#                                                          'Cost': 'Cost (act)'}, inplace = True)
-#                                    #newbd is only bill data without billing cycle data of Start Date and End Date, so we need to add it in to run newer get_XDD_df functions
-#                                    newbd['Start Date'] = newbc['Start Date']
-#                                    newbd['End Date'] = newbc['End Date']
-#                                    if self.monther_set.get(name='BILLx').consumption_model.Tccp is not None:
-#                                        newbd = self.weather_station.get_CDD_df(newbd, self.monther_set.get(name='BILLx').consumption_model.Tccp)
-#                                        newbd.rename(columns={'CDD': 'CDD_consumption'}, inplace = True)
-#                                    else:
-#                                        m = Message(when=timezone.now(),
-#                                                message_type='Code Warning',
-#                                                subject='Missing parameters.',
-#                                                comment='Meter %s missing Tccp on MeterConsumptionModel, unable to retrieve degree days.' % self.id)
-#                                        m.save()
-#                                        self.messages.add(m)
-#                                        print m
-#                                    if self.monther_set.get(name='BILLx').consumption_model.Thcp is not None:
-#                                        newbd = self.weather_station.get_HDD_df(newbd, self.monther_set.get(name='BILLx').consumption_model.Thcp)
-#                                        newbd.rename(columns={'HDD': 'HDD_consumption'}, inplace = True)
-#                                    else:
-#                                        m = Message(when=timezone.now(),
-#                                                message_type='Code Warning',
-#                                                subject='Missing parameters.',
-#                                                comment='Meter %s missing Thcp on MeterConsumptionModel, unable to retrieve degree days.' % self.id)
-#                                        m.save()
-#                                        self.messages.add(m)
-#                                        print m
-#                                    if self.monther_set.get(name='BILLx').peak_demand_model.Tccp is not None:
-#                                        newbd = self.weather_station.get_CDD_df(newbd, self.monther_set.get(name='BILLx').peak_demand_model.Tccp)
-#                                        newbd.rename(columns={'CDD': 'CDD_peak_demand'}, inplace = True)
-#                                    else:
-#                                        m = Message(when=timezone.now(),
-#                                                message_type='Code Warning',
-#                                                subject='Missing parameters.',
-#                                                comment='Meter %s missing Tccp on MeterPeakDemandModel, unable to retrieve degree days.' % self.id)
-#                                        m.save()
-#                                        self.messages.add(m)
-#                                        print m
-#                                    if self.monther_set.get(name='BILLx').peak_demand_model.Thcp is not None:
-#                                        newbd = self.weather_station.get_HDD_df(newbd, self.monther_set.get(name='BILLx').peak_demand_model.Thcp)
-#                                        newbd.rename(columns={'HDD': 'HDD_peak_demand'}, inplace = True)
-#                                    else:
-#                                        m = Message(when=timezone.now(),
-#                                                message_type='Code Warning',
-#                                                subject='Missing parameters.',
-#                                                comment='Meter %s missing Thcp on MeterPeakDemandModel, unable to retrieve degree days.' % self.id)
-#                                        m.save()
-#                                        self.messages.add(m)
-#                                        print m
-#                                        
-#                                #-----baseline values come from MeterModels
-#                                    if 'Billing Demand (base)' not in newbd.columns: newbd['Billing Demand (base)'] = NaN #ignore for now
-#                                    if 'Peak Demand (base)' not in newbd.columns:
-#                                        predicted,stderror,lower_bound,upper_bound = self.monther_set.get('BILLx').peak_demand_model.current_model_predict_df(df=newbd)
-#                                        newbd['Peak Demand (base)'] = predicted
-#                                        newbd['Peak Demand (base delta)'] = predicted - lower_bound
-#                                    if 'Consumption (base)' not in newbd.columns:
-#                                        predicted,stderror,lower_bound,upper_bound = self.monther_set.get('BILLx').consumption_model.current_model_predict_df(df=newbd)
-#                                        newbd['Consumption (base)'] = predicted
-#                                        newbd['Consumption (base delta)'] = predicted - lower_bound
-#                                        
-#                                    #now run (base) Con/Dem pair through add_kBtu_kBtuh function and then set names back
-#                                    newbd.rename(columns={'Consumption (base)': 'Consumption',
-#                                                          'Peak Demand (base)': 'Peak Demand'},inplace=True)
-#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-#                                    if success is not None: newbd = success
-#                                    newbd.rename(columns={'Consumption': 'Consumption (base)',
-#                                                          'Peak Demand': 'Peak Demand (base)',
-#                                                          'kBtu Consumption': 'kBtu Consumption (base)',
-#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (base)'},inplace=True)
-#                                    #now run (base delta) Con/Dem pair through add_kBtu_kBtuh function and then set names back
-#                                    newbd.rename(columns={'Consumption (base delta)': 'Consumption',
-#                                                          'Peak Demand (base delta)': 'Peak Demand'},inplace=True)
-#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-#                                    if success is not None: newbd = success
-#                                    newbd.rename(columns={'Consumption': 'Consumption (base delta)',
-#                                                          'Peak Demand': 'Peak Demand (base delta)',
-#                                                          'kBtu Consumption': 'kBtu Consumption (base delta)',
-#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (base delta)'},inplace=True)
-#                                    
-#                                #-----expected savings values come from EfficiencyMeasure models
-#                                    if 'Billing Demand (esave)' not in newbd.columns: newbd['Billing Demand (esave)'] = NaN #ignore for now
-#                                    if ('Consumption (esave)' not in newbd.columns or 
-#                                        'Peak Demand (esave)' not in newbd.columns or
-#                                        'Cost (esave)' not in newbd.columns):
-#                                        newbd = self.get_all_savings(df=newbd)
-#                                        newbd['Consumption (esave)'] = newbd['Consumption Savings']
-#                                        newbd['Peak Demand (esave)'] = newbd['Peak Demand Savings']
-#                                        #using RateSchedule(demand, consumption) instead of the following line
-#                                        #newbd['Cost (esave)'] = newbd['Cost Savings']
-#                                    newbd = newbd.drop(['Consumption Savings',
-#                                                        'Peak Demand Savings',
-#                                                        'Cost Savings'], axis = 1)
-#                                    newbd.rename(columns={'Consumption (esave)': 'Consumption',
-#                                                          'Peak Demand (esave)': 'Peak Demand'},inplace=True)
-#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-#                                    if success is not None: newbd = success
-#                                    newbd.rename(columns={'Consumption': 'Consumption (esave)',
-#                                                          'Peak Demand': 'Peak Demand (esave)',
-#                                                          'kBtu Consumption': 'kBtu Consumption (esave)',
-#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (esave)'},inplace=True)
-#                                    
-#                                #-----expected values are baselines minus expected savings
-#                                    if 'Billing Demand (exp)' not in newbd.columns: newbd['Billing Demand (exp)'] = NaN #ignore for now
-#                                    if 'Peak Demand (exp)' not in newbd.columns:
-#                                        newbd['Peak Demand (exp)'] = newbd['Peak Demand (base)'] - newbd['Peak Demand (esave)']
-#                                    if 'Consumption (exp)' not in newbd.columns:
-#                                        newbd['Consumption (exp)'] = newbd['Consumption (base)'] - newbd['Consumption (esave)']
-#                                    newbd.rename(columns={'Consumption (exp)': 'Consumption',
-#                                                          'Peak Demand (exp)': 'Peak Demand'},inplace=True)
-#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-#                                    if success is not None: newbd = success
-#                                    newbd.rename(columns={'Consumption': 'Consumption (exp)',
-#                                                          'Peak Demand': 'Peak Demand (exp)',
-#                                                          'kBtu Consumption': 'kBtu Consumption (exp)',
-#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (exp)'},inplace=True)
-#                                    
-#                                #-----actual savings are baselines minus actuals
-#                                    if 'Billing Demand (asave)' not in newbd.columns: newbd['Billing Demand (asave)'] = NaN #ignore for now
-#                                    if 'Peak Demand (asave)' not in newbd.columns:
-#                                        newbd['Peak Demand (asave)'] = newbd['Peak Demand (base)'] - newbd['Peak Demand (act)']
-#                                    if 'Consumption (asave)' not in newbd.columns:
-#                                        newbd['Consumption (asave)'] = newbd['Consumption (base)'] - newbd['Consumption (act)']
-#                                    newbd.rename(columns={'Consumption (asave)': 'Consumption',
-#                                                          'Peak Demand (asave)': 'Peak Demand'},inplace=True)
-#                                    success = self.add_kBtu_kBtuh(newbd,self.utility_type,self.units)
-#                                    if success is not None: newbd = success
-#                                    newbd.rename(columns={'Consumption': 'Consumption (asave)',
-#                                                          'Peak Demand': 'Peak Demand (asave)',
-#                                                          'kBtu Consumption': 'kBtu Consumption (asave)',
-#                                                          'kBtuh Peak Demand': 'kBtuh Peak Demand (asave)'},inplace=True)
-#                                    
-#                                #----costs are based on Peak Demand and Consumption with RateSchedule
-#                                    if 'Cost (base)' not in newbd.columns:
-#                                        newbd.rename(columns={'Consumption (base)': 'Consumption',
-#                                                              'Peak Demand (base)': 'Peak Demand'},inplace=True)
-#                                        newbd['Cost (base)'] = self.rate_schedule.get_cost_df(df=newbd)['Calculated Cost']
-#                                        newbd.rename(columns={'Consumption': 'Consumption (base)',
-#                                                              'Peak Demand': 'Peak Demand (base)'},inplace=True)
-#                                    if 'Cost (exp)' not in newbd.columns:
-#                                        newbd.rename(columns={'Consumption (exp)': 'Consumption',
-#                                                              'Peak Demand (exp)': 'Peak Demand'},inplace=True)
-#                                        newbd['Cost (exp)'] = self.rate_schedule.get_cost_df(df=newbd)['Calculated Cost']
-#                                        newbd.rename(columns={'Consumption': 'Consumption (exp)',
-#                                                              'Peak Demand': 'Peak Demand (exp)'},inplace=True)
-#                                    if 'Cost (esave)' not in newbd.columns:
-#                                        newbd['Cost (esave)'] = newbd['Cost (base)'] - newbd['Cost (exp)']
-#                                    if 'Cost (asave)' not in newbd.columns:
-#                                        newbd['Cost (asave)'] = newbd['Cost (base)'] - newbd['Cost (act)']
-#                                    
-#                                    if 'CDD_peak_demand' not in newbd.columns: newbd['CDD_peak_demand'] = NaN
-#                                    if 'HDD_peak_demand' not in newbd.columns: newbd['HDD_peak_demand'] = NaN
-#                                    if 'CDD_consumption' not in newbd.columns: newbd['CDD_consumption'] = NaN
-#                                    if 'HDD_consumption' not in newbd.columns: newbd['HDD_consumption'] = NaN
-#    
-#                                    success = self.monther_set.get(name='BILLx').load_monther_period_dataframe(newbd)
-#                                    if success:
-#                                        m = Message(when=timezone.now(),
-#                                                message_type='Code Success',
-#                                                subject='Model updated.',
-#                                                comment='Meter %s updated its BILLx Monther.' % self.id)
-#                                        m.save()
-#                                        self.messages.add(m)
-#                                        print m
-#                                    else:
-#                                        m = Message(when=timezone.now(),
-#                                                message_type='Code Error',
-#                                                subject='Model update failed.',
-#                                                comment='Meter %s was unable to update its BILLx Monther.' % self.id)
-#                                        m.save()
-#                                        self.messages.add(m)
-#                                        print m
-#                else:
-#                    m = Message(when=timezone.now(),
-#                                message_type='Code Error',
-#                                subject='Expected contents not found.',
-#                                comment='Meter %s failed on process_bill_data function, Bill Data File does not have appropriate data.' % self.id)
-#                    m.save()
-#                    self.messages.add(m)
-#                    print m
-#            except:
-#                m = Message(when=timezone.now(),
-#                            message_type='Code Error',
-#                            subject='Unable to load data.',
-#                            comment='Meter %s failed at process_bill_data, function aborted.' % self.id)
-#                m.save()
-#                self.messages.add(m)
-#                print m
-#        self.bill_data_import = False
-        pass
+        Computes kBtu and kBtuh to
+        go with Consumption and
+        Peak Demand columns for
+        all groups (base, exp, etc.)
+        of Meter's BILLx Monther."""
+        try:
+            df.rename(columns={'Consumption (act)': 'Consumption',
+                               'Peak Demand (act)': 'Peak Demand'}, inplace=True)
+            df = df.drop(['kBtu Consumption (act)','kBtuh Peak Demand (act)'], axis=1)
+            result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
+            if result is not None: df = result
+            df.rename(columns={'Consumption': 'Consumption (act)',
+                               'Peak Demand': 'Peak Demand (act)',
+                               'kBtu Consumption': 'kBtu Consumption (act)',
+                               'kBtuh Peak Demand': 'kBtuh Peak Demand (act)'}, inplace=True)
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_kbtu failed on (act)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+
+        try:
+            df.rename(columns={'Consumption (asave)': 'Consumption',
+                               'Peak Demand (asave)': 'Peak Demand'}, inplace=True)
+            df = df.drop(['kBtu Consumption (asave)','kBtuh Peak Demand (asave)'], axis=1)
+            result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
+            if result is not None: df = result
+            df.rename(columns={'Consumption': 'Consumption (asave)',
+                               'Peak Demand': 'Peak Demand (asave)',
+                               'kBtu Consumption': 'kBtu Consumption (asave)',
+                               'kBtuh Peak Demand': 'kBtuh Peak Demand (asave)'}, inplace=True)
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_kbtu failed on (asave)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+
+        try:
+            df.rename(columns={'Consumption (base delta)': 'Consumption',
+                               'Peak Demand (base delta)': 'Peak Demand'}, inplace=True)
+            df = df.drop(['kBtu Consumption (base delta)','kBtuh Peak Demand (base delta)'], axis=1)
+            result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
+            if result is not None: df = result
+            df.rename(columns={'Consumption': 'Consumption (base delta)',
+                               'Peak Demand': 'Peak Demand (base delta)',
+                               'kBtu Consumption': 'kBtu Consumption (base delta)',
+                               'kBtuh Peak Demand': 'kBtuh Peak Demand (base delta)'}, inplace=True)
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_kbtu failed on (base delta)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+
+        try:
+            df.rename(columns={'Consumption (base)': 'Consumption',
+                               'Peak Demand (base)': 'Peak Demand'}, inplace=True)
+            df = df.drop(['kBtu Consumption (base)','kBtuh Peak Demand (base)'], axis=1)
+            result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
+            if result is not None: df = result
+            df.rename(columns={'Consumption': 'Consumption (base)',
+                               'Peak Demand': 'Peak Demand (base)',
+                               'kBtu Consumption': 'kBtu Consumption (base)',
+                               'kBtuh Peak Demand': 'kBtuh Peak Demand (base)'}, inplace=True)
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_kbtu failed on (base)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+
+        try:
+            df.rename(columns={'Consumption (esave delta)': 'Consumption',
+                               'Peak Demand (esave delta)': 'Peak Demand'}, inplace=True)
+            df = df.drop(['kBtu Consumption (esave delta)','kBtuh Peak Demand (esave delta)'], axis=1)
+            result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
+            if result is not None: df = result
+            df.rename(columns={'Consumption': 'Consumption (esave delta)',
+                               'Peak Demand': 'Peak Demand (esave delta)',
+                               'kBtu Consumption': 'kBtu Consumption (esave delta)',
+                               'kBtuh Peak Demand': 'kBtuh Peak Demand (esave delta)'}, inplace=True)
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_kbtu failed on (esave delta)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+
+        try:
+            df.rename(columns={'Consumption (esave)': 'Consumption',
+                               'Peak Demand (esave)': 'Peak Demand'}, inplace=True)
+            df = df.drop(['kBtu Consumption (esave)','kBtuh Peak Demand (esave)'], axis=1)
+            result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
+            if result is not None: df = result
+            df.rename(columns={'Consumption': 'Consumption (esave)',
+                               'Peak Demand': 'Peak Demand (esave)',
+                               'kBtu Consumption': 'kBtu Consumption (esave)',
+                               'kBtuh Peak Demand': 'kBtuh Peak Demand (esave)'}, inplace=True)
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_kbtu failed on (esave)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+
+        try:
+            df.rename(columns={'Consumption (exp delta)': 'Consumption',
+                               'Peak Demand (exp delta)': 'Peak Demand'}, inplace=True)
+            df = df.drop(['kBtu Consumption (exp delta)','kBtuh Peak Demand (exp delta)'], axis=1)
+            result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
+            if result is not None: df = result
+            df.rename(columns={'Consumption': 'Consumption (exp delta)',
+                               'Peak Demand': 'Peak Demand (exp delta)',
+                               'kBtu Consumption': 'kBtu Consumption (exp delta)',
+                               'kBtuh Peak Demand': 'kBtuh Peak Demand (exp delta)'}, inplace=True)
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_kbtu failed on (exp delta)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+
+        try:
+            df.rename(columns={'Consumption (exp)': 'Consumption',
+                               'Peak Demand (exp)': 'Peak Demand'}, inplace=True)
+            df = df.drop(['kBtu Consumption (exp)','kBtuh Peak Demand (exp)'], axis=1)
+            result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
+            if result is not None: df = result
+            df.rename(columns={'Consumption': 'Consumption (exp)',
+                               'Peak Demand': 'Peak Demand (exp)',
+                               'kBtu Consumption': 'kBtu Consumption (exp)',
+                               'kBtuh Peak Demand': 'kBtuh Peak Demand (exp)'}, inplace=True)
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_kbtu failed on (exp)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+            
+        return df
+
+    def bill_data_calc_dd(self, df):
+        """function(df)
+        
+        Computes degree days based
+        on meter models attached
+        to Meter's BILLx Monther."""
+        try:
+            if self.monther_set.get(name='BILLx').consumption_model is None:
+                raise ValueError
+            elif self.monther_set.get(name='BILLx').consumption_model.Tccp is None:
+                raise ValueError
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Error',
+                    subject='Missing data.',
+                    comment='Meter %s missing MeterConsumptionModel or its Tccp on bill_data_calc_dd, unable to calculate CDD (consumption).' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        else:
+            try:
+                df = self.weather_station.get_CDD_df(df, self.monther_set.get(name='BILLx').consumption_model.Tccp)
+                df = df.drop(['CDD (consumption)'], axis = 1)
+                df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
+            except:
+                m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_dd unable to calculate CDD (consumption) and rename column.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+        
+        try:
+            if self.monther_set.get(name='BILLx').consumption_model is None:
+                raise ValueError
+            elif self.monther_set.get(name='BILLx').consumption_model.Thcp is None:
+                raise ValueError
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Error',
+                    subject='Missing data.',
+                    comment='Meter %s missing MeterConsumptionModel or its Thcp on bill_data_calc_dd, unable to calculate HDD (consumption).' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        else:
+            try:
+                df = self.weather_station.get_HDD_df(df, self.monther_set.get(name='BILLx').consumption_model.Thcp)
+                df = df.drop(['HDD (consumption)'], axis = 1)
+                df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
+            except:
+                m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_dd unable to calculate HDD (consumption) and rename column.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+
+        try:
+            if self.monther_set.get(name='BILLx').peak_demand_model is None:
+                raise ValueError
+            elif self.monther_set.get(name='BILLx').peak_demand_model.Tccp is None:
+                raise ValueError
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Error',
+                    subject='Missing data.',
+                    comment='Meter %s missing MeterPeakDemandModel or its Tccp on bill_data_calc_dd, unable to calculate CDD (peak demand).' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        else:
+            try:
+                df = self.weather_station.get_CDD_df(df, self.monther_set.get(name='BILLx').peak_demand_model.Tccp)
+                df = df.drop(['CDD (peak demand)'], axis = 1)
+                df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
+            except:
+                m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_dd unable to calculate CDD (peak demand) and rename column.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+        
+        try:
+            if self.monther_set.get(name='BILLx').peak_demand_model is None:
+                raise ValueError
+            elif self.monther_set.get(name='BILLx').peak_demand_model.Thcp is None:
+                raise ValueError
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Error',
+                    subject='Missing data.',
+                    comment='Meter %s missing MeterPeakDemandModel or its Thcp on bill_data_calc_dd, unable to calculate HDD (peak demand).' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        else:
+            try:
+                df = self.weather_station.get_HDD_df(df, self.monther_set.get(name='BILLx').peak_demand_model.Thcp)
+                df = df.drop(['HDD (peak demand)'], axis = 1)
+                df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
+            except:
+                m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_dd unable to calculate HDD (peak demand) and rename column.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+                
+        return df
+
+    def bill_data_calc_baseline(self, df):
+        """function(df)
+        
+        Computes (base) and (base
+        delta) from meter models
+        attached to Meter's BILLx
+        Monther."""
+        try:
+            check = (self.monther_set.get(name='BILLx').peak_demand_model is not None)
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Warning',
+                    subject='Missing data.',
+                    comment='Meter %s missing MeterPeakDemandModel on bill_data_calc_baseline, unable to calculate Peak Demand (base, base delta).' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        else:
+            if check:
+                try:
+                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').peak_demand_model.current_model_predict_df(df=df)
+                    df['Peak Demand (base)'] = predicted
+                    df['Peak Demand (base delta)'] = predicted - lower_bound
+                except:
+                    m = Message(when=timezone.now(),
+                            message_type='Code Error',
+                            subject='Calculation failed.',
+                            comment='Meter %s bill_data_calc_baseline unable to calculate Peak Demand (base, base delta).' % self.id)
+                    m.save()
+                    self.messages.add(m)
+                    print m
+                
+        try:
+            check = (self.monther_set.get(name='BILLx').consumption_model is not None)
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Warning',
+                    subject='Missing data.',
+                    comment='Meter %s missing MeterConsumptionModel on bill_data_calc_baseline, unable to calculate Consumption (base, base delta).' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        else:
+            if check:
+                try:
+                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').consumption_model.current_model_predict_df(df=df)
+                    df['Consumption (base)'] = predicted
+                    df['Consumption (base delta)'] = predicted - lower_bound
+                except:
+                    m = Message(when=timezone.now(),
+                            message_type='Code Error',
+                            subject='Calculation failed.',
+                            comment='Meter %s bill_data_calc_baseline unable to calculate Consumption (base, base delta).' % self.id)
+                    m.save()
+                    self.messages.add(m)
+                    print m
+        df[['Consumption (base)','Consumption (base delta)','Peak Demand (base)','Peak Demand (base delta)']] = df[['Consumption (base)','Consumption (base delta)','Peak Demand (base)','Peak Demand (base delta)']].applymap(Decimal)
+        return df
+
+    def bill_data_calc_savings(self, df):
+        """function(df)
+        
+        Computes savings (esave)
+        from efficiency measures
+        attached to Meter and
+        stores on BILLx Monther."""
+        try:
+            df = df.drop(['Cost (esave)','Peak Demand (esave)','Consumption (esave)',
+                          'Peak Demand (esave delta)','Consumption (esave delta)'], axis = 1)
+            df = self.get_all_savings(df=df)
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Warning',
+                    subject='Calculation failed.',
+                    comment='Meter %s bill_data_calc_savings unable to calculate Consumption and Peak Demand (esave).' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        return df
+        
+    def bill_data_calc_dependents(self, df):
+        """function(df)
+        
+        Computes (asave), (exp),
+        and (exp delta) values
+        of BILLx Monther. Needs
+        (base), (esave), and
+        (act) to compute."""
+        try:
+            df['Peak Demand (exp)'] = df['Peak Demand (base)'] - df['Peak Demand (esave)']
+            df['Consumption (exp)'] = df['Consumption (base)'] - df['Consumption (esave)']
+            df['Peak Demand (asave)'] = df['Peak Demand (base)'] - df['Peak Demand (act)']
+            df['Consumption (asave)'] = df['Consumption (base)'] - df['Consumption (act)']
+            df['Peak Demand (exp delta)'] = df['Peak Demand (base delta)'] - df['Peak Demand (esave delta)']
+            df['Consumption (exp delta)'] = df['Consumption (base delta)'] - df['Consumption (esave delta)']
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Warning',
+                    subject='Calculation failed.',
+                    comment='Meter %s bill_data_calc_dependents unable to calculate (exp)s, (asave)s, and (exp delta)s.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        return df
+
+    def bill_data_calc_costs(self, df):
+        """function(df)
+        
+        Computes costs for BILLx
+        Monther. Needs all
+        Consumptions and Demands
+        to compute."""
+        try:
+            check = (self.rate_schedule is None)
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Warning',
+                    subject='Missing data.',
+                    comment='Meter %s bill_data_calc_costs unable to retrieve rate schedule.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        else:
+            try:
+                df.rename(columns={'Consumption (base)': 'Consumption',
+                                   'Peak Demand (base)': 'Peak Demand'},inplace=True)
+                df['Cost (base)'] = self.rate_schedule.as_child().get_cost_df(df=df)['Calculated Cost']
+                df.rename(columns={'Consumption': 'Consumption (base)',
+                                   'Peak Demand': 'Peak Demand (base)'},inplace=True)
+                df.rename(columns={'Consumption (exp)': 'Consumption',
+                                   'Peak Demand (exp)': 'Peak Demand'},inplace=True)
+                df['Cost (exp)'] = self.rate_schedule.as_child().get_cost_df(df=df)['Calculated Cost']
+                df.rename(columns={'Consumption': 'Consumption (exp)',
+                                   'Peak Demand': 'Peak Demand (exp)'},inplace=True)
+                df['Cost (esave)'] = df['Cost (base)'] - df['Cost (exp)']
+                df['Cost (asave)'] = df['Cost (base)'] - df['Cost (act)']
+                
+                df['Consumption'] = df['Consumption (base)'] - df['Consumption (base delta)']
+                df['Peak Demand'] = df['Peak Demand (base)'] - df['Peak Demand (base delta)']
+                df['Cost (base delta)'] = (df['Cost (base)'] -
+                                            self.rate_schedule.as_child().get_cost_df(df=df)['Calculated Cost'])
+                                            
+                df['Consumption'] = df['Consumption (esave)'] - df['Consumption (esave delta)']
+                df['Peak Demand'] = df['Peak Demand (esave)'] - df['Peak Demand (esave delta)']
+                df['Cost (esave delta)'] = (df['Cost (esave)'] -
+                                            self.rate_schedule.as_child().get_cost_df(df=df)['Calculated Cost'])
+    
+                df = df.drop(['Consumption', 'Peak Demand'], axis = 1)
+                
+                df['Cost (exp delta)'] = df['Cost (base delta)'] - df['Cost (esave delta)']
+            except:
+                m = Message(when=timezone.now(),
+                        message_type='Code Warning',
+                        subject='Calculation failed.',
+                        comment='Meter %s bill_data_calc_costs unable to calculate costs.' % self.id)
+                m.save()
+                self.messages.add(m)
+                print m
+        return df
         
     def assign_period_datetime(self, time_series=[], dates=[]):
         """Inputs:

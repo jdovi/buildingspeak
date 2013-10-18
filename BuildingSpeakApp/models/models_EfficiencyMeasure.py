@@ -74,6 +74,9 @@ class EfficiencyMeasure(models.Model):
     annual_cost_savings = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                                               help_text='expected annual cost savings',
                                               default=Decimal(0.0))
+    percent_uncertainty = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
+                              help_text='uncertainty percentage in annual savings numbers',
+                              default=Decimal(0.01))
     
     percent_cool = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                               help_text='fraction of savings correlated with CDD',

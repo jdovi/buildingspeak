@@ -111,7 +111,6 @@ class RateSchedule(KnowsChild):
     #functions expected to be defined on all subclasses to enable universal
     #calling across all RateSchedules, regardless of subclass type
     def __unicode__(self):
-        print 'Warning: should be using subclass instance of actual rate schedule, not the parent superclass RateSchedule.'
         return self.name
     def get_cost_df(self, df):
         """Empty function on superclass
