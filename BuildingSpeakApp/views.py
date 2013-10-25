@@ -149,40 +149,13 @@ def building_detail(request, account_id, building_id):
 
 @login_required
 def meter_detail(request, account_id, meter_id):
+    #---check that we can access the account and meter and they go together
     account = get_object_or_404(Account, pk=account_id)
     meter = get_object_or_404(Meter, pk=meter_id)
     if account.pk <> meter.account.pk:
         raise Http404
-    meter_dict = {}    
-    for z in meter._meta.get_all_field_names():
-        try:
-            meter_dict[z.replace('_',' ')] = meter.__getattribute__(z)
-        except AttributeError:
-            pass
-    this_month = pd.Period(timezone.now(),freq='M')
-    bill_data = meter.get_bill_data_period_dataframe(first_month=(this_month-12).strftime('%m/%Y'), last_month=this_month.strftime('%m/%Y')).sort_index() ######use # of months here!!!!!!!!!!!!!!!!!!!
-    cost_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
-                                                                           'Cost (base)',
-                                                                           'Cost (exp)',
-                                                                           'Cost (esave)',
-                                                                           'Cost (act)',
-                                                                           'Cost (asave)'])
-    if len(cost_by_month) == 1: cost_by_month = False
-    consumption_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
-                                                                                  'Consumption (base)',
-                                                                                  'Consumption (exp)',
-                                                                                  'Consumption (esave)',
-                                                                                  'Consumption (act)',
-                                                                                  'Consumption (asave)'])
-    if len(consumption_by_month) == 1: consumption_by_month = False
-    demand_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
-                                                                             'Peak Demand (base)',
-                                                                             'Peak Demand (exp)',
-                                                                             'Peak Demand (esave)',
-                                                                             'Peak Demand (act)',
-                                                                             'Peak Demand (asave)'])
-    if len(demand_by_month) == 1: demand_by_month = False
-
+    
+    #---branching for POST vs. GET request
     if request.method == 'POST': # If the form has been submitted...
         form = MeterDataUploadForm(request.POST, request.FILES) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
@@ -215,6 +188,39 @@ def meter_detail(request, account_id, meter_id):
             latest_bill_data_file = meter.bill_data_file
         form = MeterDataUploadForm({}, {'bill_data_file': latest_bill_data_file})
         reloading = False
+
+
+
+    meter_dict = {}    
+    for z in meter._meta.get_all_field_names():
+        try:
+            meter_dict[z.replace('_',' ')] = meter.__getattribute__(z)
+        except AttributeError:
+            pass
+    this_month = pd.Period(timezone.now(),freq='M')
+    bill_data = meter.get_bill_data_period_dataframe(first_month=(this_month-12).strftime('%m/%Y'), last_month=this_month.strftime('%m/%Y')).sort_index() ######use # of months here!!!!!!!!!!!!!!!!!!!
+    cost_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
+                                                                           'Cost (base)',
+                                                                           'Cost (exp)',
+                                                                           'Cost (esave)',
+                                                                           'Cost (act)',
+                                                                           'Cost (asave)'])
+    if len(cost_by_month) == 1: cost_by_month = False
+    consumption_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
+                                                                                  'Consumption (base)',
+                                                                                  'Consumption (exp)',
+                                                                                  'Consumption (esave)',
+                                                                                  'Consumption (act)',
+                                                                                  'Consumption (asave)'])
+    if len(consumption_by_month) == 1: consumption_by_month = False
+    demand_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
+                                                                             'Peak Demand (base)',
+                                                                             'Peak Demand (exp)',
+                                                                             'Peak Demand (esave)',
+                                                                             'Peak Demand (act)',
+                                                                             'Peak Demand (asave)'])
+    if len(demand_by_month) == 1: demand_by_month = False
+
     context = {
         'user':                 request.user,
         'form':                 form,

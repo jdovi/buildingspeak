@@ -51,53 +51,76 @@ function addChart(arr) {
       <div class="sixcol-four last">
         <div class="chart-header">Last month&#8217;s consumption</div>
         <div class="row">
-          <div id="{{ bldg.id }}-by-end-use" style="display: inline-block; width: 49%;"></div>
+          <div id="{{ bldg.id }}-by-fuel-type1" style="display: inline-block; width: 49%;"></div>
           <script>
-          addChart([
-            '{{ bldg.id }}-by-end-use',
-            'PieChart',
-            [ // data
-              //            Common Units
-              [ 'End Use',  'Percent' ],
-              [ 'Cooling',         11 ],
-              [ 'Lighting',         3 ],
-              [ 'Heating',          1 ]
-            ],
-            { // options
-              title:        'By End Use',
-              slices: {
-                0: {color: '#3366cc'},
-                1: {color: '#ff9900'},
-                2: {color: '#dc3912'}
-              }
-            }
+		  addChart([
+            '{{ bldg.id }}-by-fuel-type1',
+            'ScatterChart',
+			[
+			 ['', 'male', 'female'],
+			 [1, 2, 3],
+			 [2, 4, 6],
+			 [3, 6, 9]
+			],
+            { },
+			'Scatter'
           ]);
           </script>
 
-          <div id="{{ bldg.id }}-by-fuel-type" style="display: inline-block; width: 49%;"></div>
+          <div id="{{ bldg.id }}-by-fuel-type2" style="display: inline-block; width: 49%;"></div>
           <script>
-          addChart([
-            '{{ bldg.id }}-by-fuel-type',
-            'PieChart',
-            [ // data
-              //               Common Units
-              [ 'Fuel Type',   'Percent' ],
-              [ 'Electricity',        32 ],
-              [ 'Water',              11 ],
-              [ 'Natural Gas',         7 ]
-            ],
+		  addChart([
+            '{{ bldg.id }}-by-fuel-type2',
+            'BarChart',
+			[
+			 ['April',1000,  900, 1100,   400],
+			 ['May',  1170, 1000, 1200,   460],
+			 ['June',  660,  550,  800,  1120],
+			 ['July', 1030,    ,     ,    540]
+			],
             { // options
-              title:  'By Fuel Type',
-              slices: {
-                0: {color: '#109618'},
-                1: {color: '#0099c6'},
-                2: {color: '#ff9900'}
-              }
-            }
+              },
+			'BarWithErrors'
           ]);
           </script>
         </div>
-      </div> <!-- .sixcol-four -->
+
+        <div class="row">
+          <div id="{{ bldg.id }}-by-fuel-type3" style="display: inline-block; width: 49%;"></div>
+          <script>
+		  addChart([
+            '{{ bldg.id }}-by-fuel-type3',
+            'Table',
+			[
+			  ['Name',  'Age', 'Awesome?'],
+			  ['Jim',   22,  false],
+			  ['Alice', 33, true],
+			  ['Bob',   44,  true]
+			],
+            { },
+			'Table'
+          ]);
+          </script>
+
+          <div id="{{ bldg.id }}-by-fuel-type4" style="display: inline-block; width: 49%;"></div>
+          <script>
+		  addChart([
+            '{{ bldg.id }}-by-fuel-type4',
+            'ColumnChart',
+			[
+			 ['April',1000,  900, 1100,   400],
+			 ['May',  1170, 1000, 1200,   460],
+			 ['June',  660,  550,  800,  1120],
+			 ['July', 1030,    ,     ,    540]
+			],
+            { // options
+              },
+			'BarWithErrors'
+          ]);
+          </script>
+        </div>
+
+		</div> <!-- .sixcol-four -->
     </div> <!-- .row -->
 
     <div class="clear">
@@ -108,18 +131,33 @@ function addChart(arr) {
 </section> <!-- .entry -->
 
 <script type="text/javascript">
-google.load("visualization", "1", {packages:["corechart"]});
+google.load("visualization", "1", {packages:["corechart","table"]});
 google.setOnLoadCallback(function() {
   for (var i=0; i<charts.length; i++) {
     var chart = charts[i];
     drawChart.apply(this, chart);
   }
 });
-function drawChart(id, chartType, data, options) {
+function drawChart(id, chartType, data, options, dtType) {
   var el = document.getElementById(id);
-  var dataTable = google.visualization.arrayToDataTable(data);
+  //var dataTable = google.visualization.arrayToDataTable(data);
+  if (dtType == 'BarWithErrors')
+    {
+     var dataTable = new google.visualization.DataTable();
+     dataTable.addColumn('string', 'Month'); // Implicit domain column.
+     dataTable.addColumn('number', 'Sales'); // Implicit data column.
+     dataTable.addColumn({type:'number', role:'interval'});
+     dataTable.addColumn({type:'number', role:'interval'});
+     dataTable.addColumn('number', 'Expenses');
+     dataTable.addRows(data);
+     }
+  else
+    {
+	 var dataTable = google.visualization.arrayToDataTable(data);	 
+	 }
   var chart     = new google.visualization[chartType](el);
   chart.draw(dataTable, options);
 }
+
 </script>
 {% endblock %}
