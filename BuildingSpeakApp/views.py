@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
 from BuildingSpeakApp.models import Account, Building, Meter, Equipment, WeatherStation
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm, Message
+from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list
 import json
 import pandas as pd
 from django.utils import timezone
@@ -190,15 +191,40 @@ def meter_detail(request, account_id, meter_id):
         reloading = False
 
 
-
-    meter_dict = {}    
-    for z in meter._meta.get_all_field_names():
-        try:
-            meter_dict[z.replace('_',' ')] = meter.__getattribute__(z)
-        except AttributeError:
-            pass
+    meter_list = get_model_key_value_pairs_as_nested_list(meter)
     this_month = pd.Period(timezone.now(),freq='M')
+
+
     bill_data = meter.get_bill_data_period_dataframe(first_month=(this_month-12).strftime('%m/%Y'), last_month=this_month.strftime('%m/%Y')).sort_index() ######use # of months here!!!!!!!!!!!!!!!!!!!
+    cost_per_consumption = '$/' + meter.units.split(',')[1]
+    cost_per_peak_demand = '$/' + meter.units.split(',')[0]
+    consumption_per_day = meter.units.split(',')[1] + '/day'
+    bill_data['Days'] = [(bill_data['End Date'][i] - bill_data['Start Date'][i]).days for i in range(0, len(bill_data))]
+    
+    bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)']
+    bill_data[cost_per_peak_demand] = bill_data['Cost (act)'] / bill_data['Peak Demand (act)']
+    bill_data['$/day'] = bill_data['Cost (act)'] / bill_data['Days']
+    bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
+    
+    bill_data_avg = bill_data[[cost_per_consumption,cost_per_peak_demand,'$/day',consumption_per_day]][-1:-13:-1]
+    bill_data_avg['Month Integer'] = 99
+    for i in range(0,12):
+        bill_data_avg[cost_per_consumption][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum() / bill_data['Consumption (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum()
+        bill_data_avg[cost_per_peak_demand][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum() / bill_data['Peak Demand (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum()
+        bill_data_avg['$/day'][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum() / Decimal(1.0 + bill_data['Days'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum())
+        bill_data_avg[consumption_per_day][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum() / Decimal(1.0 + bill_data['Days'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum())
+        bill_data_avg['Month Integer'][i:i+1] = bill_data_avg.index[i].month
+    bill_data_avg = bill_data_avg.sort(columns='Month Integer')
+    bill_data_avg.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    bill_data_avg = bill_data_avg.drop(['Month Integer'],1)
+    bill_data_avg = bill_data_avg.transpose()
+    bill_data_avg['Annual'] = [bill_data['Cost (act)'].sum() / bill_data['Consumption (act)'].sum(),
+                                     bill_data['Cost (act)'].sum() / bill_data['Peak Demand (act)'].sum(),
+                                     bill_data['Cost (act)'].sum() / Decimal(1.0 + bill_data['Days'].sum()),
+                                     bill_data['Consumption (act)'].sum() / Decimal(1.0 + bill_data['Days'].sum())]
+    useful_metrics_by_month = meter.get_dataframe_as_table(df=bill_data_avg, columnlist=['Metric','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual'])
+    if len(useful_metrics_by_month) == 1: useful_metrics_by_month = False
+    
     cost_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
                                                                            'Cost (base)',
                                                                            'Cost (exp)',
@@ -220,22 +246,49 @@ def meter_detail(request, account_id, meter_id):
                                                                              'Peak Demand (act)',
                                                                              'Peak Demand (asave)'])
     if len(demand_by_month) == 1: demand_by_month = False
-
+    kbtu_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
+                                                                                  'kBtu Consumption (base)',
+                                                                                  'kBtu Consumption (exp)',
+                                                                                  'kBtu Consumption (esave)',
+                                                                                  'kBtu Consumption (act)',
+                                                                                  'kBtu Consumption (asave)'])
+    if len(kbtu_by_month) == 1: kbtu_by_month = False
+    kbtuh_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
+                                                                             'kBtuh Peak Demand (base)',
+                                                                             'kBtuh Peak Demand (exp)',
+                                                                             'kBtuh Peak Demand (esave)',
+                                                                             'kBtuh Peak Demand (act)',
+                                                                             'kBtuh Peak Demand (asave)'])
+    if len(kbtuh_by_month) == 1: kbtuh_by_month = False
+    
+    consumption_model_stats_table = meter.monther_set.get(name='BILLx').consumption_model.get_model_stats_as_table()
+    peak_demand_model_stats_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_model_stats_as_table()
+    
+    consumption_model_residuals_table = meter.monther_set.get(name='BILLx').consumption_model.get_model_residuals_as_table()
+    peak_demand_model_residuals_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_model_residuals_as_table()
+    
     context = {
-        'user':                 request.user,
-        'form':                 form,
-        'account':              account,
-        'buildings':            account.building_set.order_by('name'),
-        'meters':               account.meter_set.order_by('name'),
-        'accounts':             request.user.account_set.order_by('id'),
-        'meter':                meter,
-        'meter_dict':           meter_dict,
-        'alerts':               meter.get_all_alerts(reverse_boolean=True),
-        'cost_by_month':        json.dumps(cost_by_month),
-        'consumption_by_month': json.dumps(consumption_by_month),
-        'demand_by_month':      json.dumps(demand_by_month),
-        'consumption_units':    json.dumps(meter.units.split(',')[1]),
-        'demand_units':         json.dumps(meter.units.split(',')[0])
+        'user':                             request.user,
+        'form':                             form,
+        'account':                          account,
+        'buildings':                        account.building_set.order_by('name'),
+        'meters':                           account.meter_set.order_by('name'),
+        'accounts':                         request.user.account_set.order_by('id'),
+        'meter':                            meter,
+        'meter_list':                       meter_list,
+        'alerts':                           meter.get_all_alerts(reverse_boolean=True),
+        'useful_metrics_by_month':          json.dumps(useful_metrics_by_month),
+        'cost_by_month':                    json.dumps(cost_by_month),
+        'consumption_by_month':             json.dumps(consumption_by_month),
+        'demand_by_month':                  json.dumps(demand_by_month),
+        'kbtu_by_month':                    json.dumps(kbtu_by_month),
+        'kbtuh_by_month':                   json.dumps(kbtuh_by_month),
+        'consumption_units':                json.dumps(meter.units.split(',')[1]),
+        'demand_units':                     json.dumps(meter.units.split(',')[0]),
+        'consumption_model_stats_table':    json.dumps(consumption_model_stats_table),
+        'peak_demand_model_stats_table':    json.dumps(peak_demand_model_stats_table),
+        'consumption_model_residuals_table':    json.dumps(consumption_model_residuals_table),
+        'peak_demand_model_residuals_table':    json.dumps(peak_demand_model_residuals_table),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:

@@ -148,6 +148,43 @@ class MeterConsumptionModel(models.Model):
     beta10_95_conf_int = models.FloatField(null=True, blank=True, help_text='95%% confidence half-interval, beta10')
     
     #functions
+    def get_model_residuals_as_table(self):
+        """No inputs.
+        
+        Returns table of model residuals
+        as list of lists for use in
+        html template."""
+        results = self.get_model()
+        resid_table = [['Independent Variable', 'Residual']]
+        resid_table.extend([[results.model.exog[:,1][i],results.resid[i]] for i in range(0,len(results.resid))])
+        return resid_table
+        
+    def get_model_stats_as_table(self):
+        """No inputs.
+        
+        Returns table of model stats
+        as list of lists for use in
+        html template."""
+        stats_list = [ ['Parameter', 'Value'],
+                       ['Model Type', str(self.model_type)],
+                       ['Baseline Period', str(self.first_month + ' - ' + self.last_month)],
+                       ['Change Point Temps (degrees F): cool,heat', str(self.Tccp) + ', ' + str(self.Thcp)],
+                       ['Prediction Interval alpha', str(self.prediction_alpha)],
+                       ['R-squared', str(self.r_squared)],
+                       ['Adjusted R-squared', str(self.adj_r_squared)],
+                       ['Number of Parameters', str(self.p)],
+                       ['Degrees of Freedom', str(self.df)],
+                       ['Average of Dependent Variable', str(self.Yavg)],
+                       ['Sum of Squares, Residuals', str(self.SSQres)],
+                       ['Root Mean Squared Error', str(self.rmse)],
+                       ['Coeff. of Variation of RMSE', str(self.cvrmse)],
+                       ['Net Determination Bias Error', str(self.nbe)],
+                       ['F-statistic', str(self.F_stat)],
+                       ['F-statistic p-value', str(self.F_stat_p_value)],
+                       ['Autocorrelation Coefficient', str(self.autocorr_coeff)],
+                       ['Acceptance Score', str(self.acceptance_score)] ]
+        return stats_list
+    
     def prep_df(self, df):
         """function(df)
         
@@ -1125,6 +1162,43 @@ class MeterPeakDemandModel(models.Model):
     beta10_95_conf_int = models.FloatField(null=True, blank=True, help_text='95%% confidence half-interval, beta10')
     
     #functions
+    def get_model_residuals_as_table(self): ######need to add column for each ind. variable
+        """No inputs.
+        
+        Returns table of model residuals
+        as list of lists for use in
+        html template."""
+        results = self.get_model()
+        resid_table = [['Independent Variable', 'Residual']]
+        resid_table.extend([[results.model.exog[:,0][i],results.resid[i]] for i in range(0,len(results.resid))])
+        return resid_table
+
+    def get_model_stats_as_table(self):
+        """No inputs.
+        
+        Returns table of model stats
+        as list of lists for use in
+        html template."""
+        stats_list = [ ['Parameter', 'Value'],
+                       ['Model Type', str(self.model_type)],
+                       ['Baseline Period', str(self.first_month + ' - ' + self.last_month)],
+                       ['Change Point Temps (degrees F): cool,heat', str(self.Tccp) + ', ' + str(self.Thcp)],
+                       ['Prediction Interval alpha', str(self.prediction_alpha)],
+                       ['R-squared', str(self.r_squared)],
+                       ['Adjusted R-squared', str(self.adj_r_squared)],
+                       ['Number of Parameters', str(self.p)],
+                       ['Degrees of Freedom', str(self.df)],
+                       ['Average of Dependent Variable', str(self.Yavg)],
+                       ['Sum of Squares, Residuals', str(self.SSQres)],
+                       ['Root Mean Squared Error', str(self.rmse)],
+                       ['Coeff. of Variation of RMSE', str(self.cvrmse)],
+                       ['Net Determination Bias Error', str(self.nbe)],
+                       ['F-statistic', str(self.F_stat)],
+                       ['F-statistic p-value', str(self.F_stat_p_value)],
+                       ['Autocorrelation Coefficient', str(self.autocorr_coeff)],
+                       ['Acceptance Score', str(self.acceptance_score)] ]
+        return stats_list
+
     def prep_df(self, df):
         """function(df)
         

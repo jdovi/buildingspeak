@@ -248,7 +248,14 @@ class Meter(models.Model):
                     print m
                 else:
                     try:
-                        df_dec_numbers = df_dec.columns.drop(['Start Date','End Date'])
+                        if 'Start Date' in df_dec.columns and 'End Date' in df_dec.columns:
+                            df_dec_numbers = df_dec.columns.drop(['Start Date','End Date'])
+                        elif 'Start Date' in df_dec.columns:
+                            df_dec_numbers = df_dec.columns.drop(['Start Date'])
+                        elif 'End Date' in df_dec.columns:
+                            df_dec_numbers = df_dec.columns.drop(['End Date'])
+                        else:
+                            df_dec_numbers = df_dec.columns
                         df = df_dec[df_dec_numbers].applymap(lambda x: float(x)) #convert Decimal to float
                     except:
                         m = Message(when=timezone.now(),

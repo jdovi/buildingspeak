@@ -73,10 +73,10 @@ function addChart(arr) {
             '{{ bldg.id }}-by-fuel-type2',
             'BarChart',
 			[
-			 ['April',1000,  900, 1100,   400],
-			 ['May',  1170, 1000, 1200,   460],
-			 ['June',  660,  550,  800,  1120],
-			 ['July', 1030,    ,     ,    540]
+			 ['April',600,  800, 950,  'exp', 'expected range', 400],
+			 ['May',  1170, 1000, 1200,'exp', 'expected range',   460],
+			 ['June',  660,  550,  800,'exp', 'expected range',  1120],
+			 ['July', 1030,    ,     , , ,   540]
 			],
             { // options
               },
@@ -108,10 +108,10 @@ function addChart(arr) {
             '{{ bldg.id }}-by-fuel-type4',
             'ColumnChart',
 			[
-			 ['April',1000,  900, 1100,   400],
-			 ['May',  1170, 1000, 1200,   460],
-			 ['June',  660,  550,  800,  1120],
-			 ['July', 1030,    ,     ,    540]
+			 ['April',600,  800, 950,  'A', 'range', 400],
+			 ['May',  1170, 1000, 1200,'B', 'range',   460],
+			 ['June',  660,  550,  800,'C', 'range',  1120],
+			 ['July', 1030,    ,     , , ,   540]
 			],
             { // options
               },
@@ -148,7 +148,9 @@ function drawChart(id, chartType, data, options, dtType) {
      dataTable.addColumn('number', 'Sales'); // Implicit data column.
      dataTable.addColumn({type:'number', role:'interval'});
      dataTable.addColumn({type:'number', role:'interval'});
-     dataTable.addColumn('number', 'Expenses');
+     dataTable.addColumn({type:'string', role:'annotation'});
+     dataTable.addColumn({type:'string', role:'annotationText'});
+	 dataTable.addColumn('number', 'Expenses');
      dataTable.addRows(data);
      }
   else

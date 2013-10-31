@@ -33,6 +33,37 @@ from models_Utility import Utility
 from models_WeatherStation import WeatherStation
 
 
+def get_model_key_value_pairs_as_nested_list(mymodel):
+    """Returns list of lists containing key-value
+    pairs of all of a model's fields."""
+    m_list = [['Attribute', 'Value']]
+    try:
+        if type(mymodel.id) is not int:
+            raise AttributeError
+    except:
+        print 'Function get_model_key_value_pairs_as_nested_list given non-model input, aborting and returning empty list.'
+        m_list = []
+    else:
+        try:
+            for z in mymodel._meta.get_all_field_names():
+                try:
+                    if str(mymodel.__getattribute__(z)) == '':
+                        val = '-'
+                    else:
+                        val = str(mymodel.__getattribute__(z))
+                    m_list.append([str(z.replace('_',' ')), val])
+                except AttributeError:
+                    pass
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Retrieve data failed.',
+                        comment='Object %s of type %s unable to retrieve list of lists of its key-value pairs, aborting and returning empty list.' % (mymodel.id, mymodel.__class__()))
+            m.save()
+            mymodel.messages.add(m)
+            print m
+            m_list = []
+    return m_list
 
 def import_template_path(instance, filename):
     return 'BuildingSpeak Import Template.xlsx'
