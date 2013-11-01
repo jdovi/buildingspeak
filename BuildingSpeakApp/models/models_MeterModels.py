@@ -148,15 +148,29 @@ class MeterConsumptionModel(models.Model):
     beta10_95_conf_int = models.FloatField(null=True, blank=True, help_text='95%% confidence half-interval, beta10')
     
     #functions
-    def get_model_residuals_as_table(self):
+    def get_param_names_list(self):
+        """No inputs.  Returns
+        list of model parameter
+        names (unused are empty strings)."""
+        return [str(x) for x in [self.beta00v, self.beta01v, self.beta02v, self.beta03v, self.beta04v, self.beta05v,
+                self.beta06v, self.beta07v, self.beta08v, self.beta09v, self.beta10v]]
+        
+    def get_residuals_and_indvars_as_table(self):
         """No inputs.
         
         Returns table of model residuals
-        as list of lists for use in
-        html template."""
+        and independent variables as list
+        of lists for use in html template."""
         results = self.get_model()
-        resid_table = [['Independent Variable', 'Residual']]
-        resid_table.extend([[results.model.exog[:,1][i],results.resid[i]] for i in range(0,len(results.resid))])
+        resid_table = [['Residual']]
+        resid_table[0].extend([ivname for ivname in self.get_param_names_list() if ivname not in ['constant','']])
+        data = results.model.exog  #starting with exog variables
+        if len(data[0]) == 1:       #replace constant column with residuals, only keep independent vars (if any)
+            data = results.resid
+            resid_table.extend([[x] for x in data])
+        else:
+            data[:,0] = results.resid
+            resid_table.extend(data.tolist())
         return resid_table
         
     def get_model_stats_as_table(self):
@@ -525,7 +539,7 @@ class MeterConsumptionModel(models.Model):
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
                     df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                     df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
-                    for Tccp in range(55, 96):
+                    for Tccp in range(65, 66):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         df = df.drop(['CDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
@@ -566,7 +580,7 @@ class MeterConsumptionModel(models.Model):
                     df = df.drop(['CDD (consumption)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
                     df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
-                    for Thcp in range(55, 80):
+                    for Thcp in range(65, 66):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         df = df.drop(['HDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
@@ -1162,15 +1176,29 @@ class MeterPeakDemandModel(models.Model):
     beta10_95_conf_int = models.FloatField(null=True, blank=True, help_text='95%% confidence half-interval, beta10')
     
     #functions
-    def get_model_residuals_as_table(self): ######need to add column for each ind. variable
+    def get_param_names_list(self):
+        """No inputs.  Returns
+        list of model parameter
+        names (unused are empty strings)."""
+        return [str(x) for x in [self.beta00v, self.beta01v, self.beta02v, self.beta03v, self.beta04v, self.beta05v,
+                self.beta06v, self.beta07v, self.beta08v, self.beta09v, self.beta10v]]
+        
+    def get_residuals_and_indvars_as_table(self):
         """No inputs.
         
         Returns table of model residuals
-        as list of lists for use in
-        html template."""
+        and independent variables as list
+        of lists for use in html template."""
         results = self.get_model()
-        resid_table = [['Independent Variable', 'Residual']]
-        resid_table.extend([[results.model.exog[:,0][i],results.resid[i]] for i in range(0,len(results.resid))])
+        resid_table = [['Residual']]
+        resid_table[0].extend([ivname for ivname in self.get_param_names_list() if ivname not in ['constant','']])
+        data = results.model.exog  #starting with exog variables
+        if len(data[0]) == 1:       #replace constant column with residuals, only keep independent vars (if any)
+            data = results.resid
+            resid_table.extend([[x] for x in data])
+        else:
+            data[:,0] = results.resid
+            resid_table.extend(data.tolist())
         return resid_table
 
     def get_model_stats_as_table(self):
@@ -1539,7 +1567,7 @@ class MeterPeakDemandModel(models.Model):
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
                     df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
                     df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
-                    for Tccp in range(55, 96):
+                    for Tccp in range(65, 66):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         df = df.drop(['CDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
@@ -1580,7 +1608,7 @@ class MeterPeakDemandModel(models.Model):
                     df = df.drop(['CDD (peak demand)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
                     df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
-                    for Thcp in range(55, 80):
+                    for Thcp in range(65, 66):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         df = df.drop(['HDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)

@@ -8,6 +8,7 @@ from BuildingSpeakApp.models import Account, Building, Meter, Equipment, Weather
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm, Message
 from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list
 import json
+import numpy as np
 import pandas as pd
 from django.utils import timezone
 from decimal import Decimal
@@ -264,8 +265,26 @@ def meter_detail(request, account_id, meter_id):
     consumption_model_stats_table = meter.monther_set.get(name='BILLx').consumption_model.get_model_stats_as_table()
     peak_demand_model_stats_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_model_stats_as_table()
     
-    consumption_model_residuals_table = meter.monther_set.get(name='BILLx').consumption_model.get_model_residuals_as_table()
-    peak_demand_model_residuals_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_model_residuals_as_table()
+    consumption_model_residuals_table = meter.monther_set.get(name='BILLx').consumption_model.get_residuals_and_indvars_as_table()
+    peak_demand_model_residuals_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_residuals_and_indvars_as_table()
+    
+    consumption_model_residuals = [x[0] for x in consumption_model_residuals_table[1:]]
+    peak_demand_model_residuals = [x[0] for x in peak_demand_model_residuals_table[1:]]
+    ccount,cdiv = np.histogram(consumption_model_residuals)
+    pcount,pdiv = np.histogram(peak_demand_model_residuals)
+    consumption_model_residuals_histogram = [['Bins', 'Frequency']]
+    peak_demand_model_residuals_histogram = [['Bins', 'Frequency']]
+    consumption_model_residuals_histogram.extend([[cdiv[i],float(ccount[i])] for i in range(0,len(ccount))])
+    peak_demand_model_residuals_histogram.extend([[pdiv[i],float(pcount[i])] for i in range(0,len(pcount))])
+
+    consumption_residual_plot_pairs = [[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]]]
+    if len(consumption_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
+        for i in range(1,len(consumption_model_residuals_table[0])):
+            consumption_residual_plot_pairs[i-1] = [[x[i],x[0]] for x in consumption_model_residuals_table]
+    peak_demand_residual_plot_pairs = [[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]]]
+    if len(peak_demand_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
+        for i in range(1,len(peak_demand_model_residuals_table[0])):
+            peak_demand_residual_plot_pairs[i-1] = [[x[i],x[0]] for x in peak_demand_model_residuals_table]
     
     context = {
         'user':                             request.user,
@@ -287,8 +306,48 @@ def meter_detail(request, account_id, meter_id):
         'demand_units':                     json.dumps(meter.units.split(',')[0]),
         'consumption_model_stats_table':    json.dumps(consumption_model_stats_table),
         'peak_demand_model_stats_table':    json.dumps(peak_demand_model_stats_table),
-        'consumption_model_residuals_table':    json.dumps(consumption_model_residuals_table),
-        'peak_demand_model_residuals_table':    json.dumps(peak_demand_model_residuals_table),
+        'consumption_model_residuals_table0':    json.dumps(consumption_residual_plot_pairs[0]),
+        'peak_demand_model_residuals_table0':    json.dumps(peak_demand_residual_plot_pairs[0]),
+        'consumption_model_residuals_table1':    json.dumps(consumption_residual_plot_pairs[1]),
+        'peak_demand_model_residuals_table1':    json.dumps(peak_demand_residual_plot_pairs[1]),
+        'consumption_model_residuals_table2':    json.dumps(consumption_residual_plot_pairs[2]),
+        'peak_demand_model_residuals_table2':    json.dumps(peak_demand_residual_plot_pairs[2]),
+        'consumption_model_residuals_table3':    json.dumps(consumption_residual_plot_pairs[3]),
+        'peak_demand_model_residuals_table3':    json.dumps(peak_demand_residual_plot_pairs[3]),
+        'consumption_model_residuals_table4':    json.dumps(consumption_residual_plot_pairs[4]),
+        'peak_demand_model_residuals_table4':    json.dumps(peak_demand_residual_plot_pairs[4]),
+        'consumption_model_residuals_table5':    json.dumps(consumption_residual_plot_pairs[5]),
+        'peak_demand_model_residuals_table5':    json.dumps(peak_demand_residual_plot_pairs[5]),
+        'consumption_model_residuals_table6':    json.dumps(consumption_residual_plot_pairs[6]),
+        'peak_demand_model_residuals_table6':    json.dumps(peak_demand_residual_plot_pairs[6]),
+        'consumption_model_residuals_table7':    json.dumps(consumption_residual_plot_pairs[7]),
+        'peak_demand_model_residuals_table7':    json.dumps(peak_demand_residual_plot_pairs[7]),
+        'consumption_model_residuals_table8':    json.dumps(consumption_residual_plot_pairs[8]),
+        'peak_demand_model_residuals_table8':    json.dumps(peak_demand_residual_plot_pairs[8]),
+        'consumption_model_residuals_table9':    json.dumps(consumption_residual_plot_pairs[9]),
+        'peak_demand_model_residuals_table9':    json.dumps(peak_demand_residual_plot_pairs[9]),
+        'consumption_model_indvar0':             json.dumps(consumption_residual_plot_pairs[0][0][0]),
+        'peak_demand_model_indvar0':             json.dumps(peak_demand_residual_plot_pairs[0][0][0]),
+        'consumption_model_indvar1':    json.dumps(consumption_residual_plot_pairs[1][0][0]),
+        'peak_demand_model_indvar1':    json.dumps(peak_demand_residual_plot_pairs[1][0][0]),
+        'consumption_model_indvar2':    json.dumps(consumption_residual_plot_pairs[2][0][0]),
+        'peak_demand_model_indvar2':    json.dumps(peak_demand_residual_plot_pairs[2][0][0]),
+        'consumption_model_indvar3':    json.dumps(consumption_residual_plot_pairs[3][0][0]),
+        'peak_demand_model_indvar3':    json.dumps(peak_demand_residual_plot_pairs[3][0][0]),
+        'consumption_model_indvar4':    json.dumps(consumption_residual_plot_pairs[4][0][0]),
+        'peak_demand_model_indvar4':    json.dumps(peak_demand_residual_plot_pairs[4][0][0]),
+        'consumption_model_indvar5':    json.dumps(consumption_residual_plot_pairs[5][0][0]),
+        'peak_demand_model_indvar5':    json.dumps(peak_demand_residual_plot_pairs[5][0][0]),
+        'consumption_model_indvar6':    json.dumps(consumption_residual_plot_pairs[6][0][0]),
+        'peak_demand_model_indvar6':    json.dumps(peak_demand_residual_plot_pairs[6][0][0]),
+        'consumption_model_indvar7':    json.dumps(consumption_residual_plot_pairs[7][0][0]),
+        'peak_demand_model_indvar7':    json.dumps(peak_demand_residual_plot_pairs[7][0][0]),
+        'consumption_model_indvar8':    json.dumps(consumption_residual_plot_pairs[8][0][0]),
+        'peak_demand_model_indvar8':    json.dumps(peak_demand_residual_plot_pairs[8][0][0]),
+        'consumption_model_indvar9':    json.dumps(consumption_residual_plot_pairs[9][0][0]),
+        'peak_demand_model_indvar9':    json.dumps(peak_demand_residual_plot_pairs[9][0][0]),
+        'consumption_model_residuals_histogram':    json.dumps(consumption_model_residuals_histogram),
+        'peak_demand_model_residuals_histogram':    json.dumps(peak_demand_model_residuals_histogram),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:

@@ -364,9 +364,172 @@ function addChart(arr) {
       ]);
       </script>
 
+	  {% if consumption_model_indvar0 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table0" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table0',
+		'ScatterChart',
+		{{ consumption_model_residuals_table0|safe }},
+		{hAxis: {title: {{ consumption_model_indvar0|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar1 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table1" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table1',
+		'ScatterChart',
+		{{ consumption_model_residuals_table1|safe }},
+		{hAxis: {title: {{ consumption_model_indvar1|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar2 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table2" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table2',
+		'ScatterChart',
+		{{ consumption_model_residuals_table2|safe }},
+		{hAxis: {title: {{ consumption_model_indvar2|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar3 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table3" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table3',
+		'ScatterChart',
+		{{ consumption_model_residuals_table3|safe }},
+		{hAxis: {title: {{ consumption_model_indvar3|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar4 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table4" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table4',
+		'ScatterChart',
+		{{ consumption_model_residuals_table4|safe }},
+		{hAxis: {title: {{ consumption_model_indvar4|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar5 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table5" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table5',
+		'ScatterChart',
+		{{ consumption_model_residuals_table5|safe }},
+		{hAxis: {title: {{ consumption_model_indvar5|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar6 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table6" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table6',
+		'ScatterChart',
+		{{ consumption_model_residuals_table6|safe }},
+		{hAxis: {title: {{ consumption_model_indvar6|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar7 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table7" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table7',
+		'ScatterChart',
+		{{ consumption_model_residuals_table7|safe }},
+		{hAxis: {title: {{ consumption_model_indvar7|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar8 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table8" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table8',
+		'ScatterChart',
+		{{ consumption_model_residuals_table8|safe }},
+		{hAxis: {title: {{ consumption_model_indvar8|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if consumption_model_indvar9 != '0'%}
+	  <div id="{{ meter.id }}-consumption-model-residuals-table9" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-table9',
+		'ScatterChart',
+		{{ consumption_model_residuals_table9|safe }},
+		{hAxis: {title: {{ consumption_model_indvar9|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  <div id="{{ meter.id }}-consumption-model-residuals-histogram" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-histogram',
+		'ColumnChart',
+		{{ consumption_model_residuals_histogram|safe }},
+		{},
+		'Histogram'
+	  ]);
+	  </script>
+	  
+	  
       <div class="clear">
         <div class="woo-sc-hr"></div>
       </div>
+	  
 	  
 	  Peak Demand Model Statistics
       <div id="peak_demand_model_stats_table"></div>
@@ -380,46 +543,165 @@ function addChart(arr) {
       ]);
       </script>
 	  
-      <div class="clear">
-        <div class="woo-sc-hr"></div>
-      </div>
-
-	  <div id="{{ meter.id }}-consumption-residuals" style="display: inline-block; width: 49%;"></div>
+	  {% if peak_demand_model_indvar0 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table0" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
-		'{{ meter.id }}-consumption-residuals',
+		'{{ meter.id }}-peak-demand-model-residuals-table0',
 		'ScatterChart',
-		{{ consumption_model_residuals_table|safe }},
-		{ },
+		{{ peak_demand_model_residuals_table0|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar0|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
 		'Scatter'
 	  ]);
 	  </script>
-	  
-	  <div id="{{ meter.id }}-peak-demand-residuals" style="display: inline-block; width: 49%;"></div>
+	  {% endif %}
+	  {% if peak_demand_model_indvar1 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table1" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
-		'{{ meter.id }}-peak-demand-residuals',
+		'{{ meter.id }}-peak-demand-model-residuals-table1',
 		'ScatterChart',
-		{{ peak_demand_model_residuals_table|safe }},
-		{ },
+		{{ peak_demand_model_residuals_table1|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar1|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
 		'Scatter'
 	  ]);
 	  </script>
-	  
-	  <div id="{{ meter.id }}-residuals-histogram" style="display: inline-block; width: 49%;"></div>
+	  {% endif %}
+	  {% if peak_demand_model_indvar2 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table2" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
-		'{{ meter.id }}-residuals-histogram',
+		'{{ meter.id }}-peak-demand-model-residuals-table2',
+		'ScatterChart',
+		{{ peak_demand_model_residuals_table2|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar2|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if peak_demand_model_indvar3 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table3" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-table3',
+		'ScatterChart',
+		{{ peak_demand_model_residuals_table3|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar3|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if peak_demand_model_indvar4 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table4" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-table4',
+		'ScatterChart',
+		{{ peak_demand_model_residuals_table4|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar4|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if peak_demand_model_indvar5 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table5" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-table5',
+		'ScatterChart',
+		{{ peak_demand_model_residuals_table5|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar5|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if peak_demand_model_indvar6 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table6" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-table6',
+		'ScatterChart',
+		{{ peak_demand_model_residuals_table6|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar6|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if peak_demand_model_indvar7 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table7" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-table7',
+		'ScatterChart',
+		{{ peak_demand_model_residuals_table7|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar7|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if peak_demand_model_indvar8 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table8" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-table8',
+		'ScatterChart',
+		{{ peak_demand_model_residuals_table8|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar8|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  {% if peak_demand_model_indvar9 != '0'%}
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-table9" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-table9',
+		'ScatterChart',
+		{{ peak_demand_model_residuals_table9|safe }},
+		{hAxis: {title: {{ peak_demand_model_indvar9|safe }} },
+		 vAxis: {title: 'Residuals'},
+		 legend: 'none',
+		},
+		'Scatter'
+	  ]);
+	  </script>
+	  {% endif %}
+	  
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-histogram" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-histogram',
 		'ColumnChart',
-		[
-		 ['April',600,  800, 950,  'A', 'range', 400],
-		 ['May',  1170, 1000, 1200,'B', 'range',   460],
-		 ['June',  660,  550,  800,'C', 'range',  1120],
-		 ['July', 1030,    ,     , , ,   540]
-		],
-		{ // options
-		  },
-		'BarWithErrors'
+		{{ peak_demand_model_residuals_histogram|safe }},
+		{},
+		'Histogram'
 	  ]);
 	  </script>
 	  
