@@ -186,7 +186,7 @@
                   <span>Buildings:</span>
                   <ul>
                     {% for b in buildings %}
-                      <li class="menu-item">
+                      <li class="menu-item {% if b.id == building.id %}active{% endif %}">
                         <a href="/{{ account.id }}/buildings/{{ b.id }}" {% if b.id == building.id %}class="active"{% endif %}>
                           {{ b.name }}
                         </a>
@@ -201,6 +201,26 @@
                       <li class="menu-item {% if m.id == meter.id %}active{% endif %}">
                         <a href="/{{ account.id }}/meters/{{ m.id }}" {% if m.id == meter.id %}class="active"{% endif %}>
                           {{ m.name }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                  <span>Equipment:</span>
+                  <ul>
+                    {% for e in equipments %}
+                      <li class="menu-item {% if e.id == equipment.id %}active{% endif %}">
+                        <a href="/{{ account.id }}/equipments/{{ e.id }}" {% if e.id == equipment.id %}class="active"{% endif %}>
+                          {{ e.name }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                  <span>Measures:</span>
+                  <ul>
+                    {% for mea in measures %}
+                      <li class="menu-item {% if mea.id == measure.id %}active{% endif %}">
+                        <a href="/{{ account.id }}/measures/{{ mea.id }}" {% if mea.id == measure.id %}class="active"{% endif %}>
+                          {{ mea.name }}
                         </a>
                       </li>
                     {% endfor %}

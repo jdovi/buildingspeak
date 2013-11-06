@@ -132,6 +132,8 @@ class Meter(models.Model):
     utility_meter_number = models.CharField(blank=True, max_length=200, help_text='provider''s meter number')
     
     #functions
+    def get_all_events(self, reverse_boolean):
+        return sorted(self.messages.filter(message_type='Event'), key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_alerts(self, reverse_boolean):
         return sorted(self.messages.filter(message_type='Alert'), key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_messages(self, reverse_boolean):

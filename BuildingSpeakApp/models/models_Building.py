@@ -180,6 +180,15 @@ class Building(models.Model):
     
    
     #functions
+    def get_all_events(self, reverse_boolean):
+        b = [self.messages.filter(message_type='Event').order_by('-when')]
+        e = [x.messages.filter(message_type='Event').order_by('-when') for x in self.equipment_set.all()]
+        m = [x.messages.filter(message_type='Event').order_by('-when') for x in self.meters.all()]
+        f = [x.messages.filter(message_type='Event').order_by('-when') for x in self.space_set.all()]
+        layered_message_list = [b,e,m,f]
+        flat1 = [item for sublist in layered_message_list for item in sublist]
+        flat2 = [item for sublist in flat1 for item in sublist]
+        return sorted(flat2, key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_alerts(self, reverse_boolean):
         b = [self.messages.filter(message_type='Alert').order_by('-when')]
         e = [x.messages.filter(message_type='Alert').order_by('-when') for x in self.equipment_set.all()]

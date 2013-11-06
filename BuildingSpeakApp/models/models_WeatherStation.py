@@ -13,8 +13,8 @@ from djorm_pgarray.fields import ArrayField
 from model_utils.managers import InheritanceManager
 from storages.backends.s3boto import S3BotoStorage
 from django.contrib.auth.models import User
-from rq import Queue
-from worker import conn
+#from rq import Queue
+#from worker import conn
 
 
 from models_functions import *

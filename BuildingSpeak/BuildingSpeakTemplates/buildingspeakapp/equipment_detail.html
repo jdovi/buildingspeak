@@ -1,38 +1,257 @@
 {% extends 'app_base.html' %}
 {% block body %}
 
-<h1><a href="/{{ account.id }}/">{{ account.name }}</a> - {{ equipment.name }}</h1>
+<script>
+var charts = [];
+function addChart(arr) {
+  charts.push(arr);
+};
+</script>
 
-<img src="{{ equipment.image_file.url }}" alt="equipment image" width="400" height="300"/> <img src="{{ equipment.nameplate_file.url }}" alt="nameplate image" width="300" height="400"/>
+<header>
+  <h1>{{ equipment.name}}</h1>
+</header>
 
-Equipment serves {{equipment.buildings.all.count }} building(s):
-<ul>
-{% for bldg in equipment.buildings.all %}
-    <li><a href="/{{ account.id }}/buildings/{{ bldg.id }}">{{ bldg.name }}</a></li>
-{% endfor %}
-</ul>
+<section class="entry">
+  <div class="shortcode-tabs default" id="tabs-11">
+    <ul class="tab_titles">
+      <li class="nav-tab"><a href="#tab-1">Info</a></li>
+      <li class="nav-tab"><a href="#tab-3">Data</a></li>
+      <li class="nav-tab"><a href="#tab-5">Details</a></li>
+    </ul> <!-- .nav-tabs -->
 
-Equipment connected to {{ equipment.meters.all.count }} meter(s):
-<ul>
-{% for meter in equipment.meters.all %}
-    <li><a href="/{{ account.id }}/meters/{{ meter.id }}">{{ meter.name }}</a></li>
-{% endfor %}
-</ul>
+    <div class="tab tab-info">
+      <div class="row">
+        <div class="fivecol-three space-details">
+          {% if equipment.equipment_type %}
+            <div class="form-item">
+              <label>Equipment Type:</label>
+              <span>{{ equipment.equipment_type }}</span>
+            </div>
+          {% endif %}
+          {% if equipment.location %}
+            <div class="form-item">
+              <label>Located:</label>
+              <span>{{ equipment.location }}</span>
+            </div>
+          {% endif %}
+          {% if equipment.description %}
+            <div class="form-item">
+              <label>Description:</label>
+              <span>{{ equipment.description }}</span>
+            </div>
+          {% endif %}
+        </div>
+        <div class="fivecol-two last">
+          <ul class="images">
+            {% if equipment.image_file %}
+              <li>
+                <a rel="images" href="{{ equipment.image_file.url }}"><img src="{{ equipment.image_file.url }}" /></a>
+              </li>
+            {% endif %}
+            {% if equipment.nameplate_file %}
+              <li>
+                <a rel="images" href="{{ equipment.nameplate_file.url }}"><img src="{{ equipment.nameplate_file.url }}" /></a>
+              </li>
+            {% endif %}
+          </ul>
+        </div> <!-- .fivecol-two -->
+      </div> <!-- .row -->
 
-<table>
-    <tr>
-        <td><u>Field</u></td>
-        <td><u>Value</u></td>
-    </tr>
+      <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
 
-    {% for field,value in equipment_dict.items %}
-    <tr>
-        <td>{{field}}</td>
-        <td>{{value}}</td>
-    </tr>
-    {% endfor %}
-</table>
+      {% if equipment.emequipmentapportionment_set.all %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Efficiency Measure</td>
+                <td>Start Date</td>
+                <td>Portion of Savings Assigned</td>
+              </tr>
+            {% for ema in equipment.emmeterapportionment_set.all %}
+              <tr>
+                <td><a href="/{{ account.id }}/measures/{{ ema.efficiency_measure.id }}">{{ ema.efficiency_measure.name }}</a></td>
+                <td>{{ ema.efficiency_measure.when }}</td>
+                <td>{{ ema.assigned_fraction }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
 
-<li><a href="{{ equipment.data_file.url }}">{{ equipment.name }} - data file</a></li>
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
 
+      {% if equipment.buildings.all %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Building Served</td>
+              </tr>
+            {% for b in equipment.buildings.all %}
+              <tr>
+                <td><a href="/{{ account.id }}/buildings/{{ b.id }}">{{ b.name }}</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      {% if equipment.meters.all %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Supplying Meter</td>
+              </tr>
+            {% for m in equipment.meters.all %}
+              <tr>
+                <td><a href="/{{ account.id }}/meters/{{ m.id }}">{{ m.name }}</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      <p>Event Log:</p>
+      <table>
+        <tbody>
+          {% if events %}
+            {% for e in events %}
+              <tr>
+                <td>{{ e.when|date:"m/d/Y" }}</td>
+                <td>{{ e.name }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td>No events.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+      <p>Alerts:</p>
+      <table>
+        <tbody>
+          {% if alerts %}
+            {% for a in alerts %}
+              <tr>
+                <td>{{ a.when|date:"m/d/Y" }}</td>
+                <td>{{ a.subject }}</td>
+                <td>{{ a.comment }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td>No alerts.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      {% if adding_events_is_enabled %}
+        <p>Add an event for this space:</p>
+        <p>
+          <input class="event-date datepicker" type="text" value="{% now "m/d/Y" %}" />
+          <input class="event-description" type="text" placeholder="Click to enter event description" />
+          <a href="#" class="woo-sc-button custom small">
+            <span class="woo-bu">Add</span>
+          </a>
+        </p>
+      {% endif %}
+    </div> <!-- .tab-info -->
+    <div class="tab tab-data">
+      <p>
+        <strong><u>Currently viewing:</u></strong>
+        <input type="text" class="datepicker" />
+        to
+        <input type="text" class="datepicker" />
+		<input type="submit" value="Refresh" />
+		<input type="submit" value="Export" />
+      </p>
+	  
+	  {% if cost_by_month == 'false' %}
+	    No cost data to display. <br>
+	  {% endif %}
+	  {% if consumption_by_month == 'false' %}
+	    No consumption data to display. <br>
+	  {% endif %}
+	  {% if demand_by_month == 'false' %}
+	    No demand data to display. <br>
+	  {% endif %}
+
+    </div> <!-- .tab-data -->
+    <div class="tab tab-details">
+      <div id="model-details"></div>
+      <script>
+      addChart([
+        'model-details',
+        'Table',
+		{{ equipment_list|safe }},
+        { },
+		'Table'
+      ]);
+      </script>
+
+    </div> <!-- .tab-details -->
+  </div>
+</section><!-- .entry -->
+
+<script type="text/javascript">
+google.load("visualization", "1", {packages:["corechart","table"]});
+function drawChart(id, chartType, data, options, dtType) {
+  if (!google || !google.visualization) return;
+  var el        = document.getElementById(id);
+  if (dtType == 'BarWithErrors')
+    {
+     var dataTable = new google.visualization.DataTable();
+     dataTable.addColumn('string', 'Month'); // Implicit domain column.
+     dataTable.addColumn('number', 'Sales'); // Implicit data column.
+     dataTable.addColumn({type:'number', role:'interval'});
+     dataTable.addColumn({type:'number', role:'interval'});
+     dataTable.addColumn({type:'string', role:'annotation'});
+     dataTable.addColumn({type:'string', role:'annotationText'});
+	 dataTable.addColumn('number', 'Expenses');
+     dataTable.addRows(data);
+     }
+  else
+    {
+	 var dataTable = google.visualization.arrayToDataTable(data);	 
+	 }
+  var chart     = new google.visualization[chartType](el);
+  chart.draw(dataTable, options);
+}
+
+function drawAllCharts() {
+  for (var i=0; i<charts.length; i++) {
+    var chart = charts[i];
+    drawChart.apply(this, chart);
+  }
+}
+google.setOnLoadCallback(drawAllCharts);
+$(function() {
+  $(window).resize($.debounce(250, drawAllCharts));
+  $(document).on('tabsactivate', drawAllCharts);
+});
+
+// Set up lightbox
+$(function() {
+  $('.images a').fancybox();
+});
+</script>
 {% endblock %}

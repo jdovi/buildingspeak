@@ -9,7 +9,7 @@ function addChart(arr) {
 </script>
 
 <header>
-  <h1>{{ building.name}}</h1>
+  <h1>{{ measure.name}} - {{ measure.utility_type }}</h1>
 </header>
 
 <section class="entry">
@@ -23,51 +23,53 @@ function addChart(arr) {
     <div class="tab tab-info">
       <div class="row">
         <div class="fivecol-three space-details">
-          {% if building.street_address %}
+          {% if measure.utility_type %}
             <div class="form-item">
-              <label>Address:</label>
-              <span>{{ building.street_address }}</span>
+              <label>Utility Type:</label>
+              <span>{{ measure.utility_type }}</span>
             </div>
           {% endif %}
-          {% if building.city %}
+          {% if measure.units %}
             <div class="form-item">
-              <label>City/State/Zip:</label>
-              <span>{{ building.city }}, {{ building.state }} {{ building.zip_code }}</span>
+              <label>Units (Peak Demand, Energy):</label>
+              <span>{{ measure.units }}</span>
             </div>
           {% endif %}
-          {% if building.square_footage %}
+          {% if measure.annual_consumption_savings %}
             <div class="form-item">
-              <label>Square Footage:</label>
-              <span>{{ building.square_footage }}</span>
+              <label>Annual Consumption Savings:</label>
+              <span>{{ measure.annual_consumption_savings }}</span>
+            </div>
+          {% endif %}
+          {% if measure.peak_demand_savings %}
+            <div class="form-item">
+              <label>Annual Peak Demand Savings:</label>
+              <span>{{ measure.peak_demand_savings }}</span>
+            </div>
+          {% endif %}
+          {% if measure.annual_cost_savings %}
+            <div class="form-item">
+              <label>Annual Cost Savings:</label>
+              <span>{{ measure.annual_cost_savings }}</span>
             </div>
           {% endif %}
         </div>
-        <div class="fivecol-two last">
-          <ul class="images">
-            {% if building.image_file %}
-              <li>
-                <a rel="images" href="{{ building.image_file.url }}"><img src="{{ building.image_file.url }}" /></a>
-              </li>
-            {% endif %}
-          </ul>
-        </div> <!-- .fivecol-two -->
-      </div> <!-- .row -->
+
+		</div> <!-- .row -->
 
       <div class="clear">
         <div class="woo-sc-hr"></div>
       </div>
 
-      {% if building_measures %}
+      {% if measure_buildings %}
         <table>
           <tbody>
               <tr>
-                <td>Efficiency Measure</td>
-                <td>Start Date</td>
+                <td>Building</td>
               </tr>
-            {% for bm in building_measures %}
+            {% for b in measure_buildings %}
               <tr>
-                <td><a href="/{{ account.id }}/measures/{{ bm.id }}">{{ bm.name }}</a></td>
-                <td>{{ bm.when }}</td>
+                <td><a href="/{{ account.id }}/buildings/{{ b.id }}">{{ b.name }}</a></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -78,19 +80,15 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      {% if building.buildingmeterapportionment_set.all %}
+      {% if measure.meters.all %}
         <table>
           <tbody>
               <tr>
                 <td>Meter</td>
-                <td>Fuel Type</td>
-                <td>Fraction of Meter Assigned</td>
               </tr>
-            {% for bma in building.buildingmeterapportionment_set.all %}
+            {% for m in measure.meters.all %}
               <tr>
-                <td><a href="/{{ account.id }}/meters/{{ bma.meter.id }}">{{ bma.meter.name }} - {{ bma.meter.utility_type }}</a></td>
-                <td>{{ bma.meter.utility_type }}</td>
-                <td>{{ bma.assigned_fraction }}</td>
+                <td><a href="/{{ account.id }}/meters/{{ m.id }}">{{ m.name }}</a></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -101,15 +99,15 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      {% if building.equipment_set.all %}
+      {% if measure.equipments.all %}
         <table>
           <tbody>
               <tr>
                 <td>Equipment</td>
               </tr>
-            {% for e in building.equipment_set.all %}
+            {% for e in measure.equipments.all %}
               <tr>
-                <td><a href="/{{ account.id }}/equipment/{{ e.id }}">{{ e.name }}</a></td>
+                <td><a href="/{{ account.id }}/equipments/{{ e.id }}">{{ e.name }}</a></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -120,57 +118,6 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      <p>Event Log:</p>
-      <table>
-        <tbody>
-          {% if events %}
-            {% for e in events %}
-              <tr>
-                <td>{{ e.when|date:"m/d/Y" }}</td>
-                <td>{{ e.name }}</td>
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td>No events.</td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
-
-      <div class="clear">
-        <div class="woo-sc-hr"></div>
-      </div>
-
-      <p>Alerts:</p>
-      <table>
-        <tbody>
-          {% if alerts %}
-            {% for a in alerts %}
-              <tr>
-                <td>{{ a.when|date:"m/d/Y" }}</td>
-                <td>{{ a.subject }}</td>
-                <td>{{ a.comment }}</td>
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td>No alerts.</td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
-
-      {% if adding_events_is_enabled %}
-        <p>Add an event for this space:</p>
-        <p>
-          <input class="event-date datepicker" type="text" value="{% now "m/d/Y" %}" />
-          <input class="event-description" type="text" placeholder="Click to enter event description" />
-          <a href="#" class="woo-sc-button custom small">
-            <span class="woo-bu">Add</span>
-          </a>
-        </p>
-      {% endif %}
     </div> <!-- .tab-info -->
     <div class="tab tab-data">
       <p>
@@ -199,7 +146,7 @@ function addChart(arr) {
       addChart([
         'model-details',
         'Table',
-		{{ building_list|safe }},
+		{{ measure_list|safe }},
         { },
 		'Table'
       ]);

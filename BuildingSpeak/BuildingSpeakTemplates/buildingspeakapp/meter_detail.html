@@ -88,15 +88,40 @@ function addChart(arr) {
         <div class="woo-sc-hr"></div>
       </div>
 
-      {% if meter.building_set.all %}
-        <p>Buildings</p>
+      {% if meter.emmeterapportionment_set.all %}
         <table>
           <tbody>
-            {% for b in meter.building_set.all %}
               <tr>
-                <td>Building</td>
-                <td>{{ b.name }}</td>
-                <td><a href="/{{ account.id }}/buildings/{{ b.id }}">view details</a></td>
+                <td>Efficiency Measure</td>
+                <td>Start Date</td>
+                <td>Portion of Savings Assigned</td>
+              </tr>
+            {% for ema in meter.emmeterapportionment_set.all %}
+              <tr>
+                <td><a href="/{{ account.id }}/measures/{{ ema.efficiency_measure.id }}">{{ ema.efficiency_measure.name }}</a></td>
+                <td>{{ ema.efficiency_measure.when }}</td>
+                <td>{{ ema.assigned_fraction }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      {% if meter.buildingmeterapportionment_set.all %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Building Served</td>
+                <td>Fraction of Meter Assigned</td>
+              </tr>
+            {% for bma in meter.buildingmeterapportionment_set.all %}
+              <tr>
+                <td><a href="/{{ account.id }}/buildings/{{ bma.building.id }}">{{ bma.building.name }}</a></td>
+                <td>{{ bma.assigned_fraction }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -108,14 +133,14 @@ function addChart(arr) {
       {% endif %}
 
       {% if meter.equipment_set.all %}
-        <p>Equipment</p>
         <table>
           <tbody>
+              <tr>
+                <td>Equipment Served</td>
+              </tr>
             {% for e in meter.equipment_set.all %}
               <tr>
-                <td>Equipment</td>
-                <td>{{ e.name }}</td>
-                <td><a href="/{{ account.id }}/equipment/{{ e.id }}">view details</a></td>
+                <td><a href="/{{ account.id }}/equipment/{{ e.id }}">{{ e.name }}</a></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -129,8 +154,8 @@ function addChart(arr) {
       <p>Event Log:</p>
       <table>
         <tbody>
-          {% if building.event_set.all %}
-            {% for e in building.event_set.all %}
+          {% if events %}
+            {% for e in events %}
               <tr>
                 <td>{{ e.when|date:"m/d/Y" }}</td>
                 <td>{{ e.name }}</td>
@@ -364,6 +389,16 @@ function addChart(arr) {
       ]);
       </script>
 
+	  <div id="{{ meter.id }}-consumption-model-residuals-histogram" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-consumption-model-residuals-histogram',
+		'ColumnChart',
+		{{ consumption_model_residuals_histogram|safe }},
+		{},
+		'Histogram'
+	  ]);
+	  </script>
 	  {% if consumption_model_indvar0 != '0'%}
 	  <div id="{{ meter.id }}-consumption-model-residuals-table0" style="display: inline-block; width: 49%;"></div>
 	  <script>
@@ -514,16 +549,6 @@ function addChart(arr) {
 	  ]);
 	  </script>
 	  {% endif %}
-	  <div id="{{ meter.id }}-consumption-model-residuals-histogram" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-histogram',
-		'ColumnChart',
-		{{ consumption_model_residuals_histogram|safe }},
-		{},
-		'Histogram'
-	  ]);
-	  </script>
 	  
 	  
       <div class="clear">
@@ -543,6 +568,16 @@ function addChart(arr) {
       ]);
       </script>
 	  
+	  <div id="{{ meter.id }}-peak-demand-model-residuals-histogram" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ meter.id }}-peak-demand-model-residuals-histogram',
+		'ColumnChart',
+		{{ peak_demand_model_residuals_histogram|safe }},
+		{},
+		'Histogram'
+	  ]);
+	  </script>
 	  {% if peak_demand_model_indvar0 != '0'%}
 	  <div id="{{ meter.id }}-peak-demand-model-residuals-table0" style="display: inline-block; width: 49%;"></div>
 	  <script>
@@ -694,32 +729,6 @@ function addChart(arr) {
 	  </script>
 	  {% endif %}
 	  
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-histogram" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-histogram',
-		'ColumnChart',
-		{{ peak_demand_model_residuals_histogram|safe }},
-		{},
-		'Histogram'
-	  ]);
-	  </script>
-	  
-	  <div id="{{ meter.id }}-residuals-lag" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-residuals-lag',
-		'ScatterChart',
-		[
-		 ['', 'Predicted', 'Actual'],
-		 [1, 2, 3],
-		 [2, 4, 6],
-		 [3, 6, 9]
-		],
-		{ },
-		'Scatter'
-	  ]);
-	  </script>	  
     </div> <!-- .tab-stats -->
     <div class="tab tab-details">
       <div id="model-details"></div>

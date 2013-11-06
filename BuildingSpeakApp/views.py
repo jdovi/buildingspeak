@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
-from BuildingSpeakApp.models import Account, Building, Meter, Equipment, WeatherStation
+from BuildingSpeakApp.models import Account, Building, Meter, Equipment, WeatherStation, EfficiencyMeasure
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm, Message
 from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list
 import json
@@ -14,8 +14,9 @@ from django.utils import timezone
 from decimal import Decimal
 from django.forms.models import modelform_factory
 from django.contrib.auth.models import User
-from rq import Queue
-from worker import conn
+from django.db.models import Q
+#from rq import Queue
+#from worker import conn
 
 class ResultsMessage(object):
     """Used for generating user
@@ -105,13 +106,18 @@ def account_detail(request, account_id):
             pass
     
     context = {
-        'account':      account,
+        'user':           request.user,
+        'account':        account,
+        'accounts':       request.user.account_set.order_by('id'),
         'buildings':      account.building_set.order_by('name'),
         'meters':         account.meter_set.order_by('name'),
-        'accounts':     request.user.account_set.order_by('id'),
+        'alerts':         account.get_all_alerts(reverse_boolean=True),
+        'events':         account.get_all_events(reverse_boolean=True),
+        'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct(),
+        'measures':       EfficiencyMeasure.objects.filter(Q(equipments__meters__account=account) | Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct(),
+
         'equipcount':   equipcount,
         'account_dict': account_dict,
-        'alerts':       account.get_all_alerts(reverse_boolean=True)
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -126,21 +132,24 @@ def building_detail(request, account_id, building_id):
     building = get_object_or_404(Building, pk=building_id)
     if account.pk <> building.account.pk:
         raise Http404
-    building_dict = {}    
-    for z in building._meta.get_all_field_names():
-        try:
-            building_dict[z.replace('_',' ')] = building.__getattribute__(z)
-        except AttributeError:
-            pass
+
+    building_list = get_model_key_value_pairs_as_nested_list(building)
+    this_month = pd.Period(timezone.now(),freq='M')
+
     context = {
-        'building':        building,
-        'building_dict':   building_dict,
-        'accounts':        request.user.account_set.order_by('id'),
-        'account':         building.account,
+        'user':           request.user,
+        'account':        account,
+        'accounts':       request.user.account_set.order_by('id'),
         'buildings':      account.building_set.order_by('name'),
         'meters':         account.meter_set.order_by('name'),
-        'thirty_days_ago': (datetime.now() + timedelta(-30)),
-        'alerts':          building.get_all_alerts(reverse_boolean=True)
+        'alerts':         building.get_all_alerts(reverse_boolean=True),
+        'events':         building.get_all_events(reverse_boolean=True),
+        'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct(),
+        'measures':       EfficiencyMeasure.objects.filter(Q(equipments__meters__account=account) | Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct(),
+
+        'building':             building,
+        'building_measures':    EfficiencyMeasure.objects.filter(Q(equipments__meters__building=building) | Q(equipments__buildings=building) | Q(meters__building=building)).distinct(),
+        'building_list':        building_list,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -173,9 +182,9 @@ def meter_detail(request, account_id, meter_id):
             form.initial['bill_data_file'] = latest_bill_data_file
             meter.save()
             try:
-                q = Queue(connection=conn)
-                result = q.enqueue(meter.upload_bill_data)
-                #meter.upload_bill_data()
+#                q = Queue(connection=conn)
+#                result = q.enqueue(meter.upload_bill_data)
+                meter.upload_bill_data()
                 m = ResultsMessage()
                 m.comment = 'Bill data has been uploaded.'
             except:
@@ -287,23 +296,27 @@ def meter_detail(request, account_id, meter_id):
             peak_demand_residual_plot_pairs[i-1] = [[x[i],x[0]] for x in peak_demand_model_residuals_table]
     
     context = {
-        'user':                             request.user,
-        'form':                             form,
-        'account':                          account,
-        'buildings':                        account.building_set.order_by('name'),
-        'meters':                           account.meter_set.order_by('name'),
-        'accounts':                         request.user.account_set.order_by('id'),
-        'meter':                            meter,
-        'meter_list':                       meter_list,
-        'alerts':                           meter.get_all_alerts(reverse_boolean=True),
-        'useful_metrics_by_month':          json.dumps(useful_metrics_by_month),
-        'cost_by_month':                    json.dumps(cost_by_month),
-        'consumption_by_month':             json.dumps(consumption_by_month),
-        'demand_by_month':                  json.dumps(demand_by_month),
-        'kbtu_by_month':                    json.dumps(kbtu_by_month),
-        'kbtuh_by_month':                   json.dumps(kbtuh_by_month),
-        'consumption_units':                json.dumps(meter.units.split(',')[1]),
-        'demand_units':                     json.dumps(meter.units.split(',')[0]),
+        'user':           request.user,
+        'account':        account,
+        'accounts':       request.user.account_set.order_by('id'),
+        'buildings':      account.building_set.order_by('name'),
+        'meters':         account.meter_set.order_by('name'),
+        'alerts':         meter.get_all_alerts(reverse_boolean=True),
+        'events':         meter.get_all_events(reverse_boolean=True),
+        'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct(),
+        'measures':       EfficiencyMeasure.objects.filter(Q(equipments__meters__account=account) | Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct(),
+
+        'form':                    form,
+        'meter':                   meter,
+        'meter_list':              meter_list,
+        'useful_metrics_by_month': json.dumps(useful_metrics_by_month),
+        'cost_by_month':           json.dumps(cost_by_month),
+        'consumption_by_month':    json.dumps(consumption_by_month),
+        'demand_by_month':         json.dumps(demand_by_month),
+        'kbtu_by_month':           json.dumps(kbtu_by_month),
+        'kbtuh_by_month':          json.dumps(kbtuh_by_month),
+        'consumption_units':       json.dumps(meter.units.split(',')[1]),
+        'demand_units':            json.dumps(meter.units.split(',')[0]),
         'consumption_model_stats_table':    json.dumps(consumption_model_stats_table),
         'peak_demand_model_stats_table':    json.dumps(peak_demand_model_stats_table),
         'consumption_model_residuals_table0':    json.dumps(consumption_residual_plot_pairs[0]),
@@ -366,24 +379,59 @@ def equipment_detail(request, account_id, equipment_id):
         #here we assume only one so pick the first Meter we find and get its Account
         #could add code (here?) to confirm all connected meters share same Account and flag if not
         raise Http404
-    equipment_dict = {}    
-    for z in equipment._meta.get_all_field_names():
-        try:
-            equipment_dict[z.replace('_',' ')] = equipment.__getattribute__(z)
-        except AttributeError:
-            pass
+
+    equipment_list = get_model_key_value_pairs_as_nested_list(equipment)
+
     context = {
+        'user':           request.user,
         'account':        account,
         'accounts':       request.user.account_set.order_by('id'),
-        'equipment':      equipment,
-        'equipment_dict': equipment_dict,
-        'alerts':         equipment.get_all_alerts(reverse_boolean=True),
         'buildings':      account.building_set.order_by('name'),
         'meters':         account.meter_set.order_by('name'),
+        'alerts':         equipment.get_all_alerts(reverse_boolean=True),
+        'events':         equipment.get_all_events(reverse_boolean=True),
+        'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct(),
+        'measures':       EfficiencyMeasure.objects.filter(Q(equipments__meters__account=account) | Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct(),
+
+        'equipment':      equipment,
+        'equipment_list': equipment_list,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
         template_name = 'buildingspeakapp/equipment_detail.html'
+    else:
+        template_name = 'buildingspeakapp/access_denied.html'
+    return render(request, template_name, context)
+
+@login_required
+def measure_detail(request, account_id, measure_id):
+    #---check that we can access the account and meter and they go together
+    account = get_object_or_404(Account, pk=account_id)
+    measure = get_object_or_404(EfficiencyMeasure, pk=measure_id)
+    if account.pk <> measure.meters.all()[0].account.pk: 
+        #need to close loophole here: Measures not forced to single Account
+        #here we assume only one so pick the first Meter we find and get its Account
+        #could add code (here?) to confirm all connected meters share same Account and flag if not
+        raise Http404
+    
+    measure_list = get_model_key_value_pairs_as_nested_list(measure)
+    
+    context = {
+        'user':           request.user,
+        'account':        account,
+        'accounts':       request.user.account_set.order_by('id'),
+        'buildings':      account.building_set.order_by('name'),
+        'meters':         account.meter_set.order_by('name'),
+        'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct(),
+        'measures':       EfficiencyMeasure.objects.filter(Q(equipments__meters__account=account) | Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct(),
+
+        'measure':        measure,
+        'measure_list':   measure_list,
+        'measure_buildings': Building.objects.filter(Q(meters__efficiencymeasure=measure) | Q(equipment__efficiencymeasure=measure)).distinct()
+    }
+    user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
+    if account_id in user_account_IDs:
+        template_name = 'buildingspeakapp/measure_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)

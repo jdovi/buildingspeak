@@ -32,7 +32,7 @@ class Equipment(models.Model):
     buildings = models.ManyToManyField('Building')
     spaces = models.ManyToManyField('Space')
     readers = models.ManyToManyField('Reader')
-    schedule = models.ForeignKey('OperatingSchedule')
+    schedule = models.ForeignKey('OperatingSchedule', null=True, blank=True)
 
     
     #administrative info
@@ -90,6 +90,8 @@ class Equipment(models.Model):
         Reads primary consumption Readers and
         converts/sums into kBtu Readers."""
         pass
+    def get_all_events(self, reverse_boolean):
+        return sorted(self.messages.filter(message_type='Event'), key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_alerts(self, reverse_boolean):
         return sorted(self.messages.filter(message_type='Alert'), key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_messages(self, reverse_boolean):

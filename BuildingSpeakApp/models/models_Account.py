@@ -94,6 +94,18 @@ class Account(models.Model):
                                           help_text='total monthly payment due')
     
     #functions
+    def get_all_events(self, reverse_boolean):
+        a = [self.messages.filter(message_type='Event')]
+        b = [x.messages.filter(message_type='Event') for x in self.building_set.all()]
+        e = [x.messages.filter(message_type='Event') for x in self.account_equipments()]
+        m = [x.messages.filter(message_type='Event') for x in self.meter_set.all()]
+        f_0 = [x.space_set.all() for x in self.building_set.all()]
+        f_0 = [item for sublist in f_0 for item in sublist]
+        f = [x.messages.filter(message_type='Event') for x in f_0]
+        layered_message_list = [a,b,e,m,f]
+        flat1 = [item for sublist in layered_message_list for item in sublist]
+        flat2 = [item for sublist in flat1 for item in sublist]
+        return sorted(flat2, key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_alerts(self, reverse_boolean):
         a = [self.messages.filter(message_type='Alert')]
         b = [x.messages.filter(message_type='Alert') for x in self.building_set.all()]
