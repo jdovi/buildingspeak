@@ -9,7 +9,7 @@ function addChart(arr) {
 </script>
 
 <header>
-  <h1>{{ building.name}}</h1>
+  <h1>{{ building.name }}</h1>
 </header>
 
 <section class="entry">
@@ -109,7 +109,7 @@ function addChart(arr) {
               </tr>
             {% for e in building.equipment_set.all %}
               <tr>
-                <td><a href="/{{ account.id }}/equipment/{{ e.id }}">{{ e.name }}</a></td>
+                <td><a href="/{{ account.id }}/equipments/{{ e.id }}">{{ e.name }}</a></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -182,15 +182,43 @@ function addChart(arr) {
 		<input type="submit" value="Export" />
       </p>
 	  
-	  {% if cost_by_month == 'false' %}
-	    No cost data to display. <br>
-	  {% endif %}
-	  {% if consumption_by_month == 'false' %}
-	    No consumption data to display. <br>
-	  {% endif %}
-	  {% if demand_by_month == 'false' %}
-	    No demand data to display. <br>
-	  {% endif %}
+	  {% for mtype, munits, mdata in meter_data %}
+      <div id="abcd {{ forloop.counter0 }}"></div>
+      <script>
+      addChart([
+        'abcd {{ forloop.counter0 }}',
+        'Table',
+		{{ mdata|safe }},
+        { },
+		'Table'
+      ]);
+      </script>
+      
+	  <div id="{{ mtype|safe }} - {{ forloop.counter0 }}"></div>
+	  <script>
+      addChart([
+        '{{ mtype|safe }} - {{ forloop.counter0 }}',
+        'ComboChart',
+        {{ mdata|safe }},
+        { // options
+          title: '{{ mtype|safe }}',
+          vAxes: { 0: { title: '{{ munits|safe }}' } },
+          seriesType: "bars",
+          series:     {
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+          }
+        },
+		'ComboChart'
+      ]);
+      </script>
+
+	  <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+	  {% empty %}
+	    <div id="{{ forloop.counter0 }}">No data available.</div>
+	  {% endfor %}
 
     </div> <!-- .tab-data -->
     <div class="tab tab-details">
@@ -199,7 +227,7 @@ function addChart(arr) {
       addChart([
         'model-details',
         'Table',
-		{{ building_list|safe }},
+		{{ building_attrs|safe }},
         { },
 		'Table'
       ]);

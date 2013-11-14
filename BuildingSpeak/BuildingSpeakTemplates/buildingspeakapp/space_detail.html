@@ -9,7 +9,7 @@ function addChart(arr) {
 </script>
 
 <header>
-  <h1>{{ measure.name }} - {{ measure.utility_type }}</h1>
+  <h1>{{ space.name }}</h1>
 </header>
 
 <section class="entry">
@@ -23,53 +23,45 @@ function addChart(arr) {
     <div class="tab tab-info">
       <div class="row">
         <div class="fivecol-three space-details">
-          {% if measure.utility_type %}
+          {% if space.square_footage %}
             <div class="form-item">
-              <label>Utility Type:</label>
-              <span>{{ measure.utility_type }}</span>
+              <label>Floor Area (SF):</label>
+              <span>{{ space.square_footage }}</span>
             </div>
           {% endif %}
-          {% if measure.units %}
+          {% if space.space_type %}
             <div class="form-item">
-              <label>Units (Peak Demand, Energy):</label>
-              <span>{{ measure.units }}</span>
-            </div>
-          {% endif %}
-          {% if measure.annual_consumption_savings %}
-            <div class="form-item">
-              <label>Annual Consumption Savings:</label>
-              <span>{{ measure.annual_consumption_savings }}</span>
-            </div>
-          {% endif %}
-          {% if measure.peak_demand_savings %}
-            <div class="form-item">
-              <label>Annual Peak Demand Savings:</label>
-              <span>{{ measure.peak_demand_savings }}</span>
-            </div>
-          {% endif %}
-          {% if measure.annual_cost_savings %}
-            <div class="form-item">
-              <label>Annual Cost Savings:</label>
-              <span>{{ measure.annual_cost_savings }}</span>
+              <label>Space Type:</label>
+              <span>{{ space.space_type }}</span>
             </div>
           {% endif %}
         </div>
-
-		</div> <!-- .row -->
+        <div class="fivecol-two last">
+          <ul class="images">
+            {% if space.image_file %}
+              <li>
+                <a rel="images" href="{{ space.image_file.url }}"><img src="{{ space.image_file.url }}" /></a>
+              </li>
+            {% endif %}
+          </ul>
+        </div> <!-- .fivecol-two -->
+      </div> <!-- .row -->
 
       <div class="clear">
         <div class="woo-sc-hr"></div>
       </div>
 
-      {% if measure_buildings %}
+      {% if space_measures %}
         <table>
           <tbody>
               <tr>
-                <td>Building</td>
+                <td>Efficiency Measure</td>
+                <td>Start Date</td>
               </tr>
-            {% for b in measure_buildings %}
+            {% for sm in space_measures %}
               <tr>
-                <td><a href="/{{ account.id }}/buildings/{{ b.id }}">{{ b.name }}</a></td>
+                <td><a href="/{{ account.id }}/measures/{{ sm.id }}">{{ sm.name }}</a></td>
+                <td>{{ sm.when }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -80,15 +72,19 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      {% if measure.meters.all %}
+      {% if space.spacemeterapportionment_set.all %}
         <table>
           <tbody>
               <tr>
                 <td>Meter</td>
+                <td>Fuel Type</td>
+                <td>Fraction of Meter Assigned</td>
               </tr>
-            {% for m in measure.meters.all %}
+            {% for sma in space.spacemeterapportionment_set.all %}
               <tr>
-                <td><a href="/{{ account.id }}/meters/{{ m.id }}">{{ m.name }}</a></td>
+                <td><a href="/{{ account.id }}/meters/{{ sma.meter.id }}">{{ sma.meter.name }} - {{ sma.meter.utility_type }}</a></td>
+                <td>{{ sma.meter.utility_type }}</td>
+                <td>{{ sma.assigned_fraction }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -99,13 +95,13 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      {% if measure.equipments.all %}
+      {% if space.equipment_set.all %}
         <table>
           <tbody>
               <tr>
                 <td>Equipment</td>
               </tr>
-            {% for e in measure.equipments.all %}
+            {% for e in space.equipment_set.all %}
               <tr>
                 <td><a href="/{{ account.id }}/equipments/{{ e.id }}">{{ e.name }}</a></td>
               </tr>
@@ -118,6 +114,57 @@ function addChart(arr) {
         </div>
       {% endif %}
 
+      <p>Event Log:</p>
+      <table>
+        <tbody>
+          {% if events %}
+            {% for e in events %}
+              <tr>
+                <td>{{ e.when|date:"m/d/Y" }}</td>
+                <td>{{ e.name }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td>No events.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+      <p>Alerts:</p>
+      <table>
+        <tbody>
+          {% if alerts %}
+            {% for a in alerts %}
+              <tr>
+                <td>{{ a.when|date:"m/d/Y" }}</td>
+                <td>{{ a.subject }}</td>
+                <td>{{ a.comment }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td>No alerts.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      {% if adding_events_is_enabled %}
+        <p>Add an event for this space:</p>
+        <p>
+          <input class="event-date datepicker" type="text" value="{% now "m/d/Y" %}" />
+          <input class="event-description" type="text" placeholder="Click to enter event description" />
+          <a href="#" class="woo-sc-button custom small">
+            <span class="woo-bu">Add</span>
+          </a>
+        </p>
+      {% endif %}
     </div> <!-- .tab-info -->
     <div class="tab tab-data">
       <p>
@@ -146,7 +193,7 @@ function addChart(arr) {
       addChart([
         'model-details',
         'Table',
-		{{ measure_attrs|safe }},
+		{{ space_attrs|safe }},
         { },
 		'Table'
       ]);

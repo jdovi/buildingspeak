@@ -17,7 +17,7 @@ function addChart(arr) {
     <ul class="tab_titles">
       <li class="nav-tab"><a href="#tab-1">Info</a></li>
       <li class="nav-tab"><a href="#tab-2">Upload</a></li>
-      <li class="nav-tab"><a href="#tab-3">Data</a></li>
+      <li class="nav-tab"><a href="#tab-3">Monthly</a></li>
       <li class="nav-tab"><a href="#tab-4">Stats</a></li>
       <li class="nav-tab"><a href="#tab-5">Details</a></li>
     </ul> <!-- .nav-tabs -->
@@ -140,7 +140,7 @@ function addChart(arr) {
               </tr>
             {% for e in meter.equipment_set.all %}
               <tr>
-                <td><a href="/{{ account.id }}/equipment/{{ e.id }}">{{ e.name }}</a></td>
+                <td><a href="/{{ account.id }}/equipments/{{ e.id }}">{{ e.name }}</a></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -214,7 +214,7 @@ function addChart(arr) {
 			<input type="submit" value="Upload Bill Data" />
 		</form>
 	</div> <!-- .tab-upload -->
-    <div class="tab tab-data">
+    <div class="tab tab-monthly">
       <p>
         <strong><u>Currently viewing:</u></strong>
         <input type="text" class="datepicker" />
@@ -375,7 +375,7 @@ function addChart(arr) {
 		'Table'
       ]);
       </script>
-    </div> <!-- .tab-data -->
+    </div> <!-- .tab-monthly -->
     <div class="tab tab-stats">
 	  Consumption Model Statistics
       <div id="consumption_model_stats_table"></div>
@@ -736,7 +736,7 @@ function addChart(arr) {
       addChart([
         'model-details',
         'Table',
-		{{ meter_list|safe }},
+		{{ meter_attrs|safe }},
         { },
 		'Table'
       ]);

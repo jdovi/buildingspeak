@@ -167,21 +167,34 @@ class Space(models.Model):
     
     #functions
     def __unicode__(self):
-        return self.name + ' (' + self.building + ')'
+        return self.name
+    def get_all_events(self, reverse_boolean):
+        b = [self.messages.filter(message_type='Event').order_by('-when')]
+        e = [x.messages.filter(message_type='Event').order_by('-when') for x in self.equipment_set.all()]
+        m = [x.messages.filter(message_type='Event').order_by('-when') for x in self.meters.all()]
+        f = [x.messages.filter(message_type='Event').order_by('-when') for x in [self.building]]
+        layered_message_list = [b,e,m,f]
+        flat1 = [item for sublist in layered_message_list for item in sublist]
+        flat2 = [item for sublist in flat1 for item in sublist]
+        return sorted(flat2, key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_alerts(self, reverse_boolean):
-        f = [self.messages.filter(message_type='Alert')]
-        e = [x.messages.filter(message_type='Alert') for x in self.equipment_set.all()]
-        m = [x.messages.filter(message_type='Alert') for x in self.meters.all()]
-        layered_message_list = [e,m,f]
-        flat_message_list = [item for sublist in layered_message_list for item in sublist]
-        return sorted(flat_message_list, key=attrgetter('when'), reverse=reverse_boolean)
+        b = [self.messages.filter(message_type='Alert').order_by('-when')]
+        e = [x.messages.filter(message_type='Alert').order_by('-when') for x in self.equipment_set.all()]
+        m = [x.messages.filter(message_type='Alert').order_by('-when') for x in self.meters.all()]
+        f = [x.messages.filter(message_type='Alert').order_by('-when') for x in [self.building]]
+        layered_message_list = [b,e,m,f]
+        flat1 = [item for sublist in layered_message_list for item in sublist]
+        flat2 = [item for sublist in flat1 for item in sublist]
+        return sorted(flat2, key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_messages(self, reverse_boolean):
-        f = [self.messages.all()]
+        b = [self.messages.all()]
         e = [x.messages.all() for x in self.equipment_set.all()]
         m = [x.messages.all() for x in self.meters.all()]
-        layered_message_list = [e,m,f]
-        flat_message_list = [item for sublist in layered_message_list for item in sublist]
-        return sorted(flat_message_list, key=attrgetter('when'), reverse=reverse_boolean)
+        f = [x.messages.all() for x in [self.building]]
+        layered_message_list = [b,e,m,f]
+        flat1 = [item for sublist in layered_message_list for item in sublist]
+        flat2 = [item for sublist in flat1 for item in sublist]
+        return sorted(flat2, key=attrgetter('when'), reverse=reverse_boolean)
     def account_name_for_admin(self):
         return '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_account_change',args=(self.building.account.id,)), self.building.account.name)
     account_name_for_admin.allow_tags = True

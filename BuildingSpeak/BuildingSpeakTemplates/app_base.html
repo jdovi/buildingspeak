@@ -195,6 +195,18 @@
                   </ul>
                 </li>
                 <li class="menu-item">
+                  <span>Spaces:</span>
+                  <ul>
+                    {% for s in spaces %}
+                      <li class="menu-item {% if s.id == space.id %}active{% endif %}">
+                        <a href="/{{ account.id }}/spaces/{{ s.id }}" {% if s.id == space.id %}class="active"{% endif %}>
+                          {{ s.name }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </li>
+                <li class="menu-item">
                   <span>Meters:</span>
                   <ul>
                     {% for m in meters %}
