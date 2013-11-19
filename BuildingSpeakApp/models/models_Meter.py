@@ -1409,7 +1409,7 @@ class Meter(models.Model):
             mthr.save()
         if self.bill_data_import:
             super(Meter, self).save(*args, **kwargs)
-            self.update_bill_data()
+            self.upload_bill_data()
         super(Meter, self).save(*args, **kwargs)
     class Meta:
         app_label = 'BuildingSpeakApp'

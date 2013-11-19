@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404, get_list_or_404, redirec
 from BuildingSpeakApp.models import Account, Building, Meter, Equipment, WeatherStation, EfficiencyMeasure
 from BuildingSpeakApp.models import Space
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm, Message
-from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list
+from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, convert_units_sum_meters
 import json
 import numpy as np
 import pandas as pd
@@ -16,8 +16,8 @@ from decimal import Decimal
 from django.forms.models import modelform_factory
 from django.contrib.auth.models import User
 from django.db.models import Q
-from rq import Queue
-from worker import conn
+#from rq import Queue
+#from worker import conn
 
 class ResultsMessage(object):
     """Used for generating user
@@ -223,9 +223,9 @@ def meter_detail(request, account_id, meter_id):
             form.initial['bill_data_file'] = latest_bill_data_file
             meter.save()
             try:
-                q = Queue(connection=conn)
-                result = q.enqueue(meter.upload_bill_data)
-#                meter.upload_bill_data()
+#                q = Queue(connection=conn)
+#                result = q.enqueue(meter.upload_bill_data)
+                meter.upload_bill_data()
                 m = ResultsMessage()
                 m.comment = 'Bill data has been uploaded.'
             except:

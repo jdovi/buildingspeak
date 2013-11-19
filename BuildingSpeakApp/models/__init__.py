@@ -31,3 +31,4 @@ from models_UserProfile import UserProfile
 from models_ForecastIO import Forecastio
 from models_WeatherStation import WeatherStation, WeatherDataPoint
 from models_dependent_functions import update_readers, ManagementAction, get_model_key_value_pairs_as_nested_list
+from models_dependent_functions import convert_units_sum_meters

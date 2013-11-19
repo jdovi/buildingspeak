@@ -33,6 +33,208 @@ from models_Utility import Utility
 from models_WeatherStation import WeatherStation
 
 
+def convert_units_sum_meters(utility_type, units, list_of_meters, first_month='', last_month=''):
+    """function(utility_type, units, list_of_meters, first_month, last_month)
+        utility_type/units = from Meter options
+        list = Meter objects
+        first/last_month = mm/yyyy strings for date range
+        
+    Given the type, units and mm/yyyy
+    month strings and a list of Meters,
+    function retrieves dataframes, 
+    converts units, and sums peak
+    demand and consumption in all 
+    dataframes."""
+    try:
+        if len([type(x.id) for x in list_of_meters if type(x.id) is not int]) > 0:
+            raise AttributeError
+    except:
+        print 'Function convert_units_sum_meters given non-model input, aborting and returning None.'
+        df_sum = None
+    else:
+        try:
+            if units not in ['kW,kWh','therms/h,therms','gpm,gal',
+                             'kBtuh,kBtu','MMBtuh,MMBtu','Btuh,Btu',
+                             'tons,ton-h','MW,MWh','cf/m,cf','ccf/h,ccf',
+                             'kcf/h,kcf','MMcf/h,MMcf','m^3/h,m^3',
+                             'lb/h,lb','klb/h,klb','MMlb/h,MMlb',
+                             'lpm,lit','ton(wt)/h,tons(wt)',
+                             'lbs(wt)/h,lbs(wt)','klbs(wt)/h,klbs(wt)',
+                             'MMlbs(wt)/h,MMlbs(wt)']:
+                raise AttributeError
+            if utility_type not in ['electricity',
+                                    'natural gas',
+                                    #'domestic water', Note: not energy units!
+                                    'chilled water',
+                                    'hot water',
+                                    'steam',
+                                    'fuel oil (1,2,4), diesel',
+                                    'fuel oil (5,6)',
+                                    'kerosene',
+                                    'propane and liquid propane',
+                                    'coal (anthracite)',
+                                    'coal (bituminous)',
+                                    'coke',
+                                    'wood',
+                                    'other']:
+                raise AttributeError
+        except:
+            print 'Function convert_units_sum_meters given bad utility_type or units input, aborting and returning None.'
+            df_sum = None
+        else:
+            try:
+                sf = {
+                    'electricity':              {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'kW,kWh': Decimal(3.412),
+                                                'MW,MWh': Decimal(3412)},
+                    'natural gas':              {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'cf/m,cf': Decimal(1.029),
+                                                'ccf/h,ccf': Decimal(102.9),
+                                                'kcf/h,kcf': Decimal(1029),
+                                                'MMcf/h,MMcf': Decimal(1029000),
+                                                'therms/h,therms': Decimal(100),
+                                                'm^3/h,m^3': Decimal(36.339)},
+                    'steam':                    {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'lb/h,lb': Decimal(1.194),
+                                                'klb/h,klb': Decimal(1194),
+                                                'MMlb/h,MMlb': Decimal(1194000),
+                                                'therms/h,therms': Decimal(100)},
+                    'hot water':                {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'therms/h,therms': Decimal(100)},
+                    'chilled water':            {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'tons,ton-h': Decimal(12)},
+                    'kerosene':                 {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'gpm,gal': Decimal(135),
+                                                'lpm,lit': Decimal(35.1)},
+                    'fuel oil (1,2,4), diesel': {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'gpm,gal': Decimal(138.6905),
+                                                'lpm,lit': Decimal(36.060)},
+                    'fuel oil (5,6)':           {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'gpm,gal': Decimal(149.6905),
+                                                'lpm,lit': Decimal(38.920)},
+                    'propane and liquid propane': {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'cf/m,cf': Decimal(2.5185),
+                                                'kcf/h,kcf': Decimal(2518.5),
+                                                'gpm,gal': Decimal(91.6476),
+                                                'lpm,lit': Decimal(23.828)},
+                    'coal (anthracite)':        {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'ton(wt)/h,tons(wt)': Decimal(25090),
+                                                'lbs(wt)/h,lbs(wt)': Decimal(12.545),
+                                                'klbs(wt)/h,klbs(wt)': Decimal(12545),
+                                                'MMlbs(wt)/h,MMlbs(wt)': Decimal(12545000)},
+                    'coal (bituminous)':        {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'ton(wt)/h,tons(wt)': Decimal(24930),
+                                                'lbs(wt)/h,lbs(wt)': Decimal(12.465),
+                                                'klbs(wt)/h,klbs(wt)': Decimal(12465),
+                                                'MMlbs(wt)/h,MMlbs(wt)': Decimal(12465000)},
+                    'coke':                     {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'ton(wt)/h,tons(wt)': Decimal(24800),
+                                                'lbs(wt)/h,lbs(wt)': Decimal(12.4),
+                                                'klbs(wt)/h,klbs(wt)': Decimal(12400),
+                                                'MMlbs(wt)/h,MMlbs(wt)': Decimal(12400000)},
+                    'wood':                     {'kBtuh,kBtu': Decimal(1),
+                                                'MMBtuh,MMBtu': Decimal(1000),
+                                                'ton(wt)/h,tons(wt)': Decimal(15380)},
+                    'other':                    {'kBtuh,kBtu': Decimal(1)}}
+                column_list_convert =  ['Billing Demand (act)',
+                                'Billing Demand (asave)',
+                                'Billing Demand (base delta)',
+                                'Billing Demand (base)',
+                                'Billing Demand (esave delta)',
+                                'Billing Demand (esave)',
+                                'Billing Demand (exp delta)',
+                                'Billing Demand (exp)',
+                                'Consumption (act)',
+                                'Consumption (asave)',
+                                'Consumption (base delta)',
+                                'Consumption (base)',
+                                'Consumption (esave delta)',
+                                'Consumption (esave)',
+                                'Consumption (exp delta)',
+                                'Consumption (exp)',
+                                'Peak Demand (act)',
+                                'Peak Demand (asave)',
+                                'Peak Demand (base delta)',
+                                'Peak Demand (base)',
+                                'Peak Demand (esave delta)',
+                                'Peak Demand (esave)',
+                                'Peak Demand (exp delta)',
+                                'Peak Demand (exp)']
+                column_list_sum = ['Billing Demand (act)',
+                                'Billing Demand (asave)',
+                                'Billing Demand (base delta)',
+                                'Billing Demand (base)',
+                                'Billing Demand (esave delta)',
+                                'Billing Demand (esave)',
+                                'Billing Demand (exp delta)',
+                                'Billing Demand (exp)',
+                                'Consumption (act)',
+                                'Consumption (asave)',
+                                'Consumption (base delta)',
+                                'Consumption (base)',
+                                'Consumption (esave delta)',
+                                'Consumption (esave)',
+                                'Consumption (exp delta)',
+                                'Consumption (exp)',
+                                'Cost (act)',
+                                'Cost (asave)',
+                                'Cost (base delta)',
+                                'Cost (base)',
+                                'Cost (esave delta)',
+                                'Cost (esave)',
+                                'Cost (exp delta)',
+                                'Cost (exp)',
+                                'Peak Demand (act)',
+                                'Peak Demand (asave)',
+                                'Peak Demand (base delta)',
+                                'Peak Demand (base)',
+                                'Peak Demand (esave delta)',
+                                'Peak Demand (esave)',
+                                'Peak Demand (exp delta)',
+                                'Peak Demand (exp)',
+                                'kBtu Consumption (act)',
+                                'kBtu Consumption (asave)',
+                                'kBtu Consumption (base delta)',
+                                'kBtu Consumption (base)',
+                                'kBtu Consumption (esave delta)',
+                                'kBtu Consumption (esave)',
+                                'kBtu Consumption (exp delta)',
+                                'kBtu Consumption (exp)',
+                                'kBtuh Peak Demand (act)',
+                                'kBtuh Peak Demand (asave)',
+                                'kBtuh Peak Demand (base delta)',
+                                'kBtuh Peak Demand (base)',
+                                'kBtuh Peak Demand (esave delta)',
+                                'kBtuh Peak Demand (esave)',
+                                'kBtuh Peak Demand (exp delta)',
+                                'kBtuh Peak Demand (exp)']
+                meter_data_lists = [[x.utility_type,x.units,x.get_bill_data_period_dataframe(first_month=first_month,last_month=last_month)] for x in list_of_meters]
+                for i,meter in enumerate(meter_data_lists):
+                    meter_df = meter[2]
+                    for col in column_list_convert:
+                        meter_df[col] = meter_df[col] * sf[meter[0]][meter[1]] / sf[utility_type][units]
+                    meter_data_lists[i][2] = meter_df
+                df_sum = meter_data_lists[0][2]
+                for meter in meter_data_lists[1:]:
+                    for col in column_list_sum:
+                        df_sum[col] = df_sum[col].add(meter[2][col],fill_value=0)
+            except:
+                print 'Function convert_units_sum_meters failed to compute sum, aborting and returning None.'
+                df_sum = None
+    return df_sum
+    
 def get_model_key_value_pairs_as_nested_list(mymodel):
     """Returns list of lists containing key-value
     pairs of all of a model's fields."""
