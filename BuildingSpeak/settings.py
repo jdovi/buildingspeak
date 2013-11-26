@@ -7,11 +7,13 @@ DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 PROJECT_DIR = os.path.dirname(__file__)
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
+    ('David Ashley', 'dashley@drydenengineering.com'),
+
 )
 
 MANAGERS = ADMINS
@@ -37,6 +39,9 @@ DATABASES = {
     }
 }
 
+# Hosts/domain names that are valid for this site; required if DEBUG is False
+# See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = ['127.0.0.1']
 
 ###
 # Local time zone for this installation. Choices can be found here:
@@ -128,6 +133,15 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+SEND_BROKEN_LINK_EMAILS = True
+EMAIL_HOST = 'oxmail.registrar-servers.com'
+EMAIL_HOST_USER = 'dashley@drydenengineering.com'
+EMAIL_HOST_PASSWORD = 'Dryden030211!'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_PORT = 26
+EMAIL_USE_TLS = True
+SERVER_EMAIL = 'dashley@drydenengineering.com'
 
 LOGIN_URL = '/login'
 

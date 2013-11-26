@@ -1,4 +1,5 @@
 #import dbarray
+import math
 import pandas as pd
 from pytz import UTC
 from numpy import NaN
@@ -33,6 +34,145 @@ from models_Utility import Utility
 from models_WeatherStation import WeatherStation
 
 
+def nan2zero(x):
+    y = x
+    if math.isnan(x): y = Decimal(0)
+    return y
+    
+def get_df_as_table_with_formats(df, columndict, index_name, transpose_bool):
+    """function(df,columndict,index_name, transpose_bool)
+    
+    Takes dataframe, dict of column names and
+    functions to apply to those columns, a 
+    name for the index column, and a boolean
+    indicating whether the df should be 
+    transposed prior to converting into a list
+    of lists.
+    """
+    r = []
+    try:
+        if transpose_bool:
+            s = [index_name]
+            s.extend([col for col in df.index])
+            r.append(s)
+        else:
+            r.append([col for col in columndict])
+    except:
+        print 'Received non-dict during get_df_as_table_with_formats function, aborting and returning empty list.'
+    else:
+        if (df is None) or (len(df)==0):
+            print 'Found no data to load during get_df_as_table_with_formats function, aborting and returning empty list.'
+        else:
+            try:
+                for col in columndict:
+                    df[col] = df[col].apply(columndict[col])
+            except:
+                print 'Failed to apply functions during get_df_as_table_with_formats function, aborting and returning empty list.'
+            else:
+                if not(min([x in df.columns for x in columndict])):
+                    print 'Received request for columns that are not in dataframe during get_df_as_table_with_formats function, aborting and returning empty list.'
+                else:
+                    try:
+                        if transpose_bool: 
+                            df = df.transpose()
+                            for i in range(0,len(columndict)):
+                                r_1 = [str(df.index[i])]
+                                r_j = []
+                                for j in df.columns:
+                                    r_j.append(df[j][i])
+                                r_1.extend(r_j)
+                                r.append(r_1)
+                        else:
+                            for i in range(0,len(df)):
+                                r_1 = [str(df.index[i])]
+                                r_j = []
+                                for j in columndict:
+                                    r_j.append(df[j][i])
+                                r_1.extend(r_j)
+                                r.append(r_1)
+                            
+                    except:
+                        print 'Failed to create table during get_df_as_table_with_formats function, aborting and returning empty list.'
+    return r
+
+def get_monthly_dataframe_as_table(df, columnlist):
+    """function(df,columnlist)
+    
+    Takes dataframe and a list
+    of column names to include
+    in the output.  Index put
+    in first column as Month."""
+    r = []
+    try:
+        r.append(columnlist)
+    except:
+        print 'Received non-list during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+    else:
+        try:
+            df_dec = df
+        except:
+            print 'Failed to load dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+        else:
+            if (df_dec is None) or (len(df_dec)==0):
+                print 'Found no data to load during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+            else:
+                try:
+                    if 'Start Date' in df_dec.columns and 'End Date' in df_dec.columns:
+                        df_dec_numbers = df_dec.columns.drop(['Start Date','End Date'])
+                    elif 'Start Date' in df_dec.columns:
+                        df_dec_numbers = df_dec.columns.drop(['Start Date'])
+                    elif 'End Date' in df_dec.columns:
+                        df_dec_numbers = df_dec.columns.drop(['End Date'])
+                    else:
+                        df_dec_numbers = df_dec.columns
+                    df = df_dec[df_dec_numbers].applymap(lambda x: float(x)) #convert Decimal to float
+                except:
+                    print 'Failed to convert decimals to floats during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+                else:
+                    if not(min([x in df.columns for x in columnlist[1:]])):
+                        print 'Received request for columns that are not in dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+                    else:
+                        try:
+                            df = df.sort_index()
+                            for i in range(0,len(df)):
+                                r_1 = [str(df.index[i])]
+                                r_j = []
+                                for j in columnlist[1:]:
+                                    r_j.append(df[j][i])
+                                r_1.extend(r_j)
+                                r.append(r_1)
+                        except:
+                            print 'Failed to create table during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+    return r
+
+def get_default_units(utility_type):
+    """function(utility_type)
+        utility_type = from Meter options
+        
+    Given the utility type, returns
+    the default units for that type."""
+    try:
+        sf = {
+                    'electricity':      'kW,kWh',
+                    'natural gas':      'therms/h,therms',
+                    'steam':            'lb/h,lb',
+                    'hot water':        'MMBtuh,MMBtu',
+                    'chilled water':    'tons,ton-h',
+                    'kerosene':         'gpm,gal',
+                    'fuel oil (1,2,4), diesel':     'gpm,gal',
+                    'fuel oil (5,6)':               'gpm,gal',
+                    'propane and liquid propane':   'gpm,gal',
+                    'coal (anthracite)':    'ton(wt)/h,tons(wt)',
+                    'coal (bituminous)':    'ton(wt)/h,tons(wt)',
+                    'coke':     'ton(wt)/h,tons(wt)',
+                    'wood':     'ton(wt)/h,tons(wt)',
+                    'other':    'kBtuh,kBtu'}
+        units = sf[utility_type]
+    except:
+        print 'Function get_default_units failed, aborting and returning None.'
+        units = None
+    return units
+    
 def convert_units_sum_meters(utility_type, units, list_of_meters, first_month='', last_month=''):
     """function(utility_type, units, list_of_meters, first_month, last_month)
         utility_type/units = from Meter options

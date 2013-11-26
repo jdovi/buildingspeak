@@ -226,14 +226,7 @@ function addChart(arr) {
 	  
 	  {% if cost_by_month == 'false' %}
 	    No cost data to display. <br>
-	  {% endif %}
-	  {% if consumption_by_month == 'false' %}
-	    No consumption data to display. <br>
-	  {% endif %}
-	  {% if demand_by_month == 'false' %}
-	    No demand data to display. <br>
-	  {% endif %}
-
+	  {% else %}
       <div id="cost-by-month"></div>
 	  <script>
       addChart([
@@ -255,11 +248,11 @@ function addChart(arr) {
 		'ComboChart'
       ]);
       </script>
-
-      <div class="clear">
-        <div class="woo-sc-hr"></div>
-      </div>
+	  {% endif %}
 	  
+	  {% if consumption_by_month == 'false' %}
+	    No consumption data to display. <br>
+	  {% else %}
       <div id="consumption-by-month"></div>
       <script>
       addChart([
@@ -281,11 +274,11 @@ function addChart(arr) {
 		'ComboChart'
       ]);
       </script>
-
-	  <div class="clear">
-        <div class="woo-sc-hr"></div>
-      </div>
-
+	  {% endif %}
+	  
+	  {% if demand_by_month == 'false' %}
+	    No peak demand data to display. <br>
+	  {% else %}
       <div id="demand-by-month"></div>
       <script>
       addChart([
@@ -307,11 +300,15 @@ function addChart(arr) {
 		'ComboChart'
       ]);
       </script>
+	  {% endif %}
 
       <div class="clear">
         <div class="woo-sc-hr"></div>
       </div>
 	  
+	  {% if kbtu_by_month == 'false' %}
+	    No kBtu consumption data to display. <br>
+	  {% else %}
       <div id="kbtu-by-month"></div>
       <script>
       addChart([
@@ -333,11 +330,11 @@ function addChart(arr) {
 		'ComboChart'
       ]);
       </script>
+	  {% endif %}
 
-	  <div class="clear">
-        <div class="woo-sc-hr"></div>
-      </div>
-
+	  {% if kbtuh_by_month == 'false' %}
+	    No kBtuh peak demand data to display. <br>
+	  {% else %}
       <div id="kbtuh-by-month"></div>
       <script>
       addChart([
@@ -359,24 +356,48 @@ function addChart(arr) {
 		'ComboChart'
       ]);
       </script>
+	  {% endif %}
 
 	  <div class="clear">
         <div class="woo-sc-hr"></div>
       </div>
 
-	  Average Normalizations (over the time period selected above)
-      <div id="useful-metrics"></div>
+	  {% if totals_table == 'false' %}
+	    No totals to display. <br>
+	  {% else %}
+	  Totals (over the period selected)
+      <div id="totals-table"></div>
       <script>
       addChart([
-        'useful-metrics',
+        'totals-table',
         'Table',
-        {{ useful_metrics_by_month|safe }},,
+        {{ totals_table|safe }},,
         { },
 		'Table'
       ]);
       </script>
+	  {% endif %}
+	  
+	  {% if ratios_table == 'false' %}
+	    No ratios to display. <br>
+	  {% else %}
+	  Ratios (over the period selected)
+      <div id="ratios-table"></div>
+      <script>
+      addChart([
+        'ratios-table',
+        'Table',
+        {{ ratios_table|safe }},,
+        { },
+		'Table'
+      ]);
+      </script>
+	  {% endif %}
     </div> <!-- .tab-monthly -->
     <div class="tab tab-stats">
+	  {% if consumption_model_stats_table == 'false' %}
+	    No consumption model assigned to this Meter. <br>
+	  {% else %}
 	  Consumption Model Statistics
       <div id="consumption_model_stats_table"></div>
       <script>
@@ -395,167 +416,40 @@ function addChart(arr) {
 		'{{ meter.id }}-consumption-model-residuals-histogram',
 		'ColumnChart',
 		{{ consumption_model_residuals_histogram|safe }},
-		{},
+		{hAxis: {title: 'Residual Ranges'},
+		 vAxis: {title: 'Frequency'},
+		 legend: 'none'},
 		'Histogram'
 	  ]);
 	  </script>
-	  {% if consumption_model_indvar0 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table0" style="display: inline-block; width: 49%;"></div>
+
+	  {% for indvarname,indvardata in consumption_residual_plots %}
+	  <div id="{{ indvarname|safe }} - {{ forloop.counter0 }} - consumption" style="display: inline-block; width: 49%;"></div>
 	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table0',
-		'ScatterChart',
-		{{ consumption_model_residuals_table0|safe }},
-		{hAxis: {title: {{ consumption_model_indvar0|safe }} },
+      addChart([
+        '{{ indvarname|safe }} - {{ forloop.counter0 }} - consumption',
+        'ScatterChart',
+        {{ indvardata|safe }},
+		{hAxis: {title: '{{ indvarname|safe }}' },
 		 vAxis: {title: 'Residuals'},
 		 legend: 'none',
 		},
 		'Scatter'
-	  ]);
-	  </script>
+      ]);
+      </script>
+	  {% empty %}
+	    <div id="no consumption variables">No independent variables for consumption model.</div>
+	  {% endfor %}
 	  {% endif %}
-	  {% if consumption_model_indvar1 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table1" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table1',
-		'ScatterChart',
-		{{ consumption_model_residuals_table1|safe }},
-		{hAxis: {title: {{ consumption_model_indvar1|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if consumption_model_indvar2 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table2" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table2',
-		'ScatterChart',
-		{{ consumption_model_residuals_table2|safe }},
-		{hAxis: {title: {{ consumption_model_indvar2|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if consumption_model_indvar3 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table3" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table3',
-		'ScatterChart',
-		{{ consumption_model_residuals_table3|safe }},
-		{hAxis: {title: {{ consumption_model_indvar3|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if consumption_model_indvar4 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table4" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table4',
-		'ScatterChart',
-		{{ consumption_model_residuals_table4|safe }},
-		{hAxis: {title: {{ consumption_model_indvar4|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if consumption_model_indvar5 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table5" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table5',
-		'ScatterChart',
-		{{ consumption_model_residuals_table5|safe }},
-		{hAxis: {title: {{ consumption_model_indvar5|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if consumption_model_indvar6 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table6" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table6',
-		'ScatterChart',
-		{{ consumption_model_residuals_table6|safe }},
-		{hAxis: {title: {{ consumption_model_indvar6|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if consumption_model_indvar7 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table7" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table7',
-		'ScatterChart',
-		{{ consumption_model_residuals_table7|safe }},
-		{hAxis: {title: {{ consumption_model_indvar7|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if consumption_model_indvar8 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table8" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table8',
-		'ScatterChart',
-		{{ consumption_model_residuals_table8|safe }},
-		{hAxis: {title: {{ consumption_model_indvar8|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if consumption_model_indvar9 != '0'%}
-	  <div id="{{ meter.id }}-consumption-model-residuals-table9" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-consumption-model-residuals-table9',
-		'ScatterChart',
-		{{ consumption_model_residuals_table9|safe }},
-		{hAxis: {title: {{ consumption_model_indvar9|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  
-	  
+
       <div class="clear">
         <div class="woo-sc-hr"></div>
       </div>
 	  
 	  
+	  {% if peak_demand_model_stats_table == 'false' %}
+	    No peak demand model assigned to this Meter. <br>
+	  {% else %}
 	  Peak Demand Model Statistics
       <div id="peak_demand_model_stats_table"></div>
       <script>
@@ -574,159 +468,30 @@ function addChart(arr) {
 		'{{ meter.id }}-peak-demand-model-residuals-histogram',
 		'ColumnChart',
 		{{ peak_demand_model_residuals_histogram|safe }},
-		{},
+		{hAxis: {title: 'Residual Ranges'},
+		 vAxis: {title: 'Frequency'},
+		 legend: 'none'},
 		'Histogram'
 	  ]);
 	  </script>
-	  {% if peak_demand_model_indvar0 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table0" style="display: inline-block; width: 49%;"></div>
+
+	  {% for indvarname,indvardata in peak_demand_residual_plots %}
+	  <div id="{{ indvarname|safe }} - {{ forloop.counter0 }} - peak demand" style="display: inline-block; width: 49%;"></div>
 	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table0',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table0|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar0|safe }} },
+      addChart([
+        '{{ indvarname|safe }} - {{ forloop.counter0 }} - peak demand',
+        'ScatterChart',
+        {{ indvardata|safe }},
+		{hAxis: {title: '{{ indvarname|safe }}' },
 		 vAxis: {title: 'Residuals'},
 		 legend: 'none',
 		},
 		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar1 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table1" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table1',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table1|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar1|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar2 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table2" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table2',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table2|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar2|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar3 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table3" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table3',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table3|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar3|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar4 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table4" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table4',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table4|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar4|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar5 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table5" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table5',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table5|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar5|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar6 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table6" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table6',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table6|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar6|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar7 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table7" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table7',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table7|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar7|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar8 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table8" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table8',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table8|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar8|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
-	  {% endif %}
-	  {% if peak_demand_model_indvar9 != '0'%}
-	  <div id="{{ meter.id }}-peak-demand-model-residuals-table9" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ meter.id }}-peak-demand-model-residuals-table9',
-		'ScatterChart',
-		{{ peak_demand_model_residuals_table9|safe }},
-		{hAxis: {title: {{ peak_demand_model_indvar9|safe }} },
-		 vAxis: {title: 'Residuals'},
-		 legend: 'none',
-		},
-		'Scatter'
-	  ]);
-	  </script>
+      ]);
+      </script>
+	  {% empty %}
+	    <div id="no peak demand variables">No independent variables for peak demand model.</div>
+	  {% endfor %}
 	  {% endif %}
 	  
     </div> <!-- .tab-stats -->

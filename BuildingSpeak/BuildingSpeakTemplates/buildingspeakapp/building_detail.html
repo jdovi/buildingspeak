@@ -182,31 +182,68 @@ function addChart(arr) {
 		<input type="submit" value="Export" />
       </p>
 	  
-	  {% for mtype, munits, mdata in meter_data %}
-      <div id="abcd {{ forloop.counter0 }}"></div>
-      <script>
-      addChart([
-        'abcd {{ forloop.counter0 }}',
-        'Table',
-		{{ mdata|safe }},
-        { },
-		'Table'
-      ]);
-      </script>
-      
-	  <div id="{{ mtype|safe }} - {{ forloop.counter0 }}"></div>
+	  {% for utype, costu, consu, pdu, costd, consd, pdd, tabled in meter_data %}
+	  <div>{{ utype|safe }}</div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost">{{ utype|safe }}</div>
 	  <script>
       addChart([
-        '{{ mtype|safe }} - {{ forloop.counter0 }}',
+        '{{ utype|safe }} - {{ forloop.counter0 }} - cost',
         'ComboChart',
-        {{ mdata|safe }},
+        {{ costd|safe }},
         { // options
-          title: '{{ mtype|safe }}',
-          vAxes: { 0: { title: '{{ munits|safe }}' } },
+          title: 'Cost',
+          vAxes: { 0: { title: '{{ costu|safe }}' } },
           seriesType: "bars",
           series:     {
             0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
             1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
+          }
+        },
+		'ComboChart'
+      ]);
+      </script>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cons"></div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - cons',
+        'ComboChart',
+        {{ consd|safe }},
+        { // options
+          title: 'Consumption',
+          vAxes: { 0: { title: '{{ consu|safe }}' } },
+          seriesType: "bars",
+          series:     {
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
+          }
+        },
+		'ComboChart'
+      ]);
+      </script>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - pd"></div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - pd',
+        'ComboChart',
+        {{ pdd|safe }},
+        { // options
+          title: 'Peak Demand',
+          vAxes: { 0: { title: '{{ pdu|safe }}' } },
+          seriesType: "bars",
+          series:     {
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
           }
         },
 		'ComboChart'
@@ -217,7 +254,7 @@ function addChart(arr) {
         <div class="woo-sc-hr"></div>
       </div>
 	  {% empty %}
-	    <div id="{{ forloop.counter0 }}">No data available.</div>
+	    <div id="{{ forloop.counter0 }}">No meter data available.</div>
 	  {% endfor %}
 
     </div> <!-- .tab-data -->

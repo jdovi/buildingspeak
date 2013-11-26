@@ -8,6 +8,9 @@ from BuildingSpeakApp.models import Account, Building, Meter, Equipment, Weather
 from BuildingSpeakApp.models import Space
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm, Message
 from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, convert_units_sum_meters
+from BuildingSpeakApp.models import get_default_units, get_monthly_dataframe_as_table, nan2zero, get_df_as_table_with_formats
+
+import math
 import json
 import numpy as np
 import pandas as pd
@@ -16,6 +19,7 @@ from decimal import Decimal
 from django.forms.models import modelform_factory
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.core.mail import send_mail
 #from rq import Queue
 #from worker import conn
 
@@ -128,20 +132,113 @@ def building_detail(request, account_id, building_id):
     building_attrs = get_model_key_value_pairs_as_nested_list(building)
     this_month = pd.Period(timezone.now(),freq='M')
     
-    meter_data = [[str(x.utility_type),str(x.units),x.get_dataframe_as_table(df=x.get_bill_data_period_dataframe(),
-                                                                       columnlist=['Month',
-                                                                           'Cost (base)',
-                                                                           'Cost (exp)',
-                                                                           'Cost (esave)',
-                                                                           'Cost (act)',
-                                                                           'Cost (asave)'])] for x in building.meters.filter(utility_type='electricity')]
-    if len(meter_data) == 1:
-        meter_data = False
+    #if there are no meters, skip all meter data calcs
+    if len(building.meters.all()) < 1:
+        meter_data = None
     else:
-        meter_data = [x for x in meter_data if len(x[2])>1]
+        column_list_sum = ['Billing Demand (act)',
+                        'Billing Demand (asave)',
+                        'Billing Demand (base delta)',
+                        'Billing Demand (base)',
+                        'Billing Demand (esave delta)',
+                        'Billing Demand (esave)',
+                        'Billing Demand (exp delta)',
+                        'Billing Demand (exp)',
+                        'Consumption (act)',
+                        'Consumption (asave)',
+                        'Consumption (base delta)',
+                        'Consumption (base)',
+                        'Consumption (esave delta)',
+                        'Consumption (esave)',
+                        'Consumption (exp delta)',
+                        'Consumption (exp)',
+                        'Cost (act)',
+                        'Cost (asave)',
+                        'Cost (base delta)',
+                        'Cost (base)',
+                        'Cost (esave delta)',
+                        'Cost (esave)',
+                        'Cost (exp delta)',
+                        'Cost (exp)',
+                        'Peak Demand (act)',
+                        'Peak Demand (asave)',
+                        'Peak Demand (base delta)',
+                        'Peak Demand (base)',
+                        'Peak Demand (esave delta)',
+                        'Peak Demand (esave)',
+                        'Peak Demand (exp delta)',
+                        'Peak Demand (exp)',
+                        'kBtu Consumption (act)',
+                        'kBtu Consumption (asave)',
+                        'kBtu Consumption (base delta)',
+                        'kBtu Consumption (base)',
+                        'kBtu Consumption (esave delta)',
+                        'kBtu Consumption (esave)',
+                        'kBtu Consumption (exp delta)',
+                        'kBtu Consumption (exp)',
+                        'kBtuh Peak Demand (act)',
+                        'kBtuh Peak Demand (asave)',
+                        'kBtuh Peak Demand (base delta)',
+                        'kBtuh Peak Demand (base)',
+                        'kBtuh Peak Demand (esave delta)',
+                        'kBtuh Peak Demand (esave)',
+                        'kBtuh Peak Demand (exp delta)',
+                        'kBtuh Peak Demand (exp)']
+        #meter_data is what will be passed to the template
+        meter_data = []
+        
+        #meter_dict holds all info and dataframes for each utility type, starting with Total non-water
+        meter_dict = {'Total Building Energy': {'name': 'Total Building Energy',
+                                                'costu': 'USD',
+                                                'consu': 'kBtu',
+                                                'pdu': 'kBtuh',
+                                                'df': convert_units_sum_meters(
+                                                        'other', 
+                                                        'kBtuh,kBtu', 
+                                                        building.meters.filter(~Q(utility_type = 'domestic water')), 
+                                                        first_month=(this_month-12).strftime('%m/%Y'), 
+                                                        last_month=this_month.strftime('%m/%Y') )
+                                                } }
+        
+        #now cycle through all utility types present in this building, get info and dataframes
+        for utype in sorted(set([x.utility_type for x in building.meters.all()])):
+            utype = str(utype)
+            meter_dict[utype] = {}
+            meter_dict[utype]['name'] = utype
+            meter_dict[utype]['costu'] = 'USD'
+            meter_dict[utype]['consu'] = get_default_units(utype).split(',')[1]
+            meter_dict[utype]['pdu'] = get_default_units(utype).split(',')[0]
+            meter_dict[utype]['df'] = convert_units_sum_meters(
+                                        utype,
+                                        get_default_units(utype),
+                                        building.meters.filter(utility_type=utype),
+                                        first_month=(this_month-12).strftime('%m/%Y'), 
+                                        last_month=this_month.strftime('%m/%Y'))
+        
+        #cycle through the meter_dict and pass to list meter_data, converting dataframes to tables
+        for utype in meter_dict:
+            dfsum = meter_dict[utype]['df']
+            dfsum[column_list_sum] = dfsum[column_list_sum].applymap(nan2zero)
+            meter_data.append(
+                         [meter_dict[utype]['name'],
+                          meter_dict[utype]['costu'],
+                          meter_dict[utype]['consu'],
+                          meter_dict[utype]['pdu'],
+                          get_monthly_dataframe_as_table(df=dfsum,
+                                                         columnlist=['Month','Cost (base)','Cost (exp)','Cost (esave)','Cost (act)','Cost (asave)']),
+                          get_monthly_dataframe_as_table(df=dfsum,
+                                                         columnlist=['Month','Consumption (base)','Consumption (exp)','Consumption (esave)','Consumption (act)','Consumption (asave)']),
+                          get_monthly_dataframe_as_table(df=dfsum,
+                                                         columnlist=['Month','Peak Demand (base)','Peak Demand (exp)','Peak Demand (esave)','Peak Demand (act)','Peak Demand (asave)']),
+                          'placeholder_for_metrics_table'])
+        
+            
+        if len(meter_data) < 1:
+            meter_data = None
+        else:
+            pass #if necessary, weed out empty tables here
     
-#    tt = [['Month','Cost (base)','Cost (exp)'],['2008-09',5,15],['2008-10',6,16]]
-#    meter_data = [['electricity','kW,kWh',tt],['electricity','kW,kWh',tt],['electricity','kW,kWh',tt]]
+    
     context = {
         'user':           request.user,
         'account':        account,
@@ -245,95 +342,160 @@ def meter_detail(request, account_id, meter_id):
     meter_attrs = get_model_key_value_pairs_as_nested_list(meter)
     this_month = pd.Period(timezone.now(),freq='M')
     
-    bill_data = meter.get_bill_data_period_dataframe(first_month=(this_month-12).strftime('%m/%Y'), last_month=this_month.strftime('%m/%Y')).sort_index() ######use # of months here!!!!!!!!!!!!!!!!!!!
-    cost_per_consumption = '$/' + meter.units.split(',')[1]
-    cost_per_peak_demand = '$/' + meter.units.split(',')[0]
-    consumption_per_day = meter.units.split(',')[1] + '/day'
-    bill_data['Days'] = [(bill_data['End Date'][i] - bill_data['Start Date'][i]).days for i in range(0, len(bill_data))]
+    #this dataframe provides the foundational meter dataset; if no data, skip everything
+    bill_data = meter.get_bill_data_period_dataframe(first_month=(this_month-12).strftime('%m/%Y'), last_month=this_month.strftime('%m/%Y')) ######use # of months here!!!!!!!!!!!!!!!!!!!
+    if bill_data is None:
+        totals_table = False
+        ratios_table = False
+        cost_by_month = False
+        consumption_by_month = False
+        demand_by_month = False
+        kbtu_by_month = False
+        kbtuh_by_month = False
+        consumption_residual_plots = None  #iterables in templates need None
+        peak_demand_residual_plots = None  #iterables in templates need None
+        consumption_model_stats_table = False
+        peak_demand_model_stats_table = False
+        consumption_model_residuals_histogram = False
+        peak_demand_model_residuals_histogram = False
+    else:
+        bill_data = bill_data.sort_index()
+        #additional column names to be created; these are manipulations of the stored data
+        cost_per_consumption = '$/' + meter.units.split(',')[1]
+        consumption_per_day = meter.units.split(',')[1] + '/day'
+        consumption = meter.units.split(',')[1]
+        consumption_kBtu = 'kBtu'
+        cost = '$'
+        cost_per_day = '$/day'
+        cost_per_kBtu = '$/kBtu'
+        kBtu_per_day = 'kBtu/day'
+        bill_data['Days'] = [(bill_data['End Date'][i] - bill_data['Start Date'][i]).days+1 for i in range(0, len(bill_data))]
+        
+        #now we create the additional columns to manipulate the stored data for display to user
+        bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)']
+        bill_data[cost_per_day] = bill_data['Cost (act)'] / bill_data['Days']
+        bill_data[cost] = bill_data['Cost (act)']
+        bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
+        bill_data[consumption] = bill_data['Consumption (act)']
+        bill_data[consumption_kBtu] = bill_data['kBtu Consumption (act)']
+        bill_data[cost_per_kBtu] = bill_data['Cost (act)'] / bill_data['kBtu Consumption (act)']
+        bill_data[kBtu_per_day] = bill_data['kBtu Consumption (act)'] / bill_data['Days']
+        
+        #totals and useful ratios table calculations
+        #first we construct a dataframe of the right length with only the columns we want
+        bill_data_totals = bill_data[[consumption_per_day,
+                                   cost_per_day,
+                                   cost_per_consumption,
+                                   consumption_kBtu,
+                                   consumption,
+                                   cost,
+                                   cost_per_kBtu,
+                                   kBtu_per_day]][-1:-14:-1]
+        #this column will get populated and then used to sort after we've jumped from Periods to Jan,Feb,etc.
+        bill_data_totals['Month Integer'] = 99
+        
+        #now we loop through the 12 months and overwrite the old values with summations over all occurrences
+        #    of a given month, and then we replace the index with text values Jan, Feb, etc.
+        for i in range(0,12):
+            bill_data_totals[cost_per_consumption][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+            bill_data_totals[cost_per_day][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum())
+            bill_data_totals[cost][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+            bill_data_totals[consumption_per_day][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum())
+            bill_data_totals[consumption][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+            bill_data_totals[consumption_kBtu][i:i+1] = bill_data['kBtu Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+            bill_data_totals[cost_per_kBtu][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / bill_data['kBtu Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+            bill_data_totals[kBtu_per_day][i:i+1] = bill_data['kBtu Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum())
+            bill_data_totals['Month Integer'][i:i+1] = bill_data_totals.index[i].month
+        bill_data_totals = bill_data_totals.sort(columns='Month Integer')
+        bill_data_totals.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual']
+        
+        #now we add the Annual row, which will be a column if and when we transpose
+        bill_data_totals[cost_per_consumption]['Annual'] = bill_data['Cost (act)'].sum() / bill_data['Consumption (act)'].sum()
+        bill_data_totals[cost_per_day]['Annual'] =         bill_data['Cost (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+        bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'].sum()
+        bill_data_totals[consumption_per_day]['Annual'] =  bill_data['Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+        bill_data_totals[consumption]['Annual'] =          bill_data['Consumption (act)'].sum()
+        bill_data_totals[consumption_kBtu]['Annual'] =     bill_data['kBtu Consumption (act)'].sum()
+        bill_data_totals[cost_per_kBtu]['Annual'] = bill_data['Cost (act)'].sum() / bill_data['kBtu Consumption (act)'].sum()
+        bill_data_totals[kBtu_per_day]['Annual'] =  bill_data['kBtu Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+        
+        #no longer needed once we've sorted
+        bill_data_totals = bill_data_totals.drop(['Month Integer'],1)
+        
+        #totals table only has values as opposed to ratios, so we pull relevant columns and set format
+        totals_table_df = bill_data_totals[[cost,consumption,consumption_kBtu]]
+        totals_column_dict = {cost: lambda x: '${:,.2f}'.format(x),
+                              consumption: lambda x: '{:,.0f}'.format(x),
+                              consumption_kBtu: lambda x: '{:,.0f}'.format(x)}
+        totals_table = get_df_as_table_with_formats(df = totals_table_df,
+                                                    columndict = totals_column_dict,
+                                                    index_name = 'Metric',
+                                                    transpose_bool = True)
     
-    bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)']
-    bill_data[cost_per_peak_demand] = bill_data['Cost (act)'] / bill_data['Peak Demand (act)']
-    bill_data['$/day'] = bill_data['Cost (act)'] / bill_data['Days']
-    bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
-    
-    bill_data_avg = bill_data[[cost_per_consumption,cost_per_peak_demand,'$/day',consumption_per_day]][-1:-13:-1]
-    bill_data_avg['Month Integer'] = 99
-    for i in range(0,12):
-        bill_data_avg[cost_per_consumption][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum() / bill_data['Consumption (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum()
-        bill_data_avg[cost_per_peak_demand][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum() / bill_data['Peak Demand (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum()
-        bill_data_avg['$/day'][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum() / Decimal(1.0 + bill_data['Days'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum())
-        bill_data_avg[consumption_per_day][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum() / Decimal(1.0 + bill_data['Days'][[x.month==bill_data_avg.index[i].month for x in bill_data.index]].sum())
-        bill_data_avg['Month Integer'][i:i+1] = bill_data_avg.index[i].month
-    bill_data_avg = bill_data_avg.sort(columns='Month Integer')
-    bill_data_avg.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-    bill_data_avg = bill_data_avg.drop(['Month Integer'],1)
-    bill_data_avg = bill_data_avg.transpose()
-    bill_data_avg['Annual'] = [bill_data['Cost (act)'].sum() / bill_data['Consumption (act)'].sum(),
-                                     bill_data['Cost (act)'].sum() / bill_data['Peak Demand (act)'].sum(),
-                                     bill_data['Cost (act)'].sum() / Decimal(1.0 + bill_data['Days'].sum()),
-                                     bill_data['Consumption (act)'].sum() / Decimal(1.0 + bill_data['Days'].sum())]
-    useful_metrics_by_month = meter.get_dataframe_as_table(df=bill_data_avg, columnlist=['Metric','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual'])
-    if len(useful_metrics_by_month) == 1: useful_metrics_by_month = False
-    
-    cost_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
-                                                                           'Cost (base)',
-                                                                           'Cost (exp)',
-                                                                           'Cost (esave)',
-                                                                           'Cost (act)',
-                                                                           'Cost (asave)'])
-    if len(cost_by_month) == 1: cost_by_month = False
-    consumption_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
-                                                                                  'Consumption (base)',
-                                                                                  'Consumption (exp)',
-                                                                                  'Consumption (esave)',
-                                                                                  'Consumption (act)',
-                                                                                  'Consumption (asave)'])
-    if len(consumption_by_month) == 1: consumption_by_month = False
-    demand_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
-                                                                             'Peak Demand (base)',
-                                                                             'Peak Demand (exp)',
-                                                                             'Peak Demand (esave)',
-                                                                             'Peak Demand (act)',
-                                                                             'Peak Demand (asave)'])
-    if len(demand_by_month) == 1: demand_by_month = False
-    kbtu_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
-                                                                                  'kBtu Consumption (base)',
-                                                                                  'kBtu Consumption (exp)',
-                                                                                  'kBtu Consumption (esave)',
-                                                                                  'kBtu Consumption (act)',
-                                                                                  'kBtu Consumption (asave)'])
-    if len(kbtu_by_month) == 1: kbtu_by_month = False
-    kbtuh_by_month = meter.get_dataframe_as_table(df=bill_data, columnlist=['Month',
-                                                                             'kBtuh Peak Demand (base)',
-                                                                             'kBtuh Peak Demand (exp)',
-                                                                             'kBtuh Peak Demand (esave)',
-                                                                             'kBtuh Peak Demand (act)',
-                                                                             'kBtuh Peak Demand (asave)'])
-    if len(kbtuh_by_month) == 1: kbtuh_by_month = False
-    
-    consumption_model_stats_table = meter.monther_set.get(name='BILLx').consumption_model.get_model_stats_as_table()
-    peak_demand_model_stats_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_model_stats_as_table()
-    
-    consumption_model_residuals_table = meter.monther_set.get(name='BILLx').consumption_model.get_residuals_and_indvars_as_table()
-    peak_demand_model_residuals_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_residuals_and_indvars_as_table()
-    
-    consumption_model_residuals = [x[0] for x in consumption_model_residuals_table[1:]]
-    peak_demand_model_residuals = [x[0] for x in peak_demand_model_residuals_table[1:]]
-    ccount,cdiv = np.histogram(consumption_model_residuals)
-    pcount,pdiv = np.histogram(peak_demand_model_residuals)
-    consumption_model_residuals_histogram = [['Bins', 'Frequency']]
-    peak_demand_model_residuals_histogram = [['Bins', 'Frequency']]
-    consumption_model_residuals_histogram.extend([[cdiv[i],float(ccount[i])] for i in range(0,len(ccount))])
-    peak_demand_model_residuals_histogram.extend([[pdiv[i],float(pcount[i])] for i in range(0,len(pcount))])
+        #ratios table only has ratios as opposed to totals, so we pull relevant columns and set format
+        ratios_table_df = bill_data_totals[[cost_per_consumption,consumption_per_day,cost_per_day,cost_per_kBtu,kBtu_per_day]]
+        ratios_column_dict = {cost_per_consumption: lambda x: '${:,.2f}'.format(x),
+                              consumption_per_day: lambda x: '{:,.0f}'.format(x),
+                              cost_per_day: lambda x: '${:,.2f}'.format(x),
+                              cost_per_kBtu: lambda x: '${:,.2f}'.format(x),
+                              kBtu_per_day: lambda x: '{:,.0f}'.format(x)}
+        ratios_table = get_df_as_table_with_formats(df = ratios_table_df,
+                                                    columndict = ratios_column_dict,
+                                                    index_name = 'Metric',
+                                                    transpose_bool = True)
+        
+        #now create monthly charts if data exists; set to False for template if no data
+        cost_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Cost (base)','Cost (exp)','Cost (esave)','Cost (act)','Cost (asave)'])
+        if len(cost_by_month) == 1: cost_by_month = False
+        consumption_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Consumption (base)','Consumption (exp)','Consumption (esave)','Consumption (act)','Consumption (asave)'])
+        if len(consumption_by_month) == 1: consumption_by_month = False
+        demand_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Peak Demand (base)','Peak Demand (exp)','Peak Demand (esave)','Peak Demand (act)','Peak Demand (asave)'])
+        if len(demand_by_month) == 1: demand_by_month = False
+        kbtu_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','kBtu Consumption (base)','kBtu Consumption (exp)','kBtu Consumption (esave)','kBtu Consumption (act)','kBtu Consumption (asave)'])
+        if len(kbtu_by_month) == 1: kbtu_by_month = False
+        kbtuh_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','kBtuh Peak Demand (base)','kBtuh Peak Demand (exp)','kBtuh Peak Demand (esave)','kBtuh Peak Demand (act)','kBtuh Peak Demand (asave)'])
+        if len(kbtuh_by_month) == 1: kbtuh_by_month = False
+        
+        #pull model stats and residuals if model exists; set False if no model but None for vars iterated over in template
+        if meter.monther_set.get(name='BILLx').consumption_model is None:
+            consumption_model_stats_table = False
+            consumption_model_residuals_table = False
+            consumption_model_residuals_histogram = False
+            consumption_residual_plots = None
+        else:
+            consumption_model_stats_table = meter.monther_set.get(name='BILLx').consumption_model.get_model_stats_as_table()
+            consumption_model_residuals_table = meter.monther_set.get(name='BILLx').consumption_model.get_residuals_and_indvars_as_table()
+            consumption_model_residuals = [x[0] for x in consumption_model_residuals_table[1:]]
+            ccount,cdiv = np.histogram(consumption_model_residuals)
+            consumption_model_residuals_histogram = [['Bins', 'Frequency']]
+            consumption_model_residuals_histogram.extend([[cdiv[i],float(ccount[i])] for i in range(0,len(ccount))])
+            if len(consumption_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
+                consumption_residual_plots = []
+                for i in range(1,len(consumption_model_residuals_table[0])):
+                    consumption_residual_plots.append([consumption_model_residuals_table[0][i],[[x[i],x[0]] for x in consumption_model_residuals_table]])
+            else:
+                consumption_residual_plots = None
+            
+        #pull model stats and residuals if model exists; set False if no model but None for vars iterated over in template
+        if meter.monther_set.get(name='BILLx').peak_demand_model is None:
+            peak_demand_model_stats_table = False
+            peak_demand_model_residuals_table = False
+            peak_demand_model_residuals_histogram = False
+            peak_demand_residual_plots = None
+        else:
+            peak_demand_model_stats_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_model_stats_as_table()    
+            peak_demand_model_residuals_table = meter.monther_set.get(name='BILLx').peak_demand_model.get_residuals_and_indvars_as_table()
+            peak_demand_model_residuals = [x[0] for x in peak_demand_model_residuals_table[1:]]
+            pcount,pdiv = np.histogram(peak_demand_model_residuals)
+            peak_demand_model_residuals_histogram = [['Bins', 'Frequency']]
+            peak_demand_model_residuals_histogram.extend([[pdiv[i],float(pcount[i])] for i in range(0,len(pcount))])
+            if len(peak_demand_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
+                peak_demand_residual_plots = []
+                for i in range(1,len(peak_demand_model_residuals_table[0])):
+                    peak_demand_residual_plots.append([peak_demand_model_residuals_table[0][i],[[x[i],x[0]] for x in peak_demand_model_residuals_table]])
+            else:
+                peak_demand_residual_plots = None
 
-    consumption_residual_plot_pairs = [[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]]]
-    if len(consumption_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
-        for i in range(1,len(consumption_model_residuals_table[0])):
-            consumption_residual_plot_pairs[i-1] = [[x[i],x[0]] for x in consumption_model_residuals_table]
-    peak_demand_residual_plot_pairs = [[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]],[[0]]]
-    if len(peak_demand_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
-        for i in range(1,len(peak_demand_model_residuals_table[0])):
-            peak_demand_residual_plot_pairs[i-1] = [[x[i],x[0]] for x in peak_demand_model_residuals_table]
     
     context = {
         'user':           request.user,
@@ -344,13 +506,14 @@ def meter_detail(request, account_id, meter_id):
         'meters':         account.meter_set.order_by('name'),
         'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct().order_by('name'),
         'measures':       EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name'),
-
+        
         'alerts':         meter.get_all_alerts(reverse_boolean=True),
         'events':         meter.get_all_events(reverse_boolean=True),
-        'form':                    form,
-        'meter':                   meter,
+        'form':                     form,
+        'meter':                    meter,
         'meter_attrs':              meter_attrs,
-        'useful_metrics_by_month': json.dumps(useful_metrics_by_month),
+        'totals_table':             json.dumps(totals_table),
+        'ratios_table':             json.dumps(ratios_table),
         'cost_by_month':           json.dumps(cost_by_month),
         'consumption_by_month':    json.dumps(consumption_by_month),
         'demand_by_month':         json.dumps(demand_by_month),
@@ -358,48 +521,10 @@ def meter_detail(request, account_id, meter_id):
         'kbtuh_by_month':          json.dumps(kbtuh_by_month),
         'consumption_units':       json.dumps(meter.units.split(',')[1]),
         'demand_units':            json.dumps(meter.units.split(',')[0]),
-        'consumption_model_stats_table':    json.dumps(consumption_model_stats_table),
-        'peak_demand_model_stats_table':    json.dumps(peak_demand_model_stats_table),
-        'consumption_model_residuals_table0':    json.dumps(consumption_residual_plot_pairs[0]),
-        'peak_demand_model_residuals_table0':    json.dumps(peak_demand_residual_plot_pairs[0]),
-        'consumption_model_residuals_table1':    json.dumps(consumption_residual_plot_pairs[1]),
-        'peak_demand_model_residuals_table1':    json.dumps(peak_demand_residual_plot_pairs[1]),
-        'consumption_model_residuals_table2':    json.dumps(consumption_residual_plot_pairs[2]),
-        'peak_demand_model_residuals_table2':    json.dumps(peak_demand_residual_plot_pairs[2]),
-        'consumption_model_residuals_table3':    json.dumps(consumption_residual_plot_pairs[3]),
-        'peak_demand_model_residuals_table3':    json.dumps(peak_demand_residual_plot_pairs[3]),
-        'consumption_model_residuals_table4':    json.dumps(consumption_residual_plot_pairs[4]),
-        'peak_demand_model_residuals_table4':    json.dumps(peak_demand_residual_plot_pairs[4]),
-        'consumption_model_residuals_table5':    json.dumps(consumption_residual_plot_pairs[5]),
-        'peak_demand_model_residuals_table5':    json.dumps(peak_demand_residual_plot_pairs[5]),
-        'consumption_model_residuals_table6':    json.dumps(consumption_residual_plot_pairs[6]),
-        'peak_demand_model_residuals_table6':    json.dumps(peak_demand_residual_plot_pairs[6]),
-        'consumption_model_residuals_table7':    json.dumps(consumption_residual_plot_pairs[7]),
-        'peak_demand_model_residuals_table7':    json.dumps(peak_demand_residual_plot_pairs[7]),
-        'consumption_model_residuals_table8':    json.dumps(consumption_residual_plot_pairs[8]),
-        'peak_demand_model_residuals_table8':    json.dumps(peak_demand_residual_plot_pairs[8]),
-        'consumption_model_residuals_table9':    json.dumps(consumption_residual_plot_pairs[9]),
-        'peak_demand_model_residuals_table9':    json.dumps(peak_demand_residual_plot_pairs[9]),
-        'consumption_model_indvar0':             json.dumps(consumption_residual_plot_pairs[0][0][0]),
-        'peak_demand_model_indvar0':             json.dumps(peak_demand_residual_plot_pairs[0][0][0]),
-        'consumption_model_indvar1':    json.dumps(consumption_residual_plot_pairs[1][0][0]),
-        'peak_demand_model_indvar1':    json.dumps(peak_demand_residual_plot_pairs[1][0][0]),
-        'consumption_model_indvar2':    json.dumps(consumption_residual_plot_pairs[2][0][0]),
-        'peak_demand_model_indvar2':    json.dumps(peak_demand_residual_plot_pairs[2][0][0]),
-        'consumption_model_indvar3':    json.dumps(consumption_residual_plot_pairs[3][0][0]),
-        'peak_demand_model_indvar3':    json.dumps(peak_demand_residual_plot_pairs[3][0][0]),
-        'consumption_model_indvar4':    json.dumps(consumption_residual_plot_pairs[4][0][0]),
-        'peak_demand_model_indvar4':    json.dumps(peak_demand_residual_plot_pairs[4][0][0]),
-        'consumption_model_indvar5':    json.dumps(consumption_residual_plot_pairs[5][0][0]),
-        'peak_demand_model_indvar5':    json.dumps(peak_demand_residual_plot_pairs[5][0][0]),
-        'consumption_model_indvar6':    json.dumps(consumption_residual_plot_pairs[6][0][0]),
-        'peak_demand_model_indvar6':    json.dumps(peak_demand_residual_plot_pairs[6][0][0]),
-        'consumption_model_indvar7':    json.dumps(consumption_residual_plot_pairs[7][0][0]),
-        'peak_demand_model_indvar7':    json.dumps(peak_demand_residual_plot_pairs[7][0][0]),
-        'consumption_model_indvar8':    json.dumps(consumption_residual_plot_pairs[8][0][0]),
-        'peak_demand_model_indvar8':    json.dumps(peak_demand_residual_plot_pairs[8][0][0]),
-        'consumption_model_indvar9':    json.dumps(consumption_residual_plot_pairs[9][0][0]),
-        'peak_demand_model_indvar9':    json.dumps(peak_demand_residual_plot_pairs[9][0][0]),
+        'consumption_residual_plots':           consumption_residual_plots,
+        'peak_demand_residual_plots':           peak_demand_residual_plots,
+        'consumption_model_stats_table':        json.dumps(consumption_model_stats_table),
+        'peak_demand_model_stats_table':        json.dumps(peak_demand_model_stats_table),
         'consumption_model_residuals_histogram':    json.dumps(consumption_model_residuals_histogram),
         'peak_demand_model_residuals_histogram':    json.dumps(peak_demand_model_residuals_histogram),
     }
