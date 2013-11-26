@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.db.models.loading import get_model
 from django.db.models import Model
+from django.db.models import Q
 
 
 from models_Message import Message
@@ -32,6 +33,7 @@ from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule
 from models_Utility import Utility
 from models_WeatherStation import WeatherStation
+
 
 
 def nan2zero(x):
@@ -1139,3 +1141,116 @@ def update_readers(modelinstance):
                 modelinstance.messages.add(m)
                 print m
 
+
+#################
+def temp_func(building):
+    this_month = pd.Period(timezone.now(),freq='M')
+    
+    #if there are no meters, skip all meter data calcs
+    if len(building.meters.all()) < 1:
+        meter_data = None
+    else:
+        column_list_sum = ['Billing Demand (act)',
+                        'Billing Demand (asave)',
+                        'Billing Demand (base delta)',
+                        'Billing Demand (base)',
+                        'Billing Demand (esave delta)',
+                        'Billing Demand (esave)',
+                        'Billing Demand (exp delta)',
+                        'Billing Demand (exp)',
+                        'Consumption (act)',
+                        'Consumption (asave)',
+                        'Consumption (base delta)',
+                        'Consumption (base)',
+                        'Consumption (esave delta)',
+                        'Consumption (esave)',
+                        'Consumption (exp delta)',
+                        'Consumption (exp)',
+                        'Cost (act)',
+                        'Cost (asave)',
+                        'Cost (base delta)',
+                        'Cost (base)',
+                        'Cost (esave delta)',
+                        'Cost (esave)',
+                        'Cost (exp delta)',
+                        'Cost (exp)',
+                        'Peak Demand (act)',
+                        'Peak Demand (asave)',
+                        'Peak Demand (base delta)',
+                        'Peak Demand (base)',
+                        'Peak Demand (esave delta)',
+                        'Peak Demand (esave)',
+                        'Peak Demand (exp delta)',
+                        'Peak Demand (exp)',
+                        'kBtu Consumption (act)',
+                        'kBtu Consumption (asave)',
+                        'kBtu Consumption (base delta)',
+                        'kBtu Consumption (base)',
+                        'kBtu Consumption (esave delta)',
+                        'kBtu Consumption (esave)',
+                        'kBtu Consumption (exp delta)',
+                        'kBtu Consumption (exp)',
+                        'kBtuh Peak Demand (act)',
+                        'kBtuh Peak Demand (asave)',
+                        'kBtuh Peak Demand (base delta)',
+                        'kBtuh Peak Demand (base)',
+                        'kBtuh Peak Demand (esave delta)',
+                        'kBtuh Peak Demand (esave)',
+                        'kBtuh Peak Demand (exp delta)',
+                        'kBtuh Peak Demand (exp)']
+        #meter_data is what will be passed to the template
+        meter_data = []
+        
+        #meter_dict holds all info and dataframes for each utility type, starting with Total non-water
+        meter_dict = {'Total Building Energy': {'name': 'Total Building Energy',
+                                                'costu': 'USD',
+                                                'consu': 'kBtu',
+                                                'pdu': 'kBtuh',
+                                                'df': convert_units_sum_meters(
+                                                        'other', 
+                                                        'kBtuh,kBtu', 
+                                                        building.meters.filter(~Q(utility_type = 'domestic water')), 
+                                                        first_month=(this_month-12).strftime('%m/%Y'), 
+                                                        last_month=this_month.strftime('%m/%Y') )
+                                                } }
+        
+        #now cycle through all utility types present in this building, get info and dataframes
+        for utype in sorted(set([x.utility_type for x in building.meters.all()])):
+            utype = str(utype)
+            meter_dict[utype] = {}
+            meter_dict[utype]['name'] = utype
+            meter_dict[utype]['costu'] = 'USD'
+            meter_dict[utype]['consu'] = get_default_units(utype).split(',')[1]
+            meter_dict[utype]['pdu'] = get_default_units(utype).split(',')[0]
+            meter_dict[utype]['df'] = convert_units_sum_meters(
+                                        utype,
+                                        get_default_units(utype),
+                                        building.meters.filter(utility_type=utype),
+                                        first_month=(this_month-12).strftime('%m/%Y'), 
+                                        last_month=this_month.strftime('%m/%Y'))
+        
+        #cycle through the meter_dict and pass to list meter_data, converting dataframes to tables
+        for utype in meter_dict:
+            dfsum = meter_dict[utype]['df']
+            dfsum[column_list_sum] = dfsum[column_list_sum].applymap(nan2zero)
+            meter_data.append(
+                         [meter_dict[utype]['name'],
+                          meter_dict[utype]['costu'],
+                          meter_dict[utype]['consu'],
+                          meter_dict[utype]['pdu'],
+                          get_monthly_dataframe_as_table(df=dfsum,
+                                                         columnlist=['Month','Cost (base)','Cost (exp)','Cost (esave)','Cost (act)','Cost (asave)']),
+                          get_monthly_dataframe_as_table(df=dfsum,
+                                                         columnlist=['Month','Consumption (base)','Consumption (exp)','Consumption (esave)','Consumption (act)','Consumption (asave)']),
+                          get_monthly_dataframe_as_table(df=dfsum,
+                                                         columnlist=['Month','Peak Demand (base)','Peak Demand (exp)','Peak Demand (esave)','Peak Demand (act)','Peak Demand (asave)']),
+                          'placeholder_for_metrics_table'])
+        
+            
+        if len(meter_data) < 1:
+            meter_data = None
+        else:
+            pass #if necessary, weed out empty tables here
+    return meter_dict,meter_data
+
+####################

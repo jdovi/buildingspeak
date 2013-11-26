@@ -237,7 +237,94 @@ def building_detail(request, account_id, building_id):
             meter_data = None
         else:
             pass #if necessary, weed out empty tables here
-    
+        
+        #additional column names to be created; these are manipulations of the stored data
+#        cost_per_consumption = '$/' + meter.units.split(',')[1]
+#        consumption_per_day = meter.units.split(',')[1] + '/day'
+#        consumption = meter.units.split(',')[1]
+#        consumption_kBtu = 'kBtu'
+#        cost = '$'
+#        cost_per_day = '$/day'
+#        cost_per_kBtu = '$/kBtu'
+#        kBtu_per_day = 'kBtu/day'
+#        cost_per_sf = '$/SF'
+#        consumption_per_sf = ''
+#        
+#        bill_data['Days'] = [(bill_data['End Date'][i] - bill_data['Start Date'][i]).days+1 for i in range(0, len(bill_data))]
+#        
+#        #now we create the additional columns to manipulate the stored data for display to user
+#        bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)']
+#        bill_data[cost_per_day] = bill_data['Cost (act)'] / bill_data['Days']
+#        bill_data[cost] = bill_data['Cost (act)']
+#        bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
+#        bill_data[consumption] = bill_data['Consumption (act)']
+#        bill_data[consumption_kBtu] = bill_data['kBtu Consumption (act)']
+#        bill_data[cost_per_kBtu] = bill_data['Cost (act)'] / bill_data['kBtu Consumption (act)']
+#        bill_data[kBtu_per_day] = bill_data['kBtu Consumption (act)'] / bill_data['Days']
+#        
+#        #totals and useful ratios table calculations
+#        #first we construct a dataframe of the right length with only the columns we want
+#        bill_data_totals = bill_data[[consumption_per_day,
+#                                   cost_per_day,
+#                                   cost_per_consumption,
+#                                   consumption_kBtu,
+#                                   consumption,
+#                                   cost,
+#                                   cost_per_kBtu,
+#                                   kBtu_per_day]][-1:-14:-1]
+#        #this column will get populated and then used to sort after we've jumped from Periods to Jan,Feb,etc.
+#        bill_data_totals['Month Integer'] = 99
+#        
+#        #now we loop through the 12 months and overwrite the old values with summations over all occurrences
+#        #    of a given month, and then we replace the index with text values Jan, Feb, etc.
+#        for i in range(0,12):
+#            bill_data_totals[cost_per_consumption][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+#            bill_data_totals[cost_per_day][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum())
+#            bill_data_totals[cost][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+#            bill_data_totals[consumption_per_day][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum())
+#            bill_data_totals[consumption][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+#            bill_data_totals[consumption_kBtu][i:i+1] = bill_data['kBtu Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+#            bill_data_totals[cost_per_kBtu][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / bill_data['kBtu Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+#            bill_data_totals[kBtu_per_day][i:i+1] = bill_data['kBtu Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum())
+#            bill_data_totals['Month Integer'][i:i+1] = bill_data_totals.index[i].month
+#        bill_data_totals = bill_data_totals.sort(columns='Month Integer')
+#        bill_data_totals.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual']
+#        
+#        #now we add the Annual row, which will be a column if and when we transpose
+#        bill_data_totals[cost_per_consumption]['Annual'] = bill_data['Cost (act)'].sum() / bill_data['Consumption (act)'].sum()
+#        bill_data_totals[cost_per_day]['Annual'] =         bill_data['Cost (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+#        bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'].sum()
+#        bill_data_totals[consumption_per_day]['Annual'] =  bill_data['Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+#        bill_data_totals[consumption]['Annual'] =          bill_data['Consumption (act)'].sum()
+#        bill_data_totals[consumption_kBtu]['Annual'] =     bill_data['kBtu Consumption (act)'].sum()
+#        bill_data_totals[cost_per_kBtu]['Annual'] = bill_data['Cost (act)'].sum() / bill_data['kBtu Consumption (act)'].sum()
+#        bill_data_totals[kBtu_per_day]['Annual'] =  bill_data['kBtu Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+#        
+#        #no longer needed once we've sorted
+#        bill_data_totals = bill_data_totals.drop(['Month Integer'],1)
+#        
+#        #totals table only has values as opposed to ratios, so we pull relevant columns and set format
+#        totals_table_df = bill_data_totals[[cost,consumption,consumption_kBtu]]
+#        totals_column_dict = {cost: lambda x: '${:,.2f}'.format(x),
+#                              consumption: lambda x: '{:,.0f}'.format(x),
+#                              consumption_kBtu: lambda x: '{:,.0f}'.format(x)}
+#        totals_table = get_df_as_table_with_formats(df = totals_table_df,
+#                                                    columndict = totals_column_dict,
+#                                                    index_name = 'Metric',
+#                                                    transpose_bool = True)
+#    
+#        #ratios table only has ratios as opposed to totals, so we pull relevant columns and set format
+#        ratios_table_df = bill_data_totals[[cost_per_consumption,consumption_per_day,cost_per_day,cost_per_kBtu,kBtu_per_day]]
+#        ratios_column_dict = {cost_per_consumption: lambda x: '${:,.2f}'.format(x),
+#                              consumption_per_day: lambda x: '{:,.0f}'.format(x),
+#                              cost_per_day: lambda x: '${:,.2f}'.format(x),
+#                              cost_per_kBtu: lambda x: '${:,.2f}'.format(x),
+#                              kBtu_per_day: lambda x: '{:,.0f}'.format(x)}
+#        ratios_table = get_df_as_table_with_formats(df = ratios_table_df,
+#                                                    columndict = ratios_column_dict,
+#                                                    index_name = 'Metric',
+#                                                    transpose_bool = True)
+        
     
     context = {
         'user':           request.user,
@@ -303,7 +390,6 @@ def meter_detail(request, account_id, meter_id):
     meter = get_object_or_404(Meter, pk=meter_id)
     if account.pk <> meter.account.pk:
         raise Http404
-    
     #---branching for POST vs. GET request
     if request.method == 'POST': # If the form has been submitted...
         form = MeterDataUploadForm(request.POST, request.FILES) # A form bound to the POST data
@@ -534,6 +620,7 @@ def meter_detail(request, account_id, meter_id):
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     if reloading: context['alerts'] = [m]
+    if meter.id == 4: template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)
 
 @login_required

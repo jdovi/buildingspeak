@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% load static %}
+{% get_static_prefix as STATIC_PREFIX %}
 <html lang="en-US">
 <head>
   <meta charset="UTF-8" />
@@ -9,25 +11,25 @@
   <link rel='stylesheet' id='jquery-style-css'  href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/base/jquery.ui.base.css?ver=3.5.1' type='text/css' media='all' />
 
   <!-- Stylesheets -->
-  <link href="{{ STATIC_URL }}app/css/jquery.fancybox.css" rel="stylesheet" type="text/css" />
-  <link href="{{ STATIC_URL }}app/css/resort/style.css" rel="stylesheet" type="text/css" />
-  <link href="{{ STATIC_URL }}app/css/resort/layout.css" rel="stylesheet" type="text/css" />
-  <link href="{{ STATIC_URL }}app/css/resort/shortcodes.css" rel="stylesheet" type="text/css" />
-  <link href="{{ STATIC_URL }}app/css/resort/default.css" rel="stylesheet" type="text/css" />
-  <link href="{{ STATIC_URL }}app/css/resort/custom.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_PREFIX }}app/css/jquery.fancybox.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_PREFIX }}app/css/resort/style.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_PREFIX }}app/css/resort/layout.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_PREFIX }}app/css/resort/shortcodes.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_PREFIX }}app/css/resort/default.css" rel="stylesheet" type="text/css" />
+  <link href="{{ STATIC_PREFIX }}app/css/resort/custom.css" rel="stylesheet" type="text/css" />
 
   <!-- Javascripts -->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script src="{{ STATIC_URL }}app/js/jquery.ui.core.min.js"></script>
-  <script src="{{ STATIC_URL }}app/js/jquery.ui.datepicker.min.js"></script>
-  <script src="{{ STATIC_URL }}app/js/jquery.ui.widget.min.js"></script>
-  <script src="{{ STATIC_URL }}app/js/jquery.ui.tabs.min.js"></script>
-  <script src="{{ STATIC_URL }}app/js/jquery.ba-throttle-debounce.min.js"></script>
-  <script src="{{ STATIC_URL }}app/js/comment-reply.min.js"></script>
-  <script src="{{ STATIC_URL }}app/js/jquery.fancybox.pack.js"></script>
-  <script src="{{ STATIC_URL }}app/js/resort/general.js"></script>
-  <script src="{{ STATIC_URL }}app/js/resort/shortcodes.js"></script>
-  <script src="{{ STATIC_URL }}app/js/resort/third-party.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/jquery.ui.core.min.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/jquery.ui.datepicker.min.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/jquery.ui.widget.min.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/jquery.ui.tabs.min.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/jquery.ba-throttle-debounce.min.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/comment-reply.min.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/jquery.fancybox.pack.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/resort/general.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/resort/shortcodes.js"></script>
+  <script src="{{ STATIC_PREFIX }}app/js/resort/third-party.js"></script>
 
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
   <!--
