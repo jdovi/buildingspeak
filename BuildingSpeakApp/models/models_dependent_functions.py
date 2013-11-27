@@ -1,6 +1,7 @@
 #import dbarray
 import math
 import pandas as pd
+import numpy as np
 from pytz import UTC
 from numpy import NaN
 from django.db import models
@@ -16,7 +17,7 @@ from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.db.models.loading import get_model
 from django.db.models import Model
-from django.db.models import Q
+from django.db.models import Q, Sum
 
 
 from models_Message import Message
@@ -33,6 +34,7 @@ from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule
 from models_Utility import Utility
 from models_WeatherStation import WeatherStation
+from models_monthlies import Monthling
 
 
 
@@ -174,6 +176,91 @@ def get_default_units(utility_type):
         print 'Function get_default_units failed, aborting and returning None.'
         units = None
     return units
+    
+def convert_units_single_value(n_value, n_utility, n_units, x_utility, x_units):
+    """function(n_value, n_utility, n_units, x_utility, x_units)
+    n_value =   Decimal
+    n_utility = n_value's utility type (from Meter options)
+    n_units =   n_value's units        (from Meter options)
+    x_utility = desired utility type   (from Meter options)
+    x_units =   desired units          (from Meter options)
+    
+    Given an energy quantity and its type
+    and units, returns a value converted
+    to the desired type and units. Units
+    options are those available to Meter
+    models."""
+    try:
+        sf = {
+            'electricity':              {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'kW,kWh': Decimal(3.412),
+                                        'MW,MWh': Decimal(3412)},
+            'natural gas':              {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'cf/m,cf': Decimal(1.029),
+                                        'ccf/h,ccf': Decimal(102.9),
+                                        'kcf/h,kcf': Decimal(1029),
+                                        'MMcf/h,MMcf': Decimal(1029000),
+                                        'therms/h,therms': Decimal(100),
+                                        'm^3/h,m^3': Decimal(36.339)},
+            'steam':                    {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'lb/h,lb': Decimal(1.194),
+                                        'klb/h,klb': Decimal(1194),
+                                        'MMlb/h,MMlb': Decimal(1194000),
+                                        'therms/h,therms': Decimal(100)},
+            'hot water':                {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'therms/h,therms': Decimal(100)},
+            'chilled water':            {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'tons,ton-h': Decimal(12)},
+            'kerosene':                 {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'gpm,gal': Decimal(135),
+                                        'lpm,lit': Decimal(35.1)},
+            'fuel oil (1,2,4), diesel': {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'gpm,gal': Decimal(138.6905),
+                                        'lpm,lit': Decimal(36.060)},
+            'fuel oil (5,6)':           {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'gpm,gal': Decimal(149.6905),
+                                        'lpm,lit': Decimal(38.920)},
+            'propane and liquid propane': {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'cf/m,cf': Decimal(2.5185),
+                                        'kcf/h,kcf': Decimal(2518.5),
+                                        'gpm,gal': Decimal(91.6476),
+                                        'lpm,lit': Decimal(23.828)},
+            'coal (anthracite)':        {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'ton(wt)/h,tons(wt)': Decimal(25090),
+                                        'lbs(wt)/h,lbs(wt)': Decimal(12.545),
+                                        'klbs(wt)/h,klbs(wt)': Decimal(12545),
+                                        'MMlbs(wt)/h,MMlbs(wt)': Decimal(12545000)},
+            'coal (bituminous)':        {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'ton(wt)/h,tons(wt)': Decimal(24930),
+                                        'lbs(wt)/h,lbs(wt)': Decimal(12.465),
+                                        'klbs(wt)/h,klbs(wt)': Decimal(12465),
+                                        'MMlbs(wt)/h,MMlbs(wt)': Decimal(12465000)},
+            'coke':                     {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'ton(wt)/h,tons(wt)': Decimal(24800),
+                                        'lbs(wt)/h,lbs(wt)': Decimal(12.4),
+                                        'klbs(wt)/h,klbs(wt)': Decimal(12400),
+                                        'MMlbs(wt)/h,MMlbs(wt)': Decimal(12400000)},
+            'wood':                     {'kBtuh,kBtu': Decimal(1),
+                                        'MMBtuh,MMBtu': Decimal(1000),
+                                        'ton(wt)/h,tons(wt)': Decimal(15380)},
+            'other':                    {'kBtuh,kBtu': Decimal(1)}}
+        converted_number = n_value * sf[n_utility][n_units] / sf[x_utility][x_units]
+    except:
+        print 'Function convert_units_single_value failed, aborting and returning None.'
+        converted_number = None
+    return converted_number
     
 def convert_units_sum_meters(utility_type, units, list_of_meters, first_month='', last_month=''):
     """function(utility_type, units, list_of_meters, first_month, last_month)
@@ -1145,6 +1232,8 @@ def update_readers(modelinstance):
 #################
 def temp_func(building):
     this_month = pd.Period(timezone.now(),freq='M')
+    month_first = this_month - 36   #link user selection here
+    month_last = this_month         #link user selection here
     
     #if there are no meters, skip all meter data calcs
     if len(building.meters.all()) < 1:
@@ -1200,8 +1289,10 @@ def temp_func(building):
                         'kBtuh Peak Demand (exp)']
         #meter_data is what will be passed to the template
         meter_data = []
+        utility_groups = ['Total Building Energy']
+        utility_groups.extend(sorted(set([str(x.utility_type) for x in building.meters.all()])))
         
-        #meter_dict holds all info and dataframes for each utility type, starting with Total non-water
+        #meter_dict holds all info and dataframes for each utility group, starting with Total non-water
         meter_dict = {'Total Building Energy': {'name': 'Total Building Energy',
                                                 'costu': 'USD',
                                                 'consu': 'kBtu',
@@ -1210,12 +1301,12 @@ def temp_func(building):
                                                         'other', 
                                                         'kBtuh,kBtu', 
                                                         building.meters.filter(~Q(utility_type = 'domestic water')), 
-                                                        first_month=(this_month-12).strftime('%m/%Y'), 
-                                                        last_month=this_month.strftime('%m/%Y') )
+                                                        first_month=month_first.strftime('%m/%Y'), 
+                                                        last_month=month_last.strftime('%m/%Y') )
                                                 } }
         
-        #now cycle through all utility types present in this building, get info and dataframes
-        for utype in sorted(set([x.utility_type for x in building.meters.all()])):
+        #cycle through all utility types present in this building, get info and dataframes
+        for utype in sorted(set([str(x.utility_type) for x in building.meters.all()])):
             utype = str(utype)
             meter_dict[utype] = {}
             meter_dict[utype]['name'] = utype
@@ -1226,9 +1317,93 @@ def temp_func(building):
                                         utype,
                                         get_default_units(utype),
                                         building.meters.filter(utility_type=utype),
-                                        first_month=(this_month-12).strftime('%m/%Y'), 
-                                        last_month=this_month.strftime('%m/%Y'))
+                                        first_month=month_first.strftime('%m/%Y'), 
+                                        last_month=month_last.strftime('%m/%Y'))
         
+        #now that dataframes are available, create data tables for each utility type, inc. Total
+        for utype in utility_groups:
+            #additional column names to be created; these are manipulations of the stored data
+            cost =              '$'
+            cost_per_day =      '$/day'
+            cost_per_sf =       '$/SF'
+            consumption =                   meter_dict[utype]['consu']
+            consumption_per_day =           meter_dict[utype]['consu'] + '/day'
+            consumption_per_sf =            meter_dict[utype]['consu'] + '/SF'
+            cost_per_consumption = '$/' +   meter_dict[utype]['consu']
+            
+            bill_data = meter_dict[utype]['df']
+            bill_data['Days'] = [(bill_data['End Date'][i] - bill_data['Start Date'][i]).days+1 for i in range(0, len(bill_data))]
+            
+            #now we create the additional columns to manipulate the stored data for display to user
+            bill_data[cost] = bill_data['Cost (act)']
+            bill_data[cost_per_day] = bill_data['Cost (act)'] / bill_data['Days']
+            bill_data[cost_per_sf] = bill_data['Cost (act)'] / building.square_footage
+            bill_data[consumption] = bill_data['Consumption (act)']
+            bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
+            bill_data[consumption_per_sf] = bill_data['Consumption (act)'] / building.square_footage
+            bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)']
+            
+            #totals and useful ratios table calculations
+            #first we construct a dataframe of the right length with only the columns we want
+            bill_data_totals = bill_data[[cost,
+                                       cost_per_day,
+                                       cost_per_sf,
+                                       consumption,
+                                       consumption_per_day,
+                                       consumption_per_sf,
+                                       cost_per_consumption]][-1:-14:-1]
+            #this column will get populated and then used to sort after we've jumped from Periods to Jan,Feb,etc.
+            bill_data_totals['Month Integer'] = 99
+
+            #now we loop through the 12 months and overwrite the old values with summations over all occurrences
+            #    of a given month, and then we replace the index with text values Jan, Feb, etc.
+            for i in range(0,12):
+                bill_data_totals[cost][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+                bill_data_totals[cost_per_day][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum())
+                bill_data_totals[cost_per_sf][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / building.square_footage
+                bill_data_totals[consumption][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+                bill_data_totals[consumption_per_day][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum())
+                bill_data_totals[consumption_per_sf][i:i+1] = bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / building.square_footage
+                bill_data_totals[cost_per_consumption][i:i+1] = bill_data['Cost (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum() / bill_data['Consumption (act)'][[x.month==bill_data_totals.index[i].month for x in bill_data.index]].sum()
+                bill_data_totals['Month Integer'][i:i+1] = bill_data_totals.index[i].month
+            bill_data_totals = bill_data_totals.sort(columns='Month Integer')
+            bill_data_totals.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual']
+
+            #now we add the Annual row, which will be a column if and when we transpose
+            bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'].sum()
+            bill_data_totals[cost_per_day]['Annual'] =          bill_data['Cost (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+            bill_data_totals[cost_per_sf]['Annual'] =           bill_data['Cost (act)'].sum() / building.square_footage
+            bill_data_totals[consumption]['Annual'] =           bill_data['Consumption (act)'].sum()
+            bill_data_totals[consumption_per_day]['Annual'] =   bill_data['Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+            bill_data_totals[consumption_per_sf]['Annual'] =    bill_data['Consumption (act)'].sum() / building.square_footage
+            bill_data_totals[cost_per_consumption]['Annual'] =  bill_data['Cost (act)'].sum() / bill_data['Consumption (act)'].sum()
+            
+            #no longer needed once we've sorted
+            bill_data_totals = bill_data_totals.drop(['Month Integer'],1)
+        
+            #totals table only has values as opposed to ratios, so we pull relevant columns and set format
+            totals_table_df = bill_data_totals[[cost,consumption]]
+            totals_column_dict = {cost: lambda x: '${:,.2f}'.format(x),
+                                  consumption: lambda x: '{:,.0f}'.format(x)}
+            totals_table = get_df_as_table_with_formats(df = totals_table_df,
+                                                        columndict = totals_column_dict,
+                                                        index_name = 'Metric',
+                                                        transpose_bool = True)
+        
+            #ratios table only has ratios as opposed to totals, so we pull relevant columns and set format
+            ratios_table_df = bill_data_totals[[cost_per_day,cost_per_sf,consumption_per_day,consumption_per_sf,cost_per_consumption]]
+            ratios_column_dict = {cost_per_day: lambda x: '${:,.2f}'.format(x),
+                                  cost_per_sf: lambda x: '${:,.2f}'.format(x),
+                                  consumption_per_day: lambda x: '{:,.0f}'.format(x),
+                                  consumption_per_sf: lambda x: '{:,.1f}'.format(x),
+                                  cost_per_consumption: lambda x: '${:,.2f}'.format(x)}
+            ratios_table = get_df_as_table_with_formats(df = ratios_table_df,
+                                                        columndict = ratios_column_dict,
+                                                        index_name = 'Metric',
+                                                        transpose_bool = True)
+            meter_dict[utype]['totals'] = totals_table
+            meter_dict[utype]['ratios'] = ratios_table
+            
         #cycle through the meter_dict and pass to list meter_data, converting dataframes to tables
         for utype in meter_dict:
             dfsum = meter_dict[utype]['df']
@@ -1244,13 +1419,39 @@ def temp_func(building):
                                                          columnlist=['Month','Consumption (base)','Consumption (exp)','Consumption (esave)','Consumption (act)','Consumption (asave)']),
                           get_monthly_dataframe_as_table(df=dfsum,
                                                          columnlist=['Month','Peak Demand (base)','Peak Demand (exp)','Peak Demand (esave)','Peak Demand (act)','Peak Demand (asave)']),
-                          'placeholder_for_metrics_table'])
+                          meter_dict[utype]['totals'],
+                          meter_dict[utype]['ratios']])
         
-            
+        
         if len(meter_data) < 1:
             meter_data = None
         else:
             pass #if necessary, weed out empty tables here
-    return meter_dict,meter_data
+        
+    #getting pie chart data; cost data includes all Meters; kBtu data excludes domestic water Meters
+    pie_cost_by_meter =     [['Meter','Cost']]
+    pie_cost_by_type =      [['Utility Type','Cost']]
+    pie_kBtu_by_meter =     [['Meter','kBtu']]
+    pie_kBtu_by_type =      [['Utility Type','kBtu']]
+    
+    #for breakdown by Meter, cycle through all Meters and exclude domestic water from kBtu calcs
+    for meter in building.meters.all():
+        cost_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S')).filter(when__lte=month_last.to_timestamp(how='E')).aggregate(Sum('act_cost'))['act_cost__sum']
+        if cost_sum is None or np.isnan(float(cost_sum)): cost_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
+        pie_cost_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum)])
+        if meter.utility_type != 'domestic water':
+            kBtu_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S')).filter(when__lte=month_last.to_timestamp(how='E')).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
+            if kBtu_sum is None or np.isnan(float(kBtu_sum)): kBtu_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
+            pie_kBtu_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(kBtu_sum)])
+    
+    #for breakdown by utility type, cycle through all utility groups and exclude domestic water from kBtu calcs
+    for utype in utility_groups:
+        if utype != 'Total Building Energy':
+            pie_cost_by_type.append([utype, float(meter_dict[utype]['df']['Cost (act)'].sum())])
+            if utype != 'domestic water':
+                pie_kBtu_by_type.append([utype, float(meter_dict[utype]['df']['kBtu Consumption (act)'].sum())])
+    pie_data = [[pie_cost_by_meter, pie_cost_by_type, pie_kBtu_by_meter, pie_kBtu_by_type]]
+
+    return meter_dict, meter_data, pie_data
 
 ####################

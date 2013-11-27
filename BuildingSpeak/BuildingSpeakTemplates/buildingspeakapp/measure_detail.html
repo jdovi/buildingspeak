@@ -60,6 +60,22 @@ function addChart(arr) {
         <div class="woo-sc-hr"></div>
       </div>
 
+	  <div id="abc" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'abc',
+		'PieChart',
+		// {{ cost_by_meter|safe }},
+		[['Utility Type', 'kBtu'],
+		 ['Total Building Energy', 13],
+		 ['electricity', 14],
+		 ['natural gas', 15]],
+		{},
+		'PieChart'
+	  ]);
+	  </script>
+
+
       {% if measure_buildings %}
         <table>
           <tbody>

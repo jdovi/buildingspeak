@@ -182,7 +182,7 @@ function addChart(arr) {
 		<input type="submit" value="Export" />
       </p>
 	  
-	  {% for utype, costu, consu, pdu, costd, consd, pdd, tabled in meter_data %}
+	  {% for utype, costu, consu, pdu, costd, consd, pdd, totals, ratios in meter_data %}
 	  <div>{{ utype|safe }}</div>
 	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost">{{ utype|safe }}</div>
 	  <script>
@@ -250,13 +250,85 @@ function addChart(arr) {
       ]);
       </script>
 
+	  Totals (over the period selected)
+      <div id="{{ utype|safe }} - {{ forloop.counter0 }} - totals"></div>
+      <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - totals',
+        'Table',
+        {{ totals|safe }},,
+        { },
+		'Table'
+      ]);
+      </script>
+	  
+	  Ratios (over the period selected)
+      <div id="{{ utype|safe }} - {{ forloop.counter0 }} - ratios"></div>
+      <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - ratios',
+        'Table',
+        {{ ratios|safe }},,
+        { },
+		'Table'
+      ]);
+      </script>
+	  
 	  <div class="clear">
         <div class="woo-sc-hr"></div>
       </div>
+
 	  {% empty %}
-	    <div id="{{ forloop.counter0 }}">No meter data available.</div>
+	    <div id="{{ forloop.counter0 }}">No meter data available for bar charts and tables.</div>
 	  {% endfor %}
 
+	  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data %}
+	  <div id="{{ building.id }}-pie-cost-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ building.id }}-pie-cost-by-meter',
+		'PieChart',
+		{{ cost_by_meter|safe }},
+		{title: 'Cost by Meter'},
+		'PieChart'
+	  ]);
+	  </script>
+	  <div id="{{ building.id }}-pie-cost-by-type" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ building.id }}-pie-cost-by-type',
+		'PieChart',
+		{{ cost_by_type|safe }},
+		{title: 'Cost by Utility Type'},
+		'PieChart'
+	  ]);
+	  </script>
+	  <div id="{{ building.id }}-pie-kBtu-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ building.id }}-pie-kBtu-by-meter',
+		'PieChart',
+		{{ kBtu_by_meter|safe }},
+		{title: 'kBtu by Meter'},
+		'PieChart'
+	  ]);
+	  </script>
+	  <div id="{{ building.id }}-pie-kBtu-by-type" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ building.id }}-pie-kBtu-by-type',
+		'PieChart',
+		{{ kBtu_by_type|safe }},
+		{title: 'kBtu by Utility Type'},
+		'PieChart'
+	  ]);
+	  </script>
+
+	  {% empty %}
+	    <div id="{{ forloop.counter0 }}">No meter data available for pie charts.</div>
+	  {% endfor %}
+
+	  
     </div> <!-- .tab-data -->
     <div class="tab tab-details">
       <div id="model-details"></div>
