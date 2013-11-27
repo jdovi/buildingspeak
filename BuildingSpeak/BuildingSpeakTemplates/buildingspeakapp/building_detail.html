@@ -78,6 +78,29 @@ function addChart(arr) {
         </div>
       {% endif %}
 
+      {% if spaces %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Space</td>
+                <td>Type</td>
+                <td>Square Footage</td>
+              </tr>
+            {% for sp in spaces %}
+              <tr>
+                <td><a href="/{{ account.id }}/spaces/{{ sp.id }}">{{ sp.name }}</a></td>
+                <td>{{ sp.space_type }}</td>
+                <td>{{ sp.square_footage }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
       {% if building.buildingmeterapportionment_set.all %}
         <table>
           <tbody>

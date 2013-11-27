@@ -51,22 +51,6 @@ function addChart(arr) {
       <div class="sixcol-four last">
         <div class="chart-header">Last month&#8217;s consumption</div>
         <div class="row">
-          <div id="{{ bldg.id }}-by-fuel-type1" style="display: inline-block; width: 49%;"></div>
-          <script>
-		  addChart([
-            '{{ bldg.id }}-by-fuel-type1',
-            'ScatterChart',
-			[
-			 ['', 'male', 'female'],
-			 [1, 2, 3],
-			 [2, 4, 6],
-			 [3, 6, 9]
-			],
-            { },
-			'Scatter'
-          ]);
-          </script>
-
           <div id="{{ bldg.id }}-by-fuel-type2" style="display: inline-block; width: 49%;"></div>
           <script>
 		  addChart([
@@ -86,22 +70,6 @@ function addChart(arr) {
         </div>
 
         <div class="row">
-          <div id="{{ bldg.id }}-by-fuel-type3" style="display: inline-block; width: 49%;"></div>
-          <script>
-		  addChart([
-            '{{ bldg.id }}-by-fuel-type3',
-            'Table',
-			[
-			  ['Name',  'Age', 'Awesome?'],
-			  ['Jim',   22,  false],
-			  ['Alice', 33, true],
-			  ['Bob',   44,  true]
-			],
-            { },
-			'Table'
-          ]);
-          </script>
-
           <div id="{{ bldg.id }}-by-fuel-type4" style="display: inline-block; width: 49%;"></div>
           <script>
 		  addChart([
