@@ -23,6 +23,12 @@ function addChart(arr) {
     <div class="tab tab-info">
       <div class="row">
         <div class="fivecol-three space-details">
+          {% if space.building %}
+            <div class="form-item">
+              <label>Building:</label>
+              <span>{{ space.building.name }}</span>
+            </div>
+          {% endif %}
           {% if space.square_footage %}
             <div class="form-item">
               <label>Floor Area (SF):</label>

@@ -203,7 +203,7 @@ class Meter(models.Model):
         mdf = self.monther_set.get(name='BILLx').get_monther_period_dataframe(first_month=first_month, last_month=last_month)
         if mdf is None:
             m = Message(when=timezone.now(),
-                        message_type='Code Error',
+                        message_type='Code Warning',
                         subject='Retrieve data failed.',
                         comment='Meter %s get_bill_data_period_dataframe function found no bill data, aborting and returning None.' % self.id)
             m.save()

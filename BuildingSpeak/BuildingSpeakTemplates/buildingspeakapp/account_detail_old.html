@@ -1,0 +1,154 @@
+{% extends 'app_base.html' %}
+{% block body %}
+
+<script>
+var charts = [];
+function addChart(arr) {
+  charts.push(arr);
+};
+</script>
+
+<header>
+  <h1>{{ account.name }}</h1>
+</header>
+
+<section class="entry">
+  <div class="shortcode-tabs default" id="tabs-11">
+    <ul class="tab_titles">
+      <li class="nav-tab"><a href="#tab-1">Summary</a></li>
+      <li class="nav-tab"><a href="#tab-3">Info</a></li>
+      <li class="nav-tab"><a href="#tab-4">Data</a></li>
+      <li class="nav-tab"><a href="#tab-5">Details</a></li>
+    </ul> <!-- .nav-tabs -->
+
+    <div class="tab tab-summary">
+	{% for bldg in account.building_set.all %}
+    <h2><a href="/{{ account.id }}/buildings/{{ bldg.id }}" title="{{ bldg.name }}">{{ bldg.name }}</a></h2>
+    <div class="row">
+      <div class="sixcol-two space-details">
+        {% if bldg.street_address %}
+          <div class="form-item">
+            <label>Location:</label>
+            <span>{{ bldg.street_address }}, {{ bldg.city }}, {{ bldg.state }}</span> <!-- TODO: include city, state and zip here too -->
+          </div>
+        {% endif %}
+        {% if bldg.building_type %}
+          <div class="form-item">
+            <label>Type:</label>
+            <span>{{ bldg.building_type }}</span>
+          </div>
+        {% endif %}
+        {% if bldg.age %}
+          <div class="form-item">
+            <label>Year:</label>
+            <span>{{ bldg.age }}</span>
+          </div>
+        {% endif %}
+        {% if bldg.square_footage %}
+          <div class="form-item">
+            <label>Sq Footage:</label>
+            <span>{{ bldg.square_footage }}</span>
+          </div>
+        {% endif %}
+        {% if bldg.stories %}
+          <div class="form-item">
+            <label>Stories:</label>
+            <span>{{ bldg.stories }}</span>
+          </div>
+        {% endif %}
+      </div> <!-- .sixcol-two -->
+      <div class="sixcol-four last">
+        <div class="chart-header">Last month&#8217;s consumption</div>
+        <div class="row">
+          <div id="{{ bldg.id }}-by-fuel-type2" style="display: inline-block; width: 49%;"></div>
+          <script>
+		  addChart([
+            '{{ bldg.id }}-by-fuel-type2',
+            'BarChart',
+			[
+			 ['April',600,  800, 950,  'exp', 'expected range', 400],
+			 ['May',  1170, 1000, 1200,'exp', 'expected range',   460],
+			 ['June',  660,  550,  800,'exp', 'expected range',  1120],
+			 ['July', 1030,    ,     , , ,   540]
+			],
+            { // options
+              },
+			'BarWithErrors'
+          ]);
+          </script>
+        </div>
+
+        <div class="row">
+          <div id="{{ bldg.id }}-by-fuel-type4" style="display: inline-block; width: 49%;"></div>
+          <script>
+		  addChart([
+            '{{ bldg.id }}-by-fuel-type4',
+            'ColumnChart',
+			[
+			 ['April',600,  800, 950,  'A', 'range', 400],
+			 ['May',  1170, 1000, 1200,'B', 'range',   460],
+			 ['June',  660,  550,  800,'C', 'range',  1120],
+			 ['July', 1030,    ,     , , ,   540]
+			],
+            { // options
+              },
+			'BarWithErrors'
+          ]);
+          </script>
+        </div>
+
+		</div> <!-- .sixcol-four -->
+    </div> <!-- .row -->
+
+    <div class="clear">
+      <!-- TODO: Hide the hr after the last space -->
+      <div class="woo-sc-hr"></div>
+    </div>
+    
+	{% endfor %}
+    </div> <!-- .tab-summary -->
+    <div class="tab tab-info">
+
+    </div> <!-- .tab-info -->
+    <div class="tab tab-data">
+
+    </div> <!-- .tab-data -->
+    <div class="tab tab-details">
+
+    </div> <!-- .tab-details -->
+
+</section> <!-- .entry -->
+
+<script type="text/javascript">
+google.load("visualization", "1", {packages:["corechart","table"]});
+google.setOnLoadCallback(function() {
+  for (var i=0; i<charts.length; i++) {
+    var chart = charts[i];
+    drawChart.apply(this, chart);
+  }
+});
+function drawChart(id, chartType, data, options, dtType) {
+  var el = document.getElementById(id);
+  //var dataTable = google.visualization.arrayToDataTable(data);
+  if (dtType == 'BarWithErrors')
+    {
+     var dataTable = new google.visualization.DataTable();
+     dataTable.addColumn('string', 'Month'); // Implicit domain column.
+     dataTable.addColumn('number', 'Sales'); // Implicit data column.
+     dataTable.addColumn({type:'number', role:'interval'});
+     dataTable.addColumn({type:'number', role:'interval'});
+     dataTable.addColumn({type:'string', role:'annotation'});
+     dataTable.addColumn({type:'string', role:'annotationText'});
+	 dataTable.addColumn('number', 'Expenses');
+     dataTable.addRows(data);
+     }
+  else
+    {
+	 var dataTable = google.visualization.arrayToDataTable(data);	 
+	 }
+  var chart     = new google.visualization[chartType](el);
+  chart.draw(dataTable, options);
+}
+
+</script>
+{% endblock %}
