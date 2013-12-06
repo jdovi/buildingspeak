@@ -1,25 +1,20 @@
 # Create your views here.
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect, Http404
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
-from BuildingSpeakApp.models import Account, Building, Meter, Equipment, WeatherStation, EfficiencyMeasure
-from BuildingSpeakApp.models import Space, Monthling
-from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm, Message
-from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, convert_units_sum_meters
-from BuildingSpeakApp.models import get_default_units, get_monthly_dataframe_as_table, nan2zero
-from BuildingSpeakApp.models import get_df_as_table_with_formats, convert_units_single_value
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, WeatherStation, EfficiencyMeasure
+from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm
+from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list
+from BuildingSpeakApp.models import get_monthly_dataframe_as_table, get_df_as_table_with_formats
 
-import math
 import json
 import numpy as np
 import pandas as pd
 from django.utils import timezone
 from decimal import Decimal
-from django.forms.models import modelform_factory
 from django.contrib.auth.models import User
-from django.db.models import Q, Sum
+from django.db.models import Q
 from django.core.mail import send_mail
 #from rq import Queue
 #from worker import conn
@@ -103,16 +98,16 @@ def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
     
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
-    month_curr = pd.Period(timezone.now(),freq='M')-20 #current month, final month in sequence
+    month_curr = pd.Period(timezone.now(),freq='M')-39 #current month, final month in sequence
     month_prev = month_curr - 1                     #previous month, first in sequence
     
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
-        bldg_view_data_curr = bldg.get_building_view_data(month_first = month_curr,
-                                                          month_last = month_curr)
+        bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
+                                                                month_last = month_curr)
         if bldg_view_data_curr is None: bldg_view_data_curr = [False, False]
-        bldg_view_data_prev = bldg.get_building_view_data(month_first = month_prev,
-                                                          month_last = month_prev)
+        bldg_view_data_prev = bldg.get_building_view_meter_data(month_first = month_prev,
+                                                                month_last = month_prev)
         if bldg_view_data_prev is None: bldg_view_data_prev = [False, False]
         bldg_data.append([bldg,
                           bldg_view_data_curr[0],
@@ -120,6 +115,17 @@ def account_detail(request, account_id):
                           bldg_view_data_prev[0],
                           bldg_view_data_prev[1],
                           ])
+
+    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
+    month_last = month_first + 40                            #final month in sequence
+    acct_view_data = account.get_account_view_meter_data(month_first=month_first,
+                                                         month_last=month_last)
+    if acct_view_data is None:
+        meter_data = None
+        pie_data = None
+    else:
+        meter_data = acct_view_data[0]
+        pie_data = acct_view_data[1]
     
     context = {
         'user':           request.user,
@@ -135,6 +141,8 @@ def account_detail(request, account_id):
         'events':         account.get_all_events(reverse_boolean=True),
         'account_attrs':  account_attrs,
         'bldg_data':      bldg_data,
+        'meter_data':     meter_data,
+        'pie_data':       pie_data,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -151,18 +159,18 @@ def building_detail(request, account_id, building_id):
         raise Http404
 
     building_attrs = get_model_key_value_pairs_as_nested_list(building)
-    month_curr = pd.Period(timezone.now(),freq='M') #current month, final month in sequence
-    month_prev = month_curr - 1                     #previous month, first in sequence
+    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
+    month_last = month_first + 40                            #final month in sequence
     
-    bldg_view_data = building.get_building_view_data(month_first=month_prev,
-                                                     month_last=month_curr)
+    bldg_view_data = building.get_building_view_meter_data(month_first=month_first,
+                                                           month_last=month_last)
     if bldg_view_data is None:
         meter_data = None
         pie_data = None
     else:
         meter_data = bldg_view_data[0]
         pie_data = bldg_view_data[1]
-                
+        
     context = {
         'user':           request.user,
         'account':        account,

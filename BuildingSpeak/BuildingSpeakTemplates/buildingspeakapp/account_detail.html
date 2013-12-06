@@ -113,7 +113,162 @@ function addChart(arr) {
 
     </div> <!-- .tab-info -->
     <div class="tab tab-data">
+      <p>
+        <strong><u>Currently viewing:</u></strong>
+        <input type="text" class="datepicker" />
+        to
+        <input type="text" class="datepicker" />
+		<input type="submit" value="Refresh" />
+		<input type="submit" value="Export" />
+      </p>
+	  
+	  {% for utype, costu, consu, pdu, costd, consd, pdd, totals, ratios in meter_data %}
+	  <div>{{ utype|safe }}</div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost">{{ utype|safe }}</div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - cost',
+        'ComboChart',
+        {{ costd|safe }},
+        { // options
+          title: 'Cost',
+          vAxes: { 0: { title: '{{ costu|safe }}' } },
+          seriesType: "bars",
+          series:     {
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
+          }
+        },
+		'ComboChart'
+      ]);
+      </script>
 
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cons"></div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - cons',
+        'ComboChart',
+        {{ consd|safe }},
+        { // options
+          title: 'Consumption',
+          vAxes: { 0: { title: '{{ consu|safe }}' } },
+          seriesType: "bars",
+          series:     {
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
+          }
+        },
+		'ComboChart'
+      ]);
+      </script>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - pd"></div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - pd',
+        'ComboChart',
+        {{ pdd|safe }},
+        { // options
+          title: 'Peak Demand',
+          vAxes: { 0: { title: '{{ pdu|safe }}' } },
+          seriesType: "bars",
+          series:     {
+            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
+            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
+            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
+            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
+          }
+        },
+		'ComboChart'
+      ]);
+      </script>
+
+	  Totals (over the period selected)
+      <div id="{{ utype|safe }} - {{ forloop.counter0 }} - totals"></div>
+      <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - totals',
+        'Table',
+        {{ totals|safe }},,
+        { },
+		'Table'
+      ]);
+      </script>
+	  
+	  Ratios (over the period selected)
+      <div id="{{ utype|safe }} - {{ forloop.counter0 }} - ratios"></div>
+      <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - ratios',
+        'Table',
+        {{ ratios|safe }},,
+        { },
+		'Table'
+      ]);
+      </script>
+	  
+	  <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+	  {% empty %}
+	    <div id="{{ forloop.counter0 }}">No meter data available for bar charts and tables.</div>
+	  {% endfor %}
+
+	  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data %}
+	  <div id="{{ account.id }}-pie-cost-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ account.id }}-pie-cost-by-meter',
+		'PieChart',
+		{{ cost_by_meter|safe }},
+		{title: 'Cost by Meter'},
+		'PieChart'
+	  ]);
+	  </script>
+	  <div id="{{ account.id }}-pie-cost-by-type" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ account.id }}-pie-cost-by-type',
+		'PieChart',
+		{{ cost_by_type|safe }},
+		{title: 'Cost by Utility Type'},
+		'PieChart'
+	  ]);
+	  </script>
+	  <div id="{{ account.id }}-pie-kBtu-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ account.id }}-pie-kBtu-by-meter',
+		'PieChart',
+		{{ kBtu_by_meter|safe }},
+		{title: 'kBtu by Meter'},
+		'PieChart'
+	  ]);
+	  </script>
+	  <div id="{{ account.id }}-pie-kBtu-by-type" style="display: inline-block; width: 49%;"></div>
+	  <script>
+	  addChart([
+		'{{ account.id }}-pie-kBtu-by-type',
+		'PieChart',
+		{{ kBtu_by_type|safe }},
+		{title: 'kBtu by Utility Type'},
+		'PieChart'
+	  ]);
+	  </script>
+
+	  {% empty %}
+	    <div id="{{ forloop.counter0 }}">No meter data available for pie charts.</div>
+	  {% endfor %}
+
+	  
     </div> <!-- .tab-data -->
     <div class="tab tab-details">
       <div id="model-details"></div>

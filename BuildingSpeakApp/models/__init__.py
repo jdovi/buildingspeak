@@ -8,7 +8,7 @@ from models_functions import image_file_path_floor, image_file_path_utility
 from models_functions import nameplate_file_path_equipment, nameplate_file_path_meter
 from models_functions import load_monthly_csv, assign_period_datetime, convert_units_sum_meters
 from models_functions import get_default_units, get_monthly_dataframe_as_table
-from models_functions import nan2zero, get_df_as_table_with_formats, convert_units_single_value
+from models_functions import nan2zero, get_df_as_table_with_formats, convert_units
 
 from models_Message import Message
 from models_Account import Account

@@ -40,19 +40,19 @@ def get_df_as_table_with_formats(df, columndict, index_name, transpose_bool):
         else:
             r.append([col for col in columndict])
     except:
-        print 'Received non-dict during get_df_as_table_with_formats function, aborting and returning empty list.'
+        print 'Code Error: Received non-dict during get_df_as_table_with_formats function, aborting and returning empty list.'
     else:
         if (df is None) or (len(df)==0):
-            print 'Found no data to load during get_df_as_table_with_formats function, aborting and returning empty list.'
+            print 'Code Warning: Found no data to load during get_df_as_table_with_formats function, aborting and returning empty list.'
         else:
             try:
                 for col in columndict:
                     df[col] = df[col].apply(columndict[col])
             except:
-                print 'Failed to apply functions during get_df_as_table_with_formats function, aborting and returning empty list.'
+                print 'Code Error: Failed to apply functions during get_df_as_table_with_formats function, aborting and returning empty list.'
             else:
                 if not(min([x in df.columns for x in columndict])):
-                    print 'Received request for columns that are not in dataframe during get_df_as_table_with_formats function, aborting and returning empty list.'
+                    print 'Code Error: Received request for columns that are not in dataframe during get_df_as_table_with_formats function, aborting and returning empty list.'
                 else:
                     try:
                         if transpose_bool: 
@@ -74,7 +74,7 @@ def get_df_as_table_with_formats(df, columndict, index_name, transpose_bool):
                                 r.append(r_1)
                             
                     except:
-                        print 'Failed to create table during get_df_as_table_with_formats function, aborting and returning empty list.'
+                        print 'Code Error: Failed to create table during get_df_as_table_with_formats function, aborting and returning empty list.'
     return r
 
 def get_monthly_dataframe_as_table(df, columnlist):
@@ -88,15 +88,15 @@ def get_monthly_dataframe_as_table(df, columnlist):
     try:
         r.append(columnlist)
     except:
-        print 'Received non-list during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+        print 'Code Error: Received non-list during get_monthly_dataframe_as_table function, aborting and returning empty list.'
     else:
         try:
             df_dec = df
         except:
-            print 'Failed to load dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+            print 'Code Error: Failed to load dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
         else:
             if (df_dec is None) or (len(df_dec)==0):
-                print 'Found no data to load during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+                print 'Code Warning: Found no data to load during get_monthly_dataframe_as_table function, aborting and returning empty list.'
             else:
                 try:
                     if 'Start Date' in df_dec.columns and 'End Date' in df_dec.columns:
@@ -109,10 +109,10 @@ def get_monthly_dataframe_as_table(df, columnlist):
                         df_dec_numbers = df_dec.columns
                     df = df_dec[df_dec_numbers].applymap(lambda x: float(x)) #convert Decimal to float
                 except:
-                    print 'Failed to convert decimals to floats during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+                    print 'Code Error: Failed to convert decimals to floats during get_monthly_dataframe_as_table function, aborting and returning empty list.'
                 else:
                     if not(min([x in df.columns for x in columnlist[1:]])):
-                        print 'Received request for columns that are not in dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+                        print 'Code Error: Received request for columns that are not in dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
                     else:
                         try:
                             df = df.sort_index()
@@ -124,7 +124,7 @@ def get_monthly_dataframe_as_table(df, columnlist):
                                 r_1.extend(r_j)
                                 r.append(r_1)
                         except:
-                            print 'Failed to create table during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+                            print 'Code Error: Failed to create table during get_monthly_dataframe_as_table function, aborting and returning empty list.'
     return r
 
 def get_default_units(utility_type):
@@ -137,6 +137,7 @@ def get_default_units(utility_type):
         sf = {
                     'electricity':      'kW,kWh',
                     'natural gas':      'therms/h,therms',
+                    'domestic water':   'gpm,gal',
                     'steam':            'lb/h,lb',
                     'hot water':        'MMBtuh,MMBtu',
                     'chilled water':    'tons,ton-h',
@@ -151,22 +152,23 @@ def get_default_units(utility_type):
                     'other':    'kBtuh,kBtu'}
         units = sf[utility_type]
     except:
-        print 'Function get_default_units failed, aborting and returning None.'
+        print 'Code Error: Function get_default_units failed, aborting and returning None.'
         units = None
     return units
     
-def convert_units_single_value(n_value, n_utility, n_units, x_utility, x_units):
-    """function(n_value, n_utility, n_units, x_utility, x_units)
-    n_value =   Decimal
-    n_utility = n_value's utility type (from Meter options)
-    n_units =   n_value's units        (from Meter options)
+def convert_units(n_utility, n_units, x_utility, x_units):
+    """function(n_utility, n_units, x_utility, x_units)
+    n_utility = old utility type (from Meter options)
+    n_units =   old units        (from Meter options)
     x_utility = desired utility type   (from Meter options)
     x_units =   desired units          (from Meter options)
     
-    Given an energy quantity and its type
-    and units, returns a value converted
-    to the desired type and units. Units
-    options are those available to Meter
+    Given utility types and units, returns
+    the scaling factor used to convert
+    the old units to the new units. Domestic
+    water type basis is 'gpm,gal'; all others
+    are assumed energy with basis 'kBtuh,kBtu'.
+    Units options are those available to Meter
     models."""
     try:
         sf = {
@@ -182,6 +184,7 @@ def convert_units_single_value(n_value, n_utility, n_units, x_utility, x_units):
                                         'MMcf/h,MMcf': Decimal(1029000),
                                         'therms/h,therms': Decimal(100),
                                         'm^3/h,m^3': Decimal(36.339)},
+            'domestic water':           {'gpm,gal': Decimal(1)},
             'steam':                    {'kBtuh,kBtu': Decimal(1),
                                         'MMBtuh,MMBtu': Decimal(1000),
                                         'lb/h,lb': Decimal(1.194),
@@ -234,11 +237,11 @@ def convert_units_single_value(n_value, n_utility, n_units, x_utility, x_units):
                                         'MMBtuh,MMBtu': Decimal(1000),
                                         'ton(wt)/h,tons(wt)': Decimal(15380)},
             'other':                    {'kBtuh,kBtu': Decimal(1)}}
-        converted_number = n_value * sf[n_utility][n_units] / sf[x_utility][x_units]
+        scaling_factor = sf[n_utility][n_units] / sf[x_utility][x_units]
     except:
-        print 'Function convert_units_single_value failed, aborting and returning None.'
-        converted_number = None
-    return converted_number
+        print 'Code Error: Function convert_units failed, aborting and returning None.'
+        scaling_factor = None
+    return scaling_factor
 
 def convert_units_sum_meters(utility_type, units, list_of_meters, first_month='', last_month=''):
     """function(utility_type, units, list_of_meters, first_month, last_month)
@@ -256,7 +259,7 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
         if len([type(x.id) for x in list_of_meters if type(x.id) is not int]) > 0:
             raise AttributeError
     except:
-        print 'Function convert_units_sum_meters given non-model input, aborting and returning None.'
+        print 'Code Error: Function convert_units_sum_meters given non-model input, aborting and returning None.'
         df_sum = None
     else:
         try:
@@ -271,7 +274,7 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
                 raise AttributeError
             if utility_type not in ['electricity',
                                     'natural gas',
-                                    #'domestic water', Note: not energy units!
+                                    'domestic water',
                                     'chilled water',
                                     'hot water',
                                     'steam',
@@ -286,75 +289,10 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
                                     'other']:
                 raise AttributeError
         except:
-            print 'Function convert_units_sum_meters given bad utility_type or units input, aborting and returning None.'
+            print 'Code Error: Function convert_units_sum_meters given bad utility_type or units input, aborting and returning None.'
             df_sum = None
         else:
             try:
-                sf = {
-                    'electricity':              {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'kW,kWh': Decimal(3.412),
-                                                'MW,MWh': Decimal(3412)},
-                    'natural gas':              {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'cf/m,cf': Decimal(1.029),
-                                                'ccf/h,ccf': Decimal(102.9),
-                                                'kcf/h,kcf': Decimal(1029),
-                                                'MMcf/h,MMcf': Decimal(1029000),
-                                                'therms/h,therms': Decimal(100),
-                                                'm^3/h,m^3': Decimal(36.339)},
-                    'steam':                    {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'lb/h,lb': Decimal(1.194),
-                                                'klb/h,klb': Decimal(1194),
-                                                'MMlb/h,MMlb': Decimal(1194000),
-                                                'therms/h,therms': Decimal(100)},
-                    'hot water':                {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'therms/h,therms': Decimal(100)},
-                    'chilled water':            {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'tons,ton-h': Decimal(12)},
-                    'kerosene':                 {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'gpm,gal': Decimal(135),
-                                                'lpm,lit': Decimal(35.1)},
-                    'fuel oil (1,2,4), diesel': {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'gpm,gal': Decimal(138.6905),
-                                                'lpm,lit': Decimal(36.060)},
-                    'fuel oil (5,6)':           {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'gpm,gal': Decimal(149.6905),
-                                                'lpm,lit': Decimal(38.920)},
-                    'propane and liquid propane': {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'cf/m,cf': Decimal(2.5185),
-                                                'kcf/h,kcf': Decimal(2518.5),
-                                                'gpm,gal': Decimal(91.6476),
-                                                'lpm,lit': Decimal(23.828)},
-                    'coal (anthracite)':        {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'ton(wt)/h,tons(wt)': Decimal(25090),
-                                                'lbs(wt)/h,lbs(wt)': Decimal(12.545),
-                                                'klbs(wt)/h,klbs(wt)': Decimal(12545),
-                                                'MMlbs(wt)/h,MMlbs(wt)': Decimal(12545000)},
-                    'coal (bituminous)':        {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'ton(wt)/h,tons(wt)': Decimal(24930),
-                                                'lbs(wt)/h,lbs(wt)': Decimal(12.465),
-                                                'klbs(wt)/h,klbs(wt)': Decimal(12465),
-                                                'MMlbs(wt)/h,MMlbs(wt)': Decimal(12465000)},
-                    'coke':                     {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'ton(wt)/h,tons(wt)': Decimal(24800),
-                                                'lbs(wt)/h,lbs(wt)': Decimal(12.4),
-                                                'klbs(wt)/h,klbs(wt)': Decimal(12400),
-                                                'MMlbs(wt)/h,MMlbs(wt)': Decimal(12400000)},
-                    'wood':                     {'kBtuh,kBtu': Decimal(1),
-                                                'MMBtuh,MMBtu': Decimal(1000),
-                                                'ton(wt)/h,tons(wt)': Decimal(15380)},
-                    'other':                    {'kBtuh,kBtu': Decimal(1)}}
                 column_list_convert =  ['Billing Demand (act)',
                                 'Billing Demand (asave)',
                                 'Billing Demand (base delta)',
@@ -428,17 +366,21 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
                                 'kBtuh Peak Demand (exp delta)',
                                 'kBtuh Peak Demand (exp)']
                 meter_data_lists = [[x.utility_type,x.units,x.get_bill_data_period_dataframe(first_month=first_month,last_month=last_month)] for x in list_of_meters]
-                for i,meter in enumerate(meter_data_lists):
-                    meter_df = meter[2]
-                    for col in column_list_convert:
-                        meter_df[col] = meter_df[col] * sf[meter[0]][meter[1]] / sf[utility_type][units]
-                    meter_data_lists[i][2] = meter_df
-                df_sum = meter_data_lists[0][2]
-                for meter in meter_data_lists[1:]:
-                    for col in column_list_sum:
-                        df_sum[col] = df_sum[col].add(meter[2][col],fill_value=0)
+                meter_data_lists = [x for x in meter_data_lists if x[2] is not None]
+                if len(meter_data_lists) > 0:
+                    for i,meter in enumerate(meter_data_lists):
+                        meter_df = meter[2]
+                        for col in column_list_convert:
+                            meter_df[col] = meter_df[col] * convert_units(meter[0],meter[1],utility_type,units)
+                        meter_data_lists[i][2] = meter_df
+                    df_sum = meter_data_lists[0][2]
+                    for meter in meter_data_lists[1:]:
+                        for col in column_list_sum:
+                            df_sum[col] = df_sum[col].apply(nan2zero).add(meter[2][col].apply(nan2zero),fill_value=0) #must remove NaNs so addition works
+                else:
+                    df_sum = None
             except:
-                print 'Function convert_units_sum_meters failed to compute sum, aborting and returning None.'
+                print 'Code Error: Function convert_units_sum_meters failed to compute sum, aborting and returning None.'
                 df_sum = None
     return df_sum
 

@@ -183,7 +183,7 @@ class Building(models.Model):
     
    
     #functions
-    def get_building_view_data(self, month_first, month_last):
+    def get_building_view_meter_data(self, month_first, month_last):
         """function(month_first, month_last)
         month_first/month_last = Periods(freq='M')
         
@@ -278,8 +278,11 @@ class Building(models.Model):
                                                 first_month=first_month, 
                                                 last_month=last_month)
                 
+                #remove all utility types for which no data was found (returned df is None)
+                temp = [meter_dict.__delitem__(x) for x in meter_dict.keys() if meter_dict[x]['df'] is None]
+
                 #now that dataframes are available, create data tables for each utility type, inc. Total
-                for utype in utility_groups:
+                for utype in meter_dict.keys():
                     #additional column names to be created; these are manipulations of the stored data
                     cost =              '$'
                     cost_per_day =      '$/day'
@@ -407,7 +410,7 @@ class Building(models.Model):
                         pie_kBtu_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(kBtu_sum)])
                 
                 #for breakdown by utility type, cycle through all utility groups and exclude domestic water from kBtu calcs
-                for utype in utility_groups:
+                for utype in meter_dict.keys():
                     if utype != 'Total Building Energy':
                         pie_cost_by_type.append([utype, float(meter_dict[utype]['df']['Cost (act)'].sum())])
                         if utype != 'domestic water':
@@ -418,7 +421,7 @@ class Building(models.Model):
             m = Message(when=timezone.now(),
                         message_type='Code Error',
                         subject='Retrieve data failed.',
-                        comment='Building %s failed on get_building_view_data function, returning None.' % self.id)
+                        comment='Building %s failed on get_building_view_meter_data function, returning None.' % self.id)
             m.save()
             self.messages.add(m)
             print m
