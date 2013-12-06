@@ -110,7 +110,185 @@ function addChart(arr) {
 	{% endfor %}
     </div> <!-- .tab-summary -->
     <div class="tab tab-info">
+      <div class="row">
+        <div class="fivecol-three space-details">
+          {% if account.account_type %}
+            <div class="form-item">
+              <label>Account Type:</label>
+              <span>{{ account.account_type }}</span>
+            </div>
+          {% endif %}
+          {% if account.city %}
+            <div class="form-item">
+              <label>City/State/Zip:</label>
+              <span>{{ account.city }}, {{ account.state }} {{ account.zip_code }}</span>
+            </div>
+          {% endif %}
+            <div class="form-item">
+              <label>Buildings:</label>
+              <span>{{ account.building_set.count }}</span>
+            </div>
+          {% if total_SF %}
+            <div class="form-item">
+              <label>Floorspace (SF):</label>
+              <span>{{ total_SF }}</span>
+            </div>
+          {% endif %}
+            <div class="form-item">
+              <label>Meters:</label>
+              <span>{{ account.meter_set.count }}</span>
+            </div>
+        </div>
+        <div class="fivecol-two last">
+          <ul class="images">
+            {% if account.image_file %}
+              <li>
+                <a rel="images" href="{{ account.image_file.url }}"><img src="{{ account.image_file.url }}" /></a>
+              </li>
+            {% endif %}
+          </ul>
+        </div> <!-- .fivecol-two -->
+      </div> <!-- .row -->
 
+      <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+      {% if measures %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Efficiency Measure</td>
+                <td>Start Date</td>
+              </tr>
+            {% for m in measures %}
+              <tr>
+                <td><a href="/{{ account.id }}/measures/{{ m.id }}">{{ m.name }}</a></td>
+                <td>{{ m.when }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      {% if spaces %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Space</td>
+                <td>Type</td>
+                <td>Square Footage</td>
+              </tr>
+            {% for sp in spaces %}
+              <tr>
+                <td><a href="/{{ account.id }}/spaces/{{ sp.id }}">{{ sp.name }}</a></td>
+                <td>{{ sp.space_type }}</td>
+                <td>{{ sp.square_footage }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      {% if meters %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Meter</td>
+                <td>Fuel Type</td>
+              </tr>
+            {% for m in meters %}
+              <tr>
+                <td><a href="/{{ account.id }}/meters/{{ m.id }}">{{ m.name }} - {{ m.utility_type }}</a></td>
+                <td>{{ m.utility_type }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      {% if equipments %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Equipment</td>
+              </tr>
+            {% for e in equipments %}
+              <tr>
+                <td><a href="/{{ account.id }}/equipments/{{ e.id }}">{{ e.name }}</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      <p>Event Log:</p>
+      <table>
+        <tbody>
+          {% if events %}
+            {% for e in events %}
+              <tr>
+                <td>{{ e.when|date:"m/d/Y" }}</td>
+                <td>{{ e.name }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td>No events.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+      <p>Alerts:</p>
+      <table>
+        <tbody>
+          {% if alerts %}
+            {% for a in alerts %}
+              <tr>
+                <td>{{ a.when|date:"m/d/Y" }}</td>
+                <td>{{ a.subject }}</td>
+                <td>{{ a.comment }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td>No alerts.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+
+      {% if adding_events_is_enabled %}
+        <p>Add an event for this space:</p>
+        <p>
+          <input class="event-date datepicker" type="text" value="{% now "m/d/Y" %}" />
+          <input class="event-description" type="text" placeholder="Click to enter event description" />
+          <a href="#" class="woo-sc-button custom small">
+            <span class="woo-bu">Add</span>
+          </a>
+        </p>
+      {% endif %}
     </div> <!-- .tab-info -->
     <div class="tab tab-data">
       <p>
@@ -124,7 +302,7 @@ function addChart(arr) {
 	  
 	  {% for utype, costu, consu, pdu, costd, consd, pdd, totals, ratios in meter_data %}
 	  <div>{{ utype|safe }}</div>
-	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost">{{ utype|safe }}</div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost"></div>
 	  <script>
       addChart([
         '{{ utype|safe }} - {{ forloop.counter0 }} - cost',

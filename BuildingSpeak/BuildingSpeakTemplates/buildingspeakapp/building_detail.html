@@ -78,7 +78,7 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      {% if spaces %}
+      {% if building_spaces %}
         <table>
           <tbody>
               <tr>
@@ -86,7 +86,7 @@ function addChart(arr) {
                 <td>Type</td>
                 <td>Square Footage</td>
               </tr>
-            {% for sp in spaces %}
+            {% for sp in building_spaces %}
               <tr>
                 <td><a href="/{{ account.id }}/spaces/{{ sp.id }}">{{ sp.name }}</a></td>
                 <td>{{ sp.space_type }}</td>

@@ -14,7 +14,7 @@ import pandas as pd
 from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.core.mail import send_mail
 #from rq import Queue
 #from worker import conn
@@ -96,6 +96,7 @@ def application_error(request):
 @login_required
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
+    total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
     
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
     month_curr = pd.Period(timezone.now(),freq='M')-39 #current month, final month in sequence
@@ -143,6 +144,7 @@ def account_detail(request, account_id):
         'bldg_data':      bldg_data,
         'meter_data':     meter_data,
         'pie_data':       pie_data,
+        'total_SF':       total_SF,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -185,6 +187,7 @@ def building_detail(request, account_id, building_id):
         'events':         building.get_all_events(reverse_boolean=True),
         'building':             building,
         'building_measures':    EfficiencyMeasure.objects.filter(Q(equipments__buildings=building) | Q(meters__building=building)).distinct().order_by('name'),
+        'building_spaces':      building.space_set.order_by('name'),
         'building_attrs':       building_attrs,
         'meter_data':           meter_data,
         'pie_data':             pie_data,
