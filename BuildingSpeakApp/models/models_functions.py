@@ -16,7 +16,19 @@ from storages.backends.s3boto import S3BotoStorage
 from django.contrib.auth.models import User
 
 
+def decimal_isnan(x):
+    """function(x)
+    
+    Returns math.isnan(float(x)).
+    (isnan fails on Decimal inputs)"""
+    return math.isnan(float(x))
+    
 def nan2zero(x):
+    """function(x)
+    
+    Returns Decimal(0) if
+    math.isnan(x) is True,
+    otherwise returns x."""
     y = x
     if math.isnan(x): y = Decimal(0)
     return y

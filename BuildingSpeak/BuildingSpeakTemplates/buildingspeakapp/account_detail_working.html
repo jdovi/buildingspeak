@@ -9,44 +9,141 @@ function addChart(arr) {
 </script>
 
 <header>
-  <h1>{{ space.name }}</h1>
+  <h1>{{ account.name }}</h1>
 </header>
 
 <section class="entry">
   <div class="shortcode-tabs default" id="tabs-11">
     <ul class="tab_titles">
-      <li class="nav-tab"><a href="#tab-1">Info</a></li>
-      <li class="nav-tab"><a href="#tab-3">Data</a></li>
+      <li class="nav-tab"><a href="#tab-1">Summary</a></li>
+      <li class="nav-tab"><a href="#tab-3">Info</a></li>
+      <li class="nav-tab"><a href="#tab-4">Data</a></li>
       <li class="nav-tab"><a href="#tab-5">Details</a></li>
     </ul> <!-- .nav-tabs -->
 
+    <div class="tab tab-summary">
+	{% for bldg, meter_data_curr, pie_data_curr, meter_data_prev, pie_data_prev in bldg_data %}
+    <h2><a href="/{{ account.id }}/buildings/{{ bldg.id }}" title="{{ bldg.name }}">{{ bldg.name }}</a></h2>
+    <div class="row">
+		<div class="onecol-two prev">
+	    {% if pie_data_prev %}
+			  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data_prev %}
+			  <div id="{{ bldg.id }}-pie-cost-by-meter-prev" style="display: inline-block; width: 49%;"></div>
+			  <script>
+			  addChart([
+				'{{ bldg.id }}-pie-cost-by-meter-prev',
+				'PieChart',
+				{{ cost_by_meter|safe }},
+				{title: 'Cost by Meter - Previous Month'},
+				'PieChart'
+			  ]);
+			  </script>
+			  {% empty %}
+				<div id="{{ bldg.id }}-pie-cost-by-meter-prev">{{ bldg.id }}-pie-cost-by-meter-prev2</div>
+			  {% endfor %}
+	    {% else %}
+			<div id="{{ bldg.id }}-pie-cost-by-meter-prev" style="display: inline-block; width: 49%;">{{ bldg.id }}-pie-cost-by-meter-prev3</div>
+		{% endif %}
+	    {% if pie_data_curr %}
+			  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data_curr %}
+			  <div id="{{ bldg.id }}-pie-cost-by-meter-curr" style="display: inline-block; width: 49%;"></div>
+			  <script>
+			  addChart([
+				'{{ bldg.id }}-pie-cost-by-meter-curr',
+				'PieChart',
+				{{ cost_by_meter|safe }},
+				{title: 'Cost by Meter - Latest Month'},
+				'PieChart'
+			  ]);
+			  </script>
+			  {% empty %}
+				<div id="{{ bldg.id }}-pie-cost-by-meter-curr">{{ bldg.id }}-pie-cost-by-meter-curr2</div>
+			  {% endfor %}
+	    {% else %}
+			<div id="{{ bldg.id }}-pie-cost-by-meter-curr" style="display: inline-block; width: 49%;">{{ bldg.id }}-pie-cost-by-meter-curr3</div>
+		{% endif %}
+	    {% if pie_data_prev %}
+			  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data_prev %}
+			  <div id="{{ bldg.id }}-pie-cost-by-type-prev" style="display: inline-block; width: 49%;"></div>
+			  <script>
+			  addChart([
+				'{{ bldg.id }}-pie-cost-by-type-prev',
+				'PieChart',
+				{{ cost_by_type|safe }},
+				{title: 'Cost by Type - Previous Month'},
+				'PieChart'
+			  ]);
+			  </script>
+			  {% empty %}
+				<div id="{{ bldg.id }}-pie-cost-by-type-prev">{{ bldg.id }}-pie-cost-by-type-prev2</div>
+			  {% endfor %}
+	    {% else %}
+			<div id="{{ bldg.id }}-pie-cost-by-type-prev" style="display: inline-block; width: 49%;">{{ bldg.id }}-pie-cost-by-type-prev3</div>
+		{% endif %}
+	    {% if pie_data_curr %}
+			  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data_curr %}
+			  <div id="{{ bldg.id }}-pie-cost-by-type-curr" style="display: inline-block; width: 49%;"></div>
+			  <script>
+			  addChart([
+				'{{ bldg.id }}-pie-cost-by-type-curr',
+				'PieChart',
+				{{ cost_by_type|safe }},
+				{title: 'Cost by Type - Latest Month'},
+				'PieChart'
+			  ]);
+			  </script>
+			  {% empty %}
+				<div id="{{ bldg.id }}-pie-cost-by-type-curr">{{ bldg.id }}-pie-cost-by-type-curr2</div>
+			  {% endfor %}
+	    {% else %}
+			<div id="{{ bldg.id }}-pie-cost-by-type-curr" style="display: inline-block; width: 49%;">{{ bldg.id }}-pie-cost-by-type-curr3</div>
+		{% endif %}
+
+		</div> <!-- .onecol-two -->
+    </div> <!-- .row -->
+
+    <div class="clear">
+      <!-- TODO: Hide the hr after the last space -->
+      <div class="woo-sc-hr"></div>
+    </div>
+    
+	{% endfor %}
+    </div> <!-- .tab-summary -->
     <div class="tab tab-info">
       <div class="row">
         <div class="fivecol-three space-details">
-          {% if space.building %}
+          {% if account.account_type %}
             <div class="form-item">
-              <label>Building:</label>
-              <span>{{ space.building.name }}</span>
+              <label>Account Type:</label>
+              <span>{{ account.account_type }}</span>
             </div>
           {% endif %}
-          {% if space.square_footage %}
+          {% if account.city %}
+            <div class="form-item">
+              <label>City/State/Zip:</label>
+              <span>{{ account.city }}, {{ account.state }} {{ account.zip_code }}</span>
+            </div>
+          {% endif %}
+            <div class="form-item">
+              <label>Buildings:</label>
+              <span>{{ account.building_set.count }}</span>
+            </div>
+          {% if total_SF %}
             <div class="form-item">
               <label>Floorspace (SF):</label>
-              <span>{{ space.square_footage }}</span>
+              <span>{{ total_SF }}</span>
             </div>
           {% endif %}
-          {% if space.space_type %}
             <div class="form-item">
-              <label>Space Type:</label>
-              <span>{{ space.space_type }}</span>
+              <label>Meters:</label>
+              <span>{{ account.meter_set.count }}</span>
             </div>
-          {% endif %}
         </div>
         <div class="fivecol-two last">
           <ul class="images">
-            {% if space.image_file %}
+            {% if account.image_file %}
               <li>
-                <a rel="images" href="{{ space.image_file.url }}"><img src="{{ space.image_file.url }}" /></a>
+                <a rel="images" href="{{ account.image_file.url }}"><img src="{{ account.image_file.url }}" /></a>
               </li>
             {% endif %}
           </ul>
@@ -57,17 +154,17 @@ function addChart(arr) {
         <div class="woo-sc-hr"></div>
       </div>
 
-      {% if space_measures %}
+      {% if measures %}
         <table>
           <tbody>
               <tr>
                 <td>Efficiency Measure</td>
                 <td>Start Date</td>
               </tr>
-            {% for sm in space_measures %}
+            {% for m in measures %}
               <tr>
-                <td><a href="/{{ account.id }}/measures/{{ sm.id }}">{{ sm.name }}</a></td>
-                <td>{{ sm.when }}</td>
+                <td><a href="/{{ account.id }}/measures/{{ m.id }}">{{ m.name }}</a></td>
+                <td>{{ m.when }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -78,19 +175,40 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      {% if space.spacemeterapportionment_set.all %}
+      {% if spaces %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Space</td>
+                <td>Type</td>
+                <td>Square Footage</td>
+              </tr>
+            {% for sp in spaces %}
+              <tr>
+                <td><a href="/{{ account.id }}/spaces/{{ sp.id }}">{{ sp.name }}</a></td>
+                <td>{{ sp.space_type }}</td>
+                <td>{{ sp.square_footage }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
+      {% if meters %}
         <table>
           <tbody>
               <tr>
                 <td>Meter</td>
                 <td>Fuel Type</td>
-                <td>Fraction of Meter Assigned</td>
               </tr>
-            {% for sma in space.spacemeterapportionment_set.all %}
+            {% for m in meters %}
               <tr>
-                <td><a href="/{{ account.id }}/meters/{{ sma.meter.id }}">{{ sma.meter.name }} - {{ sma.meter.utility_type }}</a></td>
-                <td>{{ sma.meter.utility_type }}</td>
-                <td>{{ sma.assigned_fraction }}</td>
+                <td><a href="/{{ account.id }}/meters/{{ m.id }}">{{ m.name }} - {{ m.utility_type }}</a></td>
+                <td>{{ m.utility_type }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -101,13 +219,13 @@ function addChart(arr) {
         </div>
       {% endif %}
 
-      {% if space.equipment_set.all %}
+      {% if equipments %}
         <table>
           <tbody>
               <tr>
                 <td>Equipment</td>
               </tr>
-            {% for e in space.equipment_set.all %}
+            {% for e in equipments %}
               <tr>
                 <td><a href="/{{ account.id }}/equipments/{{ e.id }}">{{ e.name }}</a></td>
               </tr>
@@ -184,7 +302,7 @@ function addChart(arr) {
 	  
 	  {% for utype, costu, consu, pdu, costd, consd, pdd, totals, ratios in meter_data %}
 	  <div>{{ utype|safe }}</div>
-	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost">{{ utype|safe }}</div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost"></div>
 	  <script>
       addChart([
         '{{ utype|safe }} - {{ forloop.counter0 }} - cost',
@@ -283,40 +401,40 @@ function addChart(arr) {
 	  {% endfor %}
 
 	  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data %}
-	  <div id="{{ space.id }}-pie-cost-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ account.id }}-pie-cost-by-meter" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
-		'{{ space.id }}-pie-cost-by-meter',
+		'{{ account.id }}-pie-cost-by-meter',
 		'PieChart',
 		{{ cost_by_meter|safe }},
 		{title: 'Cost by Meter'},
 		'PieChart'
 	  ]);
 	  </script>
-	  <div id="{{ space.id }}-pie-cost-by-type" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ account.id }}-pie-cost-by-type" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
-		'{{ space.id }}-pie-cost-by-type',
+		'{{ account.id }}-pie-cost-by-type',
 		'PieChart',
 		{{ cost_by_type|safe }},
 		{title: 'Cost by Utility Type'},
 		'PieChart'
 	  ]);
 	  </script>
-	  <div id="{{ space.id }}-pie-kBtu-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ account.id }}-pie-kBtu-by-meter" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
-		'{{ space.id }}-pie-kBtu-by-meter',
+		'{{ account.id }}-pie-kBtu-by-meter',
 		'PieChart',
 		{{ kBtu_by_meter|safe }},
 		{title: 'kBtu by Meter'},
 		'PieChart'
 	  ]);
 	  </script>
-	  <div id="{{ space.id }}-pie-kBtu-by-type" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ account.id }}-pie-kBtu-by-type" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
-		'{{ space.id }}-pie-kBtu-by-type',
+		'{{ account.id }}-pie-kBtu-by-type',
 		'PieChart',
 		{{ kBtu_by_type|safe }},
 		{title: 'kBtu by Utility Type'},
@@ -328,7 +446,7 @@ function addChart(arr) {
 	    <div id="{{ forloop.counter0 }}">No meter data available for pie charts.</div>
 	  {% endfor %}
 
-
+	  
     </div> <!-- .tab-data -->
     <div class="tab tab-details">
       <div id="model-details"></div>
@@ -336,21 +454,26 @@ function addChart(arr) {
       addChart([
         'model-details',
         'Table',
-		{{ space_attrs|safe }},
+		{{ account_attrs|safe }},
         { },
 		'Table'
       ]);
       </script>
-
     </div> <!-- .tab-details -->
-  </div>
-</section><!-- .entry -->
+
+</section> <!-- .entry -->
 
 <script type="text/javascript">
 google.load("visualization", "1", {packages:["corechart","table"]});
+google.setOnLoadCallback(function() {
+  for (var i=0; i<charts.length; i++) {
+    var chart = charts[i];
+    drawChart.apply(this, chart);
+  }
+});
 function drawChart(id, chartType, data, options, dtType) {
-  if (!google || !google.visualization) return;
-  var el        = document.getElementById(id);
+  var el = document.getElementById(id);
+  //var dataTable = google.visualization.arrayToDataTable(data);
   if (dtType == 'BarWithErrors')
     {
      var dataTable = new google.visualization.DataTable();
@@ -371,21 +494,5 @@ function drawChart(id, chartType, data, options, dtType) {
   chart.draw(dataTable, options);
 }
 
-function drawAllCharts() {
-  for (var i=0; i<charts.length; i++) {
-    var chart = charts[i];
-    drawChart.apply(this, chart);
-  }
-}
-google.setOnLoadCallback(drawAllCharts);
-$(function() {
-  $(window).resize($.debounce(250, drawAllCharts));
-  $(document).on('tabsactivate', drawAllCharts);
-});
-
-// Set up lightbox
-$(function() {
-  $('.images a').fancybox();
-});
 </script>
 {% endblock %}

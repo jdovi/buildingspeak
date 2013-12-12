@@ -465,15 +465,9 @@ function addChart(arr) {
 
 <script type="text/javascript">
 google.load("visualization", "1", {packages:["corechart","table"]});
-google.setOnLoadCallback(function() {
-  for (var i=0; i<charts.length; i++) {
-    var chart = charts[i];
-    drawChart.apply(this, chart);
-  }
-});
 function drawChart(id, chartType, data, options, dtType) {
-  var el = document.getElementById(id);
-  //var dataTable = google.visualization.arrayToDataTable(data);
+  if (!google || !google.visualization) return;
+  var el        = document.getElementById(id);
   if (dtType == 'BarWithErrors')
     {
      var dataTable = new google.visualization.DataTable();
@@ -494,5 +488,21 @@ function drawChart(id, chartType, data, options, dtType) {
   chart.draw(dataTable, options);
 }
 
+function drawAllCharts() {
+  for (var i=0; i<charts.length; i++) {
+    var chart = charts[i];
+    drawChart.apply(this, chart);
+  }
+}
+google.setOnLoadCallback(drawAllCharts);
+$(function() {
+  $(window).resize($.debounce(250, drawAllCharts));
+  $(document).on('tabsactivate', drawAllCharts);
+});
+
+// Set up lightbox
+$(function() {
+  $('.images a').fancybox();
+});
 </script>
 {% endblock %}

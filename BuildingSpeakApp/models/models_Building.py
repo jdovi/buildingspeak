@@ -183,6 +183,229 @@ class Building(models.Model):
     
    
     #functions
+    def get_building_view_five_year_data(self):
+        """No inputs.
+        
+        Returns meter data for Building's stacked
+        5yr bar charts."""
+        #if there are no meters, skip all meter data calcs
+        try:
+            month_curr = pd.Period(timezone.now(), freq='M')
+            year_curr = month_curr.year
+            mi = pd.Period(year = year_curr-3, month = 1, freq = 'M')
+            mf = pd.Period(year = year_curr+1, month = 12, freq = 'M')
+            mistr = mi.strftime('%m/%Y')
+            mfstr = mf.strftime('%m/%Y')
+            
+            if len(self.meters.all()) < 1:
+                result = None
+            else:
+                #five year stacked_data is what will be passed to the template
+                five_year_data = []
+                utility_groups = ['Total Building Energy']
+                utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
+                
+                #meter_dict holds all info and dataframes for each utility group, starting with Total non-water
+                meter_dict = {'Total Building Energy': {'name': 'Total Building Energy',
+                                                        'costu': 'USD',
+                                                        'consu': 'kBtu',
+                                                        'pdu': 'kBtuh',
+                                                        'df': convert_units_sum_meters(
+                                                                'other', 
+                                                                'kBtuh,kBtu', 
+                                                                self.meters.filter(~Q(utility_type = 'domestic water')), 
+                                                                first_month=mistr, 
+                                                                last_month=mfstr )
+                                                        } }
+                
+                #cycle through all utility types present in this building, get info and dataframes
+                for utype in sorted(set([str(x.utility_type) for x in self.meters.all()])):
+                    utype = str(utype)
+                    meter_dict[utype] = {}
+                    meter_dict[utype]['name'] = utype
+                    meter_dict[utype]['costu'] = 'USD'
+                    meter_dict[utype]['consu'] = get_default_units(utype).split(',')[1]
+                    meter_dict[utype]['pdu'] = get_default_units(utype).split(',')[0]
+                    meter_dict[utype]['df'] = convert_units_sum_meters(
+                                                utype,
+                                                get_default_units(utype),
+                                                self.meters.filter(utility_type=utype),
+                                                first_month=mistr, 
+                                                last_month=mfstr)
+                
+                #remove all utility types for which no data was found (returned df is None)
+                temp = [meter_dict.__delitem__(x) for x in meter_dict.keys() if meter_dict[x]['df'] is None]
+
+                #now that dataframes are available, create data tables for each utility type, inc. Total
+                for utype in meter_dict.keys():
+                    five_years = pd.DataFrame(meter_dict[utype]['df'], index = pd.period_range(start = mi, end = mf, freq = 'M'))
+                    five_years = five_years.sort_index()
+                    first_calc_month = five_years.index[five_years['Cost (act)'].apply(decimal_isnan)][0]
+                    last_act_month = first_calc_month - 1
+                    
+                    five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
+                                             'CDD (consumption)','HDD (consumption)']].applymap(nan2zero)
+                    five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
+                                             'CDD (consumption)','HDD (consumption)']].applymap(float)
+                    
+                    #cost table
+                    five_year_table_cost = [['Year','Cost (act)','Cost (exp)','CDD (consumption)','HDD (consumption)']]
+                    five_year_table_cost.append([str(five_years.index[0].year),
+                                            five_years['Cost (act)'][0:12].sum(),
+                                            0,
+                                            five_years['CDD (consumption)'][0:12].sum(),
+                                            five_years['HDD (consumption)'][0:12].sum()
+                                            ])
+                    five_year_table_cost.append([str(five_years.index[12].year),
+                                            five_years['Cost (act)'][12:24].sum(),
+                                            0,
+                                            five_years['CDD (consumption)'][12:24].sum(),
+                                            five_years['HDD (consumption)'][12:24].sum()
+                                            ])
+                    five_year_table_cost.append([str(five_years.index[24].year),
+                                            five_years['Cost (act)'][24:36].sum(),
+                                            0,
+                                            five_years['CDD (consumption)'][24:36].sum(),
+                                            five_years['HDD (consumption)'][24:36].sum()
+                                            ])
+                    five_year_table_cost.append([str(five_years.index[36].year),
+                                            five_years['Cost (act)'][36:last_act_month].sum(),
+                                            five_years['Cost (exp)'][first_calc_month:48].sum(),
+                                            five_years['CDD (consumption)'][36:48].sum(),
+                                            five_years['HDD (consumption)'][36:48].sum()
+                                            ])
+                    five_year_table_cost.append([str(five_years.index[48].year),
+                                            0,
+                                            five_years['Cost (exp)'][48:60].sum(),
+                                            five_years['CDD (consumption)'][48:60].sum(),
+                                            five_years['HDD (consumption)'][48:60].sum()
+                                            ])
+                    
+                    #cost/SF table
+                    five_year_table_costSF = [['Year','Cost (act)','Cost (exp)','CDD (consumption)','HDD (consumption)']]
+                    five_year_table_costSF.append([str(five_years.index[0].year),
+                                            five_years['Cost (act)'][0:12].sum()/self.square_footage,
+                                            0,
+                                            five_years['CDD (consumption)'][0:12].sum(),
+                                            five_years['HDD (consumption)'][0:12].sum()
+                                            ])
+                    five_year_table_costSF.append([str(five_years.index[12].year),
+                                            five_years['Cost (act)'][12:24].sum()/self.square_footage,
+                                            0,
+                                            five_years['CDD (consumption)'][12:24].sum(),
+                                            five_years['HDD (consumption)'][12:24].sum()
+                                            ])
+                    five_year_table_costSF.append([str(five_years.index[24].year),
+                                            five_years['Cost (act)'][24:36].sum()/self.square_footage,
+                                            0,
+                                            five_years['CDD (consumption)'][24:36].sum(),
+                                            five_years['HDD (consumption)'][24:36].sum()
+                                            ])
+                    five_year_table_costSF.append([str(five_years.index[36].year),
+                                            five_years['Cost (act)'][36:last_act_month].sum()/self.square_footage,
+                                            five_years['Cost (exp)'][first_calc_month:48].sum()/self.square_footage,
+                                            five_years['CDD (consumption)'][36:48].sum(),
+                                            five_years['HDD (consumption)'][36:48].sum()
+                                            ])
+                    five_year_table_costSF.append([str(five_years.index[48].year),
+                                            0,
+                                            five_years['Cost (exp)'][48:60].sum()/self.square_footage,
+                                            five_years['CDD (consumption)'][48:60].sum(),
+                                            five_years['HDD (consumption)'][48:60].sum()
+                                            ])
+                    
+                    #consumption table
+                    five_year_table_cons = [['Year','Consumption (act)','Consumption (exp)','CDD (consumption)','HDD (consumption)']]
+                    five_year_table_cons.append([str(five_years.index[0].year),
+                                            five_years['Consumption (act)'][0:12].sum(),
+                                            0,
+                                            five_years['CDD (consumption)'][0:12].sum(),
+                                            five_years['HDD (consumption)'][0:12].sum()
+                                            ])
+                    five_year_table_cons.append([str(five_years.index[12].year),
+                                            five_years['Consumption (act)'][12:24].sum(),
+                                            0,
+                                            five_years['CDD (consumption)'][12:24].sum(),
+                                            five_years['HDD (consumption)'][12:24].sum()
+                                            ])
+                    five_year_table_cons.append([str(five_years.index[24].year),
+                                            five_years['Consumption (act)'][24:36].sum(),
+                                            0,
+                                            five_years['CDD (consumption)'][24:36].sum(),
+                                            five_years['HDD (consumption)'][24:36].sum()
+                                            ])
+                    five_year_table_cons.append([str(five_years.index[36].year),
+                                            five_years['Consumption (act)'][36:last_act_month].sum(),
+                                            five_years['Consumption (exp)'][first_calc_month:48].sum(),
+                                            five_years['CDD (consumption)'][36:48].sum(),
+                                            five_years['HDD (consumption)'][36:48].sum()
+                                            ])
+                    five_year_table_cons.append([str(five_years.index[48].year),
+                                            0,
+                                            five_years['Consumption (exp)'][48:60].sum(),
+                                            five_years['CDD (consumption)'][48:60].sum(),
+                                            five_years['HDD (consumption)'][48:60].sum()
+                                            ])
+
+                    #consumption/SF table
+                    five_year_table_consSF = [['Year','Consumption (act)','Consumption (exp)','CDD (consumption)','HDD (consumption)']]
+                    five_year_table_consSF.append([str(five_years.index[0].year),
+                                            five_years['Consumption (act)'][0:12].sum()/self.square_footage,
+                                            0,
+                                            five_years['CDD (consumption)'][0:12].sum(),
+                                            five_years['HDD (consumption)'][0:12].sum()
+                                            ])
+                    five_year_table_consSF.append([str(five_years.index[12].year),
+                                            five_years['Consumption (act)'][12:24].sum()/self.square_footage,
+                                            0,
+                                            five_years['CDD (consumption)'][12:24].sum(),
+                                            five_years['HDD (consumption)'][12:24].sum()
+                                            ])
+                    five_year_table_consSF.append([str(five_years.index[24].year),
+                                            five_years['Consumption (act)'][24:36].sum()/self.square_footage,
+                                            0,
+                                            five_years['CDD (consumption)'][24:36].sum(),
+                                            five_years['HDD (consumption)'][24:36].sum()
+                                            ])
+                    five_year_table_consSF.append([str(five_years.index[36].year),
+                                            five_years['Consumption (act)'][36:last_act_month].sum()/self.square_footage,
+                                            five_years['Consumption (exp)'][first_calc_month:48].sum()/self.square_footage,
+                                            five_years['CDD (consumption)'][36:48].sum(),
+                                            five_years['HDD (consumption)'][36:48].sum()
+                                            ])
+                    five_year_table_consSF.append([str(five_years.index[48].year),
+                                            0,
+                                            five_years['Consumption (exp)'][48:60].sum()/self.square_footage,
+                                            five_years['CDD (consumption)'][48:60].sum(),
+                                            five_years['HDD (consumption)'][48:60].sum()
+                                            ])
+                    
+                    five_year_data.append(
+                                 [meter_dict[utype]['name'],
+                                  meter_dict[utype]['costu'],
+                                  meter_dict[utype]['consu'],
+                                  meter_dict[utype]['pdu'],
+                                  five_year_table_cost,
+                                  five_year_table_costSF,
+                                  five_year_table_cons,
+                                  five_year_table_consSF])
+
+                if len(five_year_data) < 1:
+                    five_year_data = None
+                else:
+                    pass #if necessary, weed out empty tables here
+                
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Retrieve data failed.',
+                        comment='Building %s failed on get_building_view_five_year_data function, returning None.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+            five_year_data = None
+        return five_year_data
+
     def get_building_view_meter_data(self, month_first, month_last):
         """function(month_first, month_last)
         month_first/month_last = Periods(freq='M')

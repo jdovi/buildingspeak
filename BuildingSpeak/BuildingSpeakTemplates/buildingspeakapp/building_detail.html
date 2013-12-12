@@ -17,6 +17,7 @@ function addChart(arr) {
     <ul class="tab_titles">
       <li class="nav-tab"><a href="#tab-1">Info</a></li>
       <li class="nav-tab"><a href="#tab-3">Data</a></li>
+      <li class="nav-tab"><a href="#tab-4">5yr</a></li>
       <li class="nav-tab"><a href="#tab-5">Details</a></li>
     </ul> <!-- .nav-tabs -->
 
@@ -353,7 +354,123 @@ function addChart(arr) {
 
 	  
     </div> <!-- .tab-data -->
-    <div class="tab tab-details">
+    <div class="tab tab-5yr">
+	  {% for utype, costu, consu, pdu, costd, costsfd, consd, conssfd in five_year_data %}
+	  <div>{{ utype|safe }}</div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - five year cost"></div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - five year cost',
+        'ColumnChart',
+        {{ costd|safe }},
+        {
+        title: '5-yr Costs',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: '{{ costu|safe }}' },
+				 1: { title: 'Degree Days' }},
+		},
+		'ColumnChart'
+		]);
+      </script>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - five year cost per SF"></div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - five year cost per SF',
+        'ColumnChart',
+        {{ costsfd|safe }},
+        {
+        title: '5-yr Costs/SF',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: '{{ costu|safe }}/SF' },
+				 1: { title: 'Degree Days' }},
+		},
+		'ColumnChart'
+		]);
+      </script>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - five year cons"></div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - five year cons',
+        'ColumnChart',
+        {{ consd|safe }},
+        {
+        title: '5-yr Consumption',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: '{{ consu|safe }}'  },
+				 1: { title: 'Degree Days' }},
+		},
+		'ColumnChart'
+      ]);
+      </script>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - five year cons per SF"></div>
+	  <script>
+      addChart([
+        '{{ utype|safe }} - {{ forloop.counter0 }} - five year cons per SF',
+        'ColumnChart',
+        {{ conssfd|safe }},
+        {
+        title: '5-yr Consumption/SF',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: '{{ consu|safe }}/SF'  },
+				 1: { title: 'Degree Days' }},
+		},
+		'ColumnChart'
+      ]);
+      </script>
+
+	  <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+	  {% empty %}
+	    <div id="{{ forloop.counter0 }}">No meter data available for five year charts.</div>
+	  {% endfor %}
+	
+     </div> <!-- .tab-5yr -->
+   <div class="tab tab-details">
       <div id="model-details"></div>
       <script>
       addChart([

@@ -1,0 +1,158 @@
+{% extends 'app_base.html' %}
+{% block body %}
+
+<script>
+var charts = [];
+function addChart(arr) {
+  charts.push(arr);
+};
+</script>
+
+<header>
+  <h1>{{ building.name }}</h1>
+</header>
+
+<section class="entry">
+  <div class="shortcode-tabs default" id="tabs-11">
+    <ul class="tab_titles">
+      <li class="nav-tab"><a href="#tab-1">Info</a></li>
+      <li class="nav-tab"><a href="#tab-3">Data</a></li>
+    </ul> <!-- .nav-tabs -->
+	  
+    <div class="tab tab-info">
+	  {% for utype, costu, consu, pdu, costd, consd, pdd, totals, ratios in meter_data %}
+	  <div>{{ utype|safe }}</div>
+      <div id="dashboard">
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost" style='width: 915px; height: 300px;'></div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - control" style='width: 915px; height: 50px;'></div>
+	  </div>
+	  <script>
+      addChart([
+        'dashboard',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - control',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - cost',
+        'ComboChart',
+        {{ mydata|safe }},
+        { },
+		'Dashboard'
+      ]);
+      </script>
+	  {% endfor %}
+
+    </div> <!-- .tab-info -->
+
+	</div>
+</section><!-- .entry -->
+
+<script type="text/javascript">
+google.load("visualization", "1", {packages:["corechart","table","controls"]});
+google.setOnLoadCallback(drawAllCharts);
+function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dtType) {
+  if (!google || !google.visualization) return;
+  var elcontrol = document.getElementById(idcontrol);
+  var elchart = document.getElementById(idchart);
+  var eldashboard = document.getElementById(iddashboard);
+  
+  if (dtType == 'BarWithErrors')
+    {
+     var dataTable = new google.visualization.DataTable();
+     dataTable.addColumn('string', 'Month'); // Implicit domain column.
+     dataTable.addColumn('number', 'Sales'); // Implicit data column.
+     dataTable.addColumn({type:'number', role:'interval'});
+     dataTable.addColumn({type:'number', role:'interval'});
+     dataTable.addColumn({type:'string', role:'annotation'});
+     dataTable.addColumn({type:'string', role:'annotationText'});
+	 dataTable.addColumn('number', 'Expenses');
+     dataTable.addRows(data);
+
+	 var chart     = new google.visualization[chartType](elchart);
+	 chart.draw(dataTable, options);
+     }
+  else if (dtType == 'Dashboard')
+    {    
+		 var dashboard = new google.visualization.Dashboard(eldashboard);
+         var control = new google.visualization.ControlWrapper({
+           'controlType': 'ChartRangeFilter',
+           'containerId': idcontrol,
+           'options': {
+             // Filter by the date axis.
+             'filterColumnIndex': 0,
+             'ui': {
+               'chartType': 'LineChart',
+               'chartOptions': {
+                 'chartArea': {'width': '90%'},
+                 'hAxis': {'baselineColor': 'none'}
+               },
+               // Display a single series that shows the closing value of the stock.
+               // Thus, this view has two columns: the date (axis) and the stock value (line series).
+               'chartView': {
+                 'columns': [0, 3]
+               },
+               // 1 day in milliseconds = 24 * 60 * 60 * 1000 = 86,400,000
+               'minRangeSize': 86400000
+             }
+           },
+           // Initial range: 2012-02-09 to 2012-03-20.
+           'state': {'range': {'start': new Date(2012, 1, 9), 'end': new Date(2012, 2, 20)}}
+         });
+      
+         var chart = new google.visualization.ChartWrapper({
+           'chartType': 'CandlestickChart',
+           'containerId': idchart,
+           'options': {
+             // Use the same chart area width as the control for axis alignment.
+             'chartArea': {'height': '80%', 'width': '90%'},
+             'hAxis': {'slantedText': false},
+             'vAxis': {'viewWindow': {'min': 0, 'max': 100}},
+             'legend': {'position': 'none'}
+           },
+           // Convert the first column from 'date' to 'string'.
+           'view': {
+             'columns': [
+               {
+                 'calc': function(dataTable, rowIndex) {
+                   return dataTable.getFormattedValue(rowIndex, 0);
+                 },
+                 'type': 'string'
+               }, 1, 2, 3, 4]
+           }
+         });
+
+         var dataTable = new google.visualization.DataTable();
+         dataTable.addColumn('date', 'Date');
+         dataTable.addColumn('number', 'Stock low');
+         dataTable.addColumn('number', 'Stock open');
+         dataTable.addColumn('number', 'Stock close');
+         dataTable.addColumn('number', 'Stock high');
+
+		 dataTable.addRows(data);
+							 
+         dashboard.bind(control, chart);
+         dashboard.draw(dataTable);
+
+		 }
+  else
+    {
+	 var dataTable = google.visualization.arrayToDataTable(data);	 
+	 var chart     = new google.visualization[chartType](elchart);
+	 chart.draw(dataTable, options);
+	 }
+}
+
+function drawAllCharts() {
+  for (var i=0; i<charts.length; i++) {
+    var chart = charts[i];
+    drawChart.apply(this, chart);
+  }
+}
+$(function() {
+  $(window).resize($.debounce(250, drawAllCharts));
+  $(document).on('tabsactivate', drawAllCharts);
+});
+
+// Set up lightbox
+$(function() {
+  $('.images a').fancybox();
+});
+</script>
+{% endblock %}

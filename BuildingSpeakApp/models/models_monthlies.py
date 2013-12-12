@@ -105,6 +105,9 @@ class Monther(models.Model):
                     pass
                 elif (last_month_n > max_month_n) and (min_month_n <= first_month_n <= max_month_n):
                     last_month = max_month
+                elif (first_month_n <= min_month_n) and (last_month_n >= max_month_n):
+                    first_month = min_month
+                    last_month = max_month
             except:
                 m = Message(when=timezone.now(),
                               message_type='Code Warning',

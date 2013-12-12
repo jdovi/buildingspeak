@@ -5,12 +5,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, WeatherStation, EfficiencyMeasure
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm
-from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list
+from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, decimal_isnan, nan2zero
 from BuildingSpeakApp.models import get_monthly_dataframe_as_table, get_df_as_table_with_formats
 
-import json
+import json, jsonpickle
 import numpy as np
 import pandas as pd
+from pytz import UTC
 from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth.models import User
@@ -94,6 +95,66 @@ def application_error(request):
     return render(request, 'buildingspeakapp/application_error.html', context)
 
 @login_required
+def dashboard_test(request):
+
+    building = get_object_or_404(Building, pk=2)
+    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
+    month_last = month_first + 40                            #final month in sequence
+
+    bldg_view_data = building.get_building_view_meter_data(month_first,month_last)
+    if bldg_view_data is None:
+        meter_data = None
+        pie_data = None
+    else:
+        meter_data = bldg_view_data[0]
+        pie_data = bldg_view_data[1]
+    
+    mydata = bldg_view_data[0][0][4]
+    
+    mydata2 = [[(pd.Period(b[0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime(),#strftime('Date(%Y,%m,%d,%H,%M,%S)'),
+               np.random.random()*50,
+               np.random.random()*50,
+               np.random.random()*50,
+               np.random.random()*50] for b in mydata[1:]]
+
+    context = {
+        'user':           request.user,
+        'accounts':       request.user.account_set.order_by('id'),
+        'meter_data':           meter_data,
+        'pie_data':             pie_data,
+        'building':             building,
+        'mydata':   jsonpickle.encode(mydata2),
+
+    }
+    template_name = 'buildingspeakapp/dashboard_test.html'
+    return render(request, template_name, context)
+@login_required
+def dashboard_test3(request):
+
+    building = get_object_or_404(Building, pk=2)
+    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
+    month_last = month_first + 40                            #final month in sequence
+
+    bldg_view_data = building.get_building_view_meter_data(month_first,month_last)
+    if bldg_view_data is None:
+        meter_data = None
+        pie_data = None
+    else:
+        meter_data = bldg_view_data[0]
+        pie_data = bldg_view_data[1]
+
+    context = {
+        'user':           request.user,
+        'accounts':       request.user.account_set.order_by('id'),
+        'meter_data':           meter_data,
+        'pie_data':             pie_data,
+        'building':             building,
+
+    }
+    template_name = 'buildingspeakapp/dashboard_test3.html'
+    return render(request, template_name, context)
+
+@login_required
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
     total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
@@ -166,6 +227,8 @@ def building_detail(request, account_id, building_id):
     
     bldg_view_data = building.get_building_view_meter_data(month_first=month_first,
                                                            month_last=month_last)
+    five_year_data = building.get_building_view_five_year_data()
+    
     if bldg_view_data is None:
         meter_data = None
         pie_data = None
@@ -191,6 +254,7 @@ def building_detail(request, account_id, building_id):
         'building_attrs':       building_attrs,
         'meter_data':           meter_data,
         'pie_data':             pie_data,
+        'five_year_data':       five_year_data,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -207,9 +271,17 @@ def space_detail(request, account_id, space_id):
         raise Http404
 
     space_attrs = get_model_key_value_pairs_as_nested_list(space)
-    this_month = pd.Period(timezone.now(),freq='M')
-    month_first = this_month - 36       #link user selection here
-    month_last = this_month    #link user selection here
+    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
+    month_last = month_first + 40                            #final month in sequence
+    
+    space_view_data = space.get_space_view_meter_data(month_first=month_first,
+                                                      month_last=month_last)
+    if space_view_data is None:
+        meter_data = None
+        pie_data = None
+    else:
+        meter_data = space_view_data[0]
+        pie_data = space_view_data[1]
 
     context = {
         'user':           request.user,
@@ -226,6 +298,8 @@ def space_detail(request, account_id, space_id):
         'space':          space,
         'space_measures': EfficiencyMeasure.objects.filter(Q(equipments__spaces=space) | Q(meters__space=space)).distinct().order_by('name'),
         'space_attrs':    space_attrs,
+        'meter_data':     meter_data,
+        'pie_data':       pie_data,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -435,7 +509,121 @@ def meter_detail(request, account_id, meter_id):
             else:
                 peak_demand_residual_plots = None
 
+    #-----------------------------------5yr graph calculations
+    month_curr = pd.Period(timezone.now(), freq='M')
+    year_curr = month_curr.year
+    mi = pd.Period(year = year_curr-3, month = 1, freq = 'M')
+    mf = pd.Period(year = year_curr+1, month = 12, freq = 'M')
+    df = meter.get_bill_data_period_dataframe(first_month = mi.strftime('%m/%Y'),
+                                              last_month = mf.strftime('%m/%Y'))
+    five_years = pd.DataFrame(df, index = pd.period_range(start = mi, end = mf, freq = 'M'))
+    five_years = five_years.sort_index()
+    first_calc_month = five_years.index[five_years['Cost (act)'].apply(decimal_isnan)][0]
+    last_act_month = first_calc_month - 1
     
+    five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
+                             'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
+                             'HDD (consumption)']].applymap(nan2zero)
+    five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
+                             'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
+                             'HDD (consumption)']].applymap(float)
+    
+    five_year_table_cost = [['Year','Cost (act)','Cost (exp)','CDD (consumption)','HDD (consumption)']]
+    five_year_table_cost.append([str(five_years.index[0].year),
+                            five_years['Cost (act)'][0:12].sum(),
+                            0,
+                            five_years['CDD (consumption)'][0:12].sum(),
+                            five_years['HDD (consumption)'][0:12].sum()
+                            ])
+    five_year_table_cost.append([str(five_years.index[12].year),
+                            five_years['Cost (act)'][12:24].sum(),
+                            0,
+                            five_years['CDD (consumption)'][12:24].sum(),
+                            five_years['HDD (consumption)'][12:24].sum()
+                            ])
+    five_year_table_cost.append([str(five_years.index[24].year),
+                            five_years['Cost (act)'][24:36].sum(),
+                            0,
+                            five_years['CDD (consumption)'][24:36].sum(),
+                            five_years['HDD (consumption)'][24:36].sum()
+                            ])
+    five_year_table_cost.append([str(five_years.index[36].year),
+                            five_years['Cost (act)'][36:last_act_month].sum(),
+                            five_years['Cost (exp)'][first_calc_month:48].sum(),
+                            five_years['CDD (consumption)'][36:48].sum(),
+                            five_years['HDD (consumption)'][36:48].sum()
+                            ])
+    five_year_table_cost.append([str(five_years.index[48].year),
+                            0,
+                            five_years['Cost (exp)'][48:60].sum(),
+                            five_years['CDD (consumption)'][48:60].sum(),
+                            five_years['HDD (consumption)'][48:60].sum()
+                            ])
+    
+    five_year_table_cons = [['Year','Consumption (act)','Consumption (exp)','CDD (consumption)','HDD (consumption)']]
+    five_year_table_cons.append([str(five_years.index[0].year),
+                            five_years['Consumption (act)'][0:12].sum(),
+                            0,
+                            five_years['CDD (consumption)'][0:12].sum(),
+                            five_years['HDD (consumption)'][0:12].sum()
+                            ])
+    five_year_table_cons.append([str(five_years.index[12].year),
+                            five_years['Consumption (act)'][12:24].sum(),
+                            0,
+                            five_years['CDD (consumption)'][12:24].sum(),
+                            five_years['HDD (consumption)'][12:24].sum()
+                            ])
+    five_year_table_cons.append([str(five_years.index[24].year),
+                            five_years['Consumption (act)'][24:36].sum(),
+                            0,
+                            five_years['CDD (consumption)'][24:36].sum(),
+                            five_years['HDD (consumption)'][24:36].sum()
+                            ])
+    five_year_table_cons.append([str(five_years.index[36].year),
+                            five_years['Consumption (act)'][36:last_act_month].sum(),
+                            five_years['Consumption (exp)'][first_calc_month:48].sum(),
+                            five_years['CDD (consumption)'][36:48].sum(),
+                            five_years['HDD (consumption)'][36:48].sum()
+                            ])
+    five_year_table_cons.append([str(five_years.index[48].year),
+                            0,
+                            five_years['Consumption (exp)'][48:60].sum(),
+                            five_years['CDD (consumption)'][48:60].sum(),
+                            five_years['HDD (consumption)'][48:60].sum()
+                            ])
+
+    five_year_table_kBtu = [['Year','kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)','HDD (consumption)']]
+    five_year_table_kBtu.append([str(five_years.index[0].year),
+                            five_years['kBtu Consumption (act)'][0:12].sum(),
+                            0,
+                            five_years['CDD (consumption)'][0:12].sum(),
+                            five_years['HDD (consumption)'][0:12].sum()
+                            ])
+    five_year_table_kBtu.append([str(five_years.index[12].year),
+                            five_years['kBtu Consumption (act)'][12:24].sum(),
+                            0,
+                            five_years['CDD (consumption)'][12:24].sum(),
+                            five_years['HDD (consumption)'][12:24].sum()
+                            ])
+    five_year_table_kBtu.append([str(five_years.index[24].year),
+                            five_years['kBtu Consumption (act)'][24:36].sum(),
+                            0,
+                            five_years['CDD (consumption)'][24:36].sum(),
+                            five_years['HDD (consumption)'][24:36].sum()
+                            ])
+    five_year_table_kBtu.append([str(five_years.index[36].year),
+                            five_years['kBtu Consumption (act)'][36:last_act_month].sum(),
+                            five_years['kBtu Consumption (exp)'][first_calc_month:48].sum(),
+                            five_years['CDD (consumption)'][36:48].sum(),
+                            five_years['HDD (consumption)'][36:48].sum()
+                            ])
+    five_year_table_kBtu.append([str(five_years.index[48].year),
+                            0,
+                            five_years['kBtu Consumption (exp)'][48:60].sum(),
+                            five_years['CDD (consumption)'][48:60].sum(),
+                            five_years['HDD (consumption)'][48:60].sum()
+                            ])
+
     context = {
         'user':           request.user,
         'account':        account,
@@ -466,6 +654,9 @@ def meter_detail(request, account_id, meter_id):
         'peak_demand_model_stats_table':        json.dumps(peak_demand_model_stats_table),
         'consumption_model_residuals_histogram':    json.dumps(consumption_model_residuals_histogram),
         'peak_demand_model_residuals_histogram':    json.dumps(peak_demand_model_residuals_histogram),
+        'five_year_table_cost':                     five_year_table_cost,
+        'five_year_table_cons':                     five_year_table_cons,
+        'five_year_table_kBtu':                     five_year_table_kBtu,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:

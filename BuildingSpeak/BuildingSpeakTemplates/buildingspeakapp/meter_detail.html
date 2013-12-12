@@ -18,8 +18,9 @@ function addChart(arr) {
       <li class="nav-tab"><a href="#tab-1">Info</a></li>
       <li class="nav-tab"><a href="#tab-2">Upload</a></li>
       <li class="nav-tab"><a href="#tab-3">Monthly</a></li>
-      <li class="nav-tab"><a href="#tab-4">Stats</a></li>
-      <li class="nav-tab"><a href="#tab-5">Details</a></li>
+      <li class="nav-tab"><a href="#tab-4">5yr</a></li>
+      <li class="nav-tab"><a href="#tab-5">Stats</a></li>
+      <li class="nav-tab"><a href="#tab-6">Details</a></li>
     </ul> <!-- .nav-tabs -->
 
     <div class="tab tab-info">
@@ -394,6 +395,99 @@ function addChart(arr) {
       </script>
 	  {% endif %}
     </div> <!-- .tab-monthly -->
+    <div class="tab tab-5yr">
+
+	<div id="stacked-5-cost"></div>
+	  <script>
+      addChart([
+        'stacked-5-cost',
+        'ColumnChart',
+		{{ five_year_table_cost|safe }},
+        {
+        title: '5-yr Costs',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: 'USD' },
+				 1: { title: 'Degree Days' }},
+		},
+		'ColumnChart'
+      ]);
+      </script>
+
+	  <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+	  
+	<div id="stacked-5-cons"></div>
+	  <script>
+      addChart([
+        'stacked-5-cons',
+        'ColumnChart',
+		{{ five_year_table_cons|safe }},
+        {
+        title: '5-yr Consumption',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: {{ consumption_units|safe }} },
+				 1: { title: 'Degree Days' }},
+		},
+		'ColumnChart'
+      ]);
+      </script>
+
+	  <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+	<div id="stacked-5-kBtu"></div>
+	  <script>
+      addChart([
+        'stacked-5-kBtu',
+        'ColumnChart',
+		{{ five_year_table_kBtu|safe }},
+        {
+        title: '5-yr kBtu Consumption',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: 'kBtu' },
+				 1: { title: 'Degree Days' }},
+		},
+		'ColumnChart'
+      ]);
+      </script>
+
+	  <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+    </div> <!-- .tab-5yr -->
     <div class="tab tab-stats">
 	  {% if consumption_model_stats_table == 'false' %}
 	    No consumption model assigned to this Meter. <br>
