@@ -111,19 +111,24 @@ def dashboard_test(request):
     
     mydata = bldg_view_data[0][0][4]
     
-    mydata2 = [[(pd.Period(b[0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime(),#strftime('Date(%Y,%m,%d,%H,%M,%S)'),
+#    mydata2 = [["new Date(" + str(pd.Period(b[0],freq='M').year) + ", " + str(pd.Period(b[0],freq='M').month-1) + ", 1)",
+#               np.random.random()*50,
+#               np.random.random()*50,
+#               np.random.random()*50,
+#               np.random.random()*50] for b in mydata[1:]]
+    mydata2 = [[(pd.Period(b[0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
                np.random.random()*50,
                np.random.random()*50,
                np.random.random()*50,
                np.random.random()*50] for b in mydata[1:]]
-
+    
     context = {
-        'user':           request.user,
-        'accounts':       request.user.account_set.order_by('id'),
-        'meter_data':           meter_data,
-        'pie_data':             pie_data,
-        'building':             building,
-        'mydata':   jsonpickle.encode(mydata2),
+        'user':         request.user,
+        'accounts':     request.user.account_set.order_by('id'),
+        'meter_data':   meter_data,
+        'pie_data':     pie_data,
+        'building':     building,
+        'mydata':       mydata2,
 
     }
     template_name = 'buildingspeakapp/dashboard_test.html'

@@ -125,8 +125,10 @@ function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dt
          dataTable.addColumn('number', 'Stock close');
          dataTable.addColumn('number', 'Stock high');
 
+		 for (var i = 0; i < data.length; i++) { 
+                            data[i][0] = new Date(data[i][0]);
+                        }
 		 dataTable.addRows(data);
-							 
          dashboard.bind(control, chart);
          dashboard.draw(dataTable);
 
