@@ -128,6 +128,7 @@ def dashboard_test(request):
     }
     template_name = 'buildingspeakapp/dashboard_test.html'
     return render(request, template_name, context)
+    
 @login_required
 def dashboard_test3(request):
 
