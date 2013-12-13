@@ -78,7 +78,7 @@ function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dt
              // Filter by the date axis.
              'filterColumnIndex': 0,
              'ui': {
-               'chartType': 'LineChart',
+               'chartType': 'ColumnChart',
                'chartOptions': {
                  'chartArea': {'width': '90%'},
                  'hAxis': {'baselineColor': 'none'}
@@ -86,7 +86,7 @@ function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dt
                // Display a single series that shows the closing value of the stock.
                // Thus, this view has two columns: the date (axis) and the stock value (line series).
                'chartView': {
-                 'columns': [0, 3]
+                 'columns': [0, 1, 2, 3, 4]
                },
                // 1 day in milliseconds = 24 * 60 * 60 * 1000 = 86,400,000
                'minRangeSize': 86400000
@@ -97,7 +97,7 @@ function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dt
          });
       
          var chart = new google.visualization.ChartWrapper({
-           'chartType': 'CandlestickChart',
+           'chartType': 'ColumnChart',
            'containerId': idchart,
            'options': {
              // Use the same chart area width as the control for axis alignment.

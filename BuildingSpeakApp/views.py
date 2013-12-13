@@ -111,11 +111,7 @@ def dashboard_test(request):
     
     mydata = bldg_view_data[0][0][4]
     
-#    mydata2 = [["new Date(" + str(pd.Period(b[0],freq='M').year) + ", " + str(pd.Period(b[0],freq='M').month-1) + ", 1)",
-#               np.random.random()*50,
-#               np.random.random()*50,
-#               np.random.random()*50,
-#               np.random.random()*50] for b in mydata[1:]]
+    #this datetime string is fed to "Date(string)" in JS code
     mydata2 = [[(pd.Period(b[0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
                np.random.random()*50,
                np.random.random()*50,
