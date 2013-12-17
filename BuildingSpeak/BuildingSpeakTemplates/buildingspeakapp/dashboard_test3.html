@@ -336,14 +336,20 @@ function addChart(arr) {
     <div class="tab tab-pies">
 	
 	  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data %}
-	  <div id="{{ building.id }}-pie-cost-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ building.id }}-pie-cost-by-meter - dashboard">
+	  <div id="{{ building.id }}-pie-cost-by-meter - chart" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ building.id }}-pie-cost-by-meter - control" style="display: inline-block; width: 49%;"></div>
+	  </div>
 	  <script>
 	  addChart([
-		'PieChart',
-		'{{ building.id }}-pie-cost-by-meter',
-		'PieChart',
+		'PieControl',
+		'{{ building.id }}-pie-cost-by-meter - dashboard',
+		'{{ building.id }}-pie-cost-by-meter - chart',
+		'{{ building.id }}-pie-cost-by-meter - control',
+        [['string','Meter'],
+		 ['number','Cost']],
 		{{ cost_by_meter|safe }},
-		{title: 'Cost by Meter'},
+		'Cost by Meter'
 	  ]);
 	  </script>
 	  <div id="{{ building.id }}-pie-cost-by-type" style="display: inline-block; width: 49%;"></div>
@@ -581,12 +587,6 @@ function drawMonthlyColumn(chartDrawFunc, iddashboard, idchart, idcontrol, cols,
   for (var i = 0; i < cols.length; i++) { 
 		dataTable.addColumn(cols[i][0], cols[i][1]);
   }
-//  dataTable.addColumn('date', 'Month');
-//  dataTable.addColumn('number', 'aa');
-//  dataTable.addColumn('number', 'bb');
-//  dataTable.addColumn('number', 'cc');
-//  dataTable.addColumn('number', 'dd');
-//  dataTable.addColumn('number', 'ee');
   
   for (var i = 0; i < data.length; i++) { 
 		data[i][0] = new Date(data[i][0]);
@@ -606,6 +606,54 @@ function drawMonthlyColumn(chartDrawFunc, iddashboard, idchart, idcontrol, cols,
   dashboard.draw(dataTable);
 }
 
+function drawPie(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, charttitle) {
+  if (!google || !google.visualization) return;
+  var eldashboard        = document.getElementById(iddashboard);
+  var dashboard = new google.visualization.Dashboard(eldashboard);
+  var categoryPicker = new google.visualization.ControlWrapper({
+    'controlType': 'CategoryFilter',
+    'containerId': idcontrol,
+    'options': {
+      'filterColumnIndex': 0,
+      'ui': {
+        'labelStacking': 'vertical',
+        'allowTyping': false,
+        'allowMultiple': false
+      }
+    }
+  });
+
+  var chart = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': [0, 1]}
+  });
+
+  var dataTable = new google.visualization.DataTable();
+  for (var i = 0; i < cols.length; i++) { 
+		dataTable.addColumn(cols[i][0], cols[i][1]);
+  }
+  
+  dataTable.addRows(data.slice(1,data.length));
+  
+  // Create formatters.
+//  var formatter_dollars = new google.visualization.NumberFormat(
+//		{prefix: '$', negativeColor: 'red', negativeParens: true});
+  // Reformat our data.
+//  formatter_dollars.format(dataTable, 1);
+ 
+  dashboard.bind(categoryPicker, chart);
+  dashboard.draw(dataTable);
+}
+
 function drawAllCharts() {
   for (var i=0; i<charts.length; i++) {
     var chart = charts[i];
@@ -617,6 +665,8 @@ function drawAllCharts() {
 			{drawGeneric.apply(this, chart);}
 		else if (chart[0] == 'PieChart')
 			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'PieControl')
+			{drawPie.apply(this, chart);}
 		else if (chart[0] == 'MonthlyColumn')
 			{drawMonthlyColumn.apply(this, chart);}
 		else
