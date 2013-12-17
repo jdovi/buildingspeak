@@ -11,21 +11,30 @@
       google.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Fruit');
+        data.addColumn('string', 'Buildings');
         data.addColumn('date', 'Date');
-        data.addColumn('number', 'Sales');
-        data.addColumn('number', 'Expenses');
-        data.addColumn('string', 'Location');
+        data.addColumn('number', 'Cost');
+        data.addColumn('number', 'kBtu');
+        data.addColumn('number', 'HDD');
+        data.addColumn('number', 'CDD');
+        data.addColumn('number', 'Cost/SF');
+        data.addColumn('number', 'kBtu/SF');
+        data.addColumn('string', 'Facility Type');
         data.addRows([
-          ['Apples',  new Date (1988,0,1), 1000, 300, 'East'],
-          ['Oranges', new Date (1988,0,1), 1150, 200, 'West'],
-          ['Bananas', new Date (1988,0,1), 300,  250, 'West'],
-          ['Apples',  new Date (1988,3,1), 1200, 600, 'East'],
-          ['Oranges', new Date (1988,3,1), 1300, 350, 'West'],
-          ['Bananas', new Date (1988,3,1), 1100,  800, 'West'],
-          ['Apples',  new Date (1989,6,1), 1200, 400, 'East'],
-          ['Oranges', new Date (1989,6,1), 750,  150, 'West'],
-          ['Bananas', new Date (1989,9,1), 788,  617, 'West']
+          ['West1',  new Date (2012,0,1), 1000, 300, 600, 700, 0.9, 0.81, 'Office'],
+          ['West1',  new Date (2012,1,1), 1100, 400, 610, 710, 0.8, 0.82, 'Office'],
+          ['West1',  new Date (2012,2,1), 1200, 500, 620, 720, 0.7, 0.83, 'Office'],
+          ['West2',  new Date (2012,0,1), 1300, 600, 630, 730, 0.6, 0.84, 'Kitchen'],
+          ['West2',  new Date (2012,1,1), 1400, 700, 640, 740, 0.5, 0.85, 'Kitchen'],
+          ['West2',  new Date (2012,2,1), 1500, 800, 650, 750, 0.4, 0.86, 'Kitchen'],
+          ['West2',  new Date (2012,3,1), 1600, 900, 660, 760, 0.3, 0.87, 'Kitchen'],
+          ['East1',  new Date (2012,0,1), 2000, 1300, 1600, 1700, 2.9, 2.81, 'Office'],
+          ['East1',  new Date (2012,1,1), 2100, 1400, 1610, 1710, 2.8, 2.82, 'Office'],
+          ['East1',  new Date (2012,2,1), 2200, 1500, 1620, 1720, 2.7, 2.83, 'Office'],
+          ['East2',  new Date (2012,0,1), 2300, 1600, 1630, 1730, 2.6, 2.84, 'Warehouse'],
+          ['East2',  new Date (2012,1,1), 2400, 1700, 1640, 1740, 2.5, 2.85, 'Warehouse'],
+          ['East2',  new Date (2012,2,1), 2500, 1800, 1650, 1750, 2.4, 2.86, 'Warehouse'],
+          ['East2',  new Date (2012,3,1), 2600, 1900, 1660, 1760, 2.3, 2.87, 'Warehouse']
         ]);
         var chart = new google.visualization.MotionChart(document.getElementById('chart_div'));
         chart.draw(data, {width: 600, height:300});
