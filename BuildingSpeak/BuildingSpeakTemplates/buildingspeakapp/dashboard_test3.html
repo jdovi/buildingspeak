@@ -289,6 +289,16 @@ function addChart(arr) {
 	  
     </div> <!-- .tab-bars -->
     <div class="tab tab-tables">
+
+      <p>
+        <strong><u>Currently viewing:</u></strong>
+        <input type="text" class="datepicker" />
+        to
+        <input type="text" class="datepicker" />
+		<input type="submit" value="Refresh" />
+		<input type="submit" value="Export" />
+      </p>
+
 	  {% for utype, costu, consu, pdu, costd, consd, pdd, totals, ratios in meter_data %}
 	  <div>{{ utype|safe }}</div>
 	  
@@ -334,52 +344,73 @@ function addChart(arr) {
 
     </div> <!-- .tab-tables -->
     <div class="tab tab-pies">
-	
-	  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data %}
-	  <div id="{{ building.id }}-pie-cost-by-meter - dashboard">
-	  <div id="{{ building.id }}-pie-cost-by-meter - chart" style="display: inline-block; width: 49%;"></div>
-	  <div id="{{ building.id }}-pie-cost-by-meter - control" style="display: inline-block; width: 49%;"></div>
+
+      <p>
+        <strong><u>Currently viewing:</u></strong>
+        <input type="text" class="datepicker" />
+        to
+        <input type="text" class="datepicker" />
+		<input type="submit" value="Refresh" />
+		<input type="submit" value="Export" />
+      </p>
+
+	  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type, pies_by_meter in pie_data %}
+	  <div id="{{ building.id }}-pies-by-meter - dashboard">
+	  <div id="{{ building.id }}-pies-by-meter - control" style="float: left;"></div>
+	  <div id="{{ building.id }}-pie-cost-by-meter - chart" style="display: inline-block; width: 40%;"></div>
+	  <div id="{{ building.id }}-pie-kBtu-by-meter - chart" style="display: inline-block; width: 40%;"></div>
 	  </div>
 	  <script>
 	  addChart([
-		'PieControl',
-		'{{ building.id }}-pie-cost-by-meter - dashboard',
+		'TwoPiesControl',
+		'{{ building.id }}-pies-by-meter - dashboard',
 		'{{ building.id }}-pie-cost-by-meter - chart',
-		'{{ building.id }}-pie-cost-by-meter - control',
+		'{{ building.id }}-pie-kBtu-by-meter - chart',
+		'{{ building.id }}-pies-by-meter - control',
         [['string','Meter'],
-		 ['number','Cost']],
-		{{ cost_by_meter|safe }},
-		'Cost by Meter'
+		 ['number','Cost'],
+		 ['number','kBtu'],
+		 ['string','Utility Type']],
+		{{ pies_by_meter|safe }},
+		'Cost by Meter',
+		'kBtu by Meter',
+		[0,1],
+		[0,2],
+		3
 	  ]);
 	  </script>
-	  <div id="{{ building.id }}-pie-cost-by-type" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ building.id }}-pie-cost-by-type - chart" style="display: inline-block; width: 30%;"></div>
 	  <script>
 	  addChart([
 		'PieChart',
-		'{{ building.id }}-pie-cost-by-type',
+		'{{ building.id }}-pie-cost-by-type - chart',
 		'PieChart',
 		{{ cost_by_type|safe }},
-		{title: 'Cost by Utility Type'},
+		{
+		  'width': 300,
+		  'height': 300,
+		  'legend': 'none',
+		  'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+		  'pieSliceText': 'label',
+		  'title': 'Cost by Utility Type'
+		}
 	  ]);
 	  </script>
-	  <div id="{{ building.id }}-pie-kBtu-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ building.id }}-pie-kBtu-by-type - chart" style="display: inline-block; width: 30%;"></div>
 	  <script>
 	  addChart([
 		'PieChart',
-		'{{ building.id }}-pie-kBtu-by-meter',
-		'PieChart',
-		{{ kBtu_by_meter|safe }},
-		{title: 'kBtu by Meter'},
-	  ]);
-	  </script>
-	  <div id="{{ building.id }}-pie-kBtu-by-type" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'PieChart',
-		'{{ building.id }}-pie-kBtu-by-type',
+		'{{ building.id }}-pie-kBtu-by-type - chart',
 		'PieChart',
 		{{ kBtu_by_type|safe }},
-		{title: 'kBtu by Utility Type'},
+		{
+		  'width': 300,
+		  'height': 300,
+		  'legend': 'none',
+		  'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+		  'pieSliceText': 'label',
+		  'title': 'kBtu by Utility Type'
+		}
 	  ]);
 	  </script>
 
@@ -606,7 +637,7 @@ function drawMonthlyColumn(chartDrawFunc, iddashboard, idchart, idcontrol, cols,
   dashboard.draw(dataTable);
 }
 
-function drawPie(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, charttitle) {
+function drawPie(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, charttitle, viewcols, filtercol) {
   if (!google || !google.visualization) return;
   var eldashboard        = document.getElementById(iddashboard);
   var dashboard = new google.visualization.Dashboard(eldashboard);
@@ -614,7 +645,7 @@ function drawPie(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, cha
     'controlType': 'CategoryFilter',
     'containerId': idcontrol,
     'options': {
-      'filterColumnIndex': 0,
+      'filterColumnIndex': filtercol,
       'ui': {
         'labelStacking': 'vertical',
         'allowTyping': false,
@@ -634,7 +665,7 @@ function drawPie(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, cha
       'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
       'pieSliceText': 'label'
     },
-	'view': {'columns': [0, 1]}
+	'view': {'columns': viewcols}
   });
 
   var dataTable = new google.visualization.DataTable();
@@ -654,6 +685,68 @@ function drawPie(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, cha
   dashboard.draw(dataTable);
 }
 
+function drawTwoPies(chartDrawFunc, iddashboard, idchart1, idchart2, idcontrol, cols, data, charttitle1, charttitle2, viewcols1, viewcols2, filtercol) {
+  if (!google || !google.visualization) return;
+  var eldashboard        = document.getElementById(iddashboard);
+  var dashboard = new google.visualization.Dashboard(eldashboard);
+  var categoryPicker = new google.visualization.ControlWrapper({
+    'controlType': 'CategoryFilter',
+    'containerId': idcontrol,
+    'options': {
+      'filterColumnIndex': filtercol,
+      'ui': {
+        'labelStacking': 'vertical',
+        'allowTyping': false,
+        'allowMultiple': false
+      }
+    }
+  });
+
+  var chart1 = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart1,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle1,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': viewcols1}
+  });
+
+    var chart2 = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart2,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle2,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': viewcols2}
+  });
+
+  var dataTable = new google.visualization.DataTable();
+  for (var i = 0; i < cols.length; i++) { 
+		dataTable.addColumn(cols[i][0], cols[i][1]);
+  }
+  
+  dataTable.addRows(data.slice(1,data.length));
+  
+  // Create formatters.
+//  var formatter_dollars = new google.visualization.NumberFormat(
+//		{prefix: '$', negativeColor: 'red', negativeParens: true});
+  // Reformat our data.
+//  formatter_dollars.format(dataTable, 1);
+ 
+  dashboard.bind(categoryPicker, [chart1, chart2]);
+  dashboard.draw(dataTable);
+}
+
 function drawAllCharts() {
   for (var i=0; i<charts.length; i++) {
     var chart = charts[i];
@@ -667,6 +760,8 @@ function drawAllCharts() {
 			{drawGeneric.apply(this, chart);}
 		else if (chart[0] == 'PieControl')
 			{drawPie.apply(this, chart);}
+		else if (chart[0] == 'TwoPiesControl')
+			{drawTwoPies.apply(this, chart);}
 		else if (chart[0] == 'MonthlyColumn')
 			{drawMonthlyColumn.apply(this, chart);}
 		else

@@ -16,8 +16,11 @@ function addChart(arr) {
   <div class="shortcode-tabs default" id="tabs-11">
     <ul class="tab_titles">
       <li class="nav-tab"><a href="#tab-1">Info</a></li>
-      <li class="nav-tab"><a href="#tab-3">Data</a></li>
-      <li class="nav-tab"><a href="#tab-5">Details</a></li>
+      <li class="nav-tab"><a href="#tab-2">Bars</a></li>
+      <li class="nav-tab"><a href="#tab-3">Tables</a></li>
+      <li class="nav-tab"><a href="#tab-4">Pies</a></li>
+      <li class="nav-tab"><a href="#tab-5">5yr</a></li>
+      <li class="nav-tab"><a href="#tab-6">Details</a></li>
     </ul> <!-- .nav-tabs -->
 
     <div class="tab tab-info">
@@ -172,7 +175,98 @@ function addChart(arr) {
         </p>
       {% endif %}
     </div> <!-- .tab-info -->
-    <div class="tab tab-data">
+    <div class="tab tab-bars">
+	  {% for utype, costu, consu, pdu, costd, consd, pdd, totals, ratios in meter_data %}
+	  <div>{{ utype|safe }}</div>
+	  
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost - dashboard">
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost - chart" style='width: 715px; height: 300px;'></div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost - control" style='width: 715px; height: 50px;'></div>
+	  </div>
+	  <script>
+      addChart([
+        'MonthlyColumn',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - cost - dashboard',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - cost - chart',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - cost - control',
+        [['date','Month'],
+		 ['number','Cost (baseline)'],
+		 ['number','Cost (expected)'],
+		 ['number','Cost Savings (expected)'],
+		 ['number','Cost (actual)'],
+		 ['number','Cost Savings (actual)']],
+		{{ costd|safe }},
+        '{{ costu|safe }}'
+      ]);
+      </script>
+
+	  <div class="clear">
+	    <br>
+        <div class="woo-sc-hr"></div>
+        </br>
+	  </div>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cons - dashboard">
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cons - chart" style='width: 715px; height: 300px;'></div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cons - control" style='width: 715px; height: 50px;'></div>
+	  </div>
+	  <script>
+      addChart([
+        'MonthlyColumn',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - cons - dashboard',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - cons - chart',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - cons - control',
+        [['date','Month'],
+		 ['number','Consumption (baseline)'],
+		 ['number','Consumption (expected)'],
+		 ['number','Consumption Savings (expected)'],
+		 ['number','Consumption (actual)'],
+		 ['number','Consumption Savings (actual)']],
+	    {{ consd|safe }},
+        '{{ consu|safe }}'
+      ]);
+      </script>
+
+	  <div class="clear">
+	    <br>
+        <div class="woo-sc-hr"></div>
+        </br>
+	  </div>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - pd - dashboard">
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - pd - chart" style='width: 715px; height: 300px;'></div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - pd - control" style='width: 715px; height: 50px;'></div>
+	  </div>
+	  <script>
+      addChart([
+        'MonthlyColumn',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - pd - dashboard',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - pd - chart',
+		'{{ utype|safe }} - {{ forloop.counter0 }} - pd - control',
+        [['date','Month'],
+		 ['number','Peak Demand (baseline)'],
+		 ['number','Peak Demand (expected)'],
+		 ['number','Peak Demand Savings (expected)'],
+		 ['number','Peak Demand (actual)'],
+		 ['number','Peak Demand Savings (actual)']],
+		{{ pdd|safe }},
+        '{{ pdu|safe }}'
+      ]);
+      </script>
+
+	  <div class="clear">
+	    <br>
+        <div class="woo-sc-hr"></div>
+        </br>
+	  </div>
+
+	  {% empty %}
+	    <div id="{{ forloop.counter0 }}">No meter data available for bar charts.</div>
+	  {% endfor %}
+	  
+    </div> <!-- .tab-bars -->
+    <div class="tab tab-tables">
+
       <p>
         <strong><u>Currently viewing:</u></strong>
         <input type="text" class="datepicker" />
@@ -181,146 +275,119 @@ function addChart(arr) {
 		<input type="submit" value="Refresh" />
 		<input type="submit" value="Export" />
       </p>
-	  
+
 	  {% for utype, costu, consu, pdu, costd, consd, pdd, totals, ratios in meter_data %}
 	  <div>{{ utype|safe }}</div>
-	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cost">{{ utype|safe }}</div>
-	  <script>
-      addChart([
-        '{{ utype|safe }} - {{ forloop.counter0 }} - cost',
-        'ComboChart',
-        {{ costd|safe }},
-        { // options
-          title: 'Cost',
-          vAxes: { 0: { title: '{{ costu|safe }}' } },
-          seriesType: "bars",
-          series:     {
-            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
-            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
-            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
-            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
-            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
-          }
-        },
-		'ComboChart'
-      ]);
-      </script>
-
-	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - cons"></div>
-	  <script>
-      addChart([
-        '{{ utype|safe }} - {{ forloop.counter0 }} - cons',
-        'ComboChart',
-        {{ consd|safe }},
-        { // options
-          title: 'Consumption',
-          vAxes: { 0: { title: '{{ consu|safe }}' } },
-          seriesType: "bars",
-          series:     {
-            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
-            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
-            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
-            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
-            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
-          }
-        },
-		'ComboChart'
-      ]);
-      </script>
-
-	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - pd"></div>
-	  <script>
-      addChart([
-        '{{ utype|safe }} - {{ forloop.counter0 }} - pd',
-        'ComboChart',
-        {{ pdd|safe }},
-        { // options
-          title: 'Peak Demand',
-          vAxes: { 0: { title: '{{ pdu|safe }}' } },
-          seriesType: "bars",
-          series:     {
-            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
-            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
-            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
-            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
-            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
-          }
-        },
-		'ComboChart'
-      ]);
-      </script>
-
+	  
 	  Totals (over the period selected)
       <div id="{{ utype|safe }} - {{ forloop.counter0 }} - totals"></div>
       <script>
       addChart([
-        '{{ utype|safe }} - {{ forloop.counter0 }} - totals',
         'Table',
-        {{ totals|safe }},,
-        { },
-		'Table'
+		'{{ utype|safe }} - {{ forloop.counter0 }} - totals',
+        'Table',
+        {{ totals|safe }},
+        {}
       ]);
       </script>
+	  
+	  <div class="clear">
+	    <br>
+        <div class="woo-sc-hr"></div>
+        </br>
+	  </div>
 	  
 	  Ratios (over the period selected)
       <div id="{{ utype|safe }} - {{ forloop.counter0 }} - ratios"></div>
       <script>
       addChart([
-        '{{ utype|safe }} - {{ forloop.counter0 }} - ratios',
         'Table',
-        {{ ratios|safe }},,
-        { },
-		'Table'
+		'{{ utype|safe }} - {{ forloop.counter0 }} - ratios',
+        'Table',
+        {{ ratios|safe }},
+        {}
       ]);
       </script>
 	  
 	  <div class="clear">
+	    <br>
         <div class="woo-sc-hr"></div>
-      </div>
+        </br>
+	  </div>
 
 	  {% empty %}
-	    <div id="{{ forloop.counter0 }}">No meter data available for bar charts and tables.</div>
+	    <div id="{{ forloop.counter0 }}">No meter data available for tables.</div>
 	  {% endfor %}
 
-	  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data %}
-	  <div id="{{ space.id }}-pie-cost-by-meter" style="display: inline-block; width: 49%;"></div>
+    </div> <!-- .tab-tables -->
+    <div class="tab tab-pies">
+
+      <p>
+        <strong><u>Currently viewing:</u></strong>
+        <input type="text" class="datepicker" />
+        to
+        <input type="text" class="datepicker" />
+		<input type="submit" value="Refresh" />
+		<input type="submit" value="Export" />
+      </p>
+
+	  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type, pies_by_meter in pie_data %}
+	  <div id="{{ building.id }}-pies-by-meter - dashboard">
+	  <div id="{{ building.id }}-pies-by-meter - control" style="float: left;"></div>
+	  <div id="{{ building.id }}-pie-cost-by-meter - chart" style="display: inline-block; width: 40%;"></div>
+	  <div id="{{ building.id }}-pie-kBtu-by-meter - chart" style="display: inline-block; width: 40%;"></div>
+	  </div>
 	  <script>
 	  addChart([
-		'{{ space.id }}-pie-cost-by-meter',
-		'PieChart',
-		{{ cost_by_meter|safe }},
-		{title: 'Cost by Meter'},
-		'PieChart'
+		'TwoPiesControl',
+		'{{ building.id }}-pies-by-meter - dashboard',
+		'{{ building.id }}-pie-cost-by-meter - chart',
+		'{{ building.id }}-pie-kBtu-by-meter - chart',
+		'{{ building.id }}-pies-by-meter - control',
+        [['string','Meter'],
+		 ['number','Cost'],
+		 ['number','kBtu'],
+		 ['string','Utility Type']],
+		{{ pies_by_meter|safe }},
+		'Cost by Meter',
+		'kBtu by Meter',
+		[0,1],
+		[0,2],
+		3
 	  ]);
 	  </script>
-	  <div id="{{ space.id }}-pie-cost-by-type" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ building.id }}-pie-cost-by-type - chart" style="display: inline-block; width: 30%;"></div>
 	  <script>
 	  addChart([
-		'{{ space.id }}-pie-cost-by-type',
+		'PieChart',
+		'{{ building.id }}-pie-cost-by-type - chart',
 		'PieChart',
 		{{ cost_by_type|safe }},
-		{title: 'Cost by Utility Type'},
-		'PieChart'
+		{
+		  'width': 300,
+		  'height': 300,
+		  'legend': 'none',
+		  'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+		  'pieSliceText': 'label',
+		  'title': 'Cost by Utility Type'
+		}
 	  ]);
 	  </script>
-	  <div id="{{ space.id }}-pie-kBtu-by-meter" style="display: inline-block; width: 49%;"></div>
+	  <div id="{{ building.id }}-pie-kBtu-by-type - chart" style="display: inline-block; width: 30%;"></div>
 	  <script>
 	  addChart([
-		'{{ space.id }}-pie-kBtu-by-meter',
 		'PieChart',
-		{{ kBtu_by_meter|safe }},
-		{title: 'kBtu by Meter'},
-		'PieChart'
-	  ]);
-	  </script>
-	  <div id="{{ space.id }}-pie-kBtu-by-type" style="display: inline-block; width: 49%;"></div>
-	  <script>
-	  addChart([
-		'{{ space.id }}-pie-kBtu-by-type',
+		'{{ building.id }}-pie-kBtu-by-type - chart',
 		'PieChart',
 		{{ kBtu_by_type|safe }},
-		{title: 'kBtu by Utility Type'},
-		'PieChart'
+		{
+		  'width': 300,
+		  'height': 300,
+		  'legend': 'none',
+		  'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+		  'pieSliceText': 'label',
+		  'title': 'kBtu by Utility Type'
+		}
 	  ]);
 	  </script>
 
@@ -328,56 +395,357 @@ function addChart(arr) {
 	    <div id="{{ forloop.counter0 }}">No meter data available for pie charts.</div>
 	  {% endfor %}
 
-
-    </div> <!-- .tab-data -->
-    <div class="tab tab-details">
-      <div id="model-details"></div>
-      <script>
+    </div> <!-- .tab-pies -->
+    <div class="tab tab-5yr">
+	  {% for utype, costu, consu, pdu, costd, costsfd, consd, conssfd in five_year_data %}
+	  <div>{{ utype|safe }}</div>
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - five year cost"></div>
+	  <script>
       addChart([
-        'model-details',
-        'Table',
-		{{ space_attrs|safe }},
-        { },
-		'Table'
+		'ColumnChart',
+        '{{ utype|safe }} - {{ forloop.counter0 }} - five year cost',
+        'ColumnChart',
+        {{ costd|safe }},
+        {
+        title: '5-yr Costs',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: '{{ costu|safe }}' },
+				 1: { title: 'Degree Days' }},
+		},
+		]);
+      </script>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - five year cost per SF"></div>
+	  <script>
+      addChart([
+		'ColumnChart',
+        '{{ utype|safe }} - {{ forloop.counter0 }} - five year cost per SF',
+        'ColumnChart',
+        {{ costsfd|safe }},
+        {
+        title: '5-yr Costs/SF',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: '{{ costu|safe }}/SF' },
+				 1: { title: 'Degree Days' }},
+		},
+		]);
+      </script>
+
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - five year cons"></div>
+	  <script>
+      addChart([
+		'ColumnChart',
+        '{{ utype|safe }} - {{ forloop.counter0 }} - five year cons',
+        'ColumnChart',
+        {{ consd|safe }},
+        {
+        title: '5-yr Consumption',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: '{{ consu|safe }}'  },
+				 1: { title: 'Degree Days' }},
+		},
       ]);
       </script>
 
+	  <div id="{{ utype|safe }} - {{ forloop.counter0 }} - five year cons per SF"></div>
+	  <script>
+      addChart([
+		'ColumnChart',
+        '{{ utype|safe }} - {{ forloop.counter0 }} - five year cons per SF',
+        'ColumnChart',
+        {{ conssfd|safe }},
+        {
+        title: '5-yr Consumption/SF',
+        width: 600,
+        height: 400,
+        legend: { position: 'top', maxLines: 3 },
+		bar: { groupWidth: '75%' },
+        isStacked: true,
+		series:     {
+			0: {type: "bar", targetAxisIndex: 0, color: '#B88A00' },
+			1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
+			2: {type: "line", targetAxisIndex: 1, color: '#4271FF' },
+			3: {type: "line", targetAxisIndex: 1, color: '#009425' },
+            },
+        vAxes: { 0: { title: '{{ consu|safe }}/SF'  },
+				 1: { title: 'Degree Days' }},
+		},
+      ]);
+      </script>
+
+	  <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+	  {% empty %}
+	    <div id="{{ forloop.counter0 }}">No meter data available for five year charts.</div>
+	  {% endfor %}
+
+	  </div> <!-- .tab-5yr -->
+   <div class="tab tab-details">
+      <div id="model-details"></div>
+      <script>
+      addChart([
+		'Table',
+        'model-details',
+        'Table',
+		{{ space_attrs|safe }},
+        {},
+      ]);
+      </script>
     </div> <!-- .tab-details -->
   </div>
 </section><!-- .entry -->
 
 <script type="text/javascript">
-google.load("visualization", "1", {packages:["corechart","table"]});
-function drawChart(id, chartType, data, options, dtType) {
+google.load("visualization", "1", {packages:["corechart","table","controls","motionchart"]});
+google.setOnLoadCallback(drawAllCharts);
+
+function drawGeneric(chartDrawFunc, id, chartType, data, options) {
   if (!google || !google.visualization) return;
   var el        = document.getElementById(id);
-  if (dtType == 'BarWithErrors')
-    {
-     var dataTable = new google.visualization.DataTable();
-     dataTable.addColumn('string', 'Month'); // Implicit domain column.
-     dataTable.addColumn('number', 'Sales'); // Implicit data column.
-     dataTable.addColumn({type:'number', role:'interval'});
-     dataTable.addColumn({type:'number', role:'interval'});
-     dataTable.addColumn({type:'string', role:'annotation'});
-     dataTable.addColumn({type:'string', role:'annotationText'});
-	 dataTable.addColumn('number', 'Expenses');
-     dataTable.addRows(data);
-     }
-  else
-    {
-	 var dataTable = google.visualization.arrayToDataTable(data);	 
-	 }
+  var dataTable = google.visualization.arrayToDataTable(data);	 
   var chart     = new google.visualization[chartType](el);
   chart.draw(dataTable, options);
+}
+
+function drawMonthlyColumn(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, vaxtitle) {
+  if (!google || !google.visualization) return;
+  var eldashboard        = document.getElementById(iddashboard);
+  var dashboard = new google.visualization.Dashboard(eldashboard);
+  var control = new google.visualization.ControlWrapper({
+    'controlType': 'ChartRangeFilter',
+    'containerId': idcontrol,
+    'options': {
+ 	 // Filter by the date axis.
+ 	  'filterColumnIndex': 0,
+ 	  'ui': {
+	    'chartType': 'ColumnChart',
+	    'chartOptions': {
+		  'chartArea': {'left': '15%', 'width': '85%'},
+		  'hAxis': {'baselineColor': 'none'}
+	    },
+	    'chartView': {
+		  'columns': [0, 1, 2, 3, 4, 5]
+	    },
+	    // 1 day in milliseconds = 24 * 60 * 60 * 1000 = 86,400,000
+	    'minRangeSize': 86400000
+	  }
+    },
+    // Initial range:
+    'state': {'range': {'start': new Date(data[data.length-13][0]),
+						'end': new Date(data[data.length-1][0])
+						}
+			  }
+  });
+
+  var chart = new google.visualization.ChartWrapper({
+    'chartType': 'ColumnChart',
+    'containerId': idchart,
+    'options': {
+	  // Use the same chart area width as the control for axis alignment.
+	  'chartArea': {'height': '80%', 'left': '15%', 'width': '85%'},
+	  'hAxis': {'slantedText': false},
+	  'vAxis': {'title': vaxtitle},
+	  'legend': {'position': 'top'}
+    },
+    // Convert the first column from 'date' to 'string'.
+    'view': {
+	  'columns': [
+	    {
+		  'calc': function(dataTable, rowIndex) {
+		    return dataTable.getFormattedValue(rowIndex, 0);
+		  },
+		  'type': 'string'
+	    }, 1, 2, 3, 4, 5]
+    }
+  });
+
+  var dataTable = new google.visualization.DataTable();
+  for (var i = 0; i < cols.length; i++) { 
+		dataTable.addColumn(cols[i][0], cols[i][1]);
+  }
+  
+  for (var i = 0; i < data.length; i++) { 
+		data[i][0] = new Date(data[i][0]);
+  }
+  
+  dataTable.addRows(data.slice(1,data.length));
+  
+  // Create formatters.
+  var formatter_months = new google.visualization.DateFormat({pattern: "MMM''yy"});
+  var formatter_dollars = new google.visualization.NumberFormat(
+		{prefix: '$', negativeColor: 'red', negativeParens: true});
+  // Reformat our data.
+  formatter_months.format(dataTable, 0);
+  formatter_dollars.format(dataTable, 1);
+ 
+  dashboard.bind(control, chart);
+  dashboard.draw(dataTable);
+}
+
+function drawPie(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, charttitle, viewcols, filtercol) {
+  if (!google || !google.visualization) return;
+  var eldashboard        = document.getElementById(iddashboard);
+  var dashboard = new google.visualization.Dashboard(eldashboard);
+  var categoryPicker = new google.visualization.ControlWrapper({
+    'controlType': 'CategoryFilter',
+    'containerId': idcontrol,
+    'options': {
+      'filterColumnIndex': filtercol,
+      'ui': {
+        'labelStacking': 'vertical',
+        'allowTyping': false,
+        'allowMultiple': false
+      }
+    }
+  });
+
+  var chart = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': viewcols}
+  });
+
+  var dataTable = new google.visualization.DataTable();
+  for (var i = 0; i < cols.length; i++) { 
+		dataTable.addColumn(cols[i][0], cols[i][1]);
+  }
+  
+  dataTable.addRows(data.slice(1,data.length));
+  
+  // Create formatters.
+//  var formatter_dollars = new google.visualization.NumberFormat(
+//		{prefix: '$', negativeColor: 'red', negativeParens: true});
+  // Reformat our data.
+//  formatter_dollars.format(dataTable, 1);
+ 
+  dashboard.bind(categoryPicker, chart);
+  dashboard.draw(dataTable);
+}
+
+function drawTwoPies(chartDrawFunc, iddashboard, idchart1, idchart2, idcontrol, cols, data, charttitle1, charttitle2, viewcols1, viewcols2, filtercol) {
+  if (!google || !google.visualization) return;
+  var eldashboard        = document.getElementById(iddashboard);
+  var dashboard = new google.visualization.Dashboard(eldashboard);
+  var categoryPicker = new google.visualization.ControlWrapper({
+    'controlType': 'CategoryFilter',
+    'containerId': idcontrol,
+    'options': {
+      'filterColumnIndex': filtercol,
+      'ui': {
+        'labelStacking': 'vertical',
+        'allowTyping': false,
+        'allowMultiple': false
+      }
+    }
+  });
+
+  var chart1 = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart1,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle1,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': viewcols1}
+  });
+
+    var chart2 = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart2,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle2,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': viewcols2}
+  });
+
+  var dataTable = new google.visualization.DataTable();
+  for (var i = 0; i < cols.length; i++) { 
+		dataTable.addColumn(cols[i][0], cols[i][1]);
+  }
+  
+  dataTable.addRows(data.slice(1,data.length));
+  
+  // Create formatters.
+//  var formatter_dollars = new google.visualization.NumberFormat(
+//		{prefix: '$', negativeColor: 'red', negativeParens: true});
+  // Reformat our data.
+//  formatter_dollars.format(dataTable, 1);
+ 
+  dashboard.bind(categoryPicker, [chart1, chart2]);
+  dashboard.draw(dataTable);
 }
 
 function drawAllCharts() {
   for (var i=0; i<charts.length; i++) {
     var chart = charts[i];
-    drawChart.apply(this, chart);
+		if (chart[0] == 'Table')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'ComboChart')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'ColumnChart')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'PieChart')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'PieControl')
+			{drawPie.apply(this, chart);}
+		else if (chart[0] == 'TwoPiesControl')
+			{drawTwoPies.apply(this, chart);}
+		else if (chart[0] == 'MonthlyColumn')
+			{drawMonthlyColumn.apply(this, chart);}
+		else
+			{}
   }
 }
-google.setOnLoadCallback(drawAllCharts);
+
 $(function() {
   $(window).resize($.debounce(250, drawAllCharts));
   $(document).on('tabsactivate', drawAllCharts);
@@ -387,5 +755,7 @@ $(function() {
 $(function() {
   $('.images a').fancybox();
 });
+
 </script>
+
 {% endblock %}

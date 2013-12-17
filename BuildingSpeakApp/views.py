@@ -97,28 +97,6 @@ def application_error(request):
 @login_required
 def dashboard_test(request):
 
-#    building = get_object_or_404(Building, pk=2)
-#    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
-#    month_last = month_first + 40                            #final month in sequence
-#
-#    bldg_view_data = building.get_building_view_meter_data(month_first,month_last)
-#    if bldg_view_data is None:
-#        meter_data = None
-#        pie_data = None
-#    else:
-#        meter_data = bldg_view_data[0]
-#        pie_data = bldg_view_data[1]
-#    
-#    mydata = bldg_view_data[0][0][4]
-#    
-#    #this datetime string is fed to "Date(string)" in JS code
-#    mydata2 = [[(pd.Period(b[0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
-#               np.random.random()*50,
-#               np.random.random()*50,
-#               np.random.random()*50,
-#               np.random.random()*50] for b in mydata[1:]]
-#    
-#    start_month = (pd.Period(mydata[1][0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat()
     context = {
 #        'user':         request.user,
 #        'accounts':     request.user.account_set.order_by('id'),
@@ -131,32 +109,6 @@ def dashboard_test(request):
     template_name = 'buildingspeakapp/dashboard_test2.html'
     return render(request, template_name, context)
     
-@login_required
-def dashboard_test3(request):
-
-    building = get_object_or_404(Building, pk=2)
-    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
-    month_last = month_first + 40                            #final month in sequence
-
-    bldg_view_data = building.get_building_view_meter_data(month_first,month_last)
-    if bldg_view_data is None:
-        meter_data = None
-        pie_data = None
-    else:
-        meter_data = bldg_view_data[0]
-        pie_data = bldg_view_data[1]
-
-    context = {
-        'user':           request.user,
-        'accounts':       request.user.account_set.order_by('id'),
-        'meter_data':           meter_data,
-        'pie_data':             pie_data,
-        'building':             building,
-
-    }
-    template_name = 'buildingspeakapp/dashboard_test3.html'
-    return render(request, template_name, context)
-
 @login_required
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
@@ -185,6 +137,8 @@ def account_detail(request, account_id):
     month_last = month_first + 40                            #final month in sequence
     acct_view_data = account.get_account_view_meter_data(month_first=month_first,
                                                          month_last=month_last)
+    five_year_data = account.get_account_view_five_year_data()
+
     if acct_view_data is None:
         meter_data = None
         pie_data = None
@@ -209,6 +163,7 @@ def account_detail(request, account_id):
         'meter_data':     meter_data,
         'pie_data':       pie_data,
         'total_SF':       total_SF,
+        'five_year_data': five_year_data,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -261,8 +216,7 @@ def building_detail(request, account_id, building_id):
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
-#        template_name = 'buildingspeakapp/building_detail.html'
-        template_name = 'buildingspeakapp/dashboard_test3.html'
+        template_name = 'buildingspeakapp/building_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)
@@ -280,6 +234,8 @@ def space_detail(request, account_id, space_id):
     
     space_view_data = space.get_space_view_meter_data(month_first=month_first,
                                                       month_last=month_last)
+    five_year_data = space.get_space_view_five_year_data()
+
     if space_view_data is None:
         meter_data = None
         pie_data = None
@@ -304,6 +260,7 @@ def space_detail(request, account_id, space_id):
         'space_attrs':    space_attrs,
         'meter_data':     meter_data,
         'pie_data':       pie_data,
+        'five_year_data': five_year_data,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:

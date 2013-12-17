@@ -617,20 +617,22 @@ class Building(models.Model):
                     pass #if necessary, weed out empty tables here
                 
                 #getting pie chart data; cost data includes all Meters; kBtu data excludes domestic water Meters
-                pie_cost_by_meter =     [['Meter','Cost']]
+                pie_cost_by_meter =     [['Meter','Cost','Utility Type']]
                 pie_cost_by_type =      [['Utility Type','Cost']]
-                pie_kBtu_by_meter =     [['Meter','kBtu']]
+                pie_kBtu_by_meter =     [['Meter','kBtu','Utility Type']]
                 pie_kBtu_by_type =      [['Utility Type','kBtu']]
+                pies_by_meter =         [['Meter','Cost','kBtu','Utility Type']]
                 
                 #for breakdown by Meter, cycle through all Meters and exclude domestic water from kBtu calcs
                 for meter in self.meters.all():
                     cost_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).aggregate(Sum('act_cost'))['act_cost__sum']
                     if cost_sum is None or np.isnan(float(cost_sum)): cost_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
-                    pie_cost_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum)])
+                    pie_cost_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum), str(meter.utility_type)])
                     if meter.utility_type != 'domestic water':
                         kBtu_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
                         if kBtu_sum is None or np.isnan(float(kBtu_sum)): kBtu_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
-                        pie_kBtu_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(kBtu_sum)])
+                        pie_kBtu_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(kBtu_sum), str(meter.utility_type)])
+                        pies_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum), float(kBtu_sum), str(meter.utility_type)])
                 
                 #for breakdown by utility type, cycle through all utility groups and exclude domestic water from kBtu calcs
                 for utype in meter_dict.keys():
@@ -638,7 +640,7 @@ class Building(models.Model):
                         pie_cost_by_type.append([utype, float(meter_dict[utype]['df']['Cost (act)'].sum())])
                         if utype != 'domestic water':
                             pie_kBtu_by_type.append([utype, float(meter_dict[utype]['df']['kBtu Consumption (act)'].sum())])
-                pie_data = [[pie_cost_by_meter, pie_cost_by_type, pie_kBtu_by_meter, pie_kBtu_by_type]]
+                pie_data = [[pie_cost_by_meter, pie_cost_by_type, pie_kBtu_by_meter, pie_kBtu_by_type, pies_by_meter]]
                 result = [meter_data, pie_data]            
         except:
             m = Message(when=timezone.now(),
