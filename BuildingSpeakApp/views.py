@@ -97,37 +97,38 @@ def application_error(request):
 @login_required
 def dashboard_test(request):
 
-    building = get_object_or_404(Building, pk=2)
-    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
-    month_last = month_first + 40                            #final month in sequence
-
-    bldg_view_data = building.get_building_view_meter_data(month_first,month_last)
-    if bldg_view_data is None:
-        meter_data = None
-        pie_data = None
-    else:
-        meter_data = bldg_view_data[0]
-        pie_data = bldg_view_data[1]
-    
-    mydata = bldg_view_data[0][0][4]
-    
-    #this datetime string is fed to "Date(string)" in JS code
-    mydata2 = [[(pd.Period(b[0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
-               np.random.random()*50,
-               np.random.random()*50,
-               np.random.random()*50,
-               np.random.random()*50] for b in mydata[1:]]
-    
+#    building = get_object_or_404(Building, pk=2)
+#    month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
+#    month_last = month_first + 40                            #final month in sequence
+#
+#    bldg_view_data = building.get_building_view_meter_data(month_first,month_last)
+#    if bldg_view_data is None:
+#        meter_data = None
+#        pie_data = None
+#    else:
+#        meter_data = bldg_view_data[0]
+#        pie_data = bldg_view_data[1]
+#    
+#    mydata = bldg_view_data[0][0][4]
+#    
+#    #this datetime string is fed to "Date(string)" in JS code
+#    mydata2 = [[(pd.Period(b[0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
+#               np.random.random()*50,
+#               np.random.random()*50,
+#               np.random.random()*50,
+#               np.random.random()*50] for b in mydata[1:]]
+#    
+#    start_month = (pd.Period(mydata[1][0],freq='M').to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat()
     context = {
-        'user':         request.user,
-        'accounts':     request.user.account_set.order_by('id'),
-        'meter_data':   meter_data,
-        'pie_data':     pie_data,
-        'building':     building,
-        'mydata':       mydata2,
-
+#        'user':         request.user,
+#        'accounts':     request.user.account_set.order_by('id'),
+#        'meter_data':   meter_data,
+#        'pie_data':     pie_data,
+#        'building':     building,
+#        'mydata':       mydata2,
+#        'start_month':  start_month
     }
-    template_name = 'buildingspeakapp/dashboard_test.html'
+    template_name = 'buildingspeakapp/dashboard_test2.html'
     return render(request, template_name, context)
     
 @login_required
@@ -260,7 +261,8 @@ def building_detail(request, account_id, building_id):
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
-        template_name = 'buildingspeakapp/building_detail.html'
+#        template_name = 'buildingspeakapp/building_detail.html'
+        template_name = 'buildingspeakapp/dashboard_test3.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)

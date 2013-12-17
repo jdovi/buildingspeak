@@ -95,7 +95,8 @@ def get_monthly_dataframe_as_table(df, columnlist):
     Takes dataframe and a list
     of column names to include
     in the output.  Index put
-    in first column as Month."""
+    in first column as Month
+    with isoformat."""
     r = []
     try:
         r.append(columnlist)
@@ -129,7 +130,8 @@ def get_monthly_dataframe_as_table(df, columnlist):
                         try:
                             df = df.sort_index()
                             for i in range(0,len(df)):
-                                r_1 = [str(df.index[i])]
+                                #r_1 = [str(df.index[i])]
+                                r_1 = [(df.index[i].to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat()]
                                 r_j = []
                                 for j in columnlist[1:]:
                                     r_j.append(df[j][i])

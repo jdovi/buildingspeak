@@ -34,7 +34,7 @@ function addChart(arr) {
         'ComboChart',
         {{ mydata|safe }},
         { },
-		'Dashboard'
+		'MonthlyColumn'
       ]);
       </script>
 	  {% endfor %}
@@ -47,6 +47,7 @@ function addChart(arr) {
 <script type="text/javascript">
 google.load("visualization", "1", {packages:["corechart","table","controls"]});
 google.setOnLoadCallback(drawAllCharts);
+
 function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dtType) {
   if (!google || !google.visualization) return;
   var elcontrol = document.getElementById(idcontrol);
@@ -69,8 +70,12 @@ function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dt
 	 chart.draw(dataTable, options);
      }
   else if (dtType == 'Dashboard')
-    {    
-		 var dashboard = new google.visualization.Dashboard(eldashboard);
+    {    //var end_date = new Date();
+		 //var new_date = new Date(end_date);
+		 //new_date.setTime(new_date.getTime()  - 1000*60*60*24*365*3);
+		 //var start_date = new Date(new_date);
+		 
+ 		 var dashboard = new google.visualization.Dashboard(eldashboard);
          var control = new google.visualization.ControlWrapper({
            'controlType': 'ChartRangeFilter',
            'containerId': idcontrol,
@@ -92,8 +97,8 @@ function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dt
                'minRangeSize': 86400000
              }
            },
-           // Initial range: 2012-02-09 to 2012-03-20.
-           'state': {'range': {'start': new Date(2012, 1, 9), 'end': new Date(2012, 2, 20)}}
+           // Initial range:
+           //'state': {'range': {'start': start_date, 'end': end_date}}
          });
       
          var chart = new google.visualization.ChartWrapper({
@@ -128,11 +133,86 @@ function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dt
 		 for (var i = 0; i < data.length; i++) { 
                             data[i][0] = new Date(data[i][0]);
                         }
+
 		 dataTable.addRows(data);
+		 // Create formatters.
+		 var formatter_months = new google.visualization.DateFormat({pattern: "MMM''yy"});
+		 var formatter_dollars = new google.visualization.NumberFormat(
+				{prefix: '$', negativeColor: 'red', negativeParens: true});
+		 // Reformat our data.
+		 formatter_months.format(dataTable, 0);
+		 formatter_dollars.format(dataTable, 1);
+		 
          dashboard.bind(control, chart);
          dashboard.draw(dataTable);
 
 		 }
+  else if (dtType == 'MonthlyColumn')
+	{
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Year');
+		data.addColumn('number', 'Foo');
+		data.addColumn('number', 'Bar');
+		data.addColumn('number', 'Baz');
+		data.addColumn('number', 'Cad');
+		data.addRows([
+			['2005',  45, 60, 89, 100],
+			['2006',  155, 50, 79, 24],
+			['2007',  35, 31, 140, 53],
+			['2008',  105, 23, 43, 82],
+			['2009',  120, 56, 21, 67],
+			['2010',  65, 19, 34, 134],
+			['2011',  80, 23, 130, 40],
+			['2012',  70, 140, 83, 90]
+		]);
+
+		var columnsTable = new google.visualization.DataTable();
+		columnsTable.addColumn('number', 'colIndex');
+		columnsTable.addColumn('string', 'colLabel');
+		var initState= {selectedValues: []};
+		// put the columns into this data table (skip column 0)
+		for (var i = 1; i < data.getNumberOfColumns(); i++) {
+			columnsTable.addRow([i, data.getColumnLabel(i)]);
+			// you can comment out this next line if you want to have a default selection other than the whole list
+			initState.selectedValues.push(data.getColumnLabel(i));
+		}
+		// you can set individual columns to be the default columns (instead of populating via the loop above) like this:
+		// initState.selectedValues.push(data.getColumnLabel(4));
+		
+		var chart = new google.visualization.ChartWrapper({
+			chartType: 'BarChart',
+			containerId: idchart,
+			dataTable: data,
+			options: {
+				title: 'Foobar',
+				width: 600,
+				height: 400
+			}
+		});
+		
+		var columnFilter = new google.visualization.ControlWrapper({
+			controlType: 'CategoryFilter',
+			containerId: idcontrol,
+			dataTable: columnsTable,
+			options: {
+				filterColumnLabel: 'colLabel',
+				ui: {
+					label: 'Columns',
+					allowTyping: false,
+					allowMultiple: true,
+					allowNone: false,
+					selectedValuesLayout: 'belowStacked'
+				}
+			},
+			state: initState
+		});
+		
+		google.visualization.events.addListener(columnFilter, 'statechange', setChartView);
+		
+		setChartView();
+		columnFilter.draw();
+	
+	 }
   else
     {
 	 var dataTable = google.visualization.arrayToDataTable(data);	 
@@ -141,6 +221,24 @@ function drawChart(iddashboard, idcontrol, idchart, chartType, data, options, dt
 	 }
 }
 
+function setChartView () {
+	var state = columnFilter.getState();
+	var row;
+	var view = {
+		columns: [0]
+	};
+	for (var i = 0; i < state.selectedValues.length; i++) {
+		row = columnsTable.getFilteredRows([{column: 1, value: state.selectedValues[i]}])[0];
+		view.columns.push(columnsTable.getValue(row, 0));
+	}
+	// sort the indices into their original order
+	view.columns.sort(function (a, b) {
+		return (a - b);
+	});
+	chart.setView(view);
+	chart.draw();
+}
+		
 function drawAllCharts() {
   for (var i=0; i<charts.length; i++) {
     var chart = charts[i];
