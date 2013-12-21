@@ -20,7 +20,8 @@ function addChart(arr) {
       <li class="nav-tab"><a href="#tab-3">Tables</a></li>
       <li class="nav-tab"><a href="#tab-4">Pies</a></li>
       <li class="nav-tab"><a href="#tab-5">5yr</a></li>
-      <li class="nav-tab"><a href="#tab-6">Details</a></li>
+      <li class="nav-tab"><a href="#tab-6">Motion</a></li>
+      <li class="nav-tab"><a href="#tab-7">Details</a></li>
     </ul> <!-- .nav-tabs -->
 
     <div class="tab tab-info">
@@ -512,7 +513,35 @@ function addChart(arr) {
 	  {% endfor %}
 
 	  </div> <!-- .tab-5yr -->
-   <div class="tab tab-details">
+    <div class="tab tab-motion">
+	  <div id="motion-chart-meters" style="display: inline-block; width: 99%;"></div>
+	  <script>
+	  addChart([
+		'MotionChart',
+		'motion-chart-meters',
+		'MotionChart',
+		{{ motion_data_meters|safe }},
+		{}
+	  ]);
+	  </script>
+
+	  <div class="clear">
+        <div class="woo-sc-hr"></div>
+      </div>
+
+	  <div id="motion-chart-fuels" style="display: inline-block; width: 99%;"></div>
+	  <script>
+	  addChart([
+		'MotionChart',
+		'motion-chart-fuels',
+		'MotionChart',
+		{{ motion_data_fuels|safe }},
+		{}
+	  ]);
+	  </script>
+
+    </div> <!-- .tab-motion -->
+    <div class="tab tab-details">
       <div id="model-details"></div>
       <script>
       addChart([
@@ -724,10 +753,23 @@ function drawTwoPies(chartDrawFunc, iddashboard, idchart1, idchart2, idcontrol, 
   dashboard.draw(dataTable);
 }
 
+function drawMotion(chartDrawFunc, id, chartType, data, options) {
+  if (!google || !google.visualization) return;
+  var el        = document.getElementById(id);
+  for (var i = 1; i < data.length; i++) {data[i][1] = new Date(data[i][1]);}
+  var dataTable = google.visualization.arrayToDataTable(data);	 
+  var chart     = new google.visualization[chartType](el);
+  chart.draw(dataTable, options);
+}
+
 function drawAllCharts() {
   for (var i=0; i<charts.length; i++) {
     var chart = charts[i];
 		if (chart[0] == 'Table')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'Scatter')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'Histogram')
 			{drawGeneric.apply(this, chart);}
 		else if (chart[0] == 'ComboChart')
 			{drawGeneric.apply(this, chart);}
@@ -741,6 +783,8 @@ function drawAllCharts() {
 			{drawTwoPies.apply(this, chart);}
 		else if (chart[0] == 'MonthlyColumn')
 			{drawMonthlyColumn.apply(this, chart);}
+		else if (chart[0] == 'MotionChart')
+			{drawMotion.apply(this, chart);}
 		else
 			{}
   }

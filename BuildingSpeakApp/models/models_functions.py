@@ -33,6 +33,53 @@ def nan2zero(x):
     if math.isnan(x): y = Decimal(0)
     return y
     
+def get_df_motion_table(df, col_0, index_func, column_list, column_dict=None):
+    """function(df,col_0,index_func,column_list[,column_dict])
+    df = DataFrame with monthly period index
+    col_0 = [name_for_column_0,value_for_column_0]
+    index_func = function to apply to index
+    column_list = list of column names in df and
+        in column_dict's keys that should be
+        included as columns in output table
+    column_dict = dictionary of name,value pairs
+        to be included in output table, where
+        value is a single value for whole column
+    
+    Returns a list of lists, with first column
+    per col_0 list, monthly index in second
+    column after applying index_func, and remaining
+    columns as listed in column_list.  Columns
+    pulled from df expected to be Decimals and are
+    converted to floats for output table.
+    """
+    try:
+        r = []
+        r_1 = [col_0[0], 'Date']
+        r_1.extend([x for x in column_list])
+        r.append(r_1)
+    except:
+        print 'Code Error: Unable to create header row in get_df_motion_table function, aborting and returning empty list.'
+    else:
+        if (df is None) or (len(df)==0):
+            print 'Code Warning: Found no data to load during get_df_motion_table function, aborting and returning empty list.'
+        else:
+            try:
+                df['mapped_index'] = df.index
+                df['mapped_index'] = df['mapped_index'].apply(index_func)
+                for i in range(0,len(df)):
+                    r_1 = [col_0[1], df['mapped_index'][i]]
+                    r_j = []
+                    for j in column_list:
+                        if j in df.columns:
+                            r_j.append(float(df[j][i]))
+                        else:
+                            r_j.append(column_dict[j])
+                    r_1.extend(r_j)
+                    r.append(r_1)
+            except:
+                print 'Code Error: Failed to create table during get_df_motion_table function, aborting and returning empty list.'
+    return r
+
 def get_df_as_table_with_formats(df, columndict, index_name, transpose_bool):
     """function(df,columndict,index_name, transpose_bool)
     
@@ -266,9 +313,15 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
     Given the type, units and mm/yyyy
     month strings and a list of Meters,
     function retrieves dataframes, 
-    converts units, and sums peak
-    demand and consumption in all 
-    dataframes."""
+    converts units for Billing Demand,
+    Peak Demand, and Consumption, then
+    sums Peak Demand, Consumption, Cost,
+    kBtu Consumption, kBtuh Peak Demand,
+    and CDD/HDD (consumption and demand).
+    
+    Domestic water meters are excluded
+    from all conversions and summations
+    other than Cost."""
     try:
         if len([type(x.id) for x in list_of_meters if type(x.id) is not int]) > 0:
             raise AttributeError
@@ -331,7 +384,7 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
                                 'Peak Demand (esave)',
                                 'Peak Demand (exp delta)',
                                 'Peak Demand (exp)']
-                column_list_sum = ['Billing Demand (act)',
+                column_list_sum_non_water = ['Billing Demand (act)',
                                 'Billing Demand (asave)',
                                 'Billing Demand (base delta)',
                                 'Billing Demand (base)',
@@ -355,6 +408,10 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
                                 'Cost (esave)',
                                 'Cost (exp delta)',
                                 'Cost (exp)',
+                                'CDD (consumption)',
+                                'CDD (peak demand)',
+                                'HDD (consumption)',
+                                'HDD (peak demand)',
                                 'Peak Demand (act)',
                                 'Peak Demand (asave)',
                                 'Peak Demand (base delta)',
@@ -379,18 +436,31 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
                                 'kBtuh Peak Demand (esave)',
                                 'kBtuh Peak Demand (exp delta)',
                                 'kBtuh Peak Demand (exp)']
+                column_list_sum_water = ['Cost (act)',
+                                'Cost (asave)',
+                                'Cost (base delta)',
+                                'Cost (base)',
+                                'Cost (esave delta)',
+                                'Cost (esave)',
+                                'Cost (exp delta)',
+                                'Cost (exp)']
                 meter_data_lists = [[x.utility_type,x.units,x.get_bill_data_period_dataframe(first_month=first_month,last_month=last_month)] for x in list_of_meters]
                 meter_data_lists = [x for x in meter_data_lists if x[2] is not None]
                 if len(meter_data_lists) > 0:
                     for i,meter in enumerate(meter_data_lists):
                         meter_df = meter[2]
-                        for col in column_list_convert:
-                            meter_df[col] = meter_df[col] * convert_units(meter[0],meter[1],utility_type,units)
+                        if meter[0] != 'domestic water':
+                            for col in column_list_convert:
+                                meter_df[col] = meter_df[col] * convert_units(meter[0],meter[1],utility_type,units)
                         meter_data_lists[i][2] = meter_df
                     df_sum = meter_data_lists[0][2]
                     for meter in meter_data_lists[1:]:
-                        for col in column_list_sum:
-                            df_sum[col] = df_sum[col].apply(nan2zero).add(meter[2][col].apply(nan2zero),fill_value=0) #must remove NaNs so addition works
+                        if meter[0] != 'domestic water':
+                            for col in column_list_sum_non_water:
+                                df_sum[col] = df_sum[col].apply(nan2zero).add(meter[2][col].apply(nan2zero),fill_value=0) #must remove NaNs so addition works
+                        elif meter[0] == 'domestic water':
+                            for col in column_list_sum_water:
+                                df_sum[col] = df_sum[col].apply(nan2zero).add(meter[2][col].apply(nan2zero),fill_value=0) #must remove NaNs so addition works
                 else:
                     df_sum = None
             except:

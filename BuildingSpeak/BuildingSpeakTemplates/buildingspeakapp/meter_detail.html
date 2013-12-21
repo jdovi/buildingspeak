@@ -17,10 +17,12 @@ function addChart(arr) {
     <ul class="tab_titles">
       <li class="nav-tab"><a href="#tab-1">Info</a></li>
       <li class="nav-tab"><a href="#tab-2">Upload</a></li>
-      <li class="nav-tab"><a href="#tab-3">Monthly</a></li>
-      <li class="nav-tab"><a href="#tab-4">5yr</a></li>
-      <li class="nav-tab"><a href="#tab-5">Stats</a></li>
-      <li class="nav-tab"><a href="#tab-6">Details</a></li>
+      <li class="nav-tab"><a href="#tab-3">Bars</a></li>
+      <li class="nav-tab"><a href="#tab-4">Tables</a></li>
+      <li class="nav-tab"><a href="#tab-5">5yr</a></li>
+      <li class="nav-tab"><a href="#tab-6">Motion</a></li>
+      <li class="nav-tab"><a href="#tab-7">Stats</a></li>
+      <li class="nav-tab"><a href="#tab-8">Details</a></li>
     </ul> <!-- .nav-tabs -->
 
     <div class="tab tab-info">
@@ -215,38 +217,28 @@ function addChart(arr) {
 			<input type="submit" value="Upload Bill Data" />
 		</form>
 	</div> <!-- .tab-upload -->
-    <div class="tab tab-monthly">
-      <p>
-        <strong><u>Currently viewing:</u></strong>
-        <input type="text" class="datepicker" />
-        to
-        <input type="text" class="datepicker" />
-		<input type="submit" value="Refresh" />
-		<input type="submit" value="Export" />
-      </p>
-	  
+    <div class="tab tab-bars">
 	  {% if cost_by_month == 'false' %}
 	    No cost data to display. <br>
 	  {% else %}
-      <div id="cost-by-month"></div>
+	  <div id="cost - dashboard">
+	  <div id="cost - chart" style='width: 715px; height: 300px;'></div>
+	  <div id="cost - control" style='width: 715px; height: 50px;'></div>
+	  </div>
 	  <script>
       addChart([
-        'cost-by-month',
-        'ComboChart',
-        {{ cost_by_month|safe }},
-        { // options
-          title: 'Cost',
-          vAxes: { 0: { title: 'USD' } },
-          seriesType: "bars",
-          series:     {
-            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
-            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
-            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
-            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
-            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
-          }
-        },
-		'ComboChart'
+        'MonthlyColumn',
+		'cost - dashboard',
+		'cost - chart',
+		'cost - control',
+        [['date','Month'],
+		 ['number','Cost (baseline)'],
+		 ['number','Cost (expected)'],
+		 ['number','Cost Savings (expected)'],
+		 ['number','Cost (actual)'],
+		 ['number','Cost Savings (actual)']],
+		{{ cost_by_month|safe }},
+        'USD'
       ]);
       </script>
 	  {% endif %}
@@ -254,25 +246,24 @@ function addChart(arr) {
 	  {% if consumption_by_month == 'false' %}
 	    No consumption data to display. <br>
 	  {% else %}
-      <div id="consumption-by-month"></div>
-      <script>
+	  <div id="consumption - dashboard">
+	  <div id="consumption - chart" style='width: 715px; height: 300px;'></div>
+	  <div id="consumption - control" style='width: 715px; height: 50px;'></div>
+	  </div>
+	  <script>
       addChart([
-        'consumption-by-month',
-        'ComboChart',
-        {{ consumption_by_month|safe }},
-        { // options
-          title: 'Consumption',
-          vAxes: { 0: { title: {{ consumption_units|safe }} } },
-          seriesType: "bars",
-          series:     {
-            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
-            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
-            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
-            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
-            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
-          }
-        },
-		'ComboChart'
+        'MonthlyColumn',
+		'consumption - dashboard',
+		'consumption - chart',
+		'consumption - control',
+        [['date','Month'],
+		 ['number','Consumption (baseline)'],
+		 ['number','Consumption (expected)'],
+		 ['number','Consumption Savings (expected)'],
+		 ['number','Consumption (actual)'],
+		 ['number','Consumption Savings (actual)']],
+		{{ consumption_by_month|safe }},
+        '{{ consumption_units|safe }}'
       ]);
       </script>
 	  {% endif %}
@@ -280,25 +271,24 @@ function addChart(arr) {
 	  {% if demand_by_month == 'false' %}
 	    No peak demand data to display. <br>
 	  {% else %}
-      <div id="demand-by-month"></div>
-      <script>
+	  <div id="demand - dashboard">
+	  <div id="demand - chart" style='width: 715px; height: 300px;'></div>
+	  <div id="demand - control" style='width: 715px; height: 50px;'></div>
+	  </div>
+	  <script>
       addChart([
-        'demand-by-month',
-        'ComboChart',
-        {{ demand_by_month|safe }},
-        { // options
-          title: 'Peak Demand',
-          vAxes: { 0: { title: {{ demand_units|safe }} } },
-          seriesType: "bars",
-          series:     {
-            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
-            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
-            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
-            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
-            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
-          }
-        },
-		'ComboChart'
+        'MonthlyColumn',
+		'demand - dashboard',
+		'demand - chart',
+		'demand - control',
+        [['date','Month'],
+		 ['number','Peak Demand (baseline)'],
+		 ['number','Peak Demand (expected)'],
+		 ['number','Peak Demand Savings (expected)'],
+		 ['number','Peak Demand (actual)'],
+		 ['number','Peak Demand Savings (actual)']],
+		{{ demand_by_month|safe }},
+        '{{ demand_units|safe }}'
       ]);
       </script>
 	  {% endif %}
@@ -310,25 +300,24 @@ function addChart(arr) {
 	  {% if kbtu_by_month == 'false' %}
 	    No kBtu consumption data to display. <br>
 	  {% else %}
-      <div id="kbtu-by-month"></div>
-      <script>
+	  <div id="kBtu - dashboard">
+	  <div id="kBtu - chart" style='width: 715px; height: 300px;'></div>
+	  <div id="kBtu - control" style='width: 715px; height: 50px;'></div>
+	  </div>
+	  <script>
       addChart([
-        'kbtu-by-month',
-        'ComboChart',
-        {{ kbtu_by_month|safe }},
-        { // options
-          title: 'Consumption',
-          vAxes: { 0: { title: 'kBtu' } },
-          seriesType: "bars",
-          series:     {
-            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
-            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
-            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
-            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
-            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
-          }
-        },
-		'ComboChart'
+        'MonthlyColumn',
+		'kBtu - dashboard',
+		'kBtu - chart',
+		'kBtu - control',
+        [['date','Month'],
+		 ['number','kBtu Consumption (baseline)'],
+		 ['number','kBtu Consumption (expected)'],
+		 ['number','kBtu Consumption Savings (expected)'],
+		 ['number','kBtu Consumption (actual)'],
+		 ['number','kBtu Consumption Savings (actual)']],
+		{{ kbtu_by_month|safe }},
+        'kBtu'
       ]);
       </script>
 	  {% endif %}
@@ -336,33 +325,39 @@ function addChart(arr) {
 	  {% if kbtuh_by_month == 'false' %}
 	    No kBtuh peak demand data to display. <br>
 	  {% else %}
-      <div id="kbtuh-by-month"></div>
-      <script>
+	  <div id="kBtuh - dashboard">
+	  <div id="kBtuh - chart" style='width: 715px; height: 300px;'></div>
+	  <div id="kBtuh - control" style='width: 715px; height: 50px;'></div>
+	  </div>
+	  <script>
       addChart([
-        'kbtuh-by-month',
-        'ComboChart',
-        {{ kbtuh_by_month|safe }},
-        { // options
-          title: 'Peak Demand',
-          vAxes: { 0: { title: 'kBtu/h' } },
-          seriesType: "bars",
-          series:     {
-            0: {type: "line", targetAxisIndex: 0, color: '#B88A00' },
-            1: {type: "bar", targetAxisIndex: 0, color: '#003DF5' },
-            2: {type: "bar", targetAxisIndex: 0, color: '#4271FF' },
-            3: {type: "bar", targetAxisIndex: 0, color: '#009425' },
-            4: {type: "bar", targetAxisIndex: 0, color: '#00E038' },
-          }
-        },
-		'ComboChart'
+        'MonthlyColumn',
+		'kBtuh - dashboard',
+		'kBtuh - chart',
+		'kBtuh - control',
+        [['date','Month'],
+		 ['number','kBtuh Peak Demand (baseline)'],
+		 ['number','kBtuh Peak Demand (expected)'],
+		 ['number','kBtuh Peak Demand Savings (expected)'],
+		 ['number','kBtuh Peak Demand (actual)'],
+		 ['number','kBtuh Peak Demand Savings (actual)']],
+		{{ kbtuh_by_month|safe }},
+        'kBtu/h'
       ]);
       </script>
 	  {% endif %}
 
-	  <div class="clear">
-        <div class="woo-sc-hr"></div>
-      </div>
-
+    </div> <!-- .tab-bars -->
+    <div class="tab tab-tables">
+      <p>
+        <strong><u>Currently viewing:</u></strong>
+        <input type="text" class="datepicker" />
+        to
+        <input type="text" class="datepicker" />
+		<input type="submit" value="Refresh" />
+		<input type="submit" value="Export" />
+      </p>
+	  
 	  {% if totals_table == 'false' %}
 	    No totals to display. <br>
 	  {% else %}
@@ -370,11 +365,11 @@ function addChart(arr) {
       <div id="totals-table"></div>
       <script>
       addChart([
-        'totals-table',
         'Table',
-        {{ totals_table|safe }},,
-        { },
-		'Table'
+        'totals-table',
+		'Table',
+        {{ totals_table|safe }},
+        {}
       ]);
       </script>
 	  {% endif %}
@@ -386,22 +381,23 @@ function addChart(arr) {
       <div id="ratios-table"></div>
       <script>
       addChart([
+		'Table',
         'ratios-table',
         'Table',
-        {{ ratios_table|safe }},,
-        { },
-		'Table'
+        {{ ratios_table|safe }},
+        {}
       ]);
       </script>
 	  {% endif %}
-    </div> <!-- .tab-monthly -->
+    </div> <!-- .tab-tables -->
     <div class="tab tab-5yr">
 
 	<div id="stacked-5-cost"></div>
 	  <script>
       addChart([
-        'stacked-5-cost',
         'ColumnChart',
+        'stacked-5-cost',
+		'ColumnChart',
 		{{ five_year_table_cost|safe }},
         {
         title: '5-yr Costs',
@@ -418,8 +414,7 @@ function addChart(arr) {
             },
         vAxes: { 0: { title: 'USD' },
 				 1: { title: 'Degree Days' }},
-		},
-		'ColumnChart'
+		}
       ]);
       </script>
 
@@ -430,6 +425,7 @@ function addChart(arr) {
 	<div id="stacked-5-cons"></div>
 	  <script>
       addChart([
+		'ColumnChart',
         'stacked-5-cons',
         'ColumnChart',
 		{{ five_year_table_cons|safe }},
@@ -448,8 +444,7 @@ function addChart(arr) {
             },
         vAxes: { 0: { title: {{ consumption_units|safe }} },
 				 1: { title: 'Degree Days' }},
-		},
-		'ColumnChart'
+		}
       ]);
       </script>
 
@@ -460,6 +455,7 @@ function addChart(arr) {
 	<div id="stacked-5-kBtu"></div>
 	  <script>
       addChart([
+		'ColumnChart',
         'stacked-5-kBtu',
         'ColumnChart',
 		{{ five_year_table_kBtu|safe }},
@@ -478,8 +474,7 @@ function addChart(arr) {
             },
         vAxes: { 0: { title: 'kBtu' },
 				 1: { title: 'Degree Days' }},
-		},
-		'ColumnChart'
+		}
       ]);
       </script>
 
@@ -488,6 +483,19 @@ function addChart(arr) {
       </div>
 
     </div> <!-- .tab-5yr -->
+    <div class="tab tab-motion">
+	  <div id="motion-chart" style="display: inline-block; width: 99%;"></div>
+	  <script>
+	  addChart([
+		'MotionChart',
+		'motion-chart',
+		'MotionChart',
+		{{ motion_data|safe }},
+		{}
+	  ]);
+	  </script>
+
+    </div> <!-- .tab-motion -->
     <div class="tab tab-stats">
 	  {% if consumption_model_stats_table == 'false' %}
 	    No consumption model assigned to this Meter. <br>
@@ -496,24 +504,24 @@ function addChart(arr) {
       <div id="consumption_model_stats_table"></div>
       <script>
       addChart([
+		'Table',
         'consumption_model_stats_table',
         'Table',
 		{{ consumption_model_stats_table|safe }},        
-		{ },
-		'Table'
+		{}
       ]);
       </script>
 
 	  <div id="{{ meter.id }}-consumption-model-residuals-histogram" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
+		'Histogram',
 		'{{ meter.id }}-consumption-model-residuals-histogram',
 		'ColumnChart',
 		{{ consumption_model_residuals_histogram|safe }},
 		{hAxis: {title: 'Residual Ranges'},
 		 vAxis: {title: 'Frequency'},
 		 legend: 'none'},
-		'Histogram'
 	  ]);
 	  </script>
 
@@ -521,14 +529,14 @@ function addChart(arr) {
 	  <div id="{{ indvarname|safe }} - {{ forloop.counter0 }} - consumption" style="display: inline-block; width: 49%;"></div>
 	  <script>
       addChart([
+		'Scatter',
         '{{ indvarname|safe }} - {{ forloop.counter0 }} - consumption',
         'ScatterChart',
         {{ indvardata|safe }},
 		{hAxis: {title: '{{ indvarname|safe }}' },
 		 vAxis: {title: 'Residuals'},
 		 legend: 'none',
-		},
-		'Scatter'
+		}
       ]);
       </script>
 	  {% empty %}
@@ -548,24 +556,24 @@ function addChart(arr) {
       <div id="peak_demand_model_stats_table"></div>
       <script>
       addChart([
+		'Table',
         'peak_demand_model_stats_table',
         'Table',
 		{{ peak_demand_model_stats_table|safe }},
-        { },
-		'Table'
+        {}
       ]);
       </script>
 	  
 	  <div id="{{ meter.id }}-peak-demand-model-residuals-histogram" style="display: inline-block; width: 49%;"></div>
 	  <script>
 	  addChart([
+		'Histogram',
 		'{{ meter.id }}-peak-demand-model-residuals-histogram',
 		'ColumnChart',
 		{{ peak_demand_model_residuals_histogram|safe }},
 		{hAxis: {title: 'Residual Ranges'},
 		 vAxis: {title: 'Frequency'},
-		 legend: 'none'},
-		'Histogram'
+		 legend: 'none'}
 	  ]);
 	  </script>
 
@@ -573,14 +581,14 @@ function addChart(arr) {
 	  <div id="{{ indvarname|safe }} - {{ forloop.counter0 }} - peak demand" style="display: inline-block; width: 49%;"></div>
 	  <script>
       addChart([
+		'Scatter',
         '{{ indvarname|safe }} - {{ forloop.counter0 }} - peak demand',
         'ScatterChart',
         {{ indvardata|safe }},
 		{hAxis: {title: '{{ indvarname|safe }}' },
 		 vAxis: {title: 'Residuals'},
 		 legend: 'none',
-		},
-		'Scatter'
+		}
       ]);
       </script>
 	  {% empty %}
@@ -593,11 +601,11 @@ function addChart(arr) {
       <div id="model-details"></div>
       <script>
       addChart([
+		'Table',
         'model-details',
         'Table',
 		{{ meter_attrs|safe }},
-        { },
-		'Table'
+        {}
       ]);
       </script>
 
@@ -606,26 +614,207 @@ function addChart(arr) {
 </section><!-- .entry -->
 
 <script type="text/javascript">
-google.load("visualization", "1", {packages:["corechart","table"]});
-function drawChart(id, chartType, data, options, dtType) {
+google.load("visualization", "1", {packages:["corechart","table","controls","motionchart"]});
+google.setOnLoadCallback(drawAllCharts);
+
+function drawGeneric(chartDrawFunc, id, chartType, data, options) {
   if (!google || !google.visualization) return;
   var el        = document.getElementById(id);
-  if (dtType == 'BarWithErrors')
-    {
-     var dataTable = new google.visualization.DataTable();
-     dataTable.addColumn('string', 'Month'); // Implicit domain column.
-     dataTable.addColumn('number', 'Sales'); // Implicit data column.
-     dataTable.addColumn({type:'number', role:'interval'});
-     dataTable.addColumn({type:'number', role:'interval'});
-     dataTable.addColumn({type:'string', role:'annotation'});
-     dataTable.addColumn({type:'string', role:'annotationText'});
-	 dataTable.addColumn('number', 'Expenses');
-     dataTable.addRows(data);
-     }
-  else
-    {
-	 var dataTable = google.visualization.arrayToDataTable(data);	 
-	 }
+  var dataTable = google.visualization.arrayToDataTable(data);	 
+  var chart     = new google.visualization[chartType](el);
+  chart.draw(dataTable, options);
+}
+
+function drawMonthlyColumn(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, vaxtitle) {
+  if (!google || !google.visualization) return;
+  var eldashboard        = document.getElementById(iddashboard);
+  var dashboard = new google.visualization.Dashboard(eldashboard);
+  var control = new google.visualization.ControlWrapper({
+    'controlType': 'ChartRangeFilter',
+    'containerId': idcontrol,
+    'options': {
+ 	 // Filter by the date axis.
+ 	  'filterColumnIndex': 0,
+ 	  'ui': {
+	    'chartType': 'ColumnChart',
+	    'chartOptions': {
+		  'chartArea': {'left': '15%', 'width': '85%'},
+		  'hAxis': {'baselineColor': 'none'}
+	    },
+	    'chartView': {
+		  'columns': [0, 1, 2, 3, 4, 5]
+	    },
+	    // 1 day in milliseconds = 24 * 60 * 60 * 1000 = 86,400,000
+	    'minRangeSize': 86400000
+	  }
+    },
+    // Initial range:
+    'state': {'range': {'start': new Date(data[data.length-13][0]),
+						'end': new Date(data[data.length-1][0])
+						}
+			  }
+  });
+
+  var chart = new google.visualization.ChartWrapper({
+    'chartType': 'ColumnChart',
+    'containerId': idchart,
+    'options': {
+	  // Use the same chart area width as the control for axis alignment.
+	  'chartArea': {'height': '80%', 'left': '15%', 'width': '85%'},
+	  'hAxis': {'slantedText': false},
+	  'vAxis': {'title': vaxtitle},
+	  'legend': {'position': 'top'}
+    },
+    // Convert the first column from 'date' to 'string'.
+    'view': {
+	  'columns': [
+	    {
+		  'calc': function(dataTable, rowIndex) {
+		    return dataTable.getFormattedValue(rowIndex, 0);
+		  },
+		  'type': 'string'
+	    }, 1, 2, 3, 4, 5]
+    }
+  });
+
+  var dataTable = new google.visualization.DataTable();
+  for (var i = 0; i < cols.length; i++) { 
+		dataTable.addColumn(cols[i][0], cols[i][1]);
+  }
+  
+  for (var i = 0; i < data.length; i++) { 
+		data[i][0] = new Date(data[i][0]);
+  }
+  
+  dataTable.addRows(data.slice(1,data.length));
+  
+  // Create formatters.
+  var formatter_months = new google.visualization.DateFormat({pattern: "MMM''yy"});
+  var formatter_dollars = new google.visualization.NumberFormat(
+		{prefix: '$', negativeColor: 'red', negativeParens: true});
+  // Reformat our data.
+  formatter_months.format(dataTable, 0);
+  formatter_dollars.format(dataTable, 1);
+ 
+  dashboard.bind(control, chart);
+  dashboard.draw(dataTable);
+}
+
+function drawPie(chartDrawFunc, iddashboard, idchart, idcontrol, cols, data, charttitle, viewcols, filtercol) {
+  if (!google || !google.visualization) return;
+  var eldashboard        = document.getElementById(iddashboard);
+  var dashboard = new google.visualization.Dashboard(eldashboard);
+  var categoryPicker = new google.visualization.ControlWrapper({
+    'controlType': 'CategoryFilter',
+    'containerId': idcontrol,
+    'options': {
+      'filterColumnIndex': filtercol,
+      'ui': {
+        'labelStacking': 'vertical',
+        'allowTyping': false,
+        'allowMultiple': false
+      }
+    }
+  });
+
+  var chart = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': viewcols}
+  });
+
+  var dataTable = new google.visualization.DataTable();
+  for (var i = 0; i < cols.length; i++) { 
+		dataTable.addColumn(cols[i][0], cols[i][1]);
+  }
+  
+  dataTable.addRows(data.slice(1,data.length));
+  
+  // Create formatters.
+//  var formatter_dollars = new google.visualization.NumberFormat(
+//		{prefix: '$', negativeColor: 'red', negativeParens: true});
+  // Reformat our data.
+//  formatter_dollars.format(dataTable, 1);
+ 
+  dashboard.bind(categoryPicker, chart);
+  dashboard.draw(dataTable);
+}
+
+function drawTwoPies(chartDrawFunc, iddashboard, idchart1, idchart2, idcontrol, cols, data, charttitle1, charttitle2, viewcols1, viewcols2, filtercol) {
+  if (!google || !google.visualization) return;
+  var eldashboard        = document.getElementById(iddashboard);
+  var dashboard = new google.visualization.Dashboard(eldashboard);
+  var categoryPicker = new google.visualization.ControlWrapper({
+    'controlType': 'CategoryFilter',
+    'containerId': idcontrol,
+    'options': {
+      'filterColumnIndex': filtercol,
+      'ui': {
+        'labelStacking': 'vertical',
+        'allowTyping': false,
+        'allowMultiple': false
+      }
+    }
+  });
+
+  var chart1 = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart1,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle1,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': viewcols1}
+  });
+
+    var chart2 = new google.visualization.ChartWrapper({
+    'chartType': 'PieChart',
+    'containerId': idchart2,
+    'options': {
+      'width': 300,
+      'height': 300,
+      'legend': 'none',
+      'title': charttitle2,
+      'chartArea': {'left': 15, 'top': 15, 'right': 0, 'bottom': 0},
+      'pieSliceText': 'label'
+    },
+	'view': {'columns': viewcols2}
+  });
+
+  var dataTable = new google.visualization.DataTable();
+  for (var i = 0; i < cols.length; i++) { 
+		dataTable.addColumn(cols[i][0], cols[i][1]);
+  }
+  
+  dataTable.addRows(data.slice(1,data.length));
+  
+  // Create formatters.
+//  var formatter_dollars = new google.visualization.NumberFormat(
+//		{prefix: '$', negativeColor: 'red', negativeParens: true});
+  // Reformat our data.
+//  formatter_dollars.format(dataTable, 1);
+ 
+  dashboard.bind(categoryPicker, [chart1, chart2]);
+  dashboard.draw(dataTable);
+}
+
+function drawMotion(chartDrawFunc, id, chartType, data, options) {
+  if (!google || !google.visualization) return;
+  var el        = document.getElementById(id);
+  for (var i = 1; i < data.length; i++) {data[i][1] = new Date(data[i][1]);}
+  var dataTable = google.visualization.arrayToDataTable(data);	 
   var chart     = new google.visualization[chartType](el);
   chart.draw(dataTable, options);
 }
@@ -633,10 +822,31 @@ function drawChart(id, chartType, data, options, dtType) {
 function drawAllCharts() {
   for (var i=0; i<charts.length; i++) {
     var chart = charts[i];
-    drawChart.apply(this, chart);
+		if (chart[0] == 'Table')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'Scatter')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'Histogram')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'ComboChart')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'ColumnChart')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'PieChart')
+			{drawGeneric.apply(this, chart);}
+		else if (chart[0] == 'PieControl')
+			{drawPie.apply(this, chart);}
+		else if (chart[0] == 'TwoPiesControl')
+			{drawTwoPies.apply(this, chart);}
+		else if (chart[0] == 'MonthlyColumn')
+			{drawMonthlyColumn.apply(this, chart);}
+		else if (chart[0] == 'MotionChart')
+			{drawMotion.apply(this, chart);}
+		else
+			{}
   }
 }
-google.setOnLoadCallback(drawAllCharts);
+
 $(function() {
   $(window).resize($.debounce(250, drawAllCharts));
   $(document).on('tabsactivate', drawAllCharts);
@@ -646,5 +856,7 @@ $(function() {
 $(function() {
   $('.images a').fancybox();
 });
+
 </script>
+
 {% endblock %}

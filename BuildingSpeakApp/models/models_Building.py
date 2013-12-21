@@ -183,6 +183,118 @@ class Building(models.Model):
     
    
     #functions
+    def get_building_view_motion_table_spaces(self):
+        """No inputs.
+        
+        Returns table for motion chart on
+        Building's detail view.  List of lists
+        with the following columns: SpaceName,
+        Date, Cost, kBtu, CDD, HDD, Cost/SF,
+        kBtu/SF, Cost/kBtu, SpaceType.
+        """
+        month_curr = pd.Period(timezone.now(), freq='M')
+        mistr = (month_curr-120).strftime('%m/%Y')
+        mfstr = month_curr.strftime('%m/%Y')
+        total_SF = self.square_footage
+        
+        result = [['Space Name','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu','Space Type']]
+
+        for space in self.space_set.all():
+            space_df = convert_units_sum_meters(
+                                        'other',
+                                        'kBtuh,kBtu',
+                                        space.meters.all(),
+                                        first_month = mistr, 
+                                        last_month = mfstr)
+            if space_df is not None:
+                space_df['Cost/SF'] = space_df['Cost (act)']/total_SF
+                space_df['kBtu/SF'] = space_df['kBtu Consumption (act)']/total_SF
+                space_df['Cost/kBtu'] = space_df['Cost (act)']/space_df['kBtu Consumption (act)']
+                space_df[['Cost (act)',
+                          'kBtu Consumption (act)',
+                          'CDD (consumption)',
+                          'HDD (consumption)',
+                          'Cost/SF',
+                          'kBtu/SF',
+                          'Cost/kBtu']] = space_df[['Cost (act)',
+                                                            'kBtu Consumption (act)',
+                                                            'CDD (consumption)',
+                                                            'HDD (consumption)',
+                                                            'Cost/SF',
+                                                            'kBtu/SF',
+                                                            'Cost/kBtu']].applymap(nan2zero)
+                space_table = get_df_motion_table(space_df,
+                                                  ['Space', str(space.name)],
+                                                  lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
+                                                  ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu','Space Type'],
+                                                  {'Space Type': str(space.space_type)})
+                for i in space_table[1:]:
+                    result.append(i)
+        return result
+    def get_building_view_motion_table_fuels(self):
+        """No inputs.
+        
+        Returns table for motion chart on
+        Building's detail view.  List of lists
+        with the following columns: UtilityType,
+        Date, Cost, kBtu, CDD, HDD, Cost/SF,
+        kBtu/SF, Cost/kBtu.
+        """
+        month_curr = pd.Period(timezone.now(), freq='M')
+        mistr = (month_curr-120).strftime('%m/%Y')
+        mfstr = month_curr.strftime('%m/%Y')
+        total_SF = self.square_footage
+        
+        utility_groups = []
+        utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
+        result = [['Utility Type','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu']]
+
+        for utype in utility_groups:
+            utype_df = convert_units_sum_meters(
+                                        utype,
+                                        get_default_units(utype),
+                                        self.meters.filter(utility_type=utype),
+                                        first_month = mistr, 
+                                        last_month = mfstr)
+            if utype_df is not None:
+                utype_df['Cost/SF'] = utype_df['Cost (act)']/total_SF
+                utype_df['kBtu/SF'] = utype_df['kBtu Consumption (act)']/total_SF
+                utype_df['Cost/kBtu'] = utype_df['Cost (act)']/utype_df['kBtu Consumption (act)']
+                utype_df[['Cost (act)',
+                          'kBtu Consumption (act)',
+                          'CDD (consumption)',
+                          'HDD (consumption)',
+                          'Cost/SF',
+                          'kBtu/SF',
+                          'Cost/kBtu']] = utype_df[['Cost (act)',
+                                                            'kBtu Consumption (act)',
+                                                            'CDD (consumption)',
+                                                            'HDD (consumption)',
+                                                            'Cost/SF',
+                                                            'kBtu/SF',
+                                                            'Cost/kBtu']].applymap(nan2zero)
+                utype_table = get_df_motion_table(utype_df,
+                                                  ['Utility Type', str(utype)],
+                                                  lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
+                                                  ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu'])
+                for i in utype_table[1:]:
+                    result.append(i)
+        return result
+    def get_building_view_motion_table_meters(self):
+        """No inputs.
+        
+        Returns table for motion chart on
+        Building's detail view.  List of lists
+        with the following columns: MeterName,
+        Date, Cost, kBtu, CDD, HDD, UtilityType.
+        """
+        result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
+        for meter in self.meters.all():
+            meter_table = meter.get_meter_view_motion_table()
+            for i in meter_table[1:]:
+                i.append(str(meter.utility_type))
+                result.append(i)
+        return result
     def get_building_view_five_year_data(self):
         """No inputs.
         
@@ -202,18 +314,19 @@ class Building(models.Model):
             else:
                 #five year stacked_data is what will be passed to the template
                 five_year_data = []
-                utility_groups = ['Total Building Energy']
+                utility_groups = ['Building Total']
                 utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
                 
                 #meter_dict holds all info and dataframes for each utility group, starting with Total non-water
-                meter_dict = {'Total Building Energy': {'name': 'Total Building Energy',
+                meter_dict = {'Building Total': {'name': 'Building Total',
                                                         'costu': 'USD',
                                                         'consu': 'kBtu',
                                                         'pdu': 'kBtuh',
                                                         'df': convert_units_sum_meters(
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
-                                                                self.meters.filter(~Q(utility_type = 'domestic water')), 
+                                                                #self.meters.filter(~Q(utility_type = 'domestic water')),
+                                                                self.meters.all(),
                                                                 first_month=mistr, 
                                                                 last_month=mfstr )
                                                         } }
@@ -470,18 +583,19 @@ class Building(models.Model):
                                 'kBtuh Peak Demand (exp)']
                 #meter_data is what will be passed to the template
                 meter_data = []
-                utility_groups = ['Total Building Energy']
+                utility_groups = ['Building Total']
                 utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
                 
                 #meter_dict holds all info and dataframes for each utility group, starting with Total non-water
-                meter_dict = {'Total Building Energy': {'name': 'Total Building Energy',
+                meter_dict = {'Building Total': {'name': 'Building Total',
                                                         'costu': 'USD',
                                                         'consu': 'kBtu',
                                                         'pdu': 'kBtuh',
                                                         'df': convert_units_sum_meters(
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
-                                                                self.meters.filter(~Q(utility_type = 'domestic water')), 
+                                                                #self.meters.filter(~Q(utility_type = 'domestic water')), 
+                                                                self.meters.all(),
                                                                 first_month=first_month, 
                                                                 last_month=last_month )
                                                         } }
@@ -636,7 +750,7 @@ class Building(models.Model):
                 
                 #for breakdown by utility type, cycle through all utility groups and exclude domestic water from kBtu calcs
                 for utype in meter_dict.keys():
-                    if utype != 'Total Building Energy':
+                    if utype != 'Building Total':
                         pie_cost_by_type.append([utype, float(meter_dict[utype]['df']['Cost (act)'].sum())])
                         if utype != 'domestic water':
                             pie_kBtu_by_type.append([utype, float(meter_dict[utype]['df']['kBtu Consumption (act)'].sum())])

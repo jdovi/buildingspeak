@@ -164,6 +164,10 @@ def account_detail(request, account_id):
         'pie_data':       pie_data,
         'total_SF':       total_SF,
         'five_year_data': five_year_data,
+        'motion_data_meters':       account.get_account_view_motion_table_meters(),
+        'motion_data_fuels':        account.get_account_view_motion_table_fuels(),
+        'motion_data_buildings':    account.get_account_view_motion_table_buildings(),
+        'motion_data_spaces':       account.get_account_view_motion_table_spaces(),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -213,10 +217,14 @@ def building_detail(request, account_id, building_id):
         'meter_data':           meter_data,
         'pie_data':             pie_data,
         'five_year_data':       five_year_data,
+        'motion_data_meters':   building.get_building_view_motion_table_meters(),
+        'motion_data_fuels':    building.get_building_view_motion_table_fuels(),
+        'motion_data_spaces':   building.get_building_view_motion_table_spaces(),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
         template_name = 'buildingspeakapp/building_detail.html'
+        #template_name = 'buildingspeakapp/dashboard_test3.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)
@@ -261,6 +269,8 @@ def space_detail(request, account_id, space_id):
         'meter_data':     meter_data,
         'pie_data':       pie_data,
         'five_year_data': five_year_data,
+        'motion_data_meters':   space.get_space_view_motion_table_meters(),
+        'motion_data_fuels':    space.get_space_view_motion_table_fuels(),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -584,7 +594,7 @@ def meter_detail(request, account_id, meter_id):
                             five_years['CDD (consumption)'][48:60].sum(),
                             five_years['HDD (consumption)'][48:60].sum()
                             ])
-
+    
     context = {
         'user':           request.user,
         'account':        account,
@@ -618,6 +628,7 @@ def meter_detail(request, account_id, meter_id):
         'five_year_table_cost':                     five_year_table_cost,
         'five_year_table_cons':                     five_year_table_cons,
         'five_year_table_kBtu':                     five_year_table_kBtu,
+        'motion_data':                              meter.get_meter_view_motion_table(),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:

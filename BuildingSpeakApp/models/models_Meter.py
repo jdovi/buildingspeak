@@ -132,6 +132,30 @@ class Meter(models.Model):
     utility_meter_number = models.CharField(blank=True, max_length=200, help_text='provider''s meter number')
     
     #functions
+    def get_meter_view_motion_table(self):
+        """No inputs.
+        
+        Returns table for motion chart on
+        Meter's detail view.  List of lists
+        with the following columns: MeterName,
+        Date, Cost, kBtu, CDD, HDD.
+        """
+        df = self.get_bill_data_period_dataframe()
+        if df is not None:
+            df[['Cost (act)',
+                'kBtu Consumption (act)',
+                'CDD (consumption)',
+                'HDD (consumption)']] = df[['Cost (act)',
+                                            'kBtu Consumption (act)',
+                                            'CDD (consumption)',
+                                            'HDD (consumption)']].applymap(nan2zero)
+            result = get_df_motion_table(df,
+                                         ['Meter',str(self.name)],
+                                         lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
+                                         ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)'])
+        else:
+            result = None
+        return result
     def get_all_events(self, reverse_boolean):
         return sorted(self.messages.filter(message_type='Event'), key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_alerts(self, reverse_boolean):
