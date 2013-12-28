@@ -23,82 +23,111 @@ from models_Space import Space
 
 class Account(models.Model):
     """
-    Model for customer.  Accepts
-    image logo file.  Parents
-    Buildings and Meters.
+    Customer Account model.
     """
     
-    #: name of Account as str
+    #: Name of Account as str.
     name = models.CharField(max_length=200)
-    #: Type of Account.
-    #: Options: Commercial, Industrial, Residential.
+    #: Type of Account as str. Options: Commercial, Industrial, Residential.
     account_type = models.CharField(blank=True, max_length=200,
                                     choices=[('Commercial', 'Commercial'),
                                              ('Industrial', 'Industrial'),
                                              ('Residential', 'Residential')])
     
     #relationships
+    #: ManyToMany relationship to Message.
     messages = models.ManyToManyField('Message')
+    #: ManyToMany relationship to User.
     users = models.ManyToManyField(User)
+    #: ManyToMany relationship to Reader.
     readers = models.ManyToManyField('Reader')
+    #: ManyToMany relationship to OperatingSchedule.
     schedules = models.ManyToManyField('OperatingSchedule')
 
     
     #file-related attributes
+    #: File: Link to file containing observed Account data.
     observed_file = models.FileField(null=True, blank=True, upload_to=data_file_path_account, 
                     storage=S3BotoStorage(location='user_data_files'),
                     help_text='link to file containing observed account data')
+    #: Boolean: Track an observed data file for this Account? Default: False.
     observed_file_track = models.BooleanField(blank=True, default=False,
                     help_text='track an observed data file for this account?')
+    #: Int: Number of rows before data header row in observed data file (will be skipped when reading data).
     observed_file_skiprows = models.IntegerField(null=True, blank=True, help_text='number of rows before data header row (will be skipped when reading data)')
+    #: Int: Column number of time stamp data to use for indexing observed data file.
     observed_file_column_for_indexing = models.IntegerField(null=True, blank=True, help_text='column number of time stamp data to use for indexing')
+    #: Str: Time zone of observed data file, compatible with pytz module.  Default: US/Eastern.
     observed_file_time_zone = models.CharField(blank=True, max_length=200,
                     help_text='time zone compatible with pytz module, default=US/Eastern',
                     default='US/Eastern')
+    #: Decimal: GMT/UTC offset as decimal number used to adjust hour values read in from observed data file. Default: -5.
     observed_file_GMT_offset = models.DecimalField(null=True, blank=True, max_digits=4, decimal_places=2,
                     help_text='GMT/UTC offset as decimal number used to adjust hour values read in from data file',
                     default=Decimal(-5))
+    #: Boolean: Dates in observed data file are always already adjusted for DST? Default: False.
     observed_file_adjusts_for_DST = models.BooleanField(blank=True,
                     help_text='dates in data file are always already adjusted for DST?',
                     default=False)
+
+    #: File: Link to file containing provided Account data.
     provided_file = models.FileField(null=True, blank=True, upload_to=data_file_path_account, 
                     storage=S3BotoStorage(location='user_data_files'),
                     help_text='link to file containing provided account data')
+    #: Boolean: Track an provided data file for this Account? Default: False.
     provided_file_track = models.BooleanField(blank=True, default=False,
                     help_text='track a provided data file for this account?')
+    #: Int: Number of rows before data header row in provided data file (will be skipped when reading data).
     provided_file_skiprows = models.IntegerField(null=True, blank=True, help_text='number of rows before data header row (will be skipped when reading data)')
+    #: Int: Column number of time stamp data to use for indexing provided data file.
     provided_file_column_for_indexing = models.IntegerField(null=True, blank=True, help_text='column number of time stamp data to use for indexing')
+    #: Str: Time zone of provided data file, compatible with pytz module.  Default: US/Eastern.
     provided_file_time_zone = models.CharField(blank=True, max_length=200,
                     help_text='time zone compatible with pytz module, default=US/Eastern',
                     default='US/Eastern')
+    #: Decimal: GMT/UTC offset as decimal number used to adjust hour values read in from provided data file. Default: -5.
     provided_file_GMT_offset = models.DecimalField(null=True, blank=True, max_digits=4, decimal_places=2,
                     help_text='GMT/UTC offset as decimal number used to adjust hour values read in from data file',
                     default=Decimal(-5))
+    #: Boolean: Dates in provided data file are always already adjusted for DST? Default: False.
     provided_file_adjusts_for_DST = models.BooleanField(blank=True,
                     help_text='dates in data file are always already adjusted for DST?',
                     default=False)
+    #: File: Link to file containing Account image.
     image_file = models.FileField(null=True, blank=True, upload_to=image_file_path_account, 
                     storage=S3BotoStorage(location='user_data_files'),
                     help_text='link to file containing account image')
     
     #single value attributes
+    #: Str: Street address of Account.
     street_address = models.CharField(blank=True, max_length=200)
+    #: Str: City of Account.
     city = models.CharField(blank=True, max_length=200)
+    #: Str: State of Account.
     state = models.CharField(blank=True, max_length=2)
+    #: Str: Zip code for Account.
     zip_code = models.CharField(blank=True, max_length=10)
+    #: DateTime: Date Account was created. 
     launch_date = models.DateTimeField(null=True, blank=True)
 
+    #: Str: Account contact first name.
     first_name = models.CharField(blank=True, max_length=200)
+    #: Str: Account contact last name.
     last_name = models.CharField(blank=True, max_length=200)
+    #: Str: Account contact title.
     title = models.CharField(blank=True, max_length=200)
+    #: Email: Account contact email address.
     email = models.EmailField(blank=True, max_length=75)
+    #: Str: Account contact phone number.
     phone = models.CharField(blank=True, max_length=20)
 
+    #: Str: Account status.  Options: Active, Closed, Delinquent, Inactive.
     status = models.CharField(blank=True, max_length=200,
                               choices=[('Active', 'Active'),
                                        ('Closed', 'Closed'),
                                        ('Delinquent', 'Delinquent'),
                                        ('Inactive', 'Inactive')])
+    #: Decimal: Total monthly Account payment amount (USD).
     monthly_payment = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
                                           help_text='total monthly payment due')
     
