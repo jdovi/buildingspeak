@@ -21,6 +21,14 @@ import os
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.append(os.path.abspath('sphinxext'))
 
+sys.path.append(os.path.abspath('../'))
+sys.path.append(os.path.abspath('../BuildingSpeakApp/models/'))
+# Set up the Django settings/environment
+from django.core.management import setup_environ
+from BuildingSpeak import settings
+setup_environ(settings)
+
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

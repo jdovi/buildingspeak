@@ -22,10 +22,16 @@ from models_monthlies import Monthling
 from models_Space import Space
 
 class Account(models.Model):
-    """Model for customer.  Accepts
+    """
+    Model for customer.  Accepts
     image logo file.  Parents
-    Buildings and Meters."""
+    Buildings and Meters.
+    """
+    
+    #: name of Account as str
     name = models.CharField(max_length=200)
+    #: Type of Account.
+    #: Options: Commercial, Industrial, Residential.
     account_type = models.CharField(blank=True, max_length=200,
                                     choices=[('Commercial', 'Commercial'),
                                              ('Industrial', 'Industrial'),
@@ -485,11 +491,16 @@ class Account(models.Model):
         return five_year_data
 
     def get_account_view_meter_data(self, month_first, month_last):
-        """function(month_first, month_last)
-        month_first/month_last = Periods(freq='M')
+        """
+        Returns tables of summed meter data for a given date range.
         
-        Returns meter data for Account's views
-        in a list: [meter_data, pie_data]."""
+        :argument month_first: The first desired month.
+        :type month_first: Period(freq='M')
+        :argument month_last: The last desired month.
+        :type month_last: Period(freq='M')
+        :returns: Meter data for Account's views in a list: [meter_data, pie_data].
+        
+        """
         #if there are no meters, skip all meter data calcs
         try:
             first_month = month_first.strftime('%m/%Y')
