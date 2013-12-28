@@ -1,3 +1,4 @@
+#DEPRECATED 12/2013: USE SPACE MODEL
 #import dbarray
 import pandas as pd
 from pytz import UTC
@@ -19,7 +20,9 @@ from models_Message import Message
 from models_Reader_ing import Reader
 
 class Floor(models.Model):
-    """Model for subspaces of
+    """DEPRECATED: USE SPACE MODEL!
+    
+    Model for subspaces of
     Buildings.  Accepts image
     file of floorplan."""
     name = models.CharField(blank=True, max_length=200)
