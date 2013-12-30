@@ -1,6 +1,6 @@
 # Create your views here.
 from datetime import datetime, timedelta
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, WeatherStation, EfficiencyMeasure
@@ -17,8 +17,10 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.core.mail import send_mail
-from rq import Queue
-from worker import conn
+from tropo import Tropo, Session
+from django.views.decorators.csrf import csrf_exempt
+#from rq import Queue
+#from worker import conn
 
 class ResultsMessage(object):
     """Used for generating user
@@ -35,7 +37,8 @@ def index(request):
     if len(accounts)==0:
         return HttpResponseRedirect('/user-account')
     else:
-        return HttpResponseRedirect('/' + str(accounts[0].id))
+        #return HttpResponseRedirect('/' + str(accounts[0].id))
+        return HttpResponseRedirect('/tropo_test')
 
 @login_required
 def user_account(request):
@@ -95,7 +98,25 @@ def application_error(request):
     return render(request, 'buildingspeakapp/application_error.html', context)
 
 @login_required
+@csrf_exempt
 def tropo_test(request):
+    t = Tropo()
+    t.say(['Hello world!'])
+    json = t.RenderJson()
+    print json
+    context = {
+        'user':         request.user,
+#        'accounts':     request.user.account_set.order_by('id'),
+#        'meter_data':   meter_data,
+#        'pie_data':     pie_data,
+        'building':     Building.objects.get(pk=2),
+#        'mydata':       mydata2,
+#        'start_month':  start_month
+    }
+    return HttpResponse(json)
+    
+@login_required
+def docs(request):
 
     context = {
         'user':         request.user,
@@ -108,7 +129,7 @@ def tropo_test(request):
     }
     template_name = 'buildingspeakapp/tropo_test.html'
     return render(request, template_name, context)
-    
+
 @login_required
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
