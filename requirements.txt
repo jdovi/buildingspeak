@@ -29,4 +29,3 @@ statsmodels==0.4.3
 redis==2.7.6
 rq==0.3.8
 times==0.6.2
-wsgiref==0.1.2
