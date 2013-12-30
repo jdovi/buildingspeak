@@ -23,6 +23,6 @@ urlpatterns = patterns('',
     url(r'^(?P<account_id>\d+)/measures/(?P<measure_id>\d+)$', views.measure_detail,
         name='measure_detail'),
     url(r'^management/$', views.management, name='management'),
-    url(r'^dashboard_test/$', views.dashboard_test, name='dashboard_test'),
+    url(r'^tropo_test/$', views.tropo_test, name='tropo_test'),
 
 )

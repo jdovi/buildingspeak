@@ -133,13 +133,14 @@ class Account(models.Model):
     
     #functions
     def get_account_view_motion_table_buildings(self):
-        """No inputs.
+        """
+        No inputs. Returns table for motion chart on
+        Account's detail view, using most recent 10
+        years of meter data.
         
-        Returns table for motion chart on
-        Account's detail view.  List of lists
-        with the following columns: BuildingName,
-        Date, Cost, kBtu, CDD, HDD, Cost/SF,
-        kBtu/SF, Cost/kBtu, BuildingType.
+        :returns: List of lists with the following
+        columns: Building Name, Date, Cost, kBtu, CDD,
+        HDD, Cost/SF, kBtu/SF, Cost/kBtu, Building Type.
         """
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
@@ -180,14 +181,15 @@ class Account(models.Model):
                     result.append(i)
         return result
     def get_account_view_motion_table_spaces(self):
-        """No inputs.
+        """
+        No inputs. Returns table for motion chart on
+        Account's detail view, using most recent 10
+        years of meter data.
         
-        Returns table for motion chart on
-        Account's detail view.  List of lists
-        with the following columns: SpaceName,
-        Date, Cost, kBtu, CDD, HDD, Cost/SF,
-        kBtu/SF, Cost/kBtu, SpaceType,
-        BuildingName.
+        :returns: List of lists with the following
+        columns: Space Name, Date, Cost, kBtu, CDD,
+        HDD, Cost/SF, kBtu/SF, Cost/kBtu, Space Type,
+        Building Name.
         """
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
@@ -229,13 +231,14 @@ class Account(models.Model):
                     result.append(i)
         return result
     def get_account_view_motion_table_fuels(self):
-        """No inputs.
+        """
+        No inputs. Returns table for motion chart on
+        Account's detail view, using most recent 10
+        years of meter data.
         
-        Returns table for motion chart on
-        Account's detail view.  List of lists
-        with the following columns: UtilityType,
-        Date, Cost, kBtu, CDD, HDD, Cost/SF,
-        kBtu/SF, Cost/kBtu.
+        :returns: List of lists with the following
+        columns: Utility Type, Date, Cost, kBtu, CDD,
+        HDD, Cost/SF, kBtu/SF, Cost/kBtu.
         """
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
@@ -278,9 +281,8 @@ class Account(models.Model):
                     result.append(i)
         return result
     def get_account_view_motion_table_meters(self):
-        """No inputs.
-        
-        Returns table for motion chart on
+        """
+        No inputs. Returns table for motion chart on
         Account's detail view.  List of lists
         with the following columns: MeterName,
         Date, Cost, kBtu, CDD, HDD, UtilityType.

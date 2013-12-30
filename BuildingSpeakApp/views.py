@@ -17,8 +17,8 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.core.mail import send_mail
-#from rq import Queue
-#from worker import conn
+from rq import Queue
+from worker import conn
 
 class ResultsMessage(object):
     """Used for generating user
@@ -95,18 +95,18 @@ def application_error(request):
     return render(request, 'buildingspeakapp/application_error.html', context)
 
 @login_required
-def dashboard_test(request):
+def tropo_test(request):
 
     context = {
-#        'user':         request.user,
+        'user':         request.user,
 #        'accounts':     request.user.account_set.order_by('id'),
 #        'meter_data':   meter_data,
 #        'pie_data':     pie_data,
-#        'building':     building,
+        'building':     Building.objects.get(pk=2),
 #        'mydata':       mydata2,
 #        'start_month':  start_month
     }
-    template_name = 'buildingspeakapp/dashboard_test2.html'
+    template_name = 'buildingspeakapp/tropo_test.html'
     return render(request, template_name, context)
     
 @login_required
@@ -302,9 +302,9 @@ def meter_detail(request, account_id, meter_id):
             form.initial['bill_data_file'] = latest_bill_data_file
             meter.save()
             try:
-#                q = Queue(connection=conn)
-#                result = q.enqueue(meter.upload_bill_data)
-                meter.upload_bill_data()
+                q = Queue(connection=conn)
+                result = q.enqueue(meter.upload_bill_data)
+#                meter.upload_bill_data()
                 m = ResultsMessage()
                 m.comment = 'Bill data has been uploaded.'
             except:
