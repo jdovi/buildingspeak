@@ -102,7 +102,7 @@ def application_error(request):
 def tropo_test(request):
     t = Tropo()
     t.say(['Hello world!'])
-    json = t.RenderJson()
+    json_stuff = t.RenderJson()
     print json
     context = {
         'user':         request.user,
@@ -113,7 +113,7 @@ def tropo_test(request):
 #        'mydata':       mydata2,
 #        'start_month':  start_month
     }
-    return HttpResponse(json)
+    return HttpResponse(json_stuff)
     
 @login_required
 def docs(request):
