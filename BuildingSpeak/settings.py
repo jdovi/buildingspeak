@@ -163,6 +163,7 @@ INSTALLED_APPS = (
     'BuildingSpeakApp',
     'storages',
     #'schedule',
+    'rtropo',
     'rapidsms',
     'rapidsms.backends.database',
     'rapidsms.contrib.handlers',
@@ -177,6 +178,15 @@ INSTALLED_APPS = (
 INSTALLED_BACKENDS = {
     "message_tester": {
         "ENGINE": "rapidsms.backends.database.DatabaseBackend",
+    },
+    "my-tropo-backend": {
+        "ENGINE": "rtropo.outgoing.TropoBackend",
+        'config': {
+            # Your Tropo application's outbound token for messaging
+            'messaging_token': '2576cf832793f3448cf4d38fca55018eb6131477b66f94d699008083ab23e6935c536e64efc7049b18cfc7c3',
+            # Your Tropo application's voice/messaging phone number (including country code)
+            'number': '+1-678-541-8217',
+        },
     },
 }
 

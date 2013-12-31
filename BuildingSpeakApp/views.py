@@ -101,9 +101,10 @@ def application_error(request):
 @csrf_exempt
 def tropo_test(request):
     t = Tropo()
-    t.say(['Hello world!'])
-    json_stuff = t.RenderJson()
-    print json
+    msg = request.POST['msg']
+    json_stuff = t.say("you just said: " + msg)
+    print json_stuff
+    json_stuff = t.RenderJson(json_stuff)
     context = {
         'user':         request.user,
 #        'accounts':     request.user.account_set.order_by('id'),
