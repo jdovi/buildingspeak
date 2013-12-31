@@ -118,7 +118,9 @@ def tropo_test_voice(request):
 def tropo_test_text(request):
     print 'result1'
     s = Session(request.body)
-    user_input = s['session']['initialText']
+    print 'restult1a'
+    user_input = s.initialText
+    print 'result1b'
     t = Tropo()
     print 'result2'
     t.say(['You said: ' + user_input])
