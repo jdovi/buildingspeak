@@ -102,8 +102,8 @@ def tropo_test_voice(request):
     print 'index1'
     t = Tropo()
     print 'index2'
-    t.on(event='continue', next='/the_answer/')
-    t.on(event='incomplete', next='/the_answer/')
+    t.on(event='continue', next='/tropo_test_voice/the_answer/')
+    t.on(event='incomplete', next='/tropo_test_voice/the_answer/')
     print 'index3'
     t.ask(choices='[5 digits]',
           bargein=True, required=True,
