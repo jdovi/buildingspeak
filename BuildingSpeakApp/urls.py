@@ -25,4 +25,5 @@ urlpatterns = patterns('',
     url(r'^management/$', views.management, name='management'),
     url(r'^tropo_test/index.json$', views.tropo_test_index, name='tropo_test_index'),
     url(r'^tropo_test/result.json$', views.tropo_test_result, name='tropo_test_result'),
+    url(r'^tropo_test/$', views.tropo_test_index, name='tropo_test_main'),
 )
