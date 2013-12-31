@@ -99,9 +99,14 @@ def application_error(request):
 
 @csrf_exempt
 def tropo_test_voice(request):
+    print 'hello1'
     t = Tropo()
+    print 'hello2'
+    t.call(to="+16782815256", network = "SMS")
+    print 'hello3'
     t.say(["Really, it's that easy."])
-    return t.RenderJson()
+    print 'hello4'
+    return HttpResponse(t.RenderJson())
     
 @csrf_exempt
 def tropo_test_text(request):
