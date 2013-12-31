@@ -111,10 +111,12 @@ def tropo_test_text(request):
     t = Tropo()
     if request.method == 'POST':
         msg = request.POST['msg']
+        t.call(to="+16782815256", network = "SMS")
         t.say("you just said: " + msg)
         json_stuff = t.RenderJson()
         print json_stuff
     if request.method == 'GET':
+        t.call(to="+16782815256", network = "SMS")
         t.say("you want me to talk first?")
         json_stuff = t.RenderJson()
         print json_stuff
