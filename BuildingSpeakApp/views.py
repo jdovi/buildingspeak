@@ -112,17 +112,20 @@ def tropo_test_voice(request):
 def tropo_test_text(request):
     t = Tropo()
     if request.method == 'POST':
+        print 'h1'
         msg = request.POST['msg']
+        print 'h2'
         t.call(to="+16782815256", network = "SMS")
+        print 'h3'
         t.say("you just said: " + msg)
-        json_stuff = t.RenderJson()
-        print json_stuff
+        print 'h4'
     if request.method == 'GET':
+        print 'h11'
         t.call(to="+16782815256", network = "SMS")
+        print 'h22'
         t.say("you want me to talk first?")
-        json_stuff = t.RenderJson()
-        print json_stuff
-    return HttpResponse(json_stuff)
+        print 'h33'
+    return HttpResponse(t.RenderJson())
     
 @login_required
 def docs(request):
