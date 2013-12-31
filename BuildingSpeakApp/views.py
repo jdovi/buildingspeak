@@ -98,25 +98,30 @@ def application_error(request):
     return render(request, 'buildingspeakapp/application_error.html', context)
 
 @csrf_exempt
-def tropo_test_index(request):
+def tropo_test_voice(request):
     print 'index1'
     t = Tropo()
     print 'index2'
-    t.call(to="+16782815256", network = "SMS")
+    t.on(event='continue', next='/the_answer')
+    t.on(event='incomplete', next='/the_answer')
     print 'index3'
-    t.say(["Made it to index."])
+    acct_choices = t.Choices("[5 digits]").obj
+    t.ask(choices=acct_choices,
+          bargein=True, required=True,
+          timeout=30, name='account_number',
+          say='Please enter your account number')
     print 'index4'
+    t.RenderJson()
+    print 'index5'
     return HttpResponse(t.RenderJson())
     
 @csrf_exempt
-def tropo_test_result(request):
+def tropo_test_text(request):
     print 'result1'
     t = Tropo()
     print 'result2'
-    t.call(to="+16782815256", network = "SMS")
-    print 'result3'
     t.say(["Made it to response."])
-    print 'result4'
+    print 'result3'
     return HttpResponse(t.RenderJson())
     
 @login_required
