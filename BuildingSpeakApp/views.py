@@ -99,21 +99,22 @@ def application_error(request):
 
 @login_required
 @csrf_exempt
-def tropo_test(request):
+def tropo_test_voice(request):
+    t = Tropo()
+    t.call(to="+16785418217", network = "SMS")
+    json_stuff = t.say("Tag, you're it!")
+    print json_stuff
+    json_stuff = t.RenderJson(json_stuff)
+    return HttpResponse(json_stuff)
+    
+@login_required
+@csrf_exempt
+def tropo_test_text(request):
     t = Tropo()
     msg = request.POST['msg']
     json_stuff = t.say("you just said: " + msg)
     print json_stuff
     json_stuff = t.RenderJson(json_stuff)
-    context = {
-        'user':         request.user,
-#        'accounts':     request.user.account_set.order_by('id'),
-#        'meter_data':   meter_data,
-#        'pie_data':     pie_data,
-        'building':     Building.objects.get(pk=2),
-#        'mydata':       mydata2,
-#        'start_month':  start_month
-    }
     return HttpResponse(json_stuff)
     
 @login_required
