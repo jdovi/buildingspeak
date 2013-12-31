@@ -100,11 +100,8 @@ def application_error(request):
 @csrf_exempt
 def tropo_test_voice(request):
     t = Tropo()
-    t.call(to="+16782815256", network = "SMS")
-    t.say("Tag, you're it!")
-    json_stuff = t.RenderJson()
-    print json_stuff
-    return HttpResponse(json_stuff)
+    t.say(["Really, it's that easy."])
+    return t.RenderJson()
     
 @csrf_exempt
 def tropo_test_text(request):
