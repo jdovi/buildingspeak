@@ -101,9 +101,9 @@ def application_error(request):
 def tropo_test_voice(request):
     t = Tropo()
     t.call(to="+16782815256", network = "SMS")
-    json_stuff = t.say("Tag, you're it!")
+    t.say("Tag, you're it!")
+    json_stuff = t.RenderJson()
     print json_stuff
-    json_stuff = t.RenderJson(json_stuff)
     return HttpResponse(json_stuff)
     
 @csrf_exempt
@@ -111,13 +111,13 @@ def tropo_test_text(request):
     t = Tropo()
     if request.method == 'POST':
         msg = request.POST['msg']
-        json_stuff = t.say("you just said: " + msg)
+        t.say("you just said: " + msg)
+        json_stuff = t.RenderJson()
         print json_stuff
-        json_stuff = t.RenderJson(json_stuff)
     if request.method == 'GET':
-        json_stuff = t.say("you want me to talk first?")
+        t.say("you want me to talk first?")
+        json_stuff = t.RenderJson()
         print json_stuff
-        json_stuff = t.RenderJson(json_stuff)
     return HttpResponse(json_stuff)
     
 @login_required
