@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 
 from BuildingSpeakApp import views
+from rtropo.views import message_received
 
 # these url patterns deal only with BuildingSpeakApp/ web requests
 # each app has its own urls.py file, which is called by the site's urls.py file
@@ -25,5 +26,6 @@ urlpatterns = patterns('',
     url(r'^management/$', views.management, name='management'),
     url(r'^tropo_test_text/$', views.tropo_test_text, name='tropo_test_text'),
     url(r'^tropo_test_voice/$', views.tropo_test_voice, name='tropo_test_voice'),
-
+    url(r"^tropo/$", message_received, kwargs={'backend_name': 'my-tropo-backend'},
+        name='tropo'),
 )
