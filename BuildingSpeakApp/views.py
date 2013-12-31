@@ -106,14 +106,14 @@ def tropo_test_voice(request):
     print 'hello3'
     t.say(["Really, it's that easy."])
     print 'hello4'
-    return HttpResponse(t.RenderJson())
+    return HttpResponse('abc')
     
 @csrf_exempt
 def tropo_test_text(request):
     t = Tropo()
     if request.method == 'POST':
         print 'h1'
-        msg = request.POST['msg']
+        msg = request.body['msg']
         print 'h2'
         t.call(to="+16782815256", network = "SMS")
         print 'h3'
