@@ -105,13 +105,12 @@ def tropo_test_voice(request):
     t.on(event='continue', next='/the_answer')
     t.on(event='incomplete', next='/the_answer')
     print 'index3'
-    acct_choices = t.Choices("[5 digits]").obj
-    t.ask(choices=acct_choices,
+    t.ask(choices='[5 digits]',
           bargein=True, required=True,
           timeout=30, name='account_number',
           say='Please enter your account number')
     print 'index4'
-    t.RenderJson()
+    t.PrettyJson()
     print 'index5'
     return HttpResponse(t.RenderJson())
     
