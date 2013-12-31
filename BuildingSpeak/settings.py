@@ -156,11 +156,33 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django_nose',
+    'django_tables2',
+    'selectable',
     'south',
     'BuildingSpeakApp',
     'storages',
     #'schedule',
+    'rapidsms',
+    'rapidsms.backends.database',
+    'rapidsms.contrib.handlers',
+    'rapidsms.contrib.httptester',
+    'rapidsms.contrib.messagelog',
+    'rapidsms.contrib.messaging',
+    'rapidsms.contrib.registration',
+    #'rapidsms.contrib.echo',
+    'rapidsms.contrib.default',  # Must be last
+)
 
+INSTALLED_BACKENDS = {
+    "message_tester": {
+        "ENGINE": "rapidsms.backends.database.DatabaseBackend",
+    },
+}
+
+RAPIDSMS_HANDLERS = (
+    #'rapidsms.contrib.echo.handlers.echo.EchoHandler',
+    'rapidsms.contrib.echo.handlers.ping.PingHandler',
 )
 
 #TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.request')
