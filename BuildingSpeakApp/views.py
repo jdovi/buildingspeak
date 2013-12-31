@@ -119,7 +119,7 @@ def tropo_test_text(request):
     print 'result1'
     t = Tropo()
     print 'result2'
-    t.say(["Made it to response."])
+    t.say(['You said: ' + request.body['session']['initialText']])
     print 'result3'
     print request.POST
     print 'result4'
