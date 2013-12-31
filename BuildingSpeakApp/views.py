@@ -110,7 +110,7 @@ def tropo_test_voice(request):
           timeout=30, name='account_number',
           say='Please enter your account number')
     print 'index4'
-    t.PrettyJson()
+    t.RenderJson()
     print 'index5'
     return HttpResponse(t.RenderJson())
     
