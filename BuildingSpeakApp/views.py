@@ -117,9 +117,11 @@ def tropo_test_voice(request):
 @csrf_exempt
 def tropo_test_text(request):
     print 'result1'
+    s = Session(request.body)
+    user_input = s['session']['initialText']
     t = Tropo()
     print 'result2'
-    t.say(['You said: ' + request.body['session']['initialText']])
+    t.say(['You said: ' + user_input])
     print 'result3'
     print request.POST
     print 'result4'
