@@ -121,6 +121,10 @@ def tropo_test_text(request):
     print 'result2'
     t.say(["Made it to response."])
     print 'result3'
+    print request.POST
+    print 'result4'
+    print request.body
+    print 'result5'
     return HttpResponse(t.RenderJson())
     
 @login_required
