@@ -98,33 +98,25 @@ def application_error(request):
     return render(request, 'buildingspeakapp/application_error.html', context)
 
 @csrf_exempt
-def tropo_test_voice(request):
-    print 'hello1'
+def tropo_test_index(request):
+    print 'index1'
     t = Tropo()
-    print 'hello2'
+    print 'index2'
     t.call(to="+16782815256", network = "SMS")
-    print 'hello3'
-    t.say(["Really, it's that easy."])
-    print 'hello4'
-    return HttpResponse('abc')
+    print 'index3'
+    t.say(["Made it to index."])
+    print 'index4'
+    return HttpResponse(t.RenderJson())
     
 @csrf_exempt
-def tropo_test_text(request):
+def tropo_test_result(request):
+    print 'result1'
     t = Tropo()
-    if request.method == 'POST':
-        print 'h1'
-        msg = request.body['msg']
-        print 'h2'
-        t.call(to="+16782815256", network = "SMS")
-        print 'h3'
-        t.say("you just said: " + msg)
-        print 'h4'
-    if request.method == 'GET':
-        print 'h11'
-        t.call(to="+16782815256", network = "SMS")
-        print 'h22'
-        t.say("you want me to talk first?")
-        print 'h33'
+    print 'result2'
+    t.call(to="+16782815256", network = "SMS")
+    print 'result3'
+    t.say(["Made it to response."])
+    print 'result4'
     return HttpResponse(t.RenderJson())
     
 @login_required

@@ -23,6 +23,6 @@ urlpatterns = patterns('',
     url(r'^(?P<account_id>\d+)/measures/(?P<measure_id>\d+)$', views.measure_detail,
         name='measure_detail'),
     url(r'^management/$', views.management, name='management'),
-    url(r'^tropo_test_text/$', views.tropo_test_text, name='tropo_test_text'),
-    url(r'^tropo_test_voice/$', views.tropo_test_voice, name='tropo_test_voice'),
+    url(r'^tropo_test/index.json$', views.tropo_test_index, name='tropo_test_index'),
+    url(r'^tropo_test/result.json$', views.tropo_test_result, name='tropo_test_result'),
 )
