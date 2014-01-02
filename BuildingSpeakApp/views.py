@@ -740,6 +740,9 @@ def tropo_index(request):
     print callerID
     print 'index4'
     if len(callerID) == 11: callerID = callerID[1:]
+    print 'index4.0'
+    print callerID
+    print 'index4.00'
     try:
         print 'index4.1'
         this_user = User.objects.get(userprofile__mobile_phone = callerID)
