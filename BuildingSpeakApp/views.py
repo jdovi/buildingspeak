@@ -758,12 +758,19 @@ def tropo_index(request):
     else:
         print 'index5'
         if len(this_user.account_set.all()) == 0:
+            print 'index5.1'
             t.say('Hey ' + their_name + '. You''re not assigned to any account, so I can''t do much for you. Please call support to get assigned to your account.')
         elif len(this_user.account_set.all()) == 1:
-            t.say('Hey ' + their_name + '. I can discuss the following account with you: ' + this_user.account_set.all()[0] + '. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
+            print 'index5.2'
+            t.ask(name = 'model_type_choice',
+                  choices = ['Account', 'Building', 'Buildings', 'Meter', 'Meters', 'Space', 'Spaces', 'Equipment', 'Equipments', 'Measure', 'Measures'],
+                  say = 'Hey ' + their_name + '. I can discuss ' + str(this_user.account_set.all()[0]) + ' with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
             t.on(event = 'continue', next = '/tropo_result')
         elif len(this_user.account_set.all()) > 1:
-            t.say('Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join(this_user.account_set.all()) + '.')
+            print 'index5.3'
+            t.ask(name = 'account_name',
+                  choices = [str(i) for i in this_user.account_set.all()],
+                  say = 'Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join([str(i) for i in this_user.account_set.all()]) + '.')
             t.on(event = 'continue', next = '/tropo_result')
         print 'index6'
     t.RenderJson()
@@ -784,7 +791,7 @@ def tropo_result(request):
     print 'result4'
     t = Tropo()
     print 'result5'
-    t.say([response_text])
+    t.say(response_text)
     print 'result6'
     return HttpResponse(t.RenderJson())
     
