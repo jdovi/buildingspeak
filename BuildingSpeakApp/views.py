@@ -765,13 +765,13 @@ def tropo_index(request):
             t.ask(name = 'model_type_choice',
                   choices = 'Account, Building, Buildings, Meter, Meters, Space, Spaces, Equipment, Equipments, Measure, Measures',
                   say = 'Hey ' + their_name + '. I can discuss ' + str(this_user.account_set.all()[0]) + ' with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
-            t.on(event = 'continue', next = '/tropo_result')
+            t.on(event = 'continue', next = '/tropo_result/')
         elif len(this_user.account_set.all()) > 1:
             print 'index5.3'
             t.ask(name = 'account_name',
                   choices = ', '.join([str(i) for i in this_user.account_set.all()]),
                   say = 'Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join([str(i) for i in this_user.account_set.all()]) + '.')
-            t.on(event = 'continue', next = '/tropo_result')
+            t.on(event = 'continue', next = '/tropo_result/')
         print 'index6'
     t.RenderJson()
     print 'index7'
