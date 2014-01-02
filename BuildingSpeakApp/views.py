@@ -737,15 +737,20 @@ def tropo_index(request):
     s = Session(request.body)
     print 'index3'
     callerID = s.fromaddress['id']
+    print callerID
     print 'index4'
     try:
+        print 'index4.1'
         this_user = User.objects.get(userprofile__mobile_phone = callerID)
+        print 'index4.2'
         if this_user.first_name == '':
             their_name = this_user.username
         else:
             their_name = this_user.first_name
     except:
+        print 'index4.3'
         this_user = 0
+        t.say('I''m not authorized to speak to you. Goodbye.')
     else:
         print 'index5'
         if len(this_user.account_set.all()) == 0:
