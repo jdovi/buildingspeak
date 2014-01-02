@@ -20,6 +20,16 @@
 		{{ form.email }}
 	</div>
 	<div class="form-item">
+		{{ form.mobile_phone.errors }}
+		{{ form.mobile_phone.label_tag }}
+		{{ form.mobile_phone }}
+	</div>
+	<div class="form-item">
+		{{ form.desk_phone.errors }}
+		{{ form.desk_phone.label_tag }}
+		{{ form.desk_phone }}
+	</div>
+	<div class="form-item">
 		{{ form.first_name.errors }}
 		{{ form.first_name.label_tag }}
 		{{ form.first_name }}

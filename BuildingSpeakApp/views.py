@@ -17,7 +17,7 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.core.mail import send_mail
-from tropo import Tropo, Session
+from tropo import Tropo, Session, Result
 from django.views.decorators.csrf import csrf_exempt
 from rq import Queue
 from worker import conn
@@ -57,6 +57,8 @@ def user_account(request):
                 latest_image_file = form.cleaned_data['image_file']
             current_user.__setattr__('username', form.cleaned_data['username'])
             current_user.__setattr__('email', form.cleaned_data['email'])
+            current_user.userprofile.__setattr__('mobile_phone', form.cleaned_data['mobile_phone'])
+            current_user.userprofile.__setattr__('desk_phone', form.cleaned_data['desk_phone'])
             current_user.__setattr__('first_name', form.cleaned_data['first_name'])
             current_user.__setattr__('last_name', form.cleaned_data['last_name'])
             current_user.userprofile.__setattr__('organization', form.cleaned_data['organization'])
@@ -74,6 +76,8 @@ def user_account(request):
             latest_image_file = current_user.userprofile.image_file
         form = UserSettingsForm({'username': current_user.username,
                                  'email': current_user.email,
+                                 'mobile_phone': current_user.userprofile.mobile_phone,
+                                 'desk_phone': current_user.userprofile.desk_phone,
                                  'first_name': current_user.first_name,
                                  'last_name': current_user.last_name,
                                  'organization': current_user.userprofile.organization},
@@ -96,56 +100,6 @@ def update_successful(request):
 def application_error(request):
     context  = {'user': request.user}
     return render(request, 'buildingspeakapp/application_error.html', context)
-
-@csrf_exempt
-def tropo_test_voice(request):
-    print 'index1'
-    t = Tropo()
-    print 'index2'
-    t.on(event='continue', next='/tropo_test_voice/the_answer/')
-    t.on(event='incomplete', next='/tropo_test_voice/the_answer/')
-    print 'index3'
-    t.ask(choices='[5 digits]',
-          bargein=True, required=True,
-          timeout=30, name='account_number',
-          say='Please enter your account number')
-    print 'index4'
-    t.RenderJson()
-    print 'index5'
-    return HttpResponse(t.RenderJson())
-    
-@csrf_exempt
-def tropo_test_text(request):
-    print 'result1'
-    print request.body
-    print 'result2'
-    s = Session(request.body)
-    print 'restult3'
-    try:
-        response_text = 'You said: ' + s.initialText
-    except:
-        response_text = 'Didn''t catch that.'
-    print 'result4'
-    t = Tropo()
-    print 'result5'
-    t.say([response_text])
-    print 'result6'
-    return HttpResponse(t.RenderJson())
-    
-@login_required
-def docs(request):
-
-    context = {
-        'user':         request.user,
-#        'accounts':     request.user.account_set.order_by('id'),
-#        'meter_data':   meter_data,
-#        'pie_data':     pie_data,
-        'building':     Building.objects.get(pk=2),
-#        'mydata':       mydata2,
-#        'start_month':  start_month
-    }
-    template_name = 'buildingspeakapp/tropo_test.html'
-    return render(request, template_name, context)
 
 @login_required
 def account_detail(request, account_id):
@@ -757,3 +711,71 @@ def management(request):
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)
+
+@login_required
+def docs(request):
+
+    context = {
+        'user':         request.user,
+#        'accounts':     request.user.account_set.order_by('id'),
+#        'meter_data':   meter_data,
+#        'pie_data':     pie_data,
+        'building':     Building.objects.get(pk=2),
+#        'mydata':       mydata2,
+#        'start_month':  start_month
+    }
+    template_name = 'buildingspeakapp/tropo_test.html'
+    return render(request, template_name, context)
+
+
+##----------Tropo messaging views
+@csrf_exempt
+def tropo_index(request):
+    print 'index1'
+    t = Tropo()
+    print 'index2'
+    s = Session(request.body)
+    print 'index3'
+    callerID = s.fromaddress['id']
+    print 'index4'
+    try:
+        this_user = User.objects.get(userprofile__mobile_phone = callerID)
+        if this_user.first_name == '':
+            their_name = this_user.username
+        else:
+            their_name = this_user.first_name
+    except:
+        this_user = 0
+    else:
+        print 'index5'
+        if len(this_user.account_set.all()) == 0:
+            t.say('Hey ' + their_name + '. You''re not assigned to any account, so I can''t do much for you. Please call support to get assigned to your account.')
+        elif len(this_user.account_set.all()) == 1:
+            t.say('Hey ' + their_name + '. I can discuss the following account with you: ' + this_user.account_set.all()[0] + '. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
+            t.on(event = 'continue', next = '/tropo_result')
+        elif len(this_user.account_set.all()) > 1:
+            t.say('Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join(this_user.account_set.all()) + '.')
+            t.on(event = 'continue', next = '/tropo_result')
+        print 'index6'
+    t.RenderJson()
+    print 'index7'
+    return HttpResponse(t.RenderJson())
+    
+@csrf_exempt
+def tropo_result(request):
+    print 'result1'
+    print request.body
+    print 'result2'
+    r = Result(request.body)
+    print 'restult3'
+    try:
+        response_text = 'You said: ' + r.getValue()
+    except:
+        response_text = 'Didn''t catch that.'
+    print 'result4'
+    t = Tropo()
+    print 'result5'
+    t.say([response_text])
+    print 'result6'
+    return HttpResponse(t.RenderJson())
+    

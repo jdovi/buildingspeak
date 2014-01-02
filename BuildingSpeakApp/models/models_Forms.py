@@ -26,6 +26,8 @@ class UserSettingsForm(forms.Form):
     user login info."""
     username = forms.CharField(required=False, max_length=30)
     email = forms.EmailField(required=False)
+    mobile_phone = forms.CharField(required=False, max_length=20)
+    desk_phone = forms.CharField(required=False, max_length=20)
     first_name = forms.CharField(required=False, max_length=30)
     last_name = forms.CharField(required=False, max_length=30)
     organization = forms.CharField(required=False, max_length=30)

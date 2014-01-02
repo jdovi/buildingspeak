@@ -25,6 +25,8 @@ class UserProfile(models.Model):
     #relationships
     messages = models.ManyToManyField('Message')
     user = models.OneToOneField(User)
+    mobile_phone = models.CharField(blank=True, max_length=20)
+    desk_phone = models.CharField(blank=True, max_length=20)
     
     #file-related attributes
     image_file = models.FileField(null=True, blank=True, upload_to=image_file_path_userprofile, 
