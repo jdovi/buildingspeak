@@ -806,6 +806,7 @@ def tropo_result(request):
     print 'result2'
     r = Result(request.body)
     print 'result3'
+    print r._actions
 #    try:
 #        print specialparam
 #    except:
