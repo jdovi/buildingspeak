@@ -786,7 +786,7 @@ def tropo_entry(request):
                   name = 'model_type_choice',
                   choices = 'Account, Building, Buildings, Meter, Meters, Space, Spaces, Equipment, Equipments, Measure, Measures',
                   say = 'Hey ' + their_name + '. I can discuss ' + str(this_user.account_set.all()[0]) + ' with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
-            t.on(event = 'continue', next = '/tropo_account/3')
+            t.on(event = 'continue', next = '/tropo_account/3/')
             t.on(event = 'error', say = 'Sorry - goodbye.')
         elif len(this_user.account_set.all()) > 1:
             print 'entry5.3'
