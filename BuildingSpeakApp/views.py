@@ -737,13 +737,14 @@ def tropo_index(request):
     """
     #capture session and extract caller ID
     s = Session(request.body)
-    callerID = s.fromaddress['id']
+    caller_id = s.fromaddress['id']
+    if len(caller_id) == 11: caller_id = caller_id[1:]
     #create Tropo object that will be used to generate JSON responses to Tropo
     t = Tropo()
     #for SMS, must catch the very first text that activates the session and discard
     t.ask(choices = "[ANY]", timeout = 60, name = "catch", say = "")
     #now that the first text is caught, move into the system via the tropo_entry function
-    t.on(event = 'continue', next = '/tropo/user/' + str(callerID) + '/')
+    t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/')
     return HttpResponse(t.RenderJson())
 
 @csrf_exempt
