@@ -796,19 +796,20 @@ def tropo_entry(request):
                   say = 'Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join([str(i) for i in this_user.account_set.all()]) + '.')
             t.on(event = 'continue', next = '/tropo_result/')
         print 'entry6'
+        print t.RenderJson()
     return HttpResponse(t.RenderJson())
     
 @csrf_exempt
-def tropo_result(request, specialparam):
+def tropo_result(request):
     print 'result1'
     print request.body
     print 'result2'
     r = Result(request.body)
     print 'result3'
-    try:
-        print specialparam
-    except:
-        print 'can not print specialparam'
+#    try:
+#        print specialparam
+#    except:
+#        print 'can not print specialparam'
     try:
         response_text = 'You said: ' + r.getValue()
     except:
