@@ -731,14 +731,24 @@ def docs(request):
 ##----------Tropo messaging views
 @csrf_exempt
 def tropo_index(request):
-    print 'index1'
+    """
+    Tropo view to catch initial incoming SMS or
+    voice and discard initial 'activating' SMS.
+    """
+    #create Tropo object that will be used to generate JSON responses to Tropo
     t = Tropo()
-    print 'index2'
+    #for SMS, must catch the very first text that activates the session and discard
     t.ask(choices = "[ANY]", timeout = 60, name = "catch", say = "")
+    #now that the first text is caught, move into the system via the tropo_entry function
     t.on(event = 'continue', next = '/tropo_entry/')
     return HttpResponse(t.RenderJson())
+
 @csrf_exempt
 def tropo_entry(request):
+    """
+    Primary entry point into Tropo views. Hangs up on
+    calls from non-BuildingSpeak-User numbers.
+    """
     print 'entry1'
     print request.body
     print 'entry2'
@@ -776,7 +786,7 @@ def tropo_entry(request):
                   name = 'model_type_choice',
                   choices = 'Account, Building, Buildings, Meter, Meters, Space, Spaces, Equipment, Equipments, Measure, Measures',
                   say = 'Hey ' + their_name + '. I can discuss ' + str(this_user.account_set.all()[0]) + ' with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
-            t.on(event = 'continue', next = '/tropo_result/')
+            t.on(event = 'continue', next = '/tropo_result/', specialparam = 'abcd')
             t.on(event = 'error', say = 'Sorry - goodbye.')
         elif len(this_user.account_set.all()) > 1:
             print 'entry5.3'
@@ -794,7 +804,8 @@ def tropo_result(request):
     print request.body
     print 'result2'
     r = Result(request.body)
-    print 'restult3'
+    print 'result3'
+    
     try:
         response_text = 'You said: ' + r.getValue()
     except:
