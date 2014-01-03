@@ -774,8 +774,6 @@ def tropo_index(request):
                   say = 'Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join([str(i) for i in this_user.account_set.all()]) + '.')
             t.on(event = 'continue', next = '/tropo_result/')
         print 'index6'
-    t.RenderJson()
-    print 'index7'
     return HttpResponse(t.RenderJson())
     
 @csrf_exempt
