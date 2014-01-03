@@ -786,7 +786,7 @@ def tropo_entry(request):
                   name = 'model_type_choice',
                   choices = 'Account, Building, Buildings, Meter, Meters, Space, Spaces, Equipment, Equipments, Measure, Measures',
                   say = 'Hey ' + their_name + '. I can discuss ' + str(this_user.account_set.all()[0]) + ' with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
-            t.on(event = 'continue', next = '/tropo_account/3/')
+            t.on(event = 'continue', next = '/tropo_account/' + this_user.account_set.all()[0].pk + '/')
             t.on(event = 'error', say = 'Sorry - goodbye.')
         elif len(this_user.account_set.all()) > 1:
             print 'entry5.3'
@@ -807,9 +807,10 @@ def tropo_account(request, account_id):
     r = Result(request.body)
     print 'result3'
     print str(account_id)
-    print str(Account.objects.get(pk = account_id))
+    account = get_object_or_404(Account, pk=account_id)
+    print str(account.name)
     try:
-        response_text = 'You said: ' + r.getValue()
+        response_text = 'Your Account ID is ' + str(account_id) + ' and you said: ' + r.getValue()
     except:
         response_text = 'Didn''t catch that.'
     print 'result4'
