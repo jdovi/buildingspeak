@@ -735,7 +735,7 @@ def tropo_index(request):
     t = Tropo()
     print 'index2'
     t.on(event = 'continue', next = '/tropo_entry/')
-    return HttpResponse(t.RenderJson())
+    return t.RenderJson()
 @csrf_exempt
 def tropo_entry(request):
     print 'entry1'
@@ -785,7 +785,7 @@ def tropo_entry(request):
                   say = 'Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join([str(i) for i in this_user.account_set.all()]) + '.')
             t.on(event = 'continue', next = '/tropo_result/')
         print 'entry6'
-    return HttpResponse(t.RenderJson())
+    return t.RenderJson()
     
 @csrf_exempt
 def tropo_result(request):
@@ -803,5 +803,5 @@ def tropo_result(request):
     print 'result5'
     t.say(response_text)
     print 'result6'
-    return HttpResponse(t.RenderJson())
+    return t.RenderJson()
     
