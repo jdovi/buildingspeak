@@ -795,14 +795,21 @@ def tropo_pick_account(request, caller_id):
     return HttpResponse(t.RenderJson())
     
 @csrf_exempt
-def tropo_account(request, account_id):
+def tropo_account(request, caller_id, account_id):
+    print 'a1'
     r = Result(request.body)
+    print 'a2'
     account = get_object_or_404(Account, pk=account_id)
+    print 'a3'
     try:
-        response_text = "Your Account ID is " + str(account_id) + " and you said: " + r.getValue()
+        print 'a4'
+        response_text = "You are " + str(caller_id) + ", your Account ID is " + str(account_id) + ", and you said: " + r.getValue()
     except:
+        print 'a5'
         response_text = "Didn't catch that."
+    print 'a6'
     t = Tropo()
+    print 'a7'
     t.say(response_text)
     return HttpResponse(t.RenderJson())
     
