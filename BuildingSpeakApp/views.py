@@ -786,7 +786,7 @@ def tropo_entry(request):
                   name = 'model_type_choice',
                   choices = 'Account, Building, Buildings, Meter, Meters, Space, Spaces, Equipment, Equipments, Measure, Measures',
                   say = 'Hey ' + their_name + '. I can discuss ' + str(this_user.account_set.all()[0]) + ' with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
-            t.on(event = 'continue', next = '/tropo_result/', specialparam = 'abcd')
+            t.on(event = 'continue', next = '/tropo_account/3')
             t.on(event = 'error', say = 'Sorry - goodbye.')
         elif len(this_user.account_set.all()) > 1:
             print 'entry5.3'
@@ -800,17 +800,14 @@ def tropo_entry(request):
     return HttpResponse(t.RenderJson())
     
 @csrf_exempt
-def tropo_result(request):
+def tropo_account(request, account_id):
     print 'result1'
     print request.body
     print 'result2'
     r = Result(request.body)
     print 'result3'
-    print r._actions
-#    try:
-#        print specialparam
-#    except:
-#        print 'can not print specialparam'
+    print str(account_id)
+    print str(Account.objects.get(pk = account_id))
     try:
         response_text = 'You said: ' + r.getValue()
     except:

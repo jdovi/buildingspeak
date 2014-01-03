@@ -25,6 +25,5 @@ urlpatterns = patterns('',
     url(r'^management/$', views.management, name='management'),
     url(r'^tropo_index/$', views.tropo_index, name='tropo_index'),
     url(r'^tropo_entry/$', views.tropo_entry, name='tropo_entry'),
-    url(r'^tropo_result/$', views.tropo_result, name='tropo_result'),
-
+    url(r'^tropo_account/(?P<account_id>\d+)/$', views.tropo_account, name='tropo_account'),
 )
