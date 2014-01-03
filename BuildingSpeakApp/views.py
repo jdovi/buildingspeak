@@ -739,17 +739,19 @@ def tropo_index(request):
 @csrf_exempt
 def tropo_entry(request):
     print 'entry1'
-    t = Tropo()
+    print request.body
     print 'entry2'
-    s = Session(request.body)
+    r = Result(request.body)
     print 'entry3'
-    callerID = s.fromaddress['id']
-    print callerID
+    t = Tropo()
     print 'entry4'
-    if len(callerID) == 11: callerID = callerID[1:]
-    print 'entry4.0'
+    callerID = '6782815256' #s.fromaddress['id']
     print callerID
+    print 'entry4.0'
+    if len(callerID) == 11: callerID = callerID[1:]
     print 'entry4.00'
+    print callerID
+    print 'entry4.000'
     try:
         print 'entry4.1'
         this_user = User.objects.get(userprofile__mobile_phone = callerID)
