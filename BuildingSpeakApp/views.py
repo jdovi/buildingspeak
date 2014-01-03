@@ -734,34 +734,41 @@ def tropo_index(request):
     print 'index1'
     t = Tropo()
     print 'index2'
+    t.on(event = 'continue', next = '/tropo_entry/')
+    return HttpResponse(t.RenderJson())
+@csrf_exempt
+def tropo_entry(request):
+    print 'entry1'
+    t = Tropo()
+    print 'entry2'
     s = Session(request.body)
-    print 'index3'
+    print 'entry3'
     callerID = s.fromaddress['id']
     print callerID
-    print 'index4'
+    print 'entry4'
     if len(callerID) == 11: callerID = callerID[1:]
-    print 'index4.0'
+    print 'entry4.0'
     print callerID
-    print 'index4.00'
+    print 'entry4.00'
     try:
-        print 'index4.1'
+        print 'entry4.1'
         this_user = User.objects.get(userprofile__mobile_phone = callerID)
-        print 'index4.2'
+        print 'entry4.2'
         if this_user.first_name == '':
             their_name = this_user.username
         else:
             their_name = this_user.first_name
     except:
-        print 'index4.3'
+        print 'entry4.3'
         this_user = 0
         t.say('I''m not authorized to speak to you. Goodbye.')
     else:
-        print 'index5'
+        print 'entry5'
         if len(this_user.account_set.all()) == 0:
-            print 'index5.1'
+            print 'entry5.1'
             t.say('Hey ' + their_name + '. You''re not assigned to any account, so I can''t do much for you. Please call support to get assigned to your account.')
         elif len(this_user.account_set.all()) == 1:
-            print 'index5.2'
+            print 'entry5.2'
             t.ask(timeout = 30,
                   name = 'model_type_choice',
                   choices = 'Account, Building, Buildings, Meter, Meters, Space, Spaces, Equipment, Equipments, Measure, Measures',
@@ -769,13 +776,13 @@ def tropo_index(request):
             t.on(event = 'continue', next = '/tropo_result/')
             t.on(event = 'error', say = 'Sorry - goodbye.')
         elif len(this_user.account_set.all()) > 1:
-            print 'index5.3'
+            print 'entry5.3'
             t.ask(timeout = 30,
                   name = 'account_name',
                   choices = ', '.join([str(i) for i in this_user.account_set.all()]),
                   say = 'Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join([str(i) for i in this_user.account_set.all()]) + '.')
             t.on(event = 'continue', next = '/tropo_result/')
-        print 'index6'
+        print 'entry6'
     return HttpResponse(t.RenderJson())
     
 @csrf_exempt
