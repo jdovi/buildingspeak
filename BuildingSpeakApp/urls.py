@@ -23,8 +23,16 @@ urlpatterns = patterns('',
     url(r'^(?P<account_id>\d+)/measures/(?P<measure_id>\d+)$', views.measure_detail,
         name='measure_detail'),
     url(r'^management/$', views.management, name='management'),
+
     url(r'^tropo/index/$', views.tropo_index, name='tropo_index'),
     url(r'^tropo/user/(?P<caller_id>\d+)/$', views.tropo_user, name='tropo_user'),
-    url(r'^tropo/user/(?P<caller_id>\d+)/pick-account/$', views.tropo_pick_account, name='tropo_pick_account'),
-    url(r'^tropo/user/(?P<caller_id>\d+)/account/(?P<account_id>\d+)/$', views.tropo_account, name='tropo_account'),
+    url(r'^tropo/user/(?P<caller_id>\d+)/catch-account/$',
+        views.tropo_catch_account, name='tropo_catch_account'),
+    url(r'^tropo/user/(?P<caller_id>\d+)/account/(?P<account_id>\d+)/catch-topic/$',
+        views.tropo_catch_topic, name='tropo_catch_topic'),
+    url(r'^tropo/user/(?P<caller_id>\d+)/account/(?P<account_id>\d+)/(?P<topic>\[a-z]+)/catch-instance/$',
+        views.tropo_catch_instance, name='tropo_catch_instance'),
+    url(r'^tropo/user/(?P<caller_id>\d+)/account/(?P<account_id>\d+)/(?P<topic>\[a-z]+)/(?P<model_id>\d+)/catch-request-type$',
+        views.tropo_catch_request_type, name='tropo_catch_request_type'),
+
 )
