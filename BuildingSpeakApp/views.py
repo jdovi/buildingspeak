@@ -749,74 +749,46 @@ def tropo_entry(request):
     Primary entry point into Tropo views. Hangs up on
     calls from non-BuildingSpeak-User numbers.
     """
-    print 'entry1'
-    print request.body
-    print 'entry2'
     r = Result(request.body)
-    print 'entry3'
     t = Tropo()
-    print 'entry4'
     callerID = '6782815256' #s.fromaddress['id']
-    print callerID
-    print 'entry4.0'
     if len(callerID) == 11: callerID = callerID[1:]
-    print 'entry4.00'
-    print callerID
-    print 'entry4.000'
     try:
-        print 'entry4.1'
         this_user = User.objects.get(userprofile__mobile_phone = callerID)
-        print 'entry4.2'
         if this_user.first_name == '':
             their_name = this_user.username
         else:
             their_name = this_user.first_name
     except:
-        print 'entry4.3'
         this_user = 0
-        t.say('I''m not authorized to speak to you. Goodbye.')
+        t.say("I''m not authorized to speak to you. Goodbye.")
     else:
-        print 'entry5'
         if len(this_user.account_set.all()) == 0:
-            print 'entry5.1'
-            t.say('Hey ' + their_name + '. You''re not assigned to any account, so I can''t do much for you. Please call support to get assigned to your account.')
+            t.say("Hey " + their_name + ". You're not assigned to any account, so I can't do much for you. Please call support to get assigned to your account.")
         elif len(this_user.account_set.all()) == 1:
-            print 'entry5.2'
             t.ask(timeout = 30,
                   name = 'model_type_choice',
                   choices = 'Account, Building, Buildings, Meter, Meters, Space, Spaces, Equipment, Equipments, Measure, Measures',
-                  say = 'Hey ' + their_name + '. I can discuss ' + str(this_user.account_set.all()[0]) + ' with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?')
+                  say = "Hey " + their_name + ". I can discuss " + str(this_user.account_set.all()[0]) + " with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?")
             t.on(event = 'continue', next = '/tropo_account/' + str(this_user.account_set.all()[0].pk) + '/')
-            t.on(event = 'error', say = 'Sorry - goodbye.')
+            t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
         elif len(this_user.account_set.all()) > 1:
-            print 'entry5.3'
             t.ask(timeout = 30,
                   name = 'account_name',
                   choices = ', '.join([str(i) for i in this_user.account_set.all()]),
-                  say = 'Hey ' + their_name + '. You have access to multiple accounts. Which one would you like to discuss? Options: ' + '; '.join([str(i) for i in this_user.account_set.all()]) + '.')
+                  say = "Hey " + their_name + ". You have access to multiple accounts. Which one would you like to discuss? Options: " + "; ".join([str(i) for i in this_user.account_set.all()]) + ".")
             t.on(event = 'continue', next = '/tropo_result/')
-        print 'entry6'
-        print t.RenderJson()
     return HttpResponse(t.RenderJson())
     
 @csrf_exempt
 def tropo_account(request, account_id):
-    print 'result1'
-    print request.body
-    print 'result2'
     r = Result(request.body)
-    print 'result3'
-    print str(account_id)
     account = get_object_or_404(Account, pk=account_id)
-    print str(account.name)
     try:
-        response_text = 'Your Account ID is ' + str(account_id) + ' and you said: ' + r.getValue()
+        response_text = "Your Account ID is " + str(account_id) + " and you said: " + r.getValue()
     except:
-        response_text = 'Didn''t catch that.'
-    print 'result4'
+        response_text = "Didn't catch that."
     t = Tropo()
-    print 'result5'
     t.say(response_text)
-    print 'result6'
     return HttpResponse(t.RenderJson())
     
