@@ -734,6 +734,7 @@ def tropo_index(request):
     print 'index1'
     t = Tropo()
     print 'index2'
+    t.ask(choices = "[ANY]", timeout = 60, name = "catch", say = "")
     t.on(event = 'continue', next = '/tropo_entry/')
     return HttpResponse(t.RenderJson())
 @csrf_exempt
