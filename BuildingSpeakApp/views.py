@@ -735,33 +735,35 @@ def tropo_index(request):
     Tropo view to catch initial incoming SMS or
     voice and discard initial 'activating' SMS.
     """
+    #capture session and extract caller ID
+    s = Session(request.body)
+    callerID = s.fromaddress['id']
     #create Tropo object that will be used to generate JSON responses to Tropo
     t = Tropo()
     #for SMS, must catch the very first text that activates the session and discard
     t.ask(choices = "[ANY]", timeout = 60, name = "catch", say = "")
     #now that the first text is caught, move into the system via the tropo_entry function
-    t.on(event = 'continue', next = '/tropo_entry/')
+    t.on(event = 'continue', next = '/tropo/user/' + str(callerID) + '/')
     return HttpResponse(t.RenderJson())
 
 @csrf_exempt
-def tropo_entry(request):
+def tropo_user(request, caller_id):
     """
     Primary entry point into Tropo views. Hangs up on
-    calls from non-BuildingSpeak-User numbers.
+    caller IDs not found in BuildingSpeak.
     """
     r = Result(request.body)
     t = Tropo()
-    callerID = '6782815256' #s.fromaddress['id']
-    if len(callerID) == 11: callerID = callerID[1:]
+    if len(caller_id) == 11: caller_id = caller_id[1:]
     try:
-        this_user = User.objects.get(userprofile__mobile_phone = callerID)
+        this_user = User.objects.get(userprofile__mobile_phone = caller_id)
         if this_user.first_name == '':
             their_name = this_user.username
         else:
             their_name = this_user.first_name
     except:
         this_user = 0
-        t.say("I''m not authorized to speak to you. Goodbye.")
+        t.say("I'm not authorized to speak to you. Goodbye.")
     else:
         if len(this_user.account_set.all()) == 0:
             t.say("Hey " + their_name + ". You're not assigned to any account, so I can't do much for you. Please call support to get assigned to your account.")
@@ -770,14 +772,26 @@ def tropo_entry(request):
                   name = 'model_type_choice',
                   choices = 'Account, Building, Buildings, Meter, Meters, Space, Spaces, Equipment, Equipments, Measure, Measures',
                   say = "Hey " + their_name + ". I can discuss " + str(this_user.account_set.all()[0]) + " with you. Want info about the Account, Buildings, Meters, Spaces, Equipment, or Measures?")
-            t.on(event = 'continue', next = '/tropo_account/' + str(this_user.account_set.all()[0].pk) + '/')
+            t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(this_user.account_set.all()[0].pk) + '/')
             t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
-        elif len(this_user.account_set.all()) > 1:
+        elif len(this_user.account_set.all()) < 4:
             t.ask(timeout = 30,
                   name = 'account_name',
                   choices = ', '.join([str(i) for i in this_user.account_set.all()]),
-                  say = "Hey " + their_name + ". You have access to multiple accounts. Which one would you like to discuss? Options: " + "; ".join([str(i) for i in this_user.account_set.all()]) + ".")
-            t.on(event = 'continue', next = '/tropo_result/')
+                  say = "Hey " + their_name + ". You have access to " + str(len(this_user.account_set.all())) + " accounts. Which one would you like to discuss? Options: " + "; ".join([str(i) for i in this_user.account_set.all()]) + ".")
+            t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/pick-account/')
+            t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
+    return HttpResponse(t.RenderJson())
+    
+@csrf_exempt
+def tropo_pick_account(request, caller_id):
+    r = Result(request.body)
+    try:
+        response_text = ""
+    except:
+        response_text = ""
+    t = Tropo()
+    t.say(response_text)
     return HttpResponse(t.RenderJson())
     
 @csrf_exempt
