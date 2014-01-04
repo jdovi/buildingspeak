@@ -1002,7 +1002,7 @@ def tropo_catch_instance(request, caller_id, account_id, topic):
                     print model_id
                     print existing_models
                     print [str(i) for i in existing_models]
-                    if model_id not in [str(i) for i in existing_models]: raise ValueError
+                    if model_id not in [str(i.id) for i in existing_models]: raise ValueError
                     print 'ci17'
                     t.ask(attempts = 2,
                           timeout = 30,
@@ -1026,7 +1026,7 @@ def tropo_catch_instance(request, caller_id, account_id, topic):
                     print 'ci19'
                     model_id = r.getValue()
                     print 'ci20'
-                    if model_id not in [str(i) for i in existing_models]: raise ValueError
+                    if model_id not in [str(i.id) for i in existing_models]: raise ValueError
                     print 'ci21'
                     t.ask(attempts = 2,
                           timeout = 30,
