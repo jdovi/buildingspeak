@@ -920,9 +920,15 @@ def tropo_catch_topic(request, caller_id, account_id):
 
 @csrf_exempt
 def tropo_catch_instance(request, caller_id, account_id, topic):
-    print 'ci1'
     print request.body
     r = Result(request.body)
+    actions = r._actions
+    print actions
+    if type(actions) is list:
+        r_dict = actions[0]
+    else:
+        r_dict = actions
+    print r_dict
     print 'ci2'
     t = Tropo()
     print 'ci3'
