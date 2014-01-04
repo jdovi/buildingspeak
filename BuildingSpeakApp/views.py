@@ -918,109 +918,110 @@ def tropo_catch_topic(request, caller_id, account_id):
     print 'ct31'
     return HttpResponse(t.RenderJson())
 
-@csrf_exempt
-def tropo_catch_instance(request, caller_id, account_id, topic):
-    print request.body
-    r = Result(request.body)
-    actions = r._actions
-    print actions
-    if type(actions) is list:
-        r_dict = actions[0]
-    else:
-        r_dict = actions
-    print r_dict
-    print 'ci2'
-    t = Tropo()
-    print 'ci3'
-    topic_lower_plural = topic
-    print 'ci4'
-    topic_lower_singular = topic[0:-1]
-    print 'ci5'
-    topic_capital_singular = topic[0:-1].capitalize()
-    print 'ci6'
-    topic_capital_plural = topic.capitalize()
-    print 'ci7'
-    account = get_object_or_404(Account, pk = account_id)
-    print 'ci8'
-    
-    if topic == 'accounts': #if accounts, we already knew which one, so we didn't ask and there's no r.getValue()
-        print 'ci9'
-        t.ask(attempts = 2,
-              timeout = 30,
-              choices = "[1 DIGIT]",
-              say = "Do you want 1) performance data or 2) " + topic_capital_singular + " information? (select 1 or 2)")
-        t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/accounts/' + str(account_id) + '/catch-request-type/')
-        t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
-        t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
-        print 'ci10'
-    else:
-        print 'ci11'
-        if topic_lower_singular == 'building': existing_models = account.building_set.order_by('name')
-        elif topic_lower_singular == 'space': existing_models = Space.objects.filter(Q(building__account=account) | Q(meters__account=account)).distinct().order_by('name')
-        elif topic_lower_singular == 'meter': existing_models = account.meter_set.order_by('name')
-        elif topic_lower_singular == 'equipment': existing_models = Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct().order_by('name')
-        elif topic_lower_singular == 'measure': existing_models = EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name')
-        print 'ci12'
-        if existing_models.count() == 1: #if only one, don't retrieve r.getValue() because we didn't ask for anything
-            print 'ci13'
-            t.ask(attempts = 2,
-                  timeout = 30,
-                  choices = "[1 DIGIT]",
-                  say = "Do you want 1) performance data or 2) " + topic_capital_singular + " information? (select 1 or 2)")
-            t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + str(existing_models[0].id) + '/catch-request-type/')
-            t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
-            t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
-        elif existing_models.count() < 4: #if more than one, we had to ask, so retrieve the answer
-                                          #follow structure of tropo_catch_topic, i.e. re-ask those questions if failed
-            print 'ci14'
-            try:
-                print 'ci15'
-                model_id = r.getValue()
-                print 'ci16'
-                if model_id not in [str(i) for i in existing_models]: raise ValueError
-                print 'ci17'
-                t.ask(attempts = 2,
-                      timeout = 30,
-                      choices = "[1 DIGIT]",
-                      say = "Do you want 1) performance data or 2) " + topic_capital_singular + " information? (select 1 or 2)")
-                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + model_id + '/catch-request-type/')
-                t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
-                t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
-            except:
-                print 'ci18'
-                t.ask(attempts = 2,
-                      timeout = 30,
-                      choices = "[1-6 DIGITS]",
-                      say = "I'm sorry.  That's not a valid selection for you. Please enter one of these " + topic_capital_singular + " ID numbers: " + "; ".join([str(i.id) + ') ' + str(i.name) for i in existing_models]) + ".")
-                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account.id) + '/' + topic_lower_plural + '/catch-instance/')
-                t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
-                t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
-        elif existing_models.count() >= 4: #if more than one, we had to ask, so retrieve the answer
-                                          #follow structure of tropo_catch_topic, i.e. re-ask those questions if failed
-            try:
-                print 'ci19'
-                model_id = r.getValue()
-                print 'ci20'
-                if model_id not in [str(i) for i in existing_models]: raise ValueError
-                print 'ci21'
-                t.ask(attempts = 2,
-                      timeout = 30,
-                      choices = "[1 DIGIT]",
-                      say = "Do you want 1) performance data or 2) " + topic_capital_singular + " information? (select 1 or 2)")
-                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + model_id + '/catch-request-type/')
-                t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
-                t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
-            except:
-                print 'ci22'
-                t.ask(attempts = 2,
-                      timeout = 30,
-                      choices = "[1-6 DIGITS]",
-                      say = "I'm sorry.  That's not a valid selection for you. Please enter the " + topic_capital_singular + " ID (1-6 digits) you wish to discuss.")
-                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account.id) + '/' + topic_lower_plural + '/catch-instance/')
-                t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
-                t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
-    print 'ci23'
-    return HttpResponse(t.RenderJson())
+#@csrf_exempt
+#def tropo_catch_instance(request, caller_id, account_id, topic):
+#    print request.body
+#    r = Result(request.body)
+#    actions = r._actions
+#    print actions
+#    if type(actions) is list:
+#        r_dict = actions[0]
+#    else:
+#        r_dict = actions
+#    print r_dict
+#    print r_dict['disposition']
+#    print 'ci2'
+#    t = Tropo()
+#    print 'ci3'
+#    topic_lower_plural = topic
+#    print 'ci4'
+#    topic_lower_singular = topic[0:-1]
+#    print 'ci5'
+#    topic_capital_singular = topic[0:-1].capitalize()
+#    print 'ci6'
+#    topic_capital_plural = topic.capitalize()
+#    print 'ci7'
+#    account = get_object_or_404(Account, pk = account_id)
+#    print 'ci8'
+#    
+#    if topic == 'accounts': #if accounts, we already knew which one, so we didn't ask and there's no r.getValue()
+#        print 'ci9'
+#        t.ask(attempts = 2,
+#              timeout = 30,
+#              choices = "[1 DIGIT]",
+#              say = "Do you want 1) performance data or 2) " + topic_capital_singular + " information? (select 1 or 2)")
+#        t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/accounts/' + str(account_id) + '/catch-request-type/')
+#        t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
+#        t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
+#        print 'ci10'
+#    else:
+#        print 'ci11'
+#        if topic_lower_singular == 'building': existing_models = account.building_set.order_by('name')
+#        elif topic_lower_singular == 'space': existing_models = Space.objects.filter(Q(building__account=account) | Q(meters__account=account)).distinct().order_by('name')
+#        elif topic_lower_singular == 'meter': existing_models = account.meter_set.order_by('name')
+#        elif topic_lower_singular == 'equipment': existing_models = Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct().order_by('name')
+#        elif topic_lower_singular == 'measure': existing_models = EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name')
+#        print 'ci12'
+#        if existing_models.count() == 1: #if only one, don't retrieve r.getValue() because we didn't ask for anything
+#            print 'ci13'
+#            t.ask(attempts = 2,
+#                  timeout = 30,
+#                  choices = "[1 DIGIT]",
+#                  say = "Do you want 1) performance data or 2) " + topic_capital_singular + " information? (select 1 or 2)")
+#            t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + str(existing_models[0].id) + '/catch-request-type/')
+#            t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
+#            t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
+#        elif existing_models.count() < 4: #if more than one, we had to ask, so retrieve the answer
+#                                          #follow structure of tropo_catch_topic, i.e. re-ask those questions if failed
+#            print 'ci14'
+#            try:
+#                print 'ci15'
+#                model_id = r.getValue()
+#                print 'ci16'
+#                if model_id not in [str(i) for i in existing_models]: raise ValueError
+#                print 'ci17'
+#                t.ask(attempts = 2,
+#                      timeout = 30,
+#                      choices = "[1 DIGIT]",
+#                      say = "Do you want 1) performance data or 2) " + topic_capital_singular + " information? (select 1 or 2)")
+#                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + model_id + '/catch-request-type/')
+#                t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
+#                t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
+#            except:
+#                print 'ci18'
+#                t.ask(attempts = 2,
+#                      timeout = 30,
+#                      choices = "[1-6 DIGITS]",
+#                      say = "I'm sorry.  That's not a valid selection for you. Please enter one of these " + topic_capital_singular + " ID numbers: " + "; ".join([str(i.id) + ') ' + str(i.name) for i in existing_models]) + ".")
+#                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account.id) + '/' + topic_lower_plural + '/catch-instance/')
+#                t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
+#                t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
+#        elif existing_models.count() >= 4: #if more than one, we had to ask, so retrieve the answer
+#                                          #follow structure of tropo_catch_topic, i.e. re-ask those questions if failed
+#            try:
+#                print 'ci19'
+#                model_id = r.getValue()
+#                print 'ci20'
+#                if model_id not in [str(i) for i in existing_models]: raise ValueError
+#                print 'ci21'
+#                t.ask(attempts = 2,
+#                      timeout = 30,
+#                      choices = "[1 DIGIT]",
+#                      say = "Do you want 1) performance data or 2) " + topic_capital_singular + " information? (select 1 or 2)")
+#                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + model_id + '/catch-request-type/')
+#                t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
+#                t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
+#            except:
+#                print 'ci22'
+#                t.ask(attempts = 2,
+#                      timeout = 30,
+#                      choices = "[1-6 DIGITS]",
+#                      say = "I'm sorry.  That's not a valid selection for you. Please enter the " + topic_capital_singular + " ID (1-6 digits) you wish to discuss.")
+#                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account.id) + '/' + topic_lower_plural + '/catch-instance/')
+#                t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
+#                t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
+#    print 'ci23'
+#    return HttpResponse(t.RenderJson())
 
 @csrf_exempt
 def tropo_catch_request_type(request, caller_id, account_id, topic, model_id):
