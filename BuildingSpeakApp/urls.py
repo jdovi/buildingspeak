@@ -34,7 +34,7 @@ urlpatterns = patterns('',
         views.tropo_catch_instance, name='tropo_catch_instance'),
     url(r'^tropo/user/(?P<caller_id>\d+)/account/(?P<account_id>\d+)/(?P<topic>[a-z]+)/(?P<model_id>\d+)/catch-request-type/$',
         views.tropo_catch_request_type, name='tropo_catch_request_type'),
-    url(r'^tropo/user/(?P<caller_id>\d+)/account/(?P<account_id>\d+)/(?P<topic>[a-z]+)/(?P<model_id>\d+)/(?P<request_type>[a-z]+)/catch-request/$',
+    url(r'^tropo/user/(?P<caller_id>\d+)/account/(?P<account_id>\d+)/(?P<topic>[a-z]+)/(?P<model_id>\d+)/request-type/(?P<request_type>[1-2]+)/catch-request/$',
         views.tropo_catch_request, name='tropo_catch_request'),
 
 )
