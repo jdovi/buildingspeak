@@ -1084,7 +1084,7 @@ def tropo_catch_request_type(request, caller_id, account_id, topic, model_id):
                       timeout = 30,
                       choices = "[ANY]",
                       say = "Tell me the date range in the following month and year format: MM*YYYY*MM*YYYY.")
-                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + model_id + '/catch-request/')
+                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + model_id + '/' + request_type + '/catch-request/')
                 t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
                 t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
             elif model_id in [2,'2']:
@@ -1093,7 +1093,7 @@ def tropo_catch_request_type(request, caller_id, account_id, topic, model_id):
                       timeout = 30,
                       choices = "[ANY]",
                       say = "Tell me the name of the field whose value you want, or tell me 'all' (quotes not required).")
-                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + model_id + '/catch-request/')
+                t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account_id) + '/' + topic_lower_plural + '/' + model_id + '/' + request_type + '/catch-request/')
                 t.on(event = 'incomplete', say = "I'm sorry we're having trouble communicating on this one. Please call support or try again later. Goodbye.")
                 t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
         except:
