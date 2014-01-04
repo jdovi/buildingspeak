@@ -883,7 +883,7 @@ def tropo_catch_topic(request, caller_id, account_id):
                 print 'ct28'
                 t.ask(timeout = 30,
                       choices = "[1-6 DIGITS]",
-                      say = "You have access to " + existing_models.count() + " " + topic_capital_plural + ". Please enter one of these " + topic_capital_singular + " ID numbers: " + "; ".join([str(i.id) + ') ' + str(i) for i in existing_models]) + ".")
+                      say = "You have access to " + str(existing_models.count()) + " " + topic_capital_plural + ". Please enter one of these " + topic_capital_singular + " ID numbers: " + "; ".join([str(i.id) + ') ' + str(i) for i in existing_models]) + ".")
                 t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account.id) + '/' + topic_lower_plural + '/catch-instance/')
                 t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
                 print 'ct29'
@@ -891,7 +891,7 @@ def tropo_catch_topic(request, caller_id, account_id):
                 print 'ct30'
                 t.ask(timeout = 30,
                       choices = "[1-6 DIGITS]",
-                      say = "You have access to " + existing_models.count() + " " + topic_capital_plural + ". Please enter the " + topic_capital_singular + " ID (1-6 digits) you wish to discuss.")
+                      say = "You have access to " + str(existing_models.count()) + " " + topic_capital_plural + ". Please enter the " + topic_capital_singular + " ID (1-6 digits) you wish to discuss.")
                 t.on(event = 'continue', next = '/tropo/user/' + str(caller_id) + '/account/' + str(account.id) + '/' + topic_lower_plural + '/catch-instance/')
                 t.on(event = 'error', say = "Sorry, something's gone wrong. Please try again later. Goodbye.")
     print 'ct31'
