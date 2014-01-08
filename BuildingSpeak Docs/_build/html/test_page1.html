@@ -1,0 +1,363 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Examples 1 &mdash; BuildingSpeak 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="BuildingSpeak 1 documentation" href="index.html" />
+    <link rel="next" title="Examples 2" href="test_page2.html" />
+    <link rel="prev" title="Primary Models" href="section_secondary_models.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/Dryden Logo Header.png" border="0" alt="py4sci"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="test_page2.html" title="Examples 2"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="section_secondary_models.html" title="Primary Models"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Examples 1</a><ul>
+<li><a class="reference internal" href="#fetching-the-data">Fetching the data</a></li>
+<li><a class="reference internal" href="#sphinx-cheat-sheet">Sphinx cheat sheet</a></li>
+<li><a class="reference internal" href="#formatting-text">Formatting text</a></li>
+<li><a class="reference internal" href="#making-a-list">Making a list</a><ul>
+<li><a class="reference internal" href="#bullet-points">Bullet points</a></li>
+<li><a class="reference internal" href="#enumerated-points">Enumerated points</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-a-table">Making a table</a></li>
+<li><a class="reference internal" href="#making-links">Making links</a></li>
+<li><a class="reference internal" href="#module-models_functions">Functions Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="section_secondary_models.html"
+                        title="previous chapter">Primary Models</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="test_page2.html"
+                        title="next chapter">Examples 2</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/test_page1.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="examples-1">
+<span id="examples1"></span><h1>Examples 1<a class="headerlink" href="#examples-1" title="Permalink to this headline">¶</a></h1>
+<p>If you now point your browser to <tt class="file docutils literal"><span class="pre">_build/html/index.html</span></tt>, you
+should see a basic sphinx site.</p>
+<img alt="_images/basic_screenshot.png" src="_images/basic_screenshot.png" />
+<div class="section" id="fetching-the-data">
+<span id="id1"></span><h2>Fetching the data<a class="headerlink" href="#fetching-the-data" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [69]: </span><span class="n">lines</span> <span class="o">=</span> <span class="n">plot</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+
+<span class="gp">In [70]: </span><span class="n">setp</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+<span class="go">  alpha: float</span>
+<span class="go">  animated: [True | False]</span>
+<span class="go">  antialiased or aa: [True | False]</span>
+<span class="go">  ...snip</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sphinx-cheat-sheet">
+<h2>Sphinx cheat sheet<a class="headerlink" href="#sphinx-cheat-sheet" title="Permalink to this headline">¶</a></h2>
+<p>Here is a quick and dirty cheat sheet for some common stuff you want
+to do in sphinx and ReST.  You can see the literal source for this
+file at.</p>
+</div>
+<div class="section" id="formatting-text">
+<span id="id2"></span><h2>Formatting text<a class="headerlink" href="#formatting-text" title="Permalink to this headline">¶</a></h2>
+<p>You use inline markup to make text <em>italics</em>, <strong>bold</strong>, or <tt class="docutils literal"><span class="pre">monotype</span></tt>.</p>
+<p>You can represent code blocks fairly easily:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or literally include code:</p>
+</div>
+<div class="section" id="making-a-list">
+<span id="id3"></span><h2>Making a list<a class="headerlink" href="#making-a-list" title="Permalink to this headline">¶</a></h2>
+<p>It is easy to make lists in rest</p>
+<div class="section" id="bullet-points">
+<h3>Bullet points<a class="headerlink" href="#bullet-points" title="Permalink to this headline">¶</a></h3>
+<p>This is a subsection making bullet points</p>
+<ul class="simple">
+<li>point A</li>
+<li>point B</li>
+<li>point C</li>
+</ul>
+</div>
+<div class="section" id="enumerated-points">
+<h3>Enumerated points<a class="headerlink" href="#enumerated-points" title="Permalink to this headline">¶</a></h3>
+<p>This is a subsection making numbered points</p>
+<ol class="arabic simple">
+<li>point A</li>
+<li>point B</li>
+<li>point C</li>
+</ol>
+</div>
+</div>
+<div class="section" id="making-a-table">
+<span id="id4"></span><h2>Making a table<a class="headerlink" href="#making-a-table" title="Permalink to this headline">¶</a></h2>
+<p>This shows you how to make a table &#8211; if you only want to make a list see <a class="reference internal" href="#making-a-list"><em>Making a list</em></a>.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="60%" />
+<col width="40%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Age</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>John D Hunter</td>
+<td>40</td>
+</tr>
+<tr class="row-odd"><td>Cast of Thousands</td>
+<td>41</td>
+</tr>
+<tr class="row-even"><td>And Still More</td>
+<td>42</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="making-links">
+<span id="id5"></span><h2>Making links<a class="headerlink" href="#making-links" title="Permalink to this headline">¶</a></h2>
+<p>It is easy to make a link to <a class="reference external" href="http://yahoo.com">yahoo</a> or to some
+section inside this document (see <a class="reference internal" href="#making-a-table"><em>Making a table</em></a>) or another
+document.</p>
+<p>You can also reference classes, modules, functions, etc that are
+documented using the sphinx <a class="reference external" href="http://sphinx.pocoo.org/ext/autodoc.html">autodoc</a> facilites.  For example,
+see the module <a class="reference internal" href="#module-models_functions" title="models_functions"><tt class="xref py py-mod docutils literal"><span class="pre">models_functions</span></tt></a> documentation, or the
+class <a class="reference internal" href="section_primary_models.html#BuildingSpeakApp.models.Account" title="BuildingSpeakApp.models.Account"><tt class="xref py py-class docutils literal"><span class="pre">Account</span></tt></a>, or the method
+<a class="reference internal" href="#models_functions.convert_units" title="models_functions.convert_units"><tt class="xref py py-meth docutils literal"><span class="pre">convert_units()</span></tt></a>.</p>
+</div>
+<div class="section" id="module-models_functions">
+<span id="functions-module"></span><h2>Functions Module<a class="headerlink" href="#module-models_functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="models_functions.assign_period_datetime">
+<tt class="descclassname">models_functions.</tt><tt class="descname">assign_period_datetime</tt><big>(</big><em>time_series=</em><span class="optional">[</span><span class="optional">]</span>, <em>dates=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#models_functions.assign_period_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Inputs:</dt>
+<dd>time_series or
+dates (list of start/end datetimes)</dd>
+</dl>
+<p>Returns datetime of first day of
+most frequently occurring month in
+a given time series spanning 25-35
+days to use as basis for Period.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.convert_units">
+<tt class="descclassname">models_functions.</tt><tt class="descname">convert_units</tt><big>(</big><em>n_utility</em>, <em>n_units</em>, <em>x_utility</em>, <em>x_units) n_utility = old utility type (from Meter options) n_units =   old units        (from Meter options) x_utility = desired utility type   (from Meter options) x_units =   desired units          (from Meter options</em><big>)</big><a class="headerlink" href="#models_functions.convert_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given utility types and units, returns
+the scaling factor used to convert
+the old units to the new units. Domestic
+water type basis is &#8216;gpm,gal&#8217;; all others
+are assumed energy with basis &#8216;kBtuh,kBtu&#8217;.
+Units options are those available to Meter
+models.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.convert_units_sum_meters">
+<tt class="descclassname">models_functions.</tt><tt class="descname">convert_units_sum_meters</tt><big>(</big><em>utility_type</em>, <em>units</em>, <em>list_of_meters</em>, <em>first_month=''</em>, <em>last_month=''</em><big>)</big><a class="headerlink" href="#models_functions.convert_units_sum_meters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>function(utility_type, units, list_of_meters, first_month, last_month)</dt>
+<dd>utility_type/units = from Meter options
+list = Meter objects
+first/last_month = mm/yyyy strings for date range</dd>
+</dl>
+<p>Given the type, units and mm/yyyy
+month strings and a list of Meters,
+function retrieves dataframes, 
+converts units for Billing Demand,
+Peak Demand, and Consumption, then
+sums Peak Demand, Consumption, Cost,
+kBtu Consumption, kBtuh Peak Demand,
+and CDD/HDD (consumption and demand).</p>
+<p>Domestic water meters are excluded
+from all conversions and summations
+other than Cost.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.decimal_isnan">
+<tt class="descclassname">models_functions.</tt><tt class="descname">decimal_isnan</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#models_functions.decimal_isnan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns math.isnan(float(x)).
+(isnan fails on Decimal inputs)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.get_default_units">
+<tt class="descclassname">models_functions.</tt><tt class="descname">get_default_units</tt><big>(</big><em>utility_type</em><big>)</big><a class="headerlink" href="#models_functions.get_default_units" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>function(utility_type)</dt>
+<dd>utility_type = from Meter options</dd>
+</dl>
+<p>Given the utility type, returns
+the default units for that type.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.get_df_as_table_with_formats">
+<tt class="descclassname">models_functions.</tt><tt class="descname">get_df_as_table_with_formats</tt><big>(</big><em>df</em>, <em>columndict</em>, <em>index_name</em>, <em>transpose_bool</em><big>)</big><a class="headerlink" href="#models_functions.get_df_as_table_with_formats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes dataframe, dict of column names and
+functions to apply to those columns, a 
+name for the index column, and a boolean
+indicating whether the df should be 
+transposed prior to converting into a list
+of lists.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.get_df_motion_table">
+<tt class="descclassname">models_functions.</tt><tt class="descname">get_df_motion_table</tt><big>(</big><em>df</em>, <em>col_0</em>, <em>index_func</em>, <em>column_list</em>, <em>column_dict=None</em><big>)</big><a class="headerlink" href="#models_functions.get_df_motion_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>function(df,col_0,index_func,column_list[,column_dict])
+df = DataFrame with monthly period index
+col_0 = [name_for_column_0,value_for_column_0]
+index_func = function to apply to index
+column_list = list of column names in df and</p>
+<blockquote>
+<div>in column_dict&#8217;s keys that should be
+included as columns in output table</div></blockquote>
+<dl class="docutils">
+<dt>column_dict = dictionary of name,value pairs</dt>
+<dd>to be included in output table, where
+value is a single value for whole column</dd>
+</dl>
+<p>Returns a list of lists, with first column
+per col_0 list, monthly index in second
+column after applying index_func, and remaining
+columns as listed in column_list.  Columns
+pulled from df expected to be Decimals and are
+converted to floats for output table.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.get_monthly_dataframe_as_table">
+<tt class="descclassname">models_functions.</tt><tt class="descname">get_monthly_dataframe_as_table</tt><big>(</big><em>df</em>, <em>columnlist</em><big>)</big><a class="headerlink" href="#models_functions.get_monthly_dataframe_as_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes dataframe and a list
+of column names to include
+in the output.  Index put
+in first column as Month
+with isoformat.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.make_pandas_data_frame">
+<tt class="descclassname">models_functions.</tt><tt class="descname">make_pandas_data_frame</tt><big>(</big><em>list_of_series</em>, <em>series_names=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#models_functions.make_pandas_data_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>make pandas DataFrame from a list of series and optional
+list of series names</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.nan2zero">
+<tt class="descclassname">models_functions.</tt><tt class="descname">nan2zero</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#models_functions.nan2zero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Decimal(0) if
+math.isnan(x) is True,
+otherwise returns x.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="test_page2.html" title="Examples 2"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="section_secondary_models.html" title="Primary Models"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, BuildingSpeak.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

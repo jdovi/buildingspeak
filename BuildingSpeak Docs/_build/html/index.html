@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="BuildingSpeak 1 documentation" href="#" />
-    <link rel="next" title="Getting started" href="getting_started.html" /> 
+    <link rel="next" title="Getting Started" href="section_getting_started.html" /> 
   </head>
   <body>
 
@@ -42,7 +42,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="getting_started.html" title="Getting started"
+          <a href="section_getting_started.html" title="Getting Started"
              accesskey="N">next</a> |</li>
         <li><a href="#">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -61,8 +61,8 @@
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="getting_started.html"
-                        title="next chapter">Getting started</a></p>
+  <p class="topless"><a href="section_getting_started.html"
+                        title="next chapter">Getting Started</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -91,25 +91,53 @@
             
   <div class="section" id="welcome-to-buildingspeak-s-documentation">
 <h1>Welcome to BuildingSpeak&#8217;s documentation!<a class="headerlink" href="#welcome-to-buildingspeak-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Version 1.0 - January 6th, 2014</p>
+<p>This documentation is for internal development and maintenance purposes and should not be shared with users.  It is designed to give an overview of the BuildingSpeak universe while also serving as the official documentation of the code base (it pulls directly from the Python modules containing the Django models and functions).</p>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installing-your-doc-directory">Installing your doc directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section_getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="section_getting_started.html#python-and-friends">Python and Friends</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="test_page.html">Test Page</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="test_page.html#fetching-the-data">Fetching the data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="test_page.html#sphinx-cheat-sheet">Sphinx cheat sheet</a></li>
-<li class="toctree-l2"><a class="reference internal" href="test_page.html#formatting-text">Formatting text</a></li>
-<li class="toctree-l2"><a class="reference internal" href="test_page.html#making-a-list">Making a list</a></li>
-<li class="toctree-l2"><a class="reference internal" href="test_page.html#making-a-table">Making a table</a></li>
-<li class="toctree-l2"><a class="reference internal" href="test_page.html#making-links">Making links</a></li>
-<li class="toctree-l2"><a class="reference internal" href="test_page.html#module-models_functions">Functions Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section_primary_models.html">Primary Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#user">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#userprofile">UserProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#account">Account</a></li>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#building">Building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#meter">Meter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#space">Space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#equipment">Equipment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="section_primary_models.html#measure">Measure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="section_secondary_models.html">Primary Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_page1.html">Examples 1</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="test_page1.html#fetching-the-data">Fetching the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_page1.html#sphinx-cheat-sheet">Sphinx cheat sheet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_page1.html#formatting-text">Formatting text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_page1.html#making-a-list">Making a list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_page1.html#making-a-table">Making a table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_page1.html#making-links">Making links</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_page1.html#module-models_functions">Functions Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_page2.html">Examples 2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="test_page2.html#installing-your-doc-directory">Installing your doc directory</a></li>
 </ul>
 </li>
 </ul>
 </div>
+<p>Installation
+Heroku/local
+Django
+models
+Spyder
+functions
+admin portal
+Tropo
+be sure to mention somewhere that compiling these docs requires Django to be in local mode, not Heroku mode!</p>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -136,7 +164,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="getting_started.html" title="Getting started"
+          <a href="section_getting_started.html" title="Getting Started"
              >next</a> |</li>
         <li><a href="#">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>

@@ -1,8 +1,8 @@
-.. _getting_started:
+.. _examples2:
 
 
 ***************
-Getting started
+Examples 2
 ***************
 
 .. _installing-docdir:

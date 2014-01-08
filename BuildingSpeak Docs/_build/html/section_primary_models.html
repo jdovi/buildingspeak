@@ -1,0 +1,799 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Primary Models &mdash; BuildingSpeak 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="BuildingSpeak 1 documentation" href="index.html" />
+    <link rel="next" title="Primary Models" href="section_secondary_models.html" />
+    <link rel="prev" title="Getting Started" href="section_getting_started.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/Dryden Logo Header.png" border="0" alt="py4sci"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="section_secondary_models.html" title="Primary Models"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="section_getting_started.html" title="Getting Started"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Primary Models</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#user">User</a></li>
+<li><a class="reference internal" href="#userprofile">UserProfile</a></li>
+<li><a class="reference internal" href="#account">Account</a></li>
+<li><a class="reference internal" href="#building">Building</a></li>
+<li><a class="reference internal" href="#meter">Meter</a></li>
+<li><a class="reference internal" href="#space">Space</a></li>
+<li><a class="reference internal" href="#equipment">Equipment</a></li>
+<li><a class="reference internal" href="#measure">Measure</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="section_getting_started.html"
+                        title="previous chapter">Getting Started</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="section_secondary_models.html"
+                        title="next chapter">Primary Models</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/section_primary_models.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="primary-models">
+<span id="id1"></span><h1>Primary Models<a class="headerlink" href="#primary-models" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The primary models and their relationships are shown in the following figure.</p>
+<a class="reference internal image-reference" href="_images/primary_models.png"><img alt="_images/primary_models.png" src="_images/primary_models.png" style="width: 500px;" /></a>
+<p>The <a class="reference internal" href="#django.contrib.auth.models.User" title="django.contrib.auth.models.User"><tt class="xref py py-class docutils literal"><span class="pre">User</span></tt></a> is Django&#8217;s built-in model, and the <a class="reference internal" href="#BuildingSpeakApp.models.UserProfile" title="BuildingSpeakApp.models.UserProfile"><tt class="xref py py-class docutils literal"><span class="pre">UserProfile</span></tt></a> simply extends that model allowing custom fields to be connected to each <tt class="file docutils literal"><span class="pre">User</span></tt>, such as <tt class="file docutils literal"><span class="pre">mobile_phone</span></tt>.  Each <tt class="file docutils literal"><span class="pre">User</span></tt> may be connected to any number of <tt class="file docutils literal"><span class="pre">Accounts</span></tt>, and it is this relationship which defines what a <tt class="file docutils literal"><span class="pre">User</span></tt> can access in BuildingSpeak.  Future versions may connect <tt class="file docutils literal"><span class="pre">Users</span></tt> to lower-level models.</p>
+<p>An <a class="reference internal" href="#BuildingSpeakApp.models.Account" title="BuildingSpeakApp.models.Account"><tt class="xref py py-class docutils literal"><span class="pre">Account</span></tt></a> is the top-level object in the BuildingSpeak universe.  Generally it will represent an organization, although there may be situations which call for multiple <tt class="file docutils literal"><span class="pre">Accounts</span></tt> to be created for one customer or organization.  <tt class="file docutils literal"><span class="pre">Buildings</span></tt> and <tt class="file docutils literal"><span class="pre">Meters</span></tt> are one-to-one with an <tt class="file docutils literal"><span class="pre">Account</span></tt> and represent what you&#8217;d expect: real world buildings and real world utility meters.</p>
+<p>A <a class="reference internal" href="#BuildingSpeakApp.models.Meter" title="BuildingSpeakApp.models.Meter"><tt class="xref py py-class docutils literal"><span class="pre">Meter</span></tt></a> is a device that records the flow of some substance of interest, e.g. electricity, natural gas, and domestic water.  All fuel types supported by ENERGY STAR&#8217;s Portfolio Manager are supported by BuildingSpeak, along with domestic water (not considered a fuel).  Generally, <tt class="file docutils literal"><span class="pre">Meters</span></tt> are provided by a utility company and are the basis for the billing that utility provides to its customer.  However, larger commercial and institutional customers may have some of their own <tt class="file docutils literal"><span class="pre">Meters</span></tt> which they read and maintain themselves.</p>
+<p><tt class="file docutils literal"><span class="pre">Meters</span></tt> receive a flow from a utility company or some local source, and the building&#8217;s pipes and wires then distribute those flows to the <a class="reference internal" href="#BuildingSpeakApp.models.Equipment" title="BuildingSpeakApp.models.Equipment"><tt class="xref py py-class docutils literal"><span class="pre">Equipment</span></tt></a> that consume it in order to provide some useful function such as lighting, heating, or cooling.  BuildingSpeak allows many-to-many relationships between <tt class="file docutils literal"><span class="pre">Meters</span></tt> and <tt class="file docutils literal"><span class="pre">Equipment</span></tt> in order to model real world scenarios.  For example, one natural gas <tt class="file docutils literal"><span class="pre">Meter</span></tt> may serve multiple rooftop units (pieces of <tt class="file docutils literal"><span class="pre">Equipment</span></tt>) for heating, but each of those rooftop units also receive electricity from an electric <tt class="file docutils literal"><span class="pre">Meter</span></tt>.</p>
+<p>A <a class="reference internal" href="#BuildingSpeakApp.models.Building" title="BuildingSpeakApp.models.Building"><tt class="xref py py-class docutils literal"><span class="pre">Building</span></tt></a> is actually quite an abstract object in BuildingSpeak, because <tt class="file docutils literal"><span class="pre">Buildings</span></tt> don&#8217;t directly influence the consumption of energy and water, i.e. the <tt class="file docutils literal"><span class="pre">Building</span></tt> itself does not consume anything.  The energy and water can be thought of as entering and leaving the building through various &#8216;pipes&#8217; that penetrate a building&#8217;s envelope.  These pipes connect directly to <tt class="file docutils literal"><span class="pre">Equipment</span></tt>, which are the actual consumers of energy and water.  Thus <tt class="file docutils literal"><span class="pre">Buildings</span></tt> are more of a boundary grouping together a set of <tt class="file docutils literal"><span class="pre">Meters</span></tt> and <tt class="file docutils literal"><span class="pre">Equipment</span></tt>.  They do, of course, have an impact on utility consumption due to their interaction with the outdoor environment, but this impact can only be seen via the consumption of <tt class="file docutils literal"><span class="pre">Equipment</span></tt> and the <tt class="file docutils literal"><span class="pre">Meters</span></tt> which serve them.</p>
+<p>A <a class="reference internal" href="#BuildingSpeakApp.models.Space" title="BuildingSpeakApp.models.Space"><tt class="xref py py-class docutils literal"><span class="pre">Space</span></tt></a> is a subunit of a <tt class="file docutils literal"><span class="pre">Building</span></tt> with very similar attributes and functionality.  It links one-to-one with <tt class="file docutils literal"><span class="pre">Buildings</span></tt> and many-to-many with <tt class="file docutils literal"><span class="pre">Equipment</span></tt> and <tt class="file docutils literal"><span class="pre">Meters</span></tt>.</p>
+<p>An <a class="reference internal" href="#BuildingSpeakApp.models.EfficiencyMeasure" title="BuildingSpeakApp.models.EfficiencyMeasure"><tt class="xref py py-class docutils literal"><span class="pre">EfficiencyMeasure</span></tt></a> represents a conservation measure (the term &#8216;energy&#8217; is avoided because <tt class="file docutils literal"><span class="pre">Measures</span></tt> may involve domestic water or other non-energy utilities) adopted by building owners to improve the efficiency of their building&#8217;s operation or to reduce consumption.  Because they deal directly with changes in utility consumption, they attach directly only to <tt class="file docutils literal"><span class="pre">Meters</span></tt> and <tt class="file docutils literal"><span class="pre">Equipment</span></tt>.</p>
+</div>
+<div class="section" id="user">
+<h2>User<a class="headerlink" href="#user" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.auth.models.User">
+<em class="property">class </em><tt class="descclassname">django.contrib.auth.models.</tt><tt class="descname">User</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User" title="Permalink to this definition">¶</a></dt>
+<dd><p>Users within the Django authentication system are represented by this
+model.</p>
+<p>Username, password and email are required. Other fields are optional.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="userprofile">
+<h2>UserProfile<a class="headerlink" href="#userprofile" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BuildingSpeakApp.models.UserProfile">
+<em class="property">class </em><tt class="descclassname">BuildingSpeakApp.models.</tt><tt class="descname">UserProfile</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.UserProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model for storing extra
+fields for Users.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="account">
+<h2>Account<a class="headerlink" href="#account" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BuildingSpeakApp.models.Account">
+<em class="property">class </em><tt class="descclassname">BuildingSpeakApp.models.</tt><tt class="descname">Account</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Account" title="Permalink to this definition">¶</a></dt>
+<dd><p>Customer Account model.</p>
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.account_type">
+<tt class="descname">account_type</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.account_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of Account as str. Options: Commercial, Industrial, Residential.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.city">
+<tt class="descname">city</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.city" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: City of Account.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.email">
+<tt class="descname">email</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email: Account contact email address.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.first_name">
+<tt class="descname">first_name</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.first_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Account contact first name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Account.get_account_view_five_year_data">
+<tt class="descname">get_account_view_five_year_data</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Account.get_account_view_five_year_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns meter data for Account&#8217;s stacked
+5yr bar charts.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Account.get_account_view_meter_data">
+<tt class="descname">get_account_view_meter_data</tt><big>(</big><em>month_first</em>, <em>month_last</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Account.get_account_view_meter_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns tables of summed meter data for a given date range.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>month_first</strong> (<em>Period(freq=&#8217;M&#8217;)</em>) &#8211; The first desired month.</li>
+<li><strong>month_last</strong> (<em>Period(freq=&#8217;M&#8217;)</em>) &#8211; The last desired month.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Meter data for Account&#8217;s views in a list: [meter_data, pie_data].</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Account.get_account_view_motion_table_buildings">
+<tt class="descname">get_account_view_motion_table_buildings</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Account.get_account_view_motion_table_buildings" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs. Returns table for motion chart on
+Account&#8217;s detail view, using most recent 10
+years of meter data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
+</tr>
+</tbody>
+</table>
+<p>columns: Building Name, Date, Cost, kBtu, CDD,
+HDD, Cost/SF, kBtu/SF, Cost/kBtu, Building Type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Account.get_account_view_motion_table_fuels">
+<tt class="descname">get_account_view_motion_table_fuels</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Account.get_account_view_motion_table_fuels" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs. Returns table for motion chart on
+Account&#8217;s detail view, using most recent 10
+years of meter data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
+</tr>
+</tbody>
+</table>
+<p>columns: Utility Type, Date, Cost, kBtu, CDD,
+HDD, Cost/SF, kBtu/SF, Cost/kBtu.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Account.get_account_view_motion_table_meters">
+<tt class="descname">get_account_view_motion_table_meters</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Account.get_account_view_motion_table_meters" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs. Returns table for motion chart on
+Account&#8217;s detail view.  List of lists
+with the following columns: MeterName,
+Date, Cost, kBtu, CDD, HDD, UtilityType.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Account.get_account_view_motion_table_spaces">
+<tt class="descname">get_account_view_motion_table_spaces</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Account.get_account_view_motion_table_spaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs. Returns table for motion chart on
+Account&#8217;s detail view, using most recent 10
+years of meter data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
+</tr>
+</tbody>
+</table>
+<p>columns: Space Name, Date, Cost, kBtu, CDD,
+HDD, Cost/SF, kBtu/SF, Cost/kBtu, Space Type,
+Building Name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.last_name">
+<tt class="descname">last_name</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.last_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Account contact last name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.launch_date">
+<tt class="descname">launch_date</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.launch_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>DateTime: Date Account was created.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.messages">
+<tt class="descname">messages</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.messages" title="Permalink to this definition">¶</a></dt>
+<dd><p>ManyToMany relationship to Message.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.monthly_payment">
+<tt class="descname">monthly_payment</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.monthly_payment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decimal: Total monthly Account payment amount (USD).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of Account as str.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.observed_file_GMT_offset">
+<tt class="descname">observed_file_GMT_offset</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_GMT_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decimal: GMT/UTC offset as decimal number used to adjust hour values read in from observed data file. Default: -5.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.observed_file_adjusts_for_DST">
+<tt class="descname">observed_file_adjusts_for_DST</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_adjusts_for_DST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean: Dates in observed data file are always already adjusted for DST? Default: False.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.observed_file_column_for_indexing">
+<tt class="descname">observed_file_column_for_indexing</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_column_for_indexing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Int: Column number of time stamp data to use for indexing observed data file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.observed_file_skiprows">
+<tt class="descname">observed_file_skiprows</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_skiprows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Int: Number of rows before data header row in observed data file (will be skipped when reading data).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.observed_file_time_zone">
+<tt class="descname">observed_file_time_zone</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_time_zone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Time zone of observed data file, compatible with pytz module.  Default: US/Eastern.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.observed_file_track">
+<tt class="descname">observed_file_track</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean: Track an observed data file for this Account? Default: False.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.phone">
+<tt class="descname">phone</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Account contact phone number.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.provided_file_GMT_offset">
+<tt class="descname">provided_file_GMT_offset</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_GMT_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decimal: GMT/UTC offset as decimal number used to adjust hour values read in from provided data file. Default: -5.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.provided_file_adjusts_for_DST">
+<tt class="descname">provided_file_adjusts_for_DST</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_adjusts_for_DST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean: Dates in provided data file are always already adjusted for DST? Default: False.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.provided_file_column_for_indexing">
+<tt class="descname">provided_file_column_for_indexing</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_column_for_indexing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Int: Column number of time stamp data to use for indexing provided data file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.provided_file_skiprows">
+<tt class="descname">provided_file_skiprows</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_skiprows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Int: Number of rows before data header row in provided data file (will be skipped when reading data).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.provided_file_time_zone">
+<tt class="descname">provided_file_time_zone</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_time_zone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Time zone of provided data file, compatible with pytz module.  Default: US/Eastern.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.provided_file_track">
+<tt class="descname">provided_file_track</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean: Track an provided data file for this Account? Default: False.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.readers">
+<tt class="descname">readers</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.readers" title="Permalink to this definition">¶</a></dt>
+<dd><p>ManyToMany relationship to Reader.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.schedules">
+<tt class="descname">schedules</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.schedules" title="Permalink to this definition">¶</a></dt>
+<dd><p>ManyToMany relationship to OperatingSchedule.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.state">
+<tt class="descname">state</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: State of Account.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.status">
+<tt class="descname">status</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Account status.  Options: Active, Closed, Delinquent, Inactive.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.street_address">
+<tt class="descname">street_address</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.street_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Street address of Account.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.title">
+<tt class="descname">title</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Account contact title.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.users">
+<tt class="descname">users</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.users" title="Permalink to this definition">¶</a></dt>
+<dd><p>ManyToMany relationship to User.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.zip_code">
+<tt class="descname">zip_code</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.zip_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Zip code for Account.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="building">
+<h2>Building<a class="headerlink" href="#building" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BuildingSpeakApp.models.Building">
+<em class="property">class </em><tt class="descclassname">BuildingSpeakApp.models.</tt><tt class="descname">Building</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Building" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model for Buildings.  Accepts
+image logo file.  Parents Spaces.</p>
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Building.get_building_view_five_year_data">
+<tt class="descname">get_building_view_five_year_data</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Building.get_building_view_five_year_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns meter data for Building&#8217;s stacked
+5yr bar charts.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Building.get_building_view_meter_data">
+<tt class="descname">get_building_view_meter_data</tt><big>(</big><em>month_first</em>, <em>month_last) month_first/month_last = Periods(freq='M'</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Building.get_building_view_meter_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns meter data for Building&#8217;s views
+in a list: [meter_data, pie_data].</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Building.get_building_view_motion_table_fuels">
+<tt class="descname">get_building_view_motion_table_fuels</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Building.get_building_view_motion_table_fuels" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns table for motion chart on
+Building&#8217;s detail view.  List of lists
+with the following columns: UtilityType,
+Date, Cost, kBtu, CDD, HDD, Cost/SF,
+kBtu/SF, Cost/kBtu.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Building.get_building_view_motion_table_meters">
+<tt class="descname">get_building_view_motion_table_meters</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Building.get_building_view_motion_table_meters" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns table for motion chart on
+Building&#8217;s detail view.  List of lists
+with the following columns: MeterName,
+Date, Cost, kBtu, CDD, HDD, UtilityType.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Building.get_building_view_motion_table_spaces">
+<tt class="descname">get_building_view_motion_table_spaces</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Building.get_building_view_motion_table_spaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns table for motion chart on
+Building&#8217;s detail view.  List of lists
+with the following columns: SpaceName,
+Date, Cost, kBtu, CDD, HDD, Cost/SF,
+kBtu/SF, Cost/kBtu, SpaceType.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="meter">
+<h2>Meter<a class="headerlink" href="#meter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BuildingSpeakApp.models.Meter">
+<em class="property">class </em><tt class="descclassname">BuildingSpeakApp.models.</tt><tt class="descname">Meter</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model for any fuel or water
+consumption measuring device.
+Supports all fuel types and units
+supported by ES Portfolio Manager.
+Accepts photo and nameplate image
+files and bill data text file.</p>
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.add_kBtu_kBtuh">
+<tt class="descname">add_kBtu_kBtuh</tt><big>(</big><em>df</em>, <em>fuel_type</em>, <em>units</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.add_kBtu_kBtuh" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Inputs:</dt>
+<dd><dl class="first last docutils">
+<dt>dataframe</dt>
+<dd>(columns: Peak Demand,Consumption)</dd>
+<dt>fuel_type</dt>
+<dd>(e.g. MeterInstance.utility_type)</dd>
+<dt>units</dt>
+<dd>(e.g. MeterInstance.units)</dd>
+</dl>
+</dd>
+</dl>
+<p>Returns dataframe with columns of
+kBtuh and kBtu.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.assign_period_datetime">
+<tt class="descname">assign_period_datetime</tt><big>(</big><em>time_series=</em><span class="optional">[</span><span class="optional">]</span>, <em>dates=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.assign_period_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Inputs:</dt>
+<dd><p class="first">time_series or
+dates (list of start/end</p>
+<blockquote class="last">
+<div>pandas Timestamps)</div></blockquote>
+</dd>
+</dl>
+<p>Returns datetime of first day of
+most frequently occurring month in
+a given time series spanning 25-35
+days to use as basis for Period.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.bill_data_calc_baseline">
+<tt class="descname">bill_data_calc_baseline</tt><big>(</big><em>df</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.bill_data_calc_baseline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes (base) and (base
+delta) from meter models
+attached to Meter&#8217;s BILLx
+Monther.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.bill_data_calc_costs">
+<tt class="descname">bill_data_calc_costs</tt><big>(</big><em>df</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.bill_data_calc_costs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes costs for BILLx
+Monther. Needs all
+Consumptions and Demands
+to compute.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.bill_data_calc_dd">
+<tt class="descname">bill_data_calc_dd</tt><big>(</big><em>df</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.bill_data_calc_dd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes degree days based
+on meter models attached
+to Meter&#8217;s BILLx Monther.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.bill_data_calc_dependents">
+<tt class="descname">bill_data_calc_dependents</tt><big>(</big><em>df</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.bill_data_calc_dependents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes (asave), (exp),
+and (exp delta) values
+of BILLx Monther. Needs
+(base), (esave), and
+(act) to compute.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.bill_data_calc_kbtu">
+<tt class="descname">bill_data_calc_kbtu</tt><big>(</big><em>df</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.bill_data_calc_kbtu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes kBtu and kBtuh to
+go with Consumption and
+Peak Demand columns for
+all groups (base, exp, etc.)
+of Meter&#8217;s BILLx Monther.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.bill_data_calc_savings">
+<tt class="descname">bill_data_calc_savings</tt><big>(</big><em>df</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.bill_data_calc_savings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes savings (esave)
+from efficiency measures
+attached to Meter and
+stores on BILLx Monther.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.get_all_savings">
+<tt class="descname">get_all_savings</tt><big>(</big><em>df</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.get_all_savings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given dataframe with
+monthly index, returns
+dataframe with new
+columns for the sums
+from all attached
+EfficiencyMeasures for
+consumption, demand,
+their deltas, and
+cost savings.</p>
+<p>WARNING: only adds 
+measures with same
+utility type and
+units as Meter!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.get_bill_data_period_dataframe">
+<tt class="descname">get_bill_data_period_dataframe</tt><big>(</big><em>first_month</em>, <em>last_month) (optional inputs</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.get_bill_data_period_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes mm/yyyy strings and returns
+a dataframe of bill data for that
+range.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.get_meter_view_motion_table">
+<tt class="descname">get_meter_view_motion_table</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.get_meter_view_motion_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns table for motion chart on
+Meter&#8217;s detail view.  List of lists
+with the following columns: MeterName,
+Date, Cost, kBtu, CDD, HDD.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.update_monthers">
+<tt class="descname">update_monthers</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.update_monthers" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Updates Meter&#8217;s Reader-based Monthers.
+NOT WRITTEN YET.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Meter.upload_bill_data">
+<tt class="descname">upload_bill_data</tt><big>(</big><em>file_location=0</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Meter.upload_bill_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd><dl class="first last docutils">
+<dt>[file_location]</dt>
+<dd>(default: MeterInstance.bill_data_url)</dd>
+</dl>
+</dd>
+</dl>
+<p>Reads Bill Data File and loads into
+Meter&#8217;s BILLx Monther, respecting any
+pre-existing data unless Overwrite
+column in Bill Data File indicates
+otherwise.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="space">
+<h2>Space<a class="headerlink" href="#space" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BuildingSpeakApp.models.Space">
+<em class="property">class </em><tt class="descclassname">BuildingSpeakApp.models.</tt><tt class="descname">Space</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model for subspaces of
+Buildings.  Accepts image
+file of floorplan or view
+of space.</p>
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Space.get_space_view_five_year_data">
+<tt class="descname">get_space_view_five_year_data</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Space.get_space_view_five_year_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns meter data for Space&#8217;s stacked
+5yr bar charts.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Space.get_space_view_meter_data">
+<tt class="descname">get_space_view_meter_data</tt><big>(</big><em>month_first</em>, <em>month_last) month_first/month_last = Periods(freq='M'</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Space.get_space_view_meter_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns meter data for Space&#8217;s views
+in a list: [meter_data, pie_data].</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Space.get_space_view_motion_table_fuels">
+<tt class="descname">get_space_view_motion_table_fuels</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Space.get_space_view_motion_table_fuels" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns table for motion chart on
+Space&#8217;s detail view.  List of lists
+with the following columns: UtilityType,
+Date, Cost, kBtu, CDD, HDD, Cost/SF,
+kBtu/SF, Cost/kBtu.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Space.get_space_view_motion_table_meters">
+<tt class="descname">get_space_view_motion_table_meters</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Space.get_space_view_motion_table_meters" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Returns table for motion chart on
+Space&#8217;s detail view.  List of lists
+with the following columns: MeterName,
+Date, Cost, kBtu, CDD, HDD, UtilityType.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="equipment">
+<h2>Equipment<a class="headerlink" href="#equipment" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BuildingSpeakApp.models.Equipment">
+<em class="property">class </em><tt class="descclassname">BuildingSpeakApp.models.</tt><tt class="descname">Equipment</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Equipment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model for all energy consuming
+Equipment.  Specific Equipment
+classes such as RooftopUnit inherit
+from this class.  Accepts photo and
+nameplate image files.</p>
+<dl class="method">
+<dt id="BuildingSpeakApp.models.Equipment.update_universals">
+<tt class="descname">update_universals</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.Equipment.update_universals" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.</p>
+<p>Reads primary consumption Readers and
+converts/sums into kBtu Readers.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="measure">
+<h2>Measure<a class="headerlink" href="#measure" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BuildingSpeakApp.models.EfficiencyMeasure">
+<em class="property">class </em><tt class="descclassname">BuildingSpeakApp.models.</tt><tt class="descname">EfficiencyMeasure</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.EfficiencyMeasure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model for efficiency
+measures. Connect to
+Meters and Equipments.</p>
+<dl class="method">
+<dt id="BuildingSpeakApp.models.EfficiencyMeasure.apportion_savings">
+<tt class="descname">apportion_savings</tt><big>(</big><em>Tccp=None</em>, <em>Thcp=None</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.EfficiencyMeasure.apportion_savings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts annual savings
+amounts from model into
+monthly amounts based on
+percent cool, heat, and
+flat values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.EfficiencyMeasure.get_savings_df">
+<tt class="descname">get_savings_df</tt><big>(</big><em>df</em><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.EfficiencyMeasure.get_savings_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given dataframe with
+monthly index, returns
+dataframe with new
+columns for consumption
+savings, peak demand
+savings, and cost
+savings.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.EfficiencyMeasure.get_savings_dictionary">
+<tt class="descname">get_savings_dictionary</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.EfficiencyMeasure.get_savings_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.  Returns
+dictionary of consumption,
+demand, and cost savings
+by month number (1-12).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="BuildingSpeakApp.models.EfficiencyMeasure.show_measure">
+<tt class="descname">show_measure</tt><big>(</big><big>)</big><a class="headerlink" href="#BuildingSpeakApp.models.EfficiencyMeasure.show_measure" title="Permalink to this definition">¶</a></dt>
+<dd><p>No inputs.  Prints
+measure properties.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="section_secondary_models.html" title="Primary Models"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="section_getting_started.html" title="Getting Started"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, BuildingSpeak.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

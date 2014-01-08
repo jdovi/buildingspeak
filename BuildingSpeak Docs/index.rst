@@ -6,14 +6,30 @@
 Welcome to BuildingSpeak's documentation!
 =========================================
 
+Version 1.0 - January 6th, 2014
+
+This documentation is for internal development and maintenance purposes and should not be shared with users.  It is designed to give an overview of the BuildingSpeak universe while also serving as the official documentation of the code base (it pulls directly from the Python modules containing the Django models and functions).
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   getting_started.rst
-   test_page.rst
+   section_getting_started.rst
+   section_primary_models.rst
+   section_secondary_models.rst
+   test_page1.rst
+   test_page2.rst
    
+Installation
+Heroku/local
+Django
+models
+Spyder
+functions
+admin portal
+Tropo
+be sure to mention somewhere that compiling these docs requires Django to be in local mode, not Heroku mode!
 
 Indices and tables
 ==================

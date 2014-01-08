@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Primary Models &mdash; BuildingSpeak 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="BuildingSpeak 1 documentation" href="index.html" />
+    <link rel="next" title="Examples 1" href="test_page1.html" />
+    <link rel="prev" title="Primary Models" href="section_primary_models.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/Dryden Logo Header.png" border="0" alt="py4sci"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="test_page1.html" title="Examples 1"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="section_primary_models.html" title="Primary Models"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="section_primary_models.html"
+                        title="previous chapter">Primary Models</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="test_page1.html"
+                        title="next chapter">Examples 1</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/section_secondary_models.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="primary-models">
+<span id="id1"></span><h1>Primary Models<a class="headerlink" href="#primary-models" title="Permalink to this headline">¶</a></h1>
+<p>The primary models and their relationships are shown in the following figure.</p>
+<a class="reference internal image-reference" href="_images/primary_models.png"><img alt="_images/primary_models.png" src="_images/primary_models.png" style="width: 500px;" /></a>
+<p>The <tt class="file docutils literal"><span class="pre">User</span></tt> is Django&#8217;s built-in model, and the <tt class="file docutils literal"><span class="pre">UserProfile</span></tt> simply extends that model allowing custom fields to be connected to each <tt class="file docutils literal"><span class="pre">User</span></tt>, such as <tt class="file docutils literal"><span class="pre">mobile_phone</span></tt>.  Each <tt class="file docutils literal"><span class="pre">User</span></tt> may be connected to any number of <tt class="file docutils literal"><span class="pre">Accounts</span></tt>, and it is this relationship which defines what a <tt class="file docutils literal"><span class="pre">User</span></tt> can access in BuildingSpeak.  Future versions may connect <tt class="file docutils literal"><span class="pre">Users</span></tt> to lower-level models.</p>
+<p>An <tt class="file docutils literal"><span class="pre">Account</span></tt> is the top-level object in the BuildingSpeak universe.  Generally it will represent an organization, although there may be situations which call for multiple <tt class="file docutils literal"><span class="pre">Accounts</span></tt> to be created for one customer or organization.  <tt class="file docutils literal"><span class="pre">Buildings</span></tt> and <tt class="file docutils literal"><span class="pre">Meters</span></tt> are one-to-one with an <tt class="file docutils literal"><span class="pre">Account</span></tt> and represent what you&#8217;d expect: real world buildings and real world utility meters.</p>
+<p><tt class="file docutils literal"><span class="pre">Meters</span></tt> are devices that record the flow of some substance of interest, e.g. electricity, natural gas, and domestic water.  All fuel types supported by ENERGY STAR&#8217;s Portfolio Manager are supported by BuildingSpeak, along with domestic water (not considered a fuel).  Generally, <tt class="file docutils literal"><span class="pre">Meters</span></tt> are provided by a utility company and are the basis for the billing that utility provides to its customer.  However, larger commercial and institutional customers may have some of their own <tt class="file docutils literal"><span class="pre">Meters</span></tt> which they read and maintain themselves.</p>
+<p><tt class="file docutils literal"><span class="pre">Meters</span></tt> receive a flow from a utility company or some local source, and the building&#8217;s pipes and wires then distribute those flows to the <tt class="file docutils literal"><span class="pre">Equipment</span></tt> that consume it in order to provide some useful function such as lighting, heating, or cooling.  BuildingSpeak allows many-to-many relationships between <tt class="file docutils literal"><span class="pre">Meters</span></tt> and <tt class="file docutils literal"><span class="pre">Equipment</span></tt> in order to model real world scenarios.  For example, one natural gas <tt class="file docutils literal"><span class="pre">Meter</span></tt> may serve multiple rooftop units (pieces of <tt class="file docutils literal"><span class="pre">Equipment</span></tt>) for heating, but each of those rooftop units also receive electricity from an electric <tt class="file docutils literal"><span class="pre">Meter</span></tt>.</p>
+<p><tt class="file docutils literal"><span class="pre">Buildings</span></tt> are actually quite abstract objects in BuildingSpeak, because they don&#8217;t directly influence the consumption of energy and water, i.e. the <tt class="file docutils literal"><span class="pre">Building</span></tt> itself does not consume anything.  The energy and water can be thought of as entering and leaving the building through various &#8216;pipes&#8217; that penetrate a building&#8217;s envelope.  These pipes connect directly to <tt class="file docutils literal"><span class="pre">Equipment</span></tt>, which are the actual consumers of energy and water.  Thus <tt class="file docutils literal"><span class="pre">Buildings</span></tt> are more of a boundary grouping together a set of <tt class="file docutils literal"><span class="pre">Meters</span></tt> and <tt class="file docutils literal"><span class="pre">Equipment</span></tt>.  They do, of course, have an impact on utility consumption due to their interaction with the outdoor environment, but this impact can only be seen via the consumption of <tt class="file docutils literal"><span class="pre">Equipment</span></tt> and the <tt class="file docutils literal"><span class="pre">Meters</span></tt> which serve them.</p>
+<p><tt class="file docutils literal"><span class="pre">Spaces</span></tt> are subunits of <tt class="file docutils literal"><span class="pre">Buildings</span></tt> with very similar attributes and functionality.  They link one-to-one with <tt class="file docutils literal"><span class="pre">Buildings</span></tt> and many-to-many with <tt class="file docutils literal"><span class="pre">Equipment</span></tt> and <tt class="file docutils literal"><span class="pre">Meters</span></tt>.</p>
+<p><tt class="file docutils literal"><span class="pre">Measures</span></tt> represent conservation measures (the term &#8216;energy&#8217; is avoided because <tt class="file docutils literal"><span class="pre">Measures</span></tt> may involve domestic water or other non-energy utilities).  These are projects building owners undertake to improve the efficiency of their building&#8217;s operation or to reduce consumption.  Because they deal directly with changes in utility consumption, they attach directly only to <tt class="file docutils literal"><span class="pre">Meters</span></tt> and <tt class="file docutils literal"><span class="pre">Equipment</span></tt>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="test_page1.html" title="Examples 1"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="section_primary_models.html" title="Primary Models"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, BuildingSpeak.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

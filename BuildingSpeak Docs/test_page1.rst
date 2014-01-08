@@ -1,8 +1,8 @@
-.. _test_page:
+.. _examples1:
 
 
 ***************
-Test Page
+Examples 1
 ***************
 
 
@@ -62,9 +62,7 @@ Bullet points
 This is a subsection making bullet points
 
 * point A
-
 * point B
-
 * point C
 
 
@@ -114,7 +112,4 @@ class :class:`~BuildingSpeakApp.models.Account`, or the method
 Functions Module
 =================
 .. automodule:: models_functions
-    :members:
-
-.. autoclass:: BuildingSpeakApp.models.Account
     :members:
