@@ -311,7 +311,7 @@ class Account(models.Model):
             total_SF = self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
             
             if len(self.meter_set.all()) < 1:
-                result = None
+                five_year_data = None
             else:
                 #five year stacked_data is what will be passed to the template
                 five_year_data = []

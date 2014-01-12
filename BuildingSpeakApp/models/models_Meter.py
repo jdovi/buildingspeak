@@ -331,21 +331,29 @@ class Meter(models.Model):
                             success = False
                         else:
                             try:
+                                readbd.rename(columns={'Billing Demand': 'Billing Demand (act)',
+                                                       'Peak Demand': 'Peak Demand (act)',
+                                                       'Consumption': 'Consumption (act)',
+                                                       'Cost': 'Cost (act)'}, inplace = True)
                                 readbd['Exists'] = readbd.index
                                 storedbd = self.monther_set.get(name='BILLx').get_monther_period_dataframe()
                                 if storedbd is None or len(storedbd)<1:
                                     readbd['Exists'] = 0
                                 else:
+                                    storedbd['Cost (act) is NaN'] = storedbd['Cost (act)'].apply(decimal_isnan)
+                                    storedbd['Consumption (act) is NaN'] = storedbd['Consumption (act)'].apply(decimal_isnan)
+                                    storedbd['Peak Demand (act) is NaN'] = storedbd['Peak Demand (act)'].apply(decimal_isnan)
+                                    temp = [[storedbd['Cost (act) is NaN'][i],
+                                            storedbd['Consumption (act) is NaN'][i],
+                                            storedbd['Peak Demand (act) is NaN'][i]] for i in range(0,len(storedbd))]
+                                    storedbd['is actual not forecasted monthling'] = [not(i[0]) and not(i[1]) and not(i[2]) for i in temp]
+                                    storedbd = storedbd[[storedbd['is actual not forecasted monthling']]]
                                     readbd['Exists'] = readbd['Exists'].apply(lambda lamvar: lamvar in storedbd.index)
                                 
                                 #ignore data that Exists but not(Overwrite)
                                 #load data that not(Exists)
                                 readbd_a = readbd[readbd['Exists']==0]
                                 if len(readbd_a)>0:
-                                    readbd_a.rename(columns={'Billing Demand': 'Billing Demand (act)',
-                                                              'Peak Demand': 'Peak Demand (act)',
-                                                              'Consumption': 'Consumption (act)',
-                                                              'Cost': 'Cost (act)'}, inplace = True)
                                     readbd_a = self.monther_set.get(name='BILLx').create_calculated_columns(readbd_a)
                                     success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe(readbd_a)
                                     if not success_a: raise TypeError
@@ -372,10 +380,10 @@ class Meter(models.Model):
                                                 if mlg is None: raise TypeError
                                                 mlg.__setattr__('start_date',readbd_b['Start Date'][i])
                                                 mlg.__setattr__('end_date',readbd_b['End Date'][i])
-                                                mlg.__setattr__('act_billing_demand',readbd_b['Billing Demand'][i])
-                                                mlg.__setattr__('act_peak_demand',readbd_b['Peak Demand'][i])
-                                                mlg.__setattr__('act_consumption',readbd_b['Consumption'][i])
-                                                mlg.__setattr__('act_cost',readbd_b['Cost'][i])
+                                                mlg.__setattr__('act_billing_demand',readbd_b['Billing Demand (act)'][i])
+                                                mlg.__setattr__('act_peak_demand',readbd_b['Peak Demand (act)'][i])
+                                                mlg.__setattr__('act_consumption',readbd_b['Consumption (act)'][i])
+                                                mlg.__setattr__('act_cost',readbd_b['Cost (act)'][i])
                                                 mlg.flush_calculated_data()
                                                 mlg.save()
                                                 month_i = None #resetting to avoid carrying over incorrectly

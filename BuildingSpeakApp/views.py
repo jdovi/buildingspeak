@@ -20,8 +20,8 @@ from django.db.models import Q, Sum
 from django.core.mail import send_mail
 from tropo import Tropo, Session, Result
 from django.views.decorators.csrf import csrf_exempt
-#from rq import Queue
-#from worker import conn
+from rq import Queue
+from worker import conn
 
 class ResultsMessage(object):
     """Used for generating user
@@ -295,9 +295,9 @@ def meter_detail(request, account_id, meter_id):
             form.initial['bill_data_file'] = latest_bill_data_file
             meter.save()
             try:
-#                q = Queue(connection=conn)
-#                result = q.enqueue(meter.upload_bill_data)
-                meter.upload_bill_data()
+                q = Queue(connection=conn)
+                result = q.enqueue(meter.upload_bill_data)
+#                meter.upload_bill_data()
                 m = ResultsMessage()
                 m.comment = 'Bill data has been uploaded.'
             except:
@@ -335,6 +335,10 @@ def meter_detail(request, account_id, meter_id):
         peak_demand_model_stats_table = False
         consumption_model_residuals_histogram = False
         peak_demand_model_residuals_histogram = False
+        five_year_table_cost = None
+        five_year_table_cons = None
+        five_year_table_kBtu = None
+        motion_data = None
     else:
         bill_data = bill_data.sort_index()
         #additional column names to be created; these are manipulations of the stored data
@@ -473,121 +477,123 @@ def meter_detail(request, account_id, meter_id):
             else:
                 peak_demand_residual_plots = None
 
-    #-----------------------------------5yr graph calculations
-    month_curr = pd.Period(timezone.now(), freq='M')
-    year_curr = month_curr.year
-    mi = pd.Period(year = year_curr-3, month = 1, freq = 'M')
-    mf = pd.Period(year = year_curr+1, month = 12, freq = 'M')
-    df = meter.get_bill_data_period_dataframe(first_month = mi.strftime('%m/%Y'),
-                                              last_month = mf.strftime('%m/%Y'))
-    five_years = pd.DataFrame(df, index = pd.period_range(start = mi, end = mf, freq = 'M'))
-    five_years = five_years.sort_index()
-    first_calc_month = five_years.index[five_years['Cost (act)'].apply(decimal_isnan)][0]
-    last_act_month = first_calc_month - 1
+        #-----------------------------------5yr graph calculations
+        month_curr = pd.Period(timezone.now(), freq='M')
+        year_curr = month_curr.year
+        mi = pd.Period(year = year_curr-3, month = 1, freq = 'M')
+        mf = pd.Period(year = year_curr+1, month = 12, freq = 'M')
+        df = meter.get_bill_data_period_dataframe(first_month = mi.strftime('%m/%Y'),
+                                                  last_month = mf.strftime('%m/%Y'))
+        five_years = pd.DataFrame(df, index = pd.period_range(start = mi, end = mf, freq = 'M'))
+        five_years = five_years.sort_index()
+        first_calc_month = five_years.index[five_years['Cost (act)'].apply(decimal_isnan)][0]
+        last_act_month = first_calc_month - 1
+        
+        five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
+                                 'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
+                                 'HDD (consumption)']].applymap(nan2zero)
+        five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
+                                 'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
+                                 'HDD (consumption)']].applymap(float)
+        
+        five_year_table_cost = [['Year','Cost (act)','Cost (exp)','CDD (consumption)','HDD (consumption)']]
+        five_year_table_cost.append([str(five_years.index[0].year),
+                                five_years['Cost (act)'][0:12].sum(),
+                                0,
+                                five_years['CDD (consumption)'][0:12].sum(),
+                                five_years['HDD (consumption)'][0:12].sum()
+                                ])
+        five_year_table_cost.append([str(five_years.index[12].year),
+                                five_years['Cost (act)'][12:24].sum(),
+                                0,
+                                five_years['CDD (consumption)'][12:24].sum(),
+                                five_years['HDD (consumption)'][12:24].sum()
+                                ])
+        five_year_table_cost.append([str(five_years.index[24].year),
+                                five_years['Cost (act)'][24:36].sum(),
+                                0,
+                                five_years['CDD (consumption)'][24:36].sum(),
+                                five_years['HDD (consumption)'][24:36].sum()
+                                ])
+        five_year_table_cost.append([str(five_years.index[36].year),
+                                five_years['Cost (act)'][36:last_act_month].sum(),
+                                five_years['Cost (exp)'][first_calc_month:48].sum(),
+                                five_years['CDD (consumption)'][36:48].sum(),
+                                five_years['HDD (consumption)'][36:48].sum()
+                                ])
+        five_year_table_cost.append([str(five_years.index[48].year),
+                                0,
+                                five_years['Cost (exp)'][48:60].sum(),
+                                five_years['CDD (consumption)'][48:60].sum(),
+                                five_years['HDD (consumption)'][48:60].sum()
+                                ])
+        
+        five_year_table_cons = [['Year','Consumption (act)','Consumption (exp)','CDD (consumption)','HDD (consumption)']]
+        five_year_table_cons.append([str(five_years.index[0].year),
+                                five_years['Consumption (act)'][0:12].sum(),
+                                0,
+                                five_years['CDD (consumption)'][0:12].sum(),
+                                five_years['HDD (consumption)'][0:12].sum()
+                                ])
+        five_year_table_cons.append([str(five_years.index[12].year),
+                                five_years['Consumption (act)'][12:24].sum(),
+                                0,
+                                five_years['CDD (consumption)'][12:24].sum(),
+                                five_years['HDD (consumption)'][12:24].sum()
+                                ])
+        five_year_table_cons.append([str(five_years.index[24].year),
+                                five_years['Consumption (act)'][24:36].sum(),
+                                0,
+                                five_years['CDD (consumption)'][24:36].sum(),
+                                five_years['HDD (consumption)'][24:36].sum()
+                                ])
+        five_year_table_cons.append([str(five_years.index[36].year),
+                                five_years['Consumption (act)'][36:last_act_month].sum(),
+                                five_years['Consumption (exp)'][first_calc_month:48].sum(),
+                                five_years['CDD (consumption)'][36:48].sum(),
+                                five_years['HDD (consumption)'][36:48].sum()
+                                ])
+        five_year_table_cons.append([str(five_years.index[48].year),
+                                0,
+                                five_years['Consumption (exp)'][48:60].sum(),
+                                five_years['CDD (consumption)'][48:60].sum(),
+                                five_years['HDD (consumption)'][48:60].sum()
+                                ])
     
-    five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
-                             'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
-                             'HDD (consumption)']].applymap(nan2zero)
-    five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
-                             'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
-                             'HDD (consumption)']].applymap(float)
-    
-    five_year_table_cost = [['Year','Cost (act)','Cost (exp)','CDD (consumption)','HDD (consumption)']]
-    five_year_table_cost.append([str(five_years.index[0].year),
-                            five_years['Cost (act)'][0:12].sum(),
-                            0,
-                            five_years['CDD (consumption)'][0:12].sum(),
-                            five_years['HDD (consumption)'][0:12].sum()
-                            ])
-    five_year_table_cost.append([str(five_years.index[12].year),
-                            five_years['Cost (act)'][12:24].sum(),
-                            0,
-                            five_years['CDD (consumption)'][12:24].sum(),
-                            five_years['HDD (consumption)'][12:24].sum()
-                            ])
-    five_year_table_cost.append([str(five_years.index[24].year),
-                            five_years['Cost (act)'][24:36].sum(),
-                            0,
-                            five_years['CDD (consumption)'][24:36].sum(),
-                            five_years['HDD (consumption)'][24:36].sum()
-                            ])
-    five_year_table_cost.append([str(five_years.index[36].year),
-                            five_years['Cost (act)'][36:last_act_month].sum(),
-                            five_years['Cost (exp)'][first_calc_month:48].sum(),
-                            five_years['CDD (consumption)'][36:48].sum(),
-                            five_years['HDD (consumption)'][36:48].sum()
-                            ])
-    five_year_table_cost.append([str(five_years.index[48].year),
-                            0,
-                            five_years['Cost (exp)'][48:60].sum(),
-                            five_years['CDD (consumption)'][48:60].sum(),
-                            five_years['HDD (consumption)'][48:60].sum()
-                            ])
-    
-    five_year_table_cons = [['Year','Consumption (act)','Consumption (exp)','CDD (consumption)','HDD (consumption)']]
-    five_year_table_cons.append([str(five_years.index[0].year),
-                            five_years['Consumption (act)'][0:12].sum(),
-                            0,
-                            five_years['CDD (consumption)'][0:12].sum(),
-                            five_years['HDD (consumption)'][0:12].sum()
-                            ])
-    five_year_table_cons.append([str(five_years.index[12].year),
-                            five_years['Consumption (act)'][12:24].sum(),
-                            0,
-                            five_years['CDD (consumption)'][12:24].sum(),
-                            five_years['HDD (consumption)'][12:24].sum()
-                            ])
-    five_year_table_cons.append([str(five_years.index[24].year),
-                            five_years['Consumption (act)'][24:36].sum(),
-                            0,
-                            five_years['CDD (consumption)'][24:36].sum(),
-                            five_years['HDD (consumption)'][24:36].sum()
-                            ])
-    five_year_table_cons.append([str(five_years.index[36].year),
-                            five_years['Consumption (act)'][36:last_act_month].sum(),
-                            five_years['Consumption (exp)'][first_calc_month:48].sum(),
-                            five_years['CDD (consumption)'][36:48].sum(),
-                            five_years['HDD (consumption)'][36:48].sum()
-                            ])
-    five_year_table_cons.append([str(five_years.index[48].year),
-                            0,
-                            five_years['Consumption (exp)'][48:60].sum(),
-                            five_years['CDD (consumption)'][48:60].sum(),
-                            five_years['HDD (consumption)'][48:60].sum()
-                            ])
-
-    five_year_table_kBtu = [['Year','kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)','HDD (consumption)']]
-    five_year_table_kBtu.append([str(five_years.index[0].year),
-                            five_years['kBtu Consumption (act)'][0:12].sum(),
-                            0,
-                            five_years['CDD (consumption)'][0:12].sum(),
-                            five_years['HDD (consumption)'][0:12].sum()
-                            ])
-    five_year_table_kBtu.append([str(five_years.index[12].year),
-                            five_years['kBtu Consumption (act)'][12:24].sum(),
-                            0,
-                            five_years['CDD (consumption)'][12:24].sum(),
-                            five_years['HDD (consumption)'][12:24].sum()
-                            ])
-    five_year_table_kBtu.append([str(five_years.index[24].year),
-                            five_years['kBtu Consumption (act)'][24:36].sum(),
-                            0,
-                            five_years['CDD (consumption)'][24:36].sum(),
-                            five_years['HDD (consumption)'][24:36].sum()
-                            ])
-    five_year_table_kBtu.append([str(five_years.index[36].year),
-                            five_years['kBtu Consumption (act)'][36:last_act_month].sum(),
-                            five_years['kBtu Consumption (exp)'][first_calc_month:48].sum(),
-                            five_years['CDD (consumption)'][36:48].sum(),
-                            five_years['HDD (consumption)'][36:48].sum()
-                            ])
-    five_year_table_kBtu.append([str(five_years.index[48].year),
-                            0,
-                            five_years['kBtu Consumption (exp)'][48:60].sum(),
-                            five_years['CDD (consumption)'][48:60].sum(),
-                            five_years['HDD (consumption)'][48:60].sum()
-                            ])
-    
+        five_year_table_kBtu = [['Year','kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)','HDD (consumption)']]
+        five_year_table_kBtu.append([str(five_years.index[0].year),
+                                five_years['kBtu Consumption (act)'][0:12].sum(),
+                                0,
+                                five_years['CDD (consumption)'][0:12].sum(),
+                                five_years['HDD (consumption)'][0:12].sum()
+                                ])
+        five_year_table_kBtu.append([str(five_years.index[12].year),
+                                five_years['kBtu Consumption (act)'][12:24].sum(),
+                                0,
+                                five_years['CDD (consumption)'][12:24].sum(),
+                                five_years['HDD (consumption)'][12:24].sum()
+                                ])
+        five_year_table_kBtu.append([str(five_years.index[24].year),
+                                five_years['kBtu Consumption (act)'][24:36].sum(),
+                                0,
+                                five_years['CDD (consumption)'][24:36].sum(),
+                                five_years['HDD (consumption)'][24:36].sum()
+                                ])
+        five_year_table_kBtu.append([str(five_years.index[36].year),
+                                five_years['kBtu Consumption (act)'][36:last_act_month].sum(),
+                                five_years['kBtu Consumption (exp)'][first_calc_month:48].sum(),
+                                five_years['CDD (consumption)'][36:48].sum(),
+                                five_years['HDD (consumption)'][36:48].sum()
+                                ])
+        five_year_table_kBtu.append([str(five_years.index[48].year),
+                                0,
+                                five_years['kBtu Consumption (exp)'][48:60].sum(),
+                                five_years['CDD (consumption)'][48:60].sum(),
+                                five_years['HDD (consumption)'][48:60].sum()
+                                ])
+        
+        motion_data = meter.get_meter_view_motion_table()
+        
     context = {
         'user':           request.user,
         'account':        account,
@@ -621,7 +627,7 @@ def meter_detail(request, account_id, meter_id):
         'five_year_table_cost':                     five_year_table_cost,
         'five_year_table_cons':                     five_year_table_cons,
         'five_year_table_kBtu':                     five_year_table_kBtu,
-        'motion_data':                              meter.get_meter_view_motion_table(),
+        'motion_data':                              motion_data,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:

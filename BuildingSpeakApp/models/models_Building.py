@@ -310,7 +310,7 @@ class Building(models.Model):
             mfstr = mf.strftime('%m/%Y')
             
             if len(self.meters.all()) < 1:
-                result = None
+                five_year_data = None
             else:
                 #five year stacked_data is what will be passed to the template
                 five_year_data = []
