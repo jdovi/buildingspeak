@@ -13,8 +13,8 @@ from djorm_pgarray.fields import ArrayField
 from model_utils.managers import InheritanceManager
 from storages.backends.s3boto import S3BotoStorage
 from django.contrib.auth.models import User
-from rq import Queue
-from worker import conn
+#from rq import Queue
+#from worker import conn
 
 
 from models_functions import *
@@ -100,8 +100,8 @@ class WeatherStation(models.Model):
             df_avg = df_avg.sort_index()
             df_avg['Month Integer'] = 99
             for i in range(0,12):
-                df_avg['CDD'][i:i+1] = df['CDD'][[x.month==df_avg.index[i].month for x in df.index]].mean()
-                df_avg['HDD'][i:i+1] = df['HDD'][[x.month==df_avg.index[i].month for x in df.index]].mean()
+                df_avg['CDD'][i:i+1] = df['CDD'][[x.month==df_avg.index[i].month and not(decimal_isnan(df['CDD'][x])) for x in df.index]].mean()
+                df_avg['HDD'][i:i+1] = df['HDD'][[x.month==df_avg.index[i].month and not(decimal_isnan(df['HDD'][x])) for x in df.index]].mean()
                 df_avg['Month Integer'][i:i+1] = df_avg.index[i].month
             df_avg = df_avg.sort(columns='Month Integer')
             df_avg.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']

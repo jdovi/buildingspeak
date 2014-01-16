@@ -72,7 +72,7 @@ class EfficiencyMeasure(models.Model):
                                               help_text='expected maximum peak demand savings',
                                               default=Decimal(0.0))
     annual_cost_savings = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
-                                              help_text='expected annual cost savings',
+                                              help_text='expected annual cost savings (will be ignored in favor of RateSchedule calculations)',
                                               default=Decimal(0.0))
     percent_uncertainty = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                               help_text='uncertainty percentage in annual savings numbers',

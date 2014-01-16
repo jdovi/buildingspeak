@@ -277,15 +277,16 @@ class GAPowerPandL(RateSchedule):
                                     df['k4a'] + df['k4b'] + df['k4c'] + df['k4d']   )
                 sum1 = df['checksum'].sum()
                 sum2 = df['Consumption'].sum()
-                if min(sum1,sum2)/max(sum1,sum2) < Decimal(0.999):
-                    m = Message(when=timezone.now(),
-                            message_type='Code Error',
-                            subject='Calculation failed.',
-                            comment='GAPowerPandL %s get_cost_df computed tier consumptions that do not sum to total consumption, function aborted.' % self.id)
-                    m.save()
-                    self.messages.add(m)
-                    print m
-                    raise TypeError
+                if not(sum1 == Decimal(0) and sum2 == Decimal(0)):
+                    if min(sum1,sum2)/max(sum1,sum2) < Decimal(0.999):
+                        m = Message(when=timezone.now(),
+                                message_type='Code Error',
+                                subject='Calculation failed.',
+                                comment='GAPowerPandL %s get_cost_df computed tier consumptions that do not sum to total consumption, function aborted.' % self.id)
+                        m.save()
+                        self.messages.add(m)
+                        print m
+                        raise TypeError
                 
                 df['Consumption Cost'] = (  df['k1a']*self.rate1a + df['k1b']*self.rate1b +
                                             df['k1c']*self.rate1c + df['k1d']*self.rate1d +
@@ -362,7 +363,7 @@ class GAPowerPandL(RateSchedule):
         return df
     def is_eligible(self, df):
         return self.pass_limitation_of_service(df=df)
-    def get_billing_demand_df(self, df): #######need to make this function keep df and pull up to 11 months of existing data in BILLx monther to use for billing demand calc
+    def get_billing_demand_df(self, df, billx):
         """function(df, billx)
         
         Given dataframe with
@@ -376,16 +377,17 @@ class GAPowerPandL(RateSchedule):
             winter_months = self.get_winter_months()
             df['Calculated Billing Demand'] = Decimal(0.0)
             df = df.sort_index()
+            billxdf = billx.get_monther_period_dataframe()
+            billxdf = billxdf.sort_index()
+            df_window = billxdf[max(0,len(billxdf)-int(self.billing_demand_sliding_month_window)):]
             
             for i in range(0,len(df)):
-                df11 = df[max(0,i-int(self.billing_demand_sliding_month_window)):i]
-                
-                summer_peaks = df11['Peak Demand'][[x.month in summer_months for x in df11['End Date']]]
+                summer_peaks = df_window['Peak Demand (act)'][[x.month in summer_months for x in df_window['End Date']]]
                 if len(summer_peaks)==0:
                     summer_max = 0
                 else:
                     summer_max = summer_peaks.max()
-                winter_peaks = df11['Peak Demand'][[x.month in winter_months for x in df11['End Date']]]
+                winter_peaks = df_window['Peak Demand (act)'][[x.month in winter_months for x in df_window['End Date']]]
                 if len(winter_peaks)==0:
                     winter_max = 0
                 else:
@@ -393,7 +395,7 @@ class GAPowerPandL(RateSchedule):
                 
                 if df['End Date'][i].month in summer_months: #might normally use df.index[i].month but GAPower uses meter read date
                     df['Calculated Billing Demand'][i:i+1] = max(
-                            df['Peak Demand'][i],
+                            df['Peak Demand (act)'][i],
                             self.summer_summer_threshold * summer_max,
                             self.summer_winter_threshold * winter_max,
                             self.contract_minimum_demand,

@@ -215,14 +215,16 @@ class MeterConsumptionModel(models.Model):
             if current_model['wname'] == ['Days']:
                 df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
             if 'CDD (consumption)/day' in current_model['xnames']:
-                df = df.drop(['CDD (consumption)'], axis = 1)
-                df = self.meter.weather_station.get_CDD_df(df, self.Tccp)
-                df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
+                if 'CDD (consumption)' not in df.columns:
+#                df = df.drop(['CDD (consumption)'], axis = 1) ##1/13/2014: don't replace XDD
+                    df = self.meter.weather_station.get_CDD_df(df, self.Tccp) ##1/13/2014: only get if not already present
+                    df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
                 df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
             if 'HDD (consumption)/day' in current_model['xnames']:
-                df = df.drop(['HDD (consumption)'], axis = 1)
-                df = self.meter.weather_station.get_HDD_df(df, self.Thcp)
-                df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
+                if 'HDD (consumption)' not in df.columns:
+#                df = df.drop(['HDD (consumption)'], axis = 1) ##1/13/2014: don't replace XDD
+                    df = self.meter.weather_station.get_HDD_df(df, self.Thcp) ##1/13/2014: only get if not already present
+                    df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                 df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
             if 'consumption/day' in current_model['yname']:
                 df['consumption/day'] = df['Consumption (act)']/df['Days']
@@ -269,10 +271,11 @@ class MeterConsumptionModel(models.Model):
         try:
             if model_type is None: model_type = self.model_type
             pred_alpha = self.prediction_alpha
-            wname = self.get_available_models()[1][self.model_type]['wname']
-            xnames = self.get_available_models()[1][self.model_type]['xnames']
-            yname = self.get_available_models()[1][self.model_type]['yname']
-            include_intercept = self.get_available_models()[1][self.model_type]['include_intercept']
+            available_models = self.get_available_models()
+            wname = available_models[1][self.model_type]['wname']
+            xnames = available_models[1][self.model_type]['xnames']
+            yname = available_models[1][self.model_type]['yname']
+            include_intercept = available_models[1][self.model_type]['include_intercept']
             answer = [include_intercept, wname, xnames, yname, pred_alpha]
         except:
             m = Message(when=timezone.now(),
@@ -672,10 +675,11 @@ class MeterConsumptionModel(models.Model):
         attributes."""
         try:
             if self.model_type is None: raise TypeError
-            wname = self.get_available_models()[1][self.model_type]['wname']
-            xnames = self.get_available_models()[1][self.model_type]['xnames']
-            yname = self.get_available_models()[1][self.model_type]['yname']
-            include_intercept = self.get_available_models()[1][self.model_type]['include_intercept']
+            available_models = self.get_available_models()
+            wname = available_models[1][self.model_type]['wname']
+            xnames = available_models[1][self.model_type]['xnames']
+            yname = available_models[1][self.model_type]['yname']
+            include_intercept = available_models[1][self.model_type]['include_intercept']
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -1031,9 +1035,10 @@ class MeterConsumptionModel(models.Model):
         try:
             df = self.prep_df(df)
             pred_alpha = self.prediction_alpha
-            wname = self.get_available_models()[1][self.model_type]['wname']
-            xnames = self.get_available_models()[1][self.model_type]['xnames']
-            include_intercept = self.get_available_models()[1][self.model_type]['include_intercept']
+            available_models = self.get_available_models()
+            wname = available_models[1][self.model_type]['wname']
+            xnames = available_models[1][self.model_type]['xnames']
+            include_intercept = available_models[1][self.model_type]['include_intercept']
             predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha)
         except:
             m = Message(when=timezone.now(),
@@ -1243,13 +1248,15 @@ class MeterPeakDemandModel(models.Model):
             if current_model['wname'] == ['Days']:
                 df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
             if 'CDD (peak demand)/day' in current_model['xnames']:
-                df = df.drop(['CDD (peak demand)'], axis = 1)
-                df = self.meter.weather_station.get_CDD_df(df, self.Tccp)
+                if 'CDD (peak demand)' not in df.columns:
+#                df = df.drop(['CDD (peak demand)'], axis = 1) ##1/13/2014: don't replace XDD
+                    df = self.meter.weather_station.get_CDD_df(df, self.Tccp) ##1/13/2014: only get if not already present
                 df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
                 df['CDD (peak demand)/day'] = df['CDD (peak demand)']/df['Days']
             if 'HDD (peak demand)/day' in current_model['xnames']:
-                df = df.drop(['HDD (peak demand)'], axis = 1)
-                df = self.meter.weather_station.get_HDD_df(df, self.Thcp)
+                if 'HDD (peak demand)' not in df.columns:
+#                df = df.drop(['HDD (peak demand)'], axis = 1) ##1/13/2014: don't replace XDD
+                    df = self.meter.weather_station.get_HDD_df(df, self.Thcp) ##1/13/2014: only get if not already present
                 df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
                 df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
             if 'peak demand/day' in current_model['yname']:
@@ -1297,10 +1304,11 @@ class MeterPeakDemandModel(models.Model):
         try:
             if model_type is None: model_type = self.model_type
             pred_alpha = self.prediction_alpha
-            wname = self.get_available_models()[1][self.model_type]['wname']
-            xnames = self.get_available_models()[1][self.model_type]['xnames']
-            yname = self.get_available_models()[1][self.model_type]['yname']
-            include_intercept = self.get_available_models()[1][self.model_type]['include_intercept']
+            available_models = self.get_available_models()
+            wname = available_models[1][self.model_type]['wname']
+            xnames = available_models[1][self.model_type]['xnames']
+            yname = available_models[1][self.model_type]['yname']
+            include_intercept = available_models[1][self.model_type]['include_intercept']
             answer = [include_intercept, wname, xnames, yname, pred_alpha]
         except:
             m = Message(when=timezone.now(),
@@ -1700,10 +1708,11 @@ class MeterPeakDemandModel(models.Model):
         attributes."""
         try:
             if self.model_type is None: raise TypeError
-            wname = self.get_available_models()[1][self.model_type]['wname']
-            xnames = self.get_available_models()[1][self.model_type]['xnames']
-            yname = self.get_available_models()[1][self.model_type]['yname']
-            include_intercept = self.get_available_models()[1][self.model_type]['include_intercept']
+            available_models = self.get_available_models()
+            wname = available_models[1][self.model_type]['wname']
+            xnames = available_models[1][self.model_type]['xnames']
+            yname = available_models[1][self.model_type]['yname']
+            include_intercept = available_models[1][self.model_type]['include_intercept']
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -2057,11 +2066,11 @@ class MeterPeakDemandModel(models.Model):
         function."""
 
         try:
-            df = self.prep_df(df)
             pred_alpha = self.prediction_alpha
-            wname = self.get_available_models()[1][self.model_type]['wname']
-            xnames = self.get_available_models()[1][self.model_type]['xnames']
-            include_intercept = self.get_available_models()[1][self.model_type]['include_intercept']
+            available_models = self.get_available_models()
+            wname = available_models[1][self.model_type]['wname']
+            xnames = available_models[1][self.model_type]['xnames']
+            include_intercept = available_models[1][self.model_type]['include_intercept']
             predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha)
         except:
             m = Message(when=timezone.now(),

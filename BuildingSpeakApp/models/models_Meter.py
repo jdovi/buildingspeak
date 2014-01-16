@@ -212,7 +212,7 @@ class Meter(models.Model):
             m = Message(when=timezone.now(),
                         message_type='Code Error',
                         subject='Calculation failed.',
-                        comment='EfficiencyMeasure %s get_savings_df failed, function aborted.' % self.id)
+                        comment='Meter %s get_all_savings failed, function aborted.' % self.id)
             m.save()
             self.messages.add(m)
             print m
@@ -340,6 +340,9 @@ class Meter(models.Model):
                                 if storedbd is None or len(storedbd)<1:
                                     readbd['Exists'] = 0
                                 else:
+                                    #here we get rid of months that are forecasted and not actual, since
+                                    #we don't want to preserve these if there's incoming uploaded data
+                                    #for those periods
                                     storedbd['Cost (act) is NaN'] = storedbd['Cost (act)'].apply(decimal_isnan)
                                     storedbd['Consumption (act) is NaN'] = storedbd['Consumption (act)'].apply(decimal_isnan)
                                     storedbd['Peak Demand (act) is NaN'] = storedbd['Peak Demand (act)'].apply(decimal_isnan)
@@ -347,14 +350,20 @@ class Meter(models.Model):
                                             storedbd['Consumption (act) is NaN'][i],
                                             storedbd['Peak Demand (act) is NaN'][i]] for i in range(0,len(storedbd))]
                                     storedbd['is actual not forecasted monthling'] = [not(i[0]) and not(i[1]) and not(i[2]) for i in temp]
-                                    storedbd = storedbd[[storedbd['is actual not forecasted monthling']]]
+                                    storedbd = storedbd[storedbd['is actual not forecasted monthling']]
                                     readbd['Exists'] = readbd['Exists'].apply(lambda lamvar: lamvar in storedbd.index)
                                 
                                 #ignore data that Exists but not(Overwrite)
                                 #load data that not(Exists)
                                 readbd_a = readbd[readbd['Exists']==0]
                                 if len(readbd_a)>0:
-                                    readbd_a = self.monther_set.get(name='BILLx').create_calculated_columns(readbd_a)
+                                    #readbd_a = self.monther_set.get(name='BILLx').create_calculated_columns(readbd_a)
+                                    readbd_a = self.bill_data_calc_dd(df = readbd_a)
+                                    readbd_a = self.bill_data_calc_baseline(df = readbd_a)
+                                    readbd_a = self.bill_data_calc_savings(df = readbd_a)
+                                    readbd_a = self.bill_data_calc_dependents(df = readbd_a)
+                                    readbd_a = self.bill_data_calc_kbtu(df = readbd_a)
+                                    readbd_a = self.bill_data_calc_costs(df = readbd_a)
                                     success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe(readbd_a)
                                     if not success_a: raise TypeError
                             except:
@@ -418,7 +427,8 @@ class Meter(models.Model):
         try:
             df.rename(columns={'Consumption (act)': 'Consumption',
                                'Peak Demand (act)': 'Peak Demand'}, inplace=True)
-            df = df.drop(['kBtu Consumption (act)','kBtuh Peak Demand (act)'], axis=1)
+            if 'kBtu Consumption (act)' in df.columns: df = df.drop(['kBtu Consumption (act)'], axis = 1)
+            if 'kBtuh Peak Demand (act)' in df.columns: df = df.drop(['kBtuh Peak Demand (act)'], axis = 1)
             result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
             if result is not None: df = result
             df.rename(columns={'Consumption': 'Consumption (act)',
@@ -437,7 +447,8 @@ class Meter(models.Model):
         try:
             df.rename(columns={'Consumption (asave)': 'Consumption',
                                'Peak Demand (asave)': 'Peak Demand'}, inplace=True)
-            df = df.drop(['kBtu Consumption (asave)','kBtuh Peak Demand (asave)'], axis=1)
+            if 'kBtu Consumption (asave)' in df.columns: df = df.drop(['kBtu Consumption (asave)'], axis = 1)
+            if 'kBtuh Peak Demand (asave)' in df.columns: df = df.drop(['kBtuh Peak Demand (asave)'], axis = 1)
             result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
             if result is not None: df = result
             df.rename(columns={'Consumption': 'Consumption (asave)',
@@ -456,7 +467,8 @@ class Meter(models.Model):
         try:
             df.rename(columns={'Consumption (base delta)': 'Consumption',
                                'Peak Demand (base delta)': 'Peak Demand'}, inplace=True)
-            df = df.drop(['kBtu Consumption (base delta)','kBtuh Peak Demand (base delta)'], axis=1)
+            if 'kBtu Consumption (base delta)' in df.columns: df = df.drop(['kBtu Consumption (base delta)'], axis = 1)
+            if 'kBtuh Peak Demand (base delta)' in df.columns: df = df.drop(['kBtuh Peak Demand (base delta)'], axis = 1)
             result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
             if result is not None: df = result
             df.rename(columns={'Consumption': 'Consumption (base delta)',
@@ -475,7 +487,8 @@ class Meter(models.Model):
         try:
             df.rename(columns={'Consumption (base)': 'Consumption',
                                'Peak Demand (base)': 'Peak Demand'}, inplace=True)
-            df = df.drop(['kBtu Consumption (base)','kBtuh Peak Demand (base)'], axis=1)
+            if 'kBtu Consumption (base)' in df.columns: df = df.drop(['kBtu Consumption (base)'], axis = 1)
+            if 'kBtuh Peak Demand (base)' in df.columns: df = df.drop(['kBtuh Peak Demand (base)'], axis = 1)
             result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
             if result is not None: df = result
             df.rename(columns={'Consumption': 'Consumption (base)',
@@ -494,7 +507,8 @@ class Meter(models.Model):
         try:
             df.rename(columns={'Consumption (esave delta)': 'Consumption',
                                'Peak Demand (esave delta)': 'Peak Demand'}, inplace=True)
-            df = df.drop(['kBtu Consumption (esave delta)','kBtuh Peak Demand (esave delta)'], axis=1)
+            if 'kBtu Consumption (esave delta)' in df.columns: df = df.drop(['kBtu Consumption (esave delta)'], axis = 1)
+            if 'kBtuh Peak Demand (esave delta)' in df.columns: df = df.drop(['kBtuh Peak Demand (esave delta)'], axis = 1)
             result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
             if result is not None: df = result
             df.rename(columns={'Consumption': 'Consumption (esave delta)',
@@ -513,7 +527,8 @@ class Meter(models.Model):
         try:
             df.rename(columns={'Consumption (esave)': 'Consumption',
                                'Peak Demand (esave)': 'Peak Demand'}, inplace=True)
-            df = df.drop(['kBtu Consumption (esave)','kBtuh Peak Demand (esave)'], axis=1)
+            if 'kBtu Consumption (esave)' in df.columns: df = df.drop(['kBtu Consumption (esave)'], axis = 1)
+            if 'kBtuh Peak Demand (esave)' in df.columns: df = df.drop(['kBtuh Peak Demand (esave)'], axis = 1)
             result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
             if result is not None: df = result
             df.rename(columns={'Consumption': 'Consumption (esave)',
@@ -532,7 +547,8 @@ class Meter(models.Model):
         try:
             df.rename(columns={'Consumption (exp delta)': 'Consumption',
                                'Peak Demand (exp delta)': 'Peak Demand'}, inplace=True)
-            df = df.drop(['kBtu Consumption (exp delta)','kBtuh Peak Demand (exp delta)'], axis=1)
+            if 'kBtu Consumption (exp delta)' in df.columns: df = df.drop(['kBtu Consumption (exp delta)'], axis = 1)
+            if 'kBtuh Peak Demand (exp delta)' in df.columns: df = df.drop(['kBtuh Peak Demand (exp delta)'], axis = 1)
             result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
             if result is not None: df = result
             df.rename(columns={'Consumption': 'Consumption (exp delta)',
@@ -551,7 +567,8 @@ class Meter(models.Model):
         try:
             df.rename(columns={'Consumption (exp)': 'Consumption',
                                'Peak Demand (exp)': 'Peak Demand'}, inplace=True)
-            df = df.drop(['kBtu Consumption (exp)','kBtuh Peak Demand (exp)'], axis=1)
+            if 'kBtu Consumption (exp)' in df.columns: df = df.drop(['kBtu Consumption (exp)'], axis = 1)
+            if 'kBtuh Peak Demand (exp)' in df.columns: df = df.drop(['kBtuh Peak Demand (exp)'], axis = 1)
             result = self.add_kBtu_kBtuh(df, self.utility_type, self.units)
             if result is not None: df = result
             df.rename(columns={'Consumption': 'Consumption (exp)',
@@ -591,7 +608,8 @@ class Meter(models.Model):
         else:
             try:
                 df = self.weather_station.get_CDD_df(df, self.monther_set.get(name='BILLx').consumption_model.Tccp)
-                df = df.drop(['CDD (consumption)'], axis = 1)
+                if 'CDD (consumption)' in df.columns: 
+                    df = df.drop(['CDD (consumption)'], axis = 1)
                 df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
             except:
                 m = Message(when=timezone.now(),
@@ -618,7 +636,8 @@ class Meter(models.Model):
         else:
             try:
                 df = self.weather_station.get_HDD_df(df, self.monther_set.get(name='BILLx').consumption_model.Thcp)
-                df = df.drop(['HDD (consumption)'], axis = 1)
+                if 'HDD (consumption)' in df.columns: 
+                    df = df.drop(['HDD (consumption)'], axis = 1)
                 df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
             except:
                 m = Message(when=timezone.now(),
@@ -645,7 +664,8 @@ class Meter(models.Model):
         else:
             try:
                 df = self.weather_station.get_CDD_df(df, self.monther_set.get(name='BILLx').peak_demand_model.Tccp)
-                df = df.drop(['CDD (peak demand)'], axis = 1)
+                if 'CDD (peak demand)' in df.columns: 
+                    df = df.drop(['CDD (peak demand)'], axis = 1)
                 df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
             except:
                 m = Message(when=timezone.now(),
@@ -672,7 +692,8 @@ class Meter(models.Model):
         else:
             try:
                 df = self.weather_station.get_HDD_df(df, self.monther_set.get(name='BILLx').peak_demand_model.Thcp)
-                df = df.drop(['HDD (peak demand)'], axis = 1)
+                if 'HDD (peak demand)' in df.columns: 
+                    df = df.drop(['HDD (peak demand)'], axis = 1)
                 df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
             except:
                 m = Message(when=timezone.now(),
@@ -752,8 +773,11 @@ class Meter(models.Model):
         attached to Meter and
         stores on BILLx Monther."""
         try:
-            df = df.drop(['Cost (esave)','Peak Demand (esave)','Consumption (esave)',
-                          'Peak Demand (esave delta)','Consumption (esave delta)'], axis = 1)
+            if 'Cost (esave)' in df.columns: df = df.drop(['Cost (esave)'], axis = 1)
+            if 'Peak Demand (esave)' in df.columns: df = df.drop(['Peak Demand (esave)'], axis = 1)
+            if 'Consumption (esave)' in df.columns: df = df.drop(['Consumption (esave)'], axis = 1)
+            if 'Peak Demand (esave delta)' in df.columns: df = df.drop(['Peak Demand (esave delta)'], axis = 1)
+            if 'Consumption (esave delta)' in df.columns: df = df.drop(['Consumption (esave delta)'], axis = 1)
             df = self.get_all_savings(df=df)
         except:
             m = Message(when=timezone.now(),
@@ -776,8 +800,12 @@ class Meter(models.Model):
         try:
             df['Peak Demand (exp)'] = df['Peak Demand (base)'] - df['Peak Demand (esave)']
             df['Consumption (exp)'] = df['Consumption (base)'] - df['Consumption (esave)']
+
             df['Peak Demand (asave)'] = df['Peak Demand (base)'] - df['Peak Demand (act)']
             df['Consumption (asave)'] = df['Consumption (base)'] - df['Consumption (act)']
+            df['Peak Demand (asave)'] = df['Peak Demand (asave)'].apply(lambda x: max(x, Decimal(0)))
+            df['Consumption (asave)'] = df['Consumption (asave)'].apply(lambda x: max(x, Decimal(0)))
+
             df['Peak Demand (exp delta)'] = df['Peak Demand (base delta)'] - df['Peak Demand (esave delta)']
             df['Consumption (exp delta)'] = df['Consumption (base delta)'] - df['Consumption (esave delta)']
         except:
@@ -803,35 +831,42 @@ class Meter(models.Model):
             m = Message(when=timezone.now(),
                     message_type='Code Warning',
                     subject='Missing data.',
-                    comment='Meter %s bill_data_calc_costs unable to retrieve rate schedule.' % self.id)
+                    comment='Meter %s bill_data_calc_costs unable to retrieve RateSchedule.' % self.id)
             m.save()
             self.messages.add(m)
             print m
         else:
             try:
                 df.rename(columns={'Consumption (base)': 'Consumption',
-                                   'Peak Demand (base)': 'Peak Demand'},inplace=True)
-                df['Cost (base)'] = self.rate_schedule.as_child().get_cost_df(df=df)['Calculated Cost']
+                                   'Peak Demand (base)': 'Peak Demand',
+                                   'Billing Demand (base)': 'Billing Demand'},inplace=True)
+                df['Cost (base)'] = self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost']
                 df.rename(columns={'Consumption': 'Consumption (base)',
-                                   'Peak Demand': 'Peak Demand (base)'},inplace=True)
+                                   'Peak Demand': 'Peak Demand (base)',
+                                   'Billing Demand': 'Billing Demand (base)'},inplace=True)
                 df.rename(columns={'Consumption (exp)': 'Consumption',
-                                   'Peak Demand (exp)': 'Peak Demand'},inplace=True)
-                df['Cost (exp)'] = self.rate_schedule.as_child().get_cost_df(df=df)['Calculated Cost']
+                                   'Peak Demand (exp)': 'Peak Demand',
+                                   'Billing Demand (exp)': 'Billing Demand'},inplace=True)
+                df['Cost (exp)'] = self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost']
                 df.rename(columns={'Consumption': 'Consumption (exp)',
-                                   'Peak Demand': 'Peak Demand (exp)'},inplace=True)
+                                   'Peak Demand': 'Peak Demand (exp)',
+                                   'Billing Demand': 'Billing Demand (exp)'},inplace=True)
                 df['Cost (esave)'] = df['Cost (base)'] - df['Cost (exp)']
                 df['Cost (asave)'] = df['Cost (base)'] - df['Cost (act)']
+                df['Cost (esave)'] = df['Cost (esave)'].apply(lambda x: max(x, Decimal(0)))
+                df['Cost (asave)'] = df['Cost (asave)'].apply(lambda x: max(x, Decimal(0)))
                 
                 df['Consumption'] = df['Consumption (base)'] - df['Consumption (base delta)']
                 df['Peak Demand'] = df['Peak Demand (base)'] - df['Peak Demand (base delta)']
                 df['Cost (base delta)'] = (df['Cost (base)'] -
-                                            self.rate_schedule.as_child().get_cost_df(df=df)['Calculated Cost'])
-                                            
+                                            self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
+                
                 df['Consumption'] = df['Consumption (esave)'] - df['Consumption (esave delta)']
                 df['Peak Demand'] = df['Peak Demand (esave)'] - df['Peak Demand (esave delta)']
                 df['Cost (esave delta)'] = (df['Cost (esave)'] -
-                                            self.rate_schedule.as_child().get_cost_df(df=df)['Calculated Cost'])
-    
+                                            self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
+                df['Cost (esave delta)'] = df['Cost (esave delta)'].apply(lambda x: max(x, Decimal(0)))
+                
                 df = df.drop(['Consumption', 'Peak Demand'], axis = 1)
                 
                 df['Cost (exp delta)'] = df['Cost (base delta)'] - df['Cost (esave delta)']
