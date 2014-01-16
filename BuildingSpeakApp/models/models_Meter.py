@@ -340,17 +340,6 @@ class Meter(models.Model):
                                 if storedbd is None or len(storedbd)<1:
                                     readbd['Exists'] = 0
                                 else:
-                                    #here we get rid of months that are forecasted and not actual, since
-                                    #we don't want to preserve these if there's incoming uploaded data
-                                    #for those periods
-                                    storedbd['Cost (act) is NaN'] = storedbd['Cost (act)'].apply(decimal_isnan)
-                                    storedbd['Consumption (act) is NaN'] = storedbd['Consumption (act)'].apply(decimal_isnan)
-                                    storedbd['Peak Demand (act) is NaN'] = storedbd['Peak Demand (act)'].apply(decimal_isnan)
-                                    temp = [[storedbd['Cost (act) is NaN'][i],
-                                            storedbd['Consumption (act) is NaN'][i],
-                                            storedbd['Peak Demand (act) is NaN'][i]] for i in range(0,len(storedbd))]
-                                    storedbd['is actual not forecasted monthling'] = [not(i[0]) and not(i[1]) and not(i[2]) for i in temp]
-                                    storedbd = storedbd[storedbd['is actual not forecasted monthling']]
                                     readbd['Exists'] = readbd['Exists'].apply(lambda lamvar: lamvar in storedbd.index)
                                 
                                 #ignore data that Exists but not(Overwrite)
@@ -377,9 +366,30 @@ class Meter(models.Model):
                                 success_a = False
                             else:
                                 try:
-                                    #retrieve and overwrite data that Exists and Overwrite
-                                    readbd_b = readbd[(readbd['Exists']==1) & (readbd['Overwrite']==1)]
+                                    #retrieve and overwrite data that: Exists and (Overwrite or IsForecasted)
+                                    #here we get rid of months that are forecasted and not actual, since
+                                    #we don't want to preserve these if there's incoming uploaded data
+                                    #for those periods
+                                    storedbd['Cost (act) is NaN'] = storedbd['Cost (act)'].apply(decimal_isnan)
+                                    storedbd['Consumption (act) is NaN'] = storedbd['Consumption (act)'].apply(decimal_isnan)
+                                    storedbd['Peak Demand (act) is NaN'] = storedbd['Peak Demand (act)'].apply(decimal_isnan)
+                                    temp = [[storedbd['Cost (act) is NaN'][i],
+                                            storedbd['Consumption (act) is NaN'][i],
+                                            storedbd['Peak Demand (act) is NaN'][i]] for i in range(0,len(storedbd))]
+                                    storedbd['IsForecasted'] = [i[0] and i[1] and i[2] for i in temp]
+                                    storedbd = storedbd[storedbd['IsForecasted']]
+                                    
+                                    readbd['IsForecasted'] = readbd.index
+                                    readbd['IsForecasted'] = readbd['IsForecasted'].apply(lambda lamvar: lamvar in storedbd.index)
+                                    
+                                    readbd_b = readbd[(readbd['Exists']==1) & (readbd['Overwrite']==1 | readbd['IsForecasted'])]
                                     if len(readbd_b)>0:
+                                        readbd_b = self.bill_data_calc_dd(df = readbd_b)
+                                        readbd_b = self.bill_data_calc_baseline(df = readbd_b)
+                                        readbd_b = self.bill_data_calc_savings(df = readbd_b)
+                                        readbd_b = self.bill_data_calc_dependents(df = readbd_b)
+                                        readbd_b = self.bill_data_calc_kbtu(df = readbd_b)
+                                        readbd_b = self.bill_data_calc_costs(df = readbd_b)
                                         for i in range(0,len(readbd_b)):
                                             try:
                                                 month_i = None #setting here to avoid error in Except block
@@ -389,11 +399,63 @@ class Meter(models.Model):
                                                 if mlg is None: raise TypeError
                                                 mlg.__setattr__('start_date',readbd_b['Start Date'][i])
                                                 mlg.__setattr__('end_date',readbd_b['End Date'][i])
+                                                
                                                 mlg.__setattr__('act_billing_demand',readbd_b['Billing Demand (act)'][i])
                                                 mlg.__setattr__('act_peak_demand',readbd_b['Peak Demand (act)'][i])
                                                 mlg.__setattr__('act_consumption',readbd_b['Consumption (act)'][i])
                                                 mlg.__setattr__('act_cost',readbd_b['Cost (act)'][i])
-                                                mlg.flush_calculated_data()
+                                                mlg.__setattr__('act_kBtu_consumption',readbd_b['kBtu Consumption (act)'][i])
+                                                mlg.__setattr__('act_kBtuh_peak_demand',readbd_b['kBtuh Peak Demand (act)'][i])
+                                                
+                                                mlg.__setattr__('exp_billing_demand',readbd_b['Billing Demand (exp)'][i])
+                                                mlg.__setattr__('exp_peak_demand',readbd_b['Peak Demand (exp)'][i])
+                                                mlg.__setattr__('exp_consumption',readbd_b['Consumption (exp)'][i])
+                                                mlg.__setattr__('exp_cost',readbd_b['Cost (exp)'][i])
+                                                mlg.__setattr__('exp_kBtu_consumption',readbd_b['kBtu Consumption (exp)'][i])
+                                                mlg.__setattr__('exp_kBtuh_peak_demand',readbd_b['kBtuh Peak Demand (exp)'][i])
+                                                
+                                                mlg.__setattr__('exp_billing_demand_delta',readbd_b['Billing Demand (exp delta)'][i])
+                                                mlg.__setattr__('exp_peak_demand_delta',readbd_b['Peak Demand (exp delta)'][i])
+                                                mlg.__setattr__('exp_consumption_delta',readbd_b['Consumption (exp delta)'][i])
+                                                mlg.__setattr__('exp_cost_delta',readbd_b['Cost (exp delta)'][i])
+                                                mlg.__setattr__('exp_kBtu_consumption_delta',readbd_b['kBtu Consumption (exp delta)'][i])
+                                                mlg.__setattr__('exp_kBtuh_peak_demand_delta',readbd_b['kBtuh Peak Demand (exp delta)'][i])
+                                                
+                                                mlg.__setattr__('base_billing_demand',readbd_b['Billing Demand (base)'][i])
+                                                mlg.__setattr__('base_peak_demand',readbd_b['Peak Demand (base)'][i])
+                                                mlg.__setattr__('base_consumption',readbd_b['Consumption (base)'][i])
+                                                mlg.__setattr__('base_cost',readbd_b['Cost (base)'][i])
+                                                mlg.__setattr__('base_kBtu_consumption',readbd_b['kBtu Consumption (base)'][i])
+                                                mlg.__setattr__('base_kBtuh_peak_demand',readbd_b['kBtuh Peak Demand (base)'][i])
+                                                
+                                                mlg.__setattr__('base_billing_demand_delta',readbd_b['Billing Demand (base delta)'][i])
+                                                mlg.__setattr__('base_peak_demand_delta',readbd_b['Peak Demand (base delta)'][i])
+                                                mlg.__setattr__('base_consumption_delta',readbd_b['Consumption (base delta)'][i])
+                                                mlg.__setattr__('base_cost_delta',readbd_b['Cost (base delta)'][i])
+                                                mlg.__setattr__('base_kBtu_consumption_delta',readbd_b['kBtu Consumption (base delta)'][i])
+                                                mlg.__setattr__('base_kBtuh_peak_demand_delta',readbd_b['kBtuh Peak Demand (base delta)'][i])
+                                                
+                                                mlg.__setattr__('esave_billing_demand',readbd_b['Billing Demand (esave)'][i])
+                                                mlg.__setattr__('esave_peak_demand',readbd_b['Peak Demand (esave)'][i])
+                                                mlg.__setattr__('esave_consumption',readbd_b['Consumption (esave)'][i])
+                                                mlg.__setattr__('esave_cost',readbd_b['Cost (esave)'][i])
+                                                mlg.__setattr__('esave_kBtu_consumption',readbd_b['kBtu Consumption (esave)'][i])
+                                                mlg.__setattr__('esave_kBtuh_peak_demand',readbd_b['kBtuh Peak Demand (esave)'][i])
+                                                
+                                                mlg.__setattr__('esave_billing_demand_delta',readbd_b['Billing Demand (esave delta)'][i])
+                                                mlg.__setattr__('esave_peak_demand_delta',readbd_b['Peak Demand (esave delta)'][i])
+                                                mlg.__setattr__('esave_consumption_delta',readbd_b['Consumption (esave delta)'][i])
+                                                mlg.__setattr__('esave_cost_delta',readbd_b['Cost (esave delta)'][i])
+                                                mlg.__setattr__('esave_kBtu_consumption_delta',readbd_b['kBtu Consumption (esave delta)'][i])
+                                                mlg.__setattr__('esave_kBtuh_peak_demand_delta',readbd_b['kBtuh Peak Demand (esave delta)'][i])
+                                                
+                                                mlg.__setattr__('asave_billing_demand',readbd_b['Billing Demand (asave)'][i])
+                                                mlg.__setattr__('asave_peak_demand',readbd_b['Peak Demand (asave)'][i])
+                                                mlg.__setattr__('asave_consumption',readbd_b['Consumption (asave)'][i])
+                                                mlg.__setattr__('asave_cost',readbd_b['Cost (asave)'][i])
+                                                mlg.__setattr__('asave_kBtu_consumption',readbd_b['kBtu Consumption (asave)'][i])
+                                                mlg.__setattr__('asave_kBtuh_peak_demand',readbd_b['kBtuh Peak Demand (asave)'][i])
+                                                
                                                 mlg.save()
                                                 month_i = None #resetting to avoid carrying over incorrectly
                                                 success_b = True #set True if at least one mlg is loaded
