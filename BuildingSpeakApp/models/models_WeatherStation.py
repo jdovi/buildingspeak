@@ -39,7 +39,7 @@ class WeatherStation(models.Model):
                     help_text='import weather data?')
     weather_data_upload_file = models.FileField(null=True, blank=True, upload_to=upload_weather_data_file_path, 
                     storage=S3BotoStorage(location='user_data_files/weather_stations'),
-                    help_text='link to text file containing monthly bill data; must be formatted correctly')
+                    help_text='link to text file containing day dates to upload')
     #relationships
     messages = models.ManyToManyField('Message')
 

@@ -20,11 +20,6 @@ class UnitSchedule(models.Model):
     messages = models.ManyToManyField('Message')
 
     #attributes
-#    day_of_week_list = dbarray.TextArrayField(null=True, blank=True)
-#    month_list = dbarray.TextArrayField(null=True, blank=True)
-#    day_of_month_list = dbarray.TextArrayField(null=True, blank=True)
-#    hour_list = dbarray.TextArrayField(null=True, blank=True)
-#    minute_list = dbarray.TextArrayField(null=True, blank=True)
     cron_string = models.CharField(null=True, blank=True, max_length=200)
     day_of_week_list = ArrayField(blank=True, null=True, dbtype='text')
     month_list = ArrayField(blank=True, null=True, dbtype='text')

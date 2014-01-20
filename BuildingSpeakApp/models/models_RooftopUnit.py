@@ -60,8 +60,6 @@ class RooftopUnit(Equipment):
                                 help_text='Rooftop Unit: compressor 3 nameplate current (RLA), A')
     nameplate_c3_PH = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
                                 help_text='Rooftop Unit: compressor 3 nameplate phase, (1,3)')
-    nameplate_c3_PH = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
-                                help_text='Rooftop Unit: compressor 3 nameplate phase, (1,3)')
     nameplate_e1_QTY = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
                                 help_text='Rooftop Unit: evaporator fan 1 nameplate quantity, ()')
     nameplate_e1_PH = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
