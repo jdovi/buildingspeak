@@ -16,6 +16,32 @@ from storages.backends.s3boto import S3BotoStorage
 from django.contrib.auth.models import User
 
 
+def max_with_NaNs(x):
+    """function(x)
+    type(x) = list of Decimals
+    
+    Returns the maximum value
+    in the list, ignoring NaNs
+    unless all are NaNs which
+    returns Decimal(0)."""
+    for i,v in enumerate(x):
+        if v.is_nan(): x[i] = Decimal('-inf')
+    return max(x)
+
+def cap_negatives_with_NaN(x):
+    """function(x)
+    type(x) = Decimal
+    
+    Returns 0 if x is NaN or <0,
+    otherwise returns x."""
+    if x.is_nan():
+        y = Decimal(0)
+    elif x < 0:
+        y = Decimal(0)
+    else:
+        y = x
+    return y
+    
 def decimal_isnan(x):
     """function(x)
     

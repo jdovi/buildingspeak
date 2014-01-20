@@ -394,20 +394,20 @@ class GAPowerPandL(RateSchedule):
                     winter_max = winter_peaks.max()
                 
                 if df['End Date'][i].month in summer_months: #might normally use df.index[i].month but GAPower uses meter read date
-                    df['Calculated Billing Demand'][i:i+1] = max(
+                    df['Calculated Billing Demand'][i:i+1] = max_with_NaNs([
                             df['Peak Demand (act)'][i],
                             self.summer_summer_threshold * summer_max,
                             self.summer_winter_threshold * winter_max,
                             self.contract_minimum_demand,
                             self.minimum_fraction_contract_capacity * self.excess_kW_threshold,
-                            self.absolute_minimum_demand  )
+                            self.absolute_minimum_demand  ])
                 if df['End Date'][i].month in winter_months:
-                    df['Calculated Billing Demand'][i:i+1] = max(
+                    df['Calculated Billing Demand'][i:i+1] = max_with_NaNs([
                             self.winter_summer_threshold * summer_max,
                             self.winter_winter_threshold * winter_max,
                             self.contract_minimum_demand,
                             self.minimum_fraction_contract_capacity * self.excess_kW_threshold,
-                            self.absolute_minimum_demand  )
+                            self.absolute_minimum_demand  ])
         except:
             m = Message(when=timezone.now(),
                     message_type='Code Error',
@@ -490,13 +490,10 @@ class GAPowerPandL(RateSchedule):
                 answer = None
             else:
                 summer_months = self.get_summer_months()
-                limit_1 = self.limitation_of_service_winter_percent * max(
-                    df['Peak Demand'][[x.month not in summer_months for x in df['End Date']]])
-                
-                limit_2 = self.limitation_of_service_summer_percent * max(
-                    df['Peak Demand'][[x.month in summer_months for x in df['End Date']]])
-                answer = ( (max(limit_1, limit_2) < self.limitation_of_service_max_kW) and
-                           (max(limit_1, limit_2) > self.limitation_of_service_min_kW) )
+                limit_1 = self.limitation_of_service_winter_percent * df['Peak Demand'][[x.month not in summer_months for x in df['End Date']]].max()
+                limit_2 = self.limitation_of_service_summer_percent * df['Peak Demand'][[x.month in summer_months for x in df['End Date']]].max()
+                answer = ( (max_with_NaNs([limit_1, limit_2]) < self.limitation_of_service_max_kW) and
+                           (max_with_NaNs([limit_1, limit_2]) > self.limitation_of_service_min_kW) )
         except:
                 m = Message(when=timezone.now(),
                         message_type='Code Error',

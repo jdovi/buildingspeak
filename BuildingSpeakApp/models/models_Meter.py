@@ -346,13 +346,13 @@ class Meter(models.Model):
                                 #load data that not(Exists)
                                 readbd_a = readbd[readbd['Exists']==0]
                                 if len(readbd_a)>0:
-                                    #readbd_a = self.monther_set.get(name='BILLx').create_calculated_columns(readbd_a)
                                     readbd_a = self.bill_data_calc_dd(df = readbd_a)
                                     readbd_a = self.bill_data_calc_baseline(df = readbd_a)
                                     readbd_a = self.bill_data_calc_savings(df = readbd_a)
                                     readbd_a = self.bill_data_calc_dependents(df = readbd_a)
                                     readbd_a = self.bill_data_calc_kbtu(df = readbd_a)
                                     readbd_a = self.bill_data_calc_costs(df = readbd_a)
+                                    readbd_a = self.monther_set.get(name='BILLx').create_missing_required_columns(df = readbd_a)
                                     success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe(readbd_a)
                                     if not success_a: raise TypeError
                             except:
@@ -364,6 +364,10 @@ class Meter(models.Model):
                                 self.messages.add(m)
                                 print m
                                 success_a = False
+                                success_b = False
+                                success_c = False
+                                success_d = False
+                                success_e = False
                             else:
                                 try:
                                     #retrieve and overwrite data that: Exists and (Overwrite or IsForecasted)
@@ -389,6 +393,7 @@ class Meter(models.Model):
                                         readbd_b = self.bill_data_calc_savings(df = readbd_b)
                                         readbd_b = self.bill_data_calc_dependents(df = readbd_b)
                                         readbd_b = self.bill_data_calc_kbtu(df = readbd_b)
+                                        readbd_b = self.monther_set.get(name='BILLx').create_missing_required_columns(df = readbd_b)
                                         readbd_b = self.bill_data_calc_costs(df = readbd_b)
                                         for i in range(0,len(readbd_b)):
                                             try:
@@ -476,8 +481,122 @@ class Meter(models.Model):
                                     self.messages.add(m)
                                     print m
                                     success_b = False
-        return max(success, success_a, success_b)
+                                    success_c = False
+                                    success_d = False
+                                    success_e = False
+                                else:
+                                    try:
+                                        storedbd = self.monther_set.get(name='BILLx').get_monther_period_dataframe()
+                                        storedbd = storedbd.sort_index()
+                                        storedbd['Cost (act) is NaN'] = storedbd['Cost (act)'].apply(decimal_isnan)
+                                        storedbd['Consumption (act) is NaN'] = storedbd['Consumption (act)'].apply(decimal_isnan)
+                                        storedbd['Peak Demand (act) is NaN'] = storedbd['Peak Demand (act)'].apply(decimal_isnan)
+                                        temp = [[storedbd['Cost (act) is NaN'][i],
+                                                storedbd['Consumption (act) is NaN'][i],
+                                                storedbd['Peak Demand (act) is NaN'][i]] for i in range(0,len(storedbd))]
+                                        storedbd['IsForecasted'] = [i[0] and i[1] and i[2] for i in temp]
+                                        storedbd_fore = storedbd[storedbd['IsForecasted']]
+                                        for i in range(0,len(storedbd_fore)):
+                                            try:
+                                                month_i = None #setting here to avoid error in Except block
+                                                month_i = storedbd_fore.index[i]
+                                                per_date = UTC.localize(month_i.to_timestamp() + timedelta(days=10,hours=11,minutes=11,seconds=11))
+                                                mlg = Monthling.objects.filter(monther=self.monther_set.get(name='BILLx')).get(when=per_date)
+                                                if mlg is None: raise TypeError
+                                                mlg.delete()
+                                                month_i = None #resetting to avoid carrying over incorrectly
+                                                success_c = True #set True if at least one mlg is deleted
+                                            except:
+                                                m = Message(when=timezone.now(),
+                                                            message_type='Code Error',
+                                                            subject='Model update failed.',
+                                                            comment='Meter %s upload_bill_data failed to remove existing forecasted month %s, function aborted.' % (self.id, str(month_i)))
+                                                m.save()
+                                                self.messages.add(m)
+                                                print m
+                                        success_c = True #also set True if there are no forecasted months to delete
+                                    except:
+                                        m = Message(when=timezone.now(),
+                                                    message_type='Code Error',
+                                                    subject='Model update failed.',
+                                                    comment='Meter %s upload_bill_data failed to remove existing forecasted months, function aborted.' % self.id)
+                                        m.save()
+                                        self.messages.add(m)
+                                        print m
+                                        success_c = False
+                                        success_d = False
+                                        success_e = False
+                                    else:
+                                        try:
+                                            storedbd_act = storedbd[storedbd['IsForecasted'].apply(lambda ff: not(ff))]
+                                            storedbd_act = storedbd_act.sort_index()
+                                            last_day = storedbd_act['End Date'][-1]
+                                            forecast_df = pd.DataFrame({'Start Date': last_day + timedelta(days=1),
+                                                                        'End Date': last_day + timedelta(days=30)},
+                                                                       index = pd.period_range(last_day + timedelta(days = 1),
+                                                                                               last_day + timedelta(days = 30 * (12 + 12 - storedbd_act.index[-1].month)),
+                                                                                               freq = 'M'))
+                                            forecast_df['Start Date'] = forecast_df.index
+                                            forecast_df['Start Date'] = forecast_df['Start Date'].apply(lambda ii: ii - forecast_df['Start Date'][0])
+                                            forecast_df['Start Date'] = forecast_df['Start Date'].apply(lambda ii: last_day + timedelta(days = 30 * float(ii) + 1))
+                                            
+                                            forecast_df['End Date'] = forecast_df.index
+                                            forecast_df['End Date'] = forecast_df['End Date'].apply(lambda ii: ii - forecast_df['End Date'][0])
+                                            forecast_df['End Date'] = forecast_df['End Date'].apply(lambda ii: last_day + timedelta(days = float(29) + 30 * float(ii) + 1))
+                                            
+                                            forecast_df['Billing Demand (act)'] = Decimal(NaN)
+                                            forecast_df['Peak Demand (act)'] = Decimal(NaN)
+                                            forecast_df['Consumption (act)'] = Decimal(NaN)
+                                            forecast_df['Cost (act)'] = Decimal(NaN)
+                                            
+                                            if self.monther_set.get(name='BILLx').consumption_model is None:
+                                                raise ValueError
+                                            elif self.monther_set.get(name='BILLx').consumption_model.Tccp is None:
+                                                raise ValueError
+                                            elif self.monther_set.get(name='BILLx').consumption_model.Thcp is None:
+                                                raise ValueError
+                                            if self.monther_set.get(name='BILLx').peak_demand_model is None:
+                                                raise ValueError
+                                            elif self.monther_set.get(name='BILLx').peak_demand_model.Tccp is None:
+                                                raise ValueError
+                                            elif self.monther_set.get(name='BILLx').peak_demand_model.Thcp is None:
+                                                raise ValueError
 
+                                            dd_cons = self.weather_station.get_average_monthly_degree_days(Tccp = self.monther_set.get(name='BILLx').consumption_model.Tccp,
+                                                                                                           Thcp = self.monther_set.get(name='BILLx').consumption_model.Thcp)
+                                            forecast_df['CDD (consumption)'] = forecast_df.index
+                                            forecast_df['CDD (consumption)'] = forecast_df['CDD (consumption)'].apply(lambda ii: dd_cons['CDD'][ii.strftime('%b')])
+                                            forecast_df['HDD (consumption)'] = forecast_df.index
+                                            forecast_df['HDD (consumption)'] = forecast_df['HDD (consumption)'].apply(lambda ii: dd_cons['HDD'][ii.strftime('%b')])
+                                            
+                                            dd_pd = self.weather_station.get_average_monthly_degree_days(Tccp = self.monther_set.get(name='BILLx').peak_demand_model.Tccp,
+                                                                                                         Thcp = self.monther_set.get(name='BILLx').peak_demand_model.Thcp)
+                                            forecast_df['CDD (peak demand)'] = forecast_df.index
+                                            forecast_df['CDD (peak demand)'] = forecast_df['CDD (peak demand)'].apply(lambda ii: dd_pd['CDD'][ii.strftime('%b')])
+                                            forecast_df['HDD (peak demand)'] = forecast_df.index
+                                            forecast_df['HDD (peak demand)'] = forecast_df['HDD (peak demand)'].apply(lambda ii: dd_pd['HDD'][ii.strftime('%b')])
+                                            
+                                            forecast_df = self.bill_data_calc_baseline(df = forecast_df)
+                                            forecast_df = self.bill_data_calc_savings(df = forecast_df)
+                                            forecast_df = self.bill_data_calc_dependents(df = forecast_df)
+                                            forecast_df = self.bill_data_calc_kbtu(df = forecast_df)
+                                            forecast_df = self.monther_set.get(name='BILLx').create_missing_required_columns(df = forecast_df)
+                                            forecast_df = self.bill_data_calc_costs(df = forecast_df)
+                                            
+                                            success_d = self.monther_set.get(name='BILLx').load_monther_period_dataframe(forecast_df)
+                                            if not success_d: raise TypeError
+                                        except:
+                                            m = Message(when=timezone.now(),
+                                                        message_type='Code Error',
+                                                        subject='Model update failed.',
+                                                        comment='Meter %s upload_bill_data failed to create forecasted months, function aborted.' % self.id)
+                                            m.save()
+                                            self.messages.add(m)
+                                            print m
+                                            success_d = False
+
+        return forecast_df, storedbd_act, storedbd, readbd #max(success, success_a, success_b, success_c, success_d)
+        
     def bill_data_calc_kbtu(self, df):
         """function(df)
         
@@ -865,8 +984,8 @@ class Meter(models.Model):
 
             df['Peak Demand (asave)'] = df['Peak Demand (base)'] - df['Peak Demand (act)']
             df['Consumption (asave)'] = df['Consumption (base)'] - df['Consumption (act)']
-            df['Peak Demand (asave)'] = df['Peak Demand (asave)'].apply(lambda x: max(x, Decimal(0)))
-            df['Consumption (asave)'] = df['Consumption (asave)'].apply(lambda x: max(x, Decimal(0)))
+            df['Peak Demand (asave)'] = df['Peak Demand (asave)'].apply(lambda x: cap_negatives_with_NaN(x))
+            df['Consumption (asave)'] = df['Consumption (asave)'].apply(lambda x: cap_negatives_with_NaN(x))
 
             df['Peak Demand (exp delta)'] = df['Peak Demand (base delta)'] - df['Peak Demand (esave delta)']
             df['Consumption (exp delta)'] = df['Consumption (base delta)'] - df['Consumption (esave delta)']
@@ -915,8 +1034,8 @@ class Meter(models.Model):
                                    'Billing Demand': 'Billing Demand (exp)'},inplace=True)
                 df['Cost (esave)'] = df['Cost (base)'] - df['Cost (exp)']
                 df['Cost (asave)'] = df['Cost (base)'] - df['Cost (act)']
-                df['Cost (esave)'] = df['Cost (esave)'].apply(lambda x: max(x, Decimal(0)))
-                df['Cost (asave)'] = df['Cost (asave)'].apply(lambda x: max(x, Decimal(0)))
+                df['Cost (esave)'] = df['Cost (esave)'].apply(lambda x: cap_negatives_with_NaN(x))
+                df['Cost (asave)'] = df['Cost (asave)'].apply(lambda x: cap_negatives_with_NaN(x))
                 
                 df['Consumption'] = df['Consumption (base)'] - df['Consumption (base delta)']
                 df['Peak Demand'] = df['Peak Demand (base)'] - df['Peak Demand (base delta)']
@@ -927,7 +1046,7 @@ class Meter(models.Model):
                 df['Peak Demand'] = df['Peak Demand (esave)'] - df['Peak Demand (esave delta)']
                 df['Cost (esave delta)'] = (df['Cost (esave)'] -
                                             self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
-                df['Cost (esave delta)'] = df['Cost (esave delta)'].apply(lambda x: max(x, Decimal(0)))
+                df['Cost (esave delta)'] = df['Cost (esave delta)'].apply(lambda x: cap_negatives_with_NaN(x))
                 
                 df = df.drop(['Consumption', 'Peak Demand'], axis = 1)
                 
