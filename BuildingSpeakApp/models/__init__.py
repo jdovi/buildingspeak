@@ -30,6 +30,7 @@ from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule
 from models_Utility import Utility
 from models_UserProfile import UserProfile
+from models_middleware import UserRestrictMiddleware
 
 from models_ForecastIO import Forecastio
 from models_WeatherStation import WeatherStation, WeatherDataPoint
