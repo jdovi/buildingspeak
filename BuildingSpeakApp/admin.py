@@ -3,7 +3,7 @@ from BuildingSpeakApp.models import RooftopUnit, Reader, Reading, Message
 from BuildingSpeakApp.models import UnitSchedule, OperatingSchedule, Utility
 from BuildingSpeakApp.models import RateSchedule, RateScheduleRider
 from BuildingSpeakApp.models import Monther, Monthling
-from BuildingSpeakApp.models import WeatherStation, WeatherDataPoint, ManagementAction
+from BuildingSpeakApp.models import WeatherStation, WeatherDataPoint
 from BuildingSpeakApp.models import UserProfile
 from BuildingSpeakApp.models import GAPowerRider, GAPowerPandL
 from django.contrib import admin

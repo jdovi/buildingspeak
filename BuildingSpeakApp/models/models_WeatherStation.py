@@ -1,18 +1,13 @@
-#import dbarray
 import pandas as pd
 from pytz import UTC
 from pytz import timezone as tz
 from numpy import NaN, float64, int, float, int64
 from django.db import models
-from croniter import croniter
 from django.utils import timezone
 from django.core import urlresolvers
-from decimal import getcontext, Decimal
+from decimal import Decimal
 from datetime import datetime, timedelta
-from djorm_pgarray.fields import ArrayField
-from model_utils.managers import InheritanceManager
 from storages.backends.s3boto import S3BotoStorage
-from django.contrib.auth.models import User
 #from rq import Queue
 #from worker import conn
 

@@ -1,19 +1,14 @@
-#import dbarray
 import pandas as pd
 import numpy as np
 from pytz import UTC
 from numpy import NaN
 from django.db import models
-from croniter import croniter
 from django.utils import timezone
 from django.core import urlresolvers
-from decimal import getcontext, Decimal
+from decimal import Decimal
 from datetime import datetime, timedelta
-from operator import itemgetter, attrgetter
-from djorm_pgarray.fields import ArrayField
-from model_utils.managers import InheritanceManager
+from operator import attrgetter
 from storages.backends.s3boto import S3BotoStorage
-from django.contrib.auth.models import User
 
 from models_functions import *
 from models_Message import Message
@@ -367,7 +362,6 @@ class Meter(models.Model):
                                 success_b = False
                                 success_c = False
                                 success_d = False
-                                success_e = False
                             else:
                                 try:
                                     #retrieve and overwrite data that: Exists and (Overwrite or IsForecasted)
@@ -483,7 +477,6 @@ class Meter(models.Model):
                                     success_b = False
                                     success_c = False
                                     success_d = False
-                                    success_e = False
                                 else:
                                     try:
                                         storedbd = self.monther_set.get(name='BILLx').get_monther_period_dataframe()
@@ -525,7 +518,6 @@ class Meter(models.Model):
                                         print m
                                         success_c = False
                                         success_d = False
-                                        success_e = False
                                     else:
                                         try:
                                             storedbd_act = storedbd[storedbd['IsForecasted'].apply(lambda ff: not(ff))]
@@ -595,7 +587,7 @@ class Meter(models.Model):
                                             print m
                                             success_d = False
 
-        return forecast_df, storedbd_act, storedbd, readbd #max(success, success_a, success_b, success_c, success_d)
+        return max(success, success_a, success_b, success_c, success_d)
         
     def bill_data_calc_kbtu(self, df):
         """function(df)

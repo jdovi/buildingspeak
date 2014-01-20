@@ -1,23 +1,18 @@
-# Create your views here.
-from datetime import datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, WeatherStation, EfficiencyMeasure
-from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm, WeatherDataUploadForm
+from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm
 from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, decimal_isnan, nan2zero
 from BuildingSpeakApp.models import get_monthly_dataframe_as_table, get_df_as_table_with_formats
 
-import json, jsonpickle
+import json
 import numpy as np
 import pandas as pd
-from pytz import UTC
 from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth.models import User
-from django.db.models.loading import get_model
 from django.db.models import Q, Sum
-from django.core.mail import send_mail
 from tropo import Tropo, Session, Result
 from django.views.decorators.csrf import csrf_exempt
 #from rq import Queue

@@ -1,20 +1,11 @@
-#import dbarray
-import numpy as np
 import pandas as pd
 from pytz import UTC
-from pytz import timezone as tz
 from numpy import NaN
-from scipy import stats
 from django.db import models
-from croniter import croniter
 from django.utils import timezone
 from django.core import urlresolvers
-from decimal import getcontext, Decimal
-from datetime import datetime, timedelta
-from djorm_pgarray.fields import ArrayField
-from model_utils.managers import InheritanceManager
-from storages.backends.s3boto import S3BotoStorage
-from django.contrib.auth.models import User
+from decimal import Decimal
+from datetime import timedelta
 from django.db.models import Max, Min
 
 from models_functions import *

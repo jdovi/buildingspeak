@@ -1,40 +1,26 @@
-#import dbarray
-import math
 import pandas as pd
-import numpy as np
-from pytz import UTC
-from numpy import NaN
 from django.db import models
-from croniter import croniter
 from django.utils import timezone
 from django.core import urlresolvers
-from decimal import getcontext, Decimal
-from datetime import datetime, timedelta
-from djorm_pgarray.fields import ArrayField
-from model_utils.managers import InheritanceManager
+from datetime import timedelta
 from storages.backends.s3boto import S3BotoStorage
-from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.db.models.loading import get_model
 from django.db.models import Model
-from django.db.models import Q, Sum
 
 
 from models_Message import Message
 from models_Account import Account
-from models_Building import Building, BuildingMeterApportionment
-from models_EfficiencyMeasure import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
+from models_Building import Building
 from models_Equipment import Equipment
-from models_Space import Space, SpaceMeterApportionment
+from models_Space import Space
 from models_Meter import Meter
-from models_MeterModels import MeterConsumptionModel, MeterPeakDemandModel
-from models_RateSchedules import RateSchedule, KnowsChild
+from models_RateSchedules import RateSchedule
 from models_Reader_ing import Reader
 from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule
 from models_Utility import Utility
 from models_WeatherStation import WeatherStation
-from models_monthlies import Monthling
 from models_functions import *
 
 
@@ -808,147 +794,5 @@ def update_readers(modelinstance):
 
 #################
 def temp_func(self, file_location=0):
-    """Input:
-        [file_location]
-            (default: MeterInstance.bill_data_url)
-    
-    Reads Bill Data File and loads into
-    Meter's BILLx Monther, respecting any
-    pre-existing data unless Overwrite
-    column in Bill Data File indicates
-    otherwise."""
-    if not(file_location): file_location = self.bill_data_file.url
-    success = success_a = success_b = None
-    try:
-        readbd = pd.read_csv(file_location,
-                             skiprows=0,
-                             usecols=['Overwrite', 'Start Date', 'End Date', 'Billing Demand',
-                                      'Peak Demand', 'Consumption', 'Cost'],
-                             dtype={'Billing Demand': np.float, 'Peak Demand': np.float,
-                                    'Consumption': np.float, 'Cost': np.float})
-    except:
-        m = Message(when=timezone.now(),
-                    message_type='Code Error',
-                    subject='File not found.',
-                    comment='Meter %s failed on upload_bill_data function when attempting to read Bill Data File.' % self.id)
-        m.save()
-        self.messages.add(m)
-        print m
-        success = False
-    else:
-        try:
-            if (('Start Date' in readbd.columns) and ('End Date' in readbd.columns) and
-                ('Billing Demand' in readbd.columns) and ('Peak Demand' in readbd.columns) and
-                ('Consumption' in readbd.columns) and ('Cost' in readbd.columns) and
-                (len(readbd)>0) ):
-                readbd['Start Date'] = readbd['Start Date'].apply(pd.to_datetime) + timedelta(hours=11,minutes=11,seconds=11) #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
-                readbd['End Date'] = readbd['End Date'].apply(pd.to_datetime) + timedelta(hours=11,minutes=11,seconds=11) #add hours/mins/secs to avoid crossing day boundary when adjusting timezones
-                readbd['Start Date'] = readbd['Start Date'].apply(UTC.localize)
-                readbd['End Date'] = readbd['End Date'].apply(UTC.localize)
-                readbd['Billing Demand'] = readbd['Billing Demand'].apply(Decimal)
-                readbd['Peak Demand'] = readbd['Peak Demand'].apply(Decimal)
-                readbd['Consumption'] = readbd['Consumption'].apply(Decimal)
-                readbd['Cost'] = readbd['Cost'].apply(Decimal)
-                if 'Overwrite' not in readbd.columns:
-                    readbd['Overwrite'] = 0
-                else:
-                    readbd['Overwrite'] = readbd['Overwrite'].apply(int)
-        except:
-            m = Message(when=timezone.now(),
-                        message_type='Code Error',
-                        subject='Model update failed.',
-                        comment='Meter %s upload_bill_data function failed to pre-process incoming data, function aborted.' % self.id)
-            m.save()
-            self.messages.add(m)
-            print m
-            success = False
-        else:
-            try:
-                t = [self.assign_period_datetime(dates=[readbd['Start Date'][i],
-                                                        readbd['End Date'][i]]) for i in range(0,len(readbd))]
-                if None in t: raise TypeError
-            except:
-                m = Message(when=timezone.now(),
-                            message_type='Code Error',
-                            subject='Model update failed.',
-                            comment='Meter %s upload_bill_data function failed at assign_period_datetime, function aborted.' % self.id)
-                m.save()
-                self.messages.add(m)
-                print m
-                success = False
-            else:
-                try:
-                    readbd.index = pd.PeriodIndex(t, freq='M')
-                    readbd = readbd.sort_index()
-                    
-                    #check if incoming data is self consistent in the Start(i)=End(i-1)+1
-                    contiguous_check = (readbd['End Date'].shift(1) + timedelta(days=1)) == readbd['Start Date']
-                except:
-                    m = Message(when=timezone.now(),
-                                message_type='Code Error',
-                                subject='Model update failed.',
-                                comment='Meter %s, upload_bill_data unable to check contiguity, function aborted.' % self.id)
-                    m.save()
-                    self.messages.add(m)
-                    print m
-                    success = False
-                else:
-                    if False in contiguous_check[1:].values: #1st is always False due to shift, but if other False then abort
-                        m = Message(when=timezone.now(),
-                                    message_type='Code Error',
-                                    subject='Function received bad arguments.',
-                                    comment='Meter %s, upload_bill_data given non-contiguous data, function aborted.' % self.id)
-                        m.save()
-                        self.messages.add(m)
-                        print m
-                        success = False
-                    else:
-                        try:
-                            readbd.rename(columns={'Billing Demand': 'Billing Demand (act)',
-                                                   'Peak Demand': 'Peak Demand (act)',
-                                                   'Consumption': 'Consumption (act)',
-                                                   'Cost': 'Cost (act)'}, inplace = True)
-                            readbd['Exists'] = readbd.index
-                            storedbd = self.monther_set.get(name='BILLx').get_monther_period_dataframe()
-                            if storedbd is None or len(storedbd)<1:
-                                readbd['Exists'] = 0
-                            else:
-                                #here we get rid of months that are forecasted and not actual, since
-                                #we don't want to preserve these if there's incoming uploaded data
-                                #for those periods
-                                storedbd['Cost (act) is NaN'] = storedbd['Cost (act)'].apply(decimal_isnan)
-                                storedbd['Consumption (act) is NaN'] = storedbd['Consumption (act)'].apply(decimal_isnan)
-                                storedbd['Peak Demand (act) is NaN'] = storedbd['Peak Demand (act)'].apply(decimal_isnan)
-                                temp = [[storedbd['Cost (act) is NaN'][i],
-                                        storedbd['Consumption (act) is NaN'][i],
-                                        storedbd['Peak Demand (act) is NaN'][i]] for i in range(0,len(storedbd))]
-                                storedbd['is actual not forecasted monthling'] = [not(i[0]) and not(i[1]) and not(i[2]) for i in temp]
-                                storedbd = storedbd[storedbd['is actual not forecasted monthling']]
-                                readbd['Exists'] = readbd['Exists'].apply(lambda lamvar: lamvar in storedbd.index)
-                            
-                            #ignore data that Exists but not(Overwrite)
-                            #load data that not(Exists)
-                            readbd_a = readbd[readbd['Exists']==0]
-                            if len(readbd_a)>0:
-                                #readbd_a = self.monther_set.get(name='BILLx').create_calculated_columns(readbd_a)
-                                readbd_a = self.bill_data_calc_dd(df = readbd_a)
-                                readbd_a = self.bill_data_calc_baseline(df = readbd_a)
-                                readbd_a = self.bill_data_calc_savings(df = readbd_a)
-                                readbd_a = self.bill_data_calc_dependents(df = readbd_a)
-                                readbd_a = self.bill_data_calc_kbtu(df = readbd_a)
-                                print 'h1'
-                                readbd_a = self.bill_data_calc_costs(df = readbd_a)
-                                print 'h2'
-#                                success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe(readbd_a)
-#                                if not success_a: raise TypeError
-                        except:
-                            m = Message(when=timezone.now(),
-                                        message_type='Code Error',
-                                        subject='Model update failed.',
-                                        comment='Meter %s upload_bill_data failed to load new data, function aborted.' % self.id)
-                            m.save()
-                            self.messages.add(m)
-                            print m
-                            success_a = False
-    return readbd_a
+    pass
 ####################
