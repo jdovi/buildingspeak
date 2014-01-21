@@ -394,9 +394,8 @@ class SpaceAdmin(admin.ModelAdmin):
                                             'ESPM_type',
                                             'square_footage',
                                             'max_occupancy']}),
-        ('Relationships',   {'fields':  ['meters',
-                                         'readers',
-                                         'schedule',
+        ('Relationships',   {'fields':  ['readers',
+                                         'schedules',
                                          'messages'],
                              'classes': ['collapse']}),
         ('Data Files', {'fields': ['observed_file',
@@ -431,7 +430,7 @@ class RooftopUnitAdmin(admin.ModelAdmin):
                                     'serial_number',
                                     'nameplate_tons',
                                     'nameplate_EER',
-                                    'nameplate_MBH_in'
+                                    'nameplate_MBH_in',
                                     'nameplate_MBH_out',
                                     'nameplate_ng_eta']}),
         ('Details',   {'fields': ['nameplate_V',
@@ -779,7 +778,6 @@ class GAPowerPandLAdmin(admin.ModelAdmin):
 class CityOfATLWWWAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Information', {'fields': ['name',
-                                          'basic_service_charge',
                                           'tax_percentage',
                                           'tier1',
                                           'tier2',

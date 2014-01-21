@@ -33,8 +33,7 @@ def index(request):
     if len(accounts)==0:
         return HttpResponseRedirect('/user-account')
     else:
-        #return HttpResponseRedirect('/' + str(accounts[0].id))
-        return HttpResponseRedirect('/tropo_test')
+        return HttpResponseRedirect('/' + str(accounts[0].id))
 
 @login_required
 def user_account(request):
