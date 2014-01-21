@@ -83,11 +83,9 @@ STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 #AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 #AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY') 
 #AWS_STORAGE_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME')
-#MANDRILL_APIKEY = os.environ.get('MANDRILL_APIKEY')
 AWS_ACCESS_KEY_ID = 'AKIAJOGG7W44H32J7LAA'
 AWS_SECRET_ACCESS_KEY = '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'
 AWS_STORAGE_BUCKET_NAME = 'buildingspeak-staging'
-MANDRILL_APIKEY = 'MEItn9PZZDjZcuD_3i2LwA'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -139,6 +137,8 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+#MANDRILL_APIKEY = os.environ.get('MANDRILL_APIKEY')
+MANDRILL_APIKEY = 'MEItn9PZZDjZcuD_3i2LwA'
 SEND_BROKEN_LINK_EMAILS = True
 EMAIL_HOST = 'smtp.mandrillapp.com'
 EMAIL_HOST_USER = 'app17333324@heroku.com'
