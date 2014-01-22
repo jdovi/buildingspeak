@@ -139,12 +139,14 @@ MIDDLEWARE_CLASSES = (
 )
 
 #MANDRILL_APIKEY = os.environ.get('MANDRILL_APIKEY')
+#MANDRILL_USERNAME = os.environ.get('MANDRILL_USERNAME')
+MANDRILL_USERNAME = 'app17333324@heroku.com'
 MANDRILL_APIKEY = 'MEItn9PZZDjZcuD_3i2LwA'
 SEND_BROKEN_LINK_EMAILS = True
 EMAIL_HOST = 'smtp.mandrillapp.com'
-EMAIL_HOST_USER = 'app17333324@heroku.com'
+EMAIL_HOST_USER = MANDRILL_USERNAME
 EMAIL_HOST_PASSWORD = MANDRILL_APIKEY
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'#'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
