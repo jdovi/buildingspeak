@@ -125,6 +125,8 @@ class Account(models.Model):
     #: Decimal: Total monthly Account payment amount (USD).
     monthly_payment = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
                                           help_text='total monthly payment due')
+    #: Str: Stripe's customer.id for this Account.
+    stripe_customer_id = models.CharField(blank=True, max_length=100)
     
     #functions
     def get_account_view_motion_table_buildings(self):

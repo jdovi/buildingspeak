@@ -6,7 +6,7 @@ from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm
 from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, decimal_isnan, nan2zero
 from BuildingSpeakApp.models import get_monthly_dataframe_as_table, get_df_as_table_with_formats
 
-import json
+import json, stripe
 import numpy as np
 import pandas as pd
 from django.utils import timezone
@@ -17,6 +17,11 @@ from tropo import Tropo, Session, Result
 from django.views.decorators.csrf import csrf_exempt
 #from rq import Queue
 #from worker import conn
+from django.conf import settings
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe_pk = settings.STRIPE_PUBLISHABLE_KEY
 
 class ResultsMessage(object):
     """Used for generating user
@@ -643,6 +648,21 @@ def equipment_detail(request, account_id, equipment_id):
 
     equipment_attrs = get_model_key_value_pairs_as_nested_list(equipment)
 
+    #####Stripe testing
+    if request.method == 'POST':
+        print request.POST['stripeToken']
+        try:
+            stripe_customer = stripe.Customer.retrieve(account.stripe_customer_id)
+            stripe_customer.card = request.POST['stripeToken']
+            stripe_customer.save()
+        except:
+            stripe_customer = stripe.Customer.create(
+                card = request.POST['stripeToken'],
+                description = 'AccountID:' + str(account.id)
+            )
+            account.__setattr__('stripe_customer_id', stripe_customer.id)
+            account.save()
+        
     context = {
         'user':           request.user,
         'account':        account,
@@ -657,6 +677,7 @@ def equipment_detail(request, account_id, equipment_id):
         'events':         equipment.get_all_events(reverse_boolean=True),
         'equipment':      equipment,
         'equipment_attrs': equipment_attrs,
+        'stripe_pk':      stripe_pk,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -678,6 +699,14 @@ def measure_detail(request, account_id, measure_id):
     
     measure_attrs = get_model_key_value_pairs_as_nested_list(measure)
     
+    #####Stripe testing
+    charge = stripe.Charge.create(
+        amount = timezone.now().minute * 100,
+        currency = 'usd',
+        customer = account.stripe_customer_id,
+        description = 'Account ' + str(account.id) + ': test payment $' + str(timezone.now().minute * 100)
+        )
+        
     context = {
         'user':           request.user,
         'account':        account,

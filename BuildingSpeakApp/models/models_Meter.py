@@ -178,8 +178,7 @@ class Meter(models.Model):
         
         WARNING: only adds 
         measures with same
-        utility type and
-        units as Meter!"""
+        utility type as Meter!"""
         try:
             df['Consumption Savings_sum'] = Decimal(0.0)
             df['Peak Demand Savings_sum'] = Decimal(0.0)
@@ -189,13 +188,16 @@ class Meter(models.Model):
             
             if len(self.emmeterapportionment_set.all()) > 0:
                 for emma in self.emmeterapportionment_set.all():
-                    if ( (emma.efficiency_measure.utility_type == self.utility_type) and
-                         (emma.efficiency_measure.units == self.units)  ):
+                    if emma.efficiency_measure.utility_type == self.utility_type:
+                        conversion_ratio = convert_units(emma.efficiency_measure.utility_type,
+                                                         emma.efficiency_measure.units,
+                                                         self.utility_type,
+                                                         self.units)
                         df = emma.efficiency_measure.get_savings_df(df=df)
-                        df['Consumption Savings_sum'] = df['Consumption Savings_sum'] + df['Consumption Savings']
-                        df['Peak Demand Savings_sum'] = df['Peak Demand Savings_sum'] + df['Peak Demand Savings']
-                        df['Consumption Savings_sum_delta'] = df['Consumption Savings_sum'] + df['Consumption Savings']*emma.efficiency_measure.percent_uncertainty
-                        df['Peak Demand Savings_sum_delta'] = df['Peak Demand Savings_sum'] + df['Peak Demand Savings']*emma.efficiency_measure.percent_uncertainty
+                        df['Consumption Savings_sum'] = df['Consumption Savings_sum'] + df['Consumption Savings'] * conversion_ratio
+                        df['Peak Demand Savings_sum'] = df['Peak Demand Savings_sum'] + df['Peak Demand Savings'] * conversion_ratio
+                        df['Consumption Savings_sum_delta'] = df['Consumption Savings_sum'] + df['Consumption Savings'] * conversion_ratio * emma.efficiency_measure.percent_uncertainty
+                        df['Peak Demand Savings_sum_delta'] = df['Peak Demand Savings_sum'] + df['Peak Demand Savings'] * conversion_ratio * emma.efficiency_measure.percent_uncertainty
                         df['Cost Savings_sum'] = df['Cost Savings_sum'] + df['Cost Savings']
                     df = df.drop(['Cost Savings', 'Peak Demand Savings', 'Consumption Savings'], axis = 1)
             df.rename(columns={'Cost Savings_sum': 'Cost (esave)',
