@@ -1,19 +1,18 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Examples 1 &mdash; BuildingSpeak 1 documentation</title>
-    
+    <title>Examples 1 &mdash; BuildingSpeak v1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -23,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="BuildingSpeak 1 documentation" href="index.html" />
+    <link rel="top" title="BuildingSpeak v1 documentation" href="index.html" />
     <link rel="next" title="Examples 2" href="test_page2.html" />
     <link rel="prev" title="Primary Models" href="section_secondary_models.html" /> 
   </head>
@@ -170,18 +169,18 @@ file at.</p>
 <col width="40%" />
 </colgroup>
 <thead valign="bottom">
-<tr class="row-odd"><th class="head">Name</th>
+<tr><th class="head">Name</th>
 <th class="head">Age</th>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>John D Hunter</td>
+<tr><td>John D Hunter</td>
 <td>40</td>
 </tr>
-<tr class="row-odd"><td>Cast of Thousands</td>
+<tr><td>Cast of Thousands</td>
 <td>41</td>
 </tr>
-<tr class="row-even"><td>And Still More</td>
+<tr><td>And Still More</td>
 <td>42</td>
 </tr>
 </tbody>
@@ -195,7 +194,7 @@ document.</p>
 <p>You can also reference classes, modules, functions, etc that are
 documented using the sphinx <a class="reference external" href="http://sphinx.pocoo.org/ext/autodoc.html">autodoc</a> facilites.  For example,
 see the module <a class="reference internal" href="#module-models_functions" title="models_functions"><tt class="xref py py-mod docutils literal"><span class="pre">models_functions</span></tt></a> documentation, or the
-class <a class="reference internal" href="section_primary_models.html#BuildingSpeakApp.models.Account" title="BuildingSpeakApp.models.Account"><tt class="xref py py-class docutils literal"><span class="pre">Account</span></tt></a>, or the method
+class <tt class="xref py py-class docutils literal"><span class="pre">Account</span></tt>, or the method
 <a class="reference internal" href="#models_functions.convert_units" title="models_functions.convert_units"><tt class="xref py py-meth docutils literal"><span class="pre">convert_units()</span></tt></a>.</p>
 </div>
 <div class="section" id="module-models_functions">
@@ -212,6 +211,15 @@ dates (list of start/end datetimes)</dd>
 most frequently occurring month in
 a given time series spanning 25-35
 days to use as basis for Period.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="models_functions.cap_negatives_with_NaN">
+<tt class="descclassname">models_functions.</tt><tt class="descname">cap_negatives_with_NaN</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#models_functions.cap_negatives_with_NaN" title="Permalink to this definition">¶</a></dt>
+<dd><p>function(x)
+type(x) = Decimal</p>
+<p>Returns 0 if x is NaN or &lt;0,
+otherwise returns x.</p>
 </dd></dl>
 
 <dl class="function">
@@ -319,6 +327,17 @@ list of series names</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="models_functions.max_with_NaNs">
+<tt class="descclassname">models_functions.</tt><tt class="descname">max_with_NaNs</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#models_functions.max_with_NaNs" title="Permalink to this definition">¶</a></dt>
+<dd><p>function(x)
+type(x) = list of Decimals</p>
+<p>Returns the maximum value
+in the list, ignoring NaNs
+unless all are NaNs which
+returns Decimal(0).</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="models_functions.nan2zero">
 <tt class="descclassname">models_functions.</tt><tt class="descname">nan2zero</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#models_functions.nan2zero" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns Decimal(0) if
@@ -357,7 +376,7 @@ otherwise returns x.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2013, BuildingSpeak.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
   </body>
 </html>

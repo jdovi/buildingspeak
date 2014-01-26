@@ -1,19 +1,18 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting Started &mdash; BuildingSpeak 1 documentation</title>
-    
+    <title>Getting Started &mdash; BuildingSpeak v1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -23,8 +22,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="BuildingSpeak 1 documentation" href="index.html" />
-    <link rel="next" title="Primary Models" href="section_primary_models.html" />
+    <link rel="top" title="BuildingSpeak v1 documentation" href="index.html" />
+    <link rel="next" title="Launching New Instance" href="section_launching_new_db.html" />
     <link rel="prev" title="Welcome to BuildingSpeak’s documentation!" href="index.html" /> 
   </head>
   <body>
@@ -43,7 +42,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="section_primary_models.html" title="Primary Models"
+          <a href="section_launching_new_db.html" title="Launching New Instance"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to BuildingSpeak’s documentation!"
@@ -68,8 +67,8 @@
   <p class="topless"><a href="index.html"
                         title="previous chapter">Welcome to BuildingSpeak&#8217;s documentation!</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="section_primary_models.html"
-                        title="next chapter">Primary Models</a></p>
+  <p class="topless"><a href="section_launching_new_db.html"
+                        title="next chapter">Launching New Instance</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/section_getting_started.txt"
@@ -113,16 +112,19 @@
 <p>You might need to adjust your PATH environment variable to include paths to Python executable and additional scripts. For example, if your Python is installed in C:Python27, the following paths need to be added to PATH:</p>
 <div class="highlight-python"><pre>C:\Python27\; C:\Python27\Scripts;</pre>
 </div>
-<p>This will make a primary Python installation available on the machine.  Later we will install something called a <tt class="file docutils literal"><span class="pre">virtualenv</span></tt> which is the actual Python installation that will be used by BuildingSpeak.  But the primary installation is helpful for local development within Spyder, so we will do both.</p>
+<p>This will make a primary Python installation available on the machine.  Included in the source code for BuildingSpeak is virtual Python environment, which is the actual Python installation that will be used by BuildingSpeak.  But the primary installation is helpful for local development within Spyder, so we will do both, with the result that each package is loaded into both the main local machine environment and the virtual environment.</p>
+<p>Although not required for some activities, e.g. making <tt class="file docutils literal"><span class="pre">git</span> <span class="pre">commit`s,</span> <span class="pre">it's</span> <span class="pre">a</span> <span class="pre">good</span> <span class="pre">general</span> <span class="pre">practice</span> <span class="pre">to</span> <span class="pre">activate</span> <span class="pre">the</span> <span class="pre">:file:`venv</span></tt> when doing anything from the command line:</p>
+<p>C:...BuildingSpeak&gt; venvscriptsactivate.bat
+(venv) C:...BuildingSpeak&gt;</p>
 <p>Once Python is installed, we need to install quite a few packages that perform various functions.  These packages are best managed with a tool called <tt class="file docutils literal"><span class="pre">pip</span></tt>, which requires another tool called <tt class="file docutils literal"><span class="pre">setuptools</span></tt>.  Follow <a class="reference external" href="http://www.pip-installer.org/en/latest/installing.html">these instructions</a> to download <tt class="file docutils literal"><span class="pre">ez_setup.py</span></tt> and <tt class="file docutils literal"><span class="pre">get-pip.py</span></tt>.  Then run the following two lines from the command prompt:</p>
-<div class="highlight-python"><pre>C:\somedirectory\&gt; python ez_setup.py
+<div class="highlight-python"><pre>C:\...\BuildingSpeak&gt; python ez_setup.py
 [... output from running ez_setup.py]
-C:\somedirectory\&gt; python get-pip.py</pre>
+C:\...\BuildingSpeak&gt; python get-pip.py</pre>
 </div>
 <p>With <tt class="file docutils literal"><span class="pre">pip</span></tt> installed, most packages can be installed with the following:</p>
-<div class="highlight-python"><pre>C:\somedirectory\&gt; pip install my_package_name</pre>
+<div class="highlight-python"><pre>C:\...\BuildingSpeak&gt; pip install my_package_name</pre>
 </div>
-<p>Here&#8217;s the full requirements.txt file:</p>
+<p>Make sure all of the following packages are installed on the local machine (they should already exist in the <tt class="file docutils literal"><span class="pre">venv</span></tt> contained in the BuildingSpeak directory.:</p>
 <div class="highlight-python"><pre>Django==1.5.1
 South==0.8.1
 boto==2.9.9
@@ -155,7 +157,9 @@ statsmodels==0.4.3
 redis==2.7.6
 rq==0.3.8
 times==0.6.2
-tropo-webapi-python==0.1.3</pre>
+tropo-webapi-python==0.1.3
+mandrill&gt;=1.0.6
+stripe==1.11.0</pre>
 </div>
 </div>
 </div>
@@ -176,7 +180,7 @@ tropo-webapi-python==0.1.3</pre>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="section_primary_models.html" title="Primary Models"
+          <a href="section_launching_new_db.html" title="Launching New Instance"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to BuildingSpeak’s documentation!"
@@ -188,7 +192,7 @@ tropo-webapi-python==0.1.3</pre>
     </div>
     <div class="footer">
         &copy; Copyright 2013, BuildingSpeak.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
   </body>
 </html>

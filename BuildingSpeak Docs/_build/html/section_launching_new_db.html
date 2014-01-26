@@ -1,0 +1,177 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Launching New Instance &mdash; BuildingSpeak v1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="BuildingSpeak v1 documentation" href="index.html" />
+    <link rel="next" title="Primary Models" href="section_primary_models.html" />
+    <link rel="prev" title="Getting Started" href="section_getting_started.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/Dryden Logo Header.png" border="0" alt="py4sci"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="section_primary_models.html" title="Primary Models"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="section_getting_started.html" title="Getting Started"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Launching New Instance</a><ul>
+<li><a class="reference internal" href="#remove-old-stuff">Remove Old Stuff</a></li>
+<li><a class="reference internal" href="#create-new-database">Create New Database</a></li>
+<li><a class="reference internal" href="#special-prerequisites">Special Prerequisites</a></li>
+<li><a class="reference internal" href="#syncing-with-south">Syncing with South</a></li>
+<li><a class="reference internal" href="#populating-framework-data">Populating Framework Data</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="section_getting_started.html"
+                        title="previous chapter">Getting Started</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="section_primary_models.html"
+                        title="next chapter">Primary Models</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/section_launching_new_db.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="launching-new-instance">
+<span id="launching-new-db"></span><h1>Launching New Instance<a class="headerlink" href="#launching-new-instance" title="Permalink to this headline">¶</a></h1>
+<p>This section details the process for launching a new database.  It covers both local installation and Heroku installation, with local installation covered first as it&#8217;s required prior to a push to Heroku.  It also assumes all the steps in the <a class="reference internal" href="section_getting_started.html#getting-started"><em>Getting Started</em></a> section have been completed, meaning the local environment has the necessary setup.</p>
+<div class="section" id="remove-old-stuff">
+<h2>Remove Old Stuff<a class="headerlink" href="#remove-old-stuff" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes phantom connections exist in the database that prevent deletion.  To kill all existing connections, execute the following in the Postgres shell (accessible from the Start menu):</p>
+<p>postgres=# select pg_terminate_backend(pid) from pg_stat_activity where datname=&#8217;old_local_db_name&#8217;;</p>
+<p>To delete the old database and any migrations, from the command line run the following, inserting the full path to your BuildingSpeak folder in the second line:</p>
+<div class="highlight-python"><pre>(venv) C:\...\BuildingSpeak&gt; dropdb old_local_db_name
+(venv) C:\...\BuildingSpeak&gt; rd /s /q C:\...\BuildingSpeak\BuildingSpeakApp\migrations</pre>
+</div>
+</div>
+<div class="section" id="create-new-database">
+<h2>Create New Database<a class="headerlink" href="#create-new-database" title="Permalink to this headline">¶</a></h2>
+<p>To create a new database, run:</p>
+<div class="highlight-python"><pre>(venv) C:\...\BuildingSpeak&gt; createdb new_local_db_name</pre>
+</div>
+</div>
+<div class="section" id="special-prerequisites">
+<h2>Special Prerequisites<a class="headerlink" href="#special-prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>The forms in <tt class="file docutils literal"><span class="pre">models_Forms.py</span></tt> previously had fields that would break the first command to set up the database with South, presumably because these attributes had <tt class="file docutils literal"><span class="pre">choices</span></tt> fields dependent on model objects that didn&#8217;t yet exist prior to the first South command to initialize the database schema.  These fields were deemed unnecessary and removed, but future modifications may cause similar issues again.  (The inability to populate FileField attributes is a similar issue - the FileField upload function requires a model ID which doesn&#8217;t yet exist during the initial creation of the model instance.)</p>
+<p>The solution is simply to comment out any fields dependent on other models prior to the first South command.  Then run the South commands to initialize and migrate.  Afterwards, uncomment the code and migrate the database.</p>
+</div>
+<div class="section" id="syncing-with-south">
+<h2>Syncing with South<a class="headerlink" href="#syncing-with-south" title="Permalink to this headline">¶</a></h2>
+<p>First we initialize the South migration history with:</p>
+<div class="highlight-python"><pre>(venv) C:\...\BuildingSpeak&gt; python manage.py schemamigration BuildingSpeakApp --initial</pre>
+</div>
+<p>This should also offer the setup of a superuser.  Once initialized, we can perform the first migration:</p>
+<div class="highlight-python"><pre>(venv) C:\...\BuildingSpeak&gt; python manage.py migrate BuildingSpeakApp</pre>
+</div>
+<p>Now the database is set up with one user and can be accessed via the admin portal once we launch the development server with:</p>
+<div class="highlight-python"><pre>(venv) C:\...\BuildingSpeak&gt; python manage.py runserver</pre>
+</div>
+<p>Open a browser and navigate to <tt class="file docutils literal"><span class="pre">127.0.0.1:8000/admin</span></tt>, where you can log in as the superuser you created during the database setup step.</p>
+</div>
+<div class="section" id="populating-framework-data">
+<h2>Populating Framework Data<a class="headerlink" href="#populating-framework-data" title="Permalink to this headline">¶</a></h2>
+<p>Django&#8217;s functionality for creating management commands is useful for streamlining the loading of framework data (utilities, weather data, rate schedules, etc.) and customer data into BuildingSpeak.  The folder <tt class="file docutils literal"><span class="pre">C:\...\BuildingSpeak\BuildingSpeakApp\management\commands\</span></tt> contains files that may be executed with:</p>
+<div class="highlight-python"><pre>(venv) C:\...\BuildingSpeak&gt; python manage.py mgt_command_filename</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="section_primary_models.html" title="Primary Models"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="section_getting_started.html" title="Getting Started"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, BuildingSpeak.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>

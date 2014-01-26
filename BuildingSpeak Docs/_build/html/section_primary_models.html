@@ -1,19 +1,18 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Primary Models &mdash; BuildingSpeak 1 documentation</title>
-    
+    <title>Primary Models &mdash; BuildingSpeak v1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -23,9 +22,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="BuildingSpeak 1 documentation" href="index.html" />
+    <link rel="top" title="BuildingSpeak v1 documentation" href="index.html" />
     <link rel="next" title="Primary Models" href="section_secondary_models.html" />
-    <link rel="prev" title="Getting Started" href="section_getting_started.html" /> 
+    <link rel="prev" title="Launching New Instance" href="section_launching_new_db.html" /> 
   </head>
   <body>
 
@@ -46,7 +45,7 @@
           <a href="section_secondary_models.html" title="Primary Models"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="section_getting_started.html" title="Getting Started"
+          <a href="section_launching_new_db.html" title="Launching New Instance"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -73,8 +72,8 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="section_getting_started.html"
-                        title="previous chapter">Getting Started</a></p>
+  <p class="topless"><a href="section_launching_new_db.html"
+                        title="previous chapter">Launching New Instance</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="section_secondary_models.html"
                         title="next chapter">Primary Models</a></p>
@@ -109,7 +108,7 @@
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>The primary models and their relationships are shown in the following figure.</p>
-<a class="reference internal image-reference" href="_images/primary_models.png"><img alt="_images/primary_models.png" src="_images/primary_models.png" style="width: 500px;" /></a>
+<img alt="_images/primary_models.png" src="_images/primary_models.png" style="width: 500px;" />
 <p>The <a class="reference internal" href="#django.contrib.auth.models.User" title="django.contrib.auth.models.User"><tt class="xref py py-class docutils literal"><span class="pre">User</span></tt></a> is Django&#8217;s built-in model, and the <a class="reference internal" href="#BuildingSpeakApp.models.UserProfile" title="BuildingSpeakApp.models.UserProfile"><tt class="xref py py-class docutils literal"><span class="pre">UserProfile</span></tt></a> simply extends that model allowing custom fields to be connected to each <tt class="file docutils literal"><span class="pre">User</span></tt>, such as <tt class="file docutils literal"><span class="pre">mobile_phone</span></tt>.  Each <tt class="file docutils literal"><span class="pre">User</span></tt> may be connected to any number of <tt class="file docutils literal"><span class="pre">Accounts</span></tt>, and it is this relationship which defines what a <tt class="file docutils literal"><span class="pre">User</span></tt> can access in BuildingSpeak.  Future versions may connect <tt class="file docutils literal"><span class="pre">Users</span></tt> to lower-level models.</p>
 <p>An <a class="reference internal" href="#BuildingSpeakApp.models.Account" title="BuildingSpeakApp.models.Account"><tt class="xref py py-class docutils literal"><span class="pre">Account</span></tt></a> is the top-level object in the BuildingSpeak universe.  Generally it will represent an organization, although there may be situations which call for multiple <tt class="file docutils literal"><span class="pre">Accounts</span></tt> to be created for one customer or organization.  <tt class="file docutils literal"><span class="pre">Buildings</span></tt> and <tt class="file docutils literal"><span class="pre">Meters</span></tt> are one-to-one with an <tt class="file docutils literal"><span class="pre">Account</span></tt> and represent what you&#8217;d expect: real world buildings and real world utility meters.</p>
 <p>A <a class="reference internal" href="#BuildingSpeakApp.models.Meter" title="BuildingSpeakApp.models.Meter"><tt class="xref py py-class docutils literal"><span class="pre">Meter</span></tt></a> is a device that records the flow of some substance of interest, e.g. electricity, natural gas, and domestic water.  All fuel types supported by ENERGY STAR&#8217;s Portfolio Manager are supported by BuildingSpeak, along with domestic water (not considered a fuel).  Generally, <tt class="file docutils literal"><span class="pre">Meters</span></tt> are provided by a utility company and are the basis for the billing that utility provides to its customer.  However, larger commercial and institutional customers may have some of their own <tt class="file docutils literal"><span class="pre">Meters</span></tt> which they read and maintain themselves.</p>
@@ -125,7 +124,80 @@
 <em class="property">class </em><tt class="descclassname">django.contrib.auth.models.</tt><tt class="descname">User</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User" title="Permalink to this definition">¶</a></dt>
 <dd><p>Users within the Django authentication system are represented by this
 model.</p>
-<p>Username, password and email are required. Other fields are optional.</p>
+<p>Username and password are required. Other fields are optional.</p>
+<dl class="method">
+<dt id="django.contrib.auth.models.User.check_password">
+<tt class="descname">check_password</tt><big>(</big><em>raw_password</em><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.check_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean of whether the raw_password was correct. Handles
+hashing formats behind the scenes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.email_user">
+<tt class="descname">email_user</tt><big>(</big><em>subject</em>, <em>message</em>, <em>from_email=None</em><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.email_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends an email to this User.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.get_full_name">
+<tt class="descname">get_full_name</tt><big>(</big><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.get_full_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the first_name plus the last_name, with a space in between.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.get_group_permissions">
+<tt class="descname">get_group_permissions</tt><big>(</big><em>obj=None</em><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.get_group_permissions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of permission strings that this user has through his/her
+groups. This method queries all available auth backends. If an object
+is passed in, only permissions matching this object are returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.get_profile">
+<tt class="descname">get_profile</tt><big>(</big><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.get_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns site-specific profile for this user. Raises
+SiteProfileNotAvailable if this site does not allow profiles.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.has_module_perms">
+<tt class="descname">has_module_perms</tt><big>(</big><em>app_label</em><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.has_module_perms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the user has any permissions in the given app label.
+Uses pretty much the same logic as has_perm, above.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.has_perm">
+<tt class="descname">has_perm</tt><big>(</big><em>perm</em>, <em>obj=None</em><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.has_perm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the user has the specified permission. This method
+queries all available auth backends, but returns immediately if any
+backend returns True. Thus, a user who has permission from a single
+auth backend is assumed to have permission in general. If an object is
+provided, permissions for this specific object are checked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.has_perms">
+<tt class="descname">has_perms</tt><big>(</big><em>perm_list</em>, <em>obj=None</em><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.has_perms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the user has each of the specified permissions. If
+object is passed, it checks if the user has all required perms for this
+object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.is_anonymous">
+<tt class="descname">is_anonymous</tt><big>(</big><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.is_anonymous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Always returns False. This is a way of comparing User objects to
+anonymous users.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.auth.models.User.is_authenticated">
+<tt class="descname">is_authenticated</tt><big>(</big><big>)</big><a class="headerlink" href="#django.contrib.auth.models.User.is_authenticated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Always return True. This is a way to tell if the user has been
+authenticated in templates.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -147,25 +219,25 @@ fields for Users.</p>
 <dd><p>Customer Account model.</p>
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.account_type">
-<tt class="descname">account_type</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.account_type" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">account_type</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.account_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type of Account as str. Options: Commercial, Industrial, Residential.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.city">
-<tt class="descname">city</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.city" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">city</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.city" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: City of Account.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.email">
-<tt class="descname">email</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.email" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">email</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.email" title="Permalink to this definition">¶</a></dt>
 <dd><p>Email: Account contact email address.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.first_name">
-<tt class="descname">first_name</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.first_name" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">first_name</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.first_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Account contact first name.</p>
 </dd></dl>
 
@@ -185,13 +257,13 @@ fields for Users.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>month_first</strong> (<em>Period(freq=&#8217;M&#8217;)</em>) &#8211; The first desired month.</li>
 <li><strong>month_last</strong> (<em>Period(freq=&#8217;M&#8217;)</em>) &#8211; The last desired month.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Meter data for Account&#8217;s views in a list: [meter_data, pie_data].</p>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Meter data for Account&#8217;s views in a list: [meter_data, pie_data].</p>
 </td>
 </tr>
 </tbody>
@@ -208,7 +280,7 @@ years of meter data.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
 </tr>
 </tbody>
 </table>
@@ -226,7 +298,7 @@ years of meter data.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
 </tr>
 </tbody>
 </table>
@@ -253,7 +325,7 @@ years of meter data.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">List of lists with the following</td>
 </tr>
 </tbody>
 </table>
@@ -264,13 +336,13 @@ Building Name.</p>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.last_name">
-<tt class="descname">last_name</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.last_name" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">last_name</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.last_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Account contact last name.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.launch_date">
-<tt class="descname">launch_date</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.launch_date" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">launch_date</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.launch_date" title="Permalink to this definition">¶</a></dt>
 <dd><p>DateTime: Date Account was created.</p>
 </dd></dl>
 
@@ -282,91 +354,91 @@ Building Name.</p>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.monthly_payment">
-<tt class="descname">monthly_payment</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.monthly_payment" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">monthly_payment</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.monthly_payment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decimal: Total monthly Account payment amount (USD).</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.name">
-<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.name" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">name</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of Account as str.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.observed_file_GMT_offset">
-<tt class="descname">observed_file_GMT_offset</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_GMT_offset" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">observed_file_GMT_offset</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_GMT_offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decimal: GMT/UTC offset as decimal number used to adjust hour values read in from observed data file. Default: -5.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.observed_file_adjusts_for_DST">
-<tt class="descname">observed_file_adjusts_for_DST</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_adjusts_for_DST" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">observed_file_adjusts_for_DST</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_adjusts_for_DST" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean: Dates in observed data file are always already adjusted for DST? Default: False.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.observed_file_column_for_indexing">
-<tt class="descname">observed_file_column_for_indexing</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_column_for_indexing" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">observed_file_column_for_indexing</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_column_for_indexing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Int: Column number of time stamp data to use for indexing observed data file.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.observed_file_skiprows">
-<tt class="descname">observed_file_skiprows</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_skiprows" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">observed_file_skiprows</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_skiprows" title="Permalink to this definition">¶</a></dt>
 <dd><p>Int: Number of rows before data header row in observed data file (will be skipped when reading data).</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.observed_file_time_zone">
-<tt class="descname">observed_file_time_zone</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_time_zone" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">observed_file_time_zone</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_time_zone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Time zone of observed data file, compatible with pytz module.  Default: US/Eastern.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.observed_file_track">
-<tt class="descname">observed_file_track</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_track" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">observed_file_track</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.observed_file_track" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean: Track an observed data file for this Account? Default: False.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.phone">
-<tt class="descname">phone</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.phone" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">phone</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.phone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Account contact phone number.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.provided_file_GMT_offset">
-<tt class="descname">provided_file_GMT_offset</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_GMT_offset" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">provided_file_GMT_offset</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_GMT_offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decimal: GMT/UTC offset as decimal number used to adjust hour values read in from provided data file. Default: -5.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.provided_file_adjusts_for_DST">
-<tt class="descname">provided_file_adjusts_for_DST</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_adjusts_for_DST" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">provided_file_adjusts_for_DST</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_adjusts_for_DST" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean: Dates in provided data file are always already adjusted for DST? Default: False.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.provided_file_column_for_indexing">
-<tt class="descname">provided_file_column_for_indexing</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_column_for_indexing" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">provided_file_column_for_indexing</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_column_for_indexing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Int: Column number of time stamp data to use for indexing provided data file.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.provided_file_skiprows">
-<tt class="descname">provided_file_skiprows</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_skiprows" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">provided_file_skiprows</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_skiprows" title="Permalink to this definition">¶</a></dt>
 <dd><p>Int: Number of rows before data header row in provided data file (will be skipped when reading data).</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.provided_file_time_zone">
-<tt class="descname">provided_file_time_zone</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_time_zone" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">provided_file_time_zone</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_time_zone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Time zone of provided data file, compatible with pytz module.  Default: US/Eastern.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.provided_file_track">
-<tt class="descname">provided_file_track</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_track" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">provided_file_track</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.provided_file_track" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean: Track an provided data file for this Account? Default: False.</p>
 </dd></dl>
 
@@ -384,25 +456,31 @@ Building Name.</p>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.state">
-<tt class="descname">state</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.state" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">state</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: State of Account.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.status">
-<tt class="descname">status</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.status" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">status</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Account status.  Options: Active, Closed, Delinquent, Inactive.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.street_address">
-<tt class="descname">street_address</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.street_address" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">street_address</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.street_address" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Street address of Account.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="BuildingSpeakApp.models.Account.stripe_customer_id">
+<tt class="descname">stripe_customer_id</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.stripe_customer_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str: Stripe&#8217;s customer.id for this Account.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.title">
-<tt class="descname">title</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.title" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">title</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.title" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Account contact title.</p>
 </dd></dl>
 
@@ -414,7 +492,7 @@ Building Name.</p>
 
 <dl class="attribute">
 <dt id="BuildingSpeakApp.models.Account.zip_code">
-<tt class="descname">zip_code</tt><em class="property"> = None</em><a class="headerlink" href="#BuildingSpeakApp.models.Account.zip_code" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">zip_code</tt><a class="headerlink" href="#BuildingSpeakApp.models.Account.zip_code" title="Permalink to this definition">¶</a></dt>
 <dd><p>Str: Zip code for Account.</p>
 </dd></dl>
 
@@ -594,8 +672,7 @@ their deltas, and
 cost savings.</p>
 <p>WARNING: only adds 
 measures with same
-utility type and
-units as Meter!</p>
+utility type as Meter!</p>
 </dd></dl>
 
 <dl class="method">
@@ -784,7 +861,7 @@ measure properties.</p>
           <a href="section_secondary_models.html" title="Primary Models"
              >next</a> |</li>
         <li class="right" >
-          <a href="section_getting_started.html" title="Getting Started"
+          <a href="section_launching_new_db.html" title="Launching New Instance"
              >previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -793,7 +870,7 @@ measure properties.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2013, BuildingSpeak.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
   </body>
 </html>

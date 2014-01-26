@@ -22,21 +22,24 @@ You might need to adjust your PATH environment variable to include paths to Pyth
 
 	C:\Python27\; C:\Python27\Scripts;
 
-This will make a primary Python installation available on the machine.  Later we will install something called a :file:`virtualenv` which is the actual Python installation that will be used by BuildingSpeak.  But the primary installation is helpful for local development within Spyder, so we will do both.
+This will make a primary Python installation available on the machine.  Included in the source code for BuildingSpeak is virtual Python environment, which is the actual Python installation that will be used by BuildingSpeak.  But the primary installation is helpful for local development within Spyder, so we will do both, with the result that each package is loaded into both the main local machine environment and the virtual environment.
+
+Although not required for some activities, e.g. making :file:`git commit`s, it's a good general practice to activate the :file:`venv` when doing anything from the command line::
+
+C:\...\BuildingSpeak> venv\scripts\activate.bat
+(venv) C:\...\BuildingSpeak>
 
 Once Python is installed, we need to install quite a few packages that perform various functions.  These packages are best managed with a tool called :file:`pip`, which requires another tool called :file:`setuptools`.  Follow `these instructions <http://www.pip-installer.org/en/latest/installing.html>`_ to download :file:`ez_setup.py` and :file:`get-pip.py`.  Then run the following two lines from the command prompt::
 
-	C:\somedirectory\> python ez_setup.py
+	C:\...\BuildingSpeak> python ez_setup.py
 	[... output from running ez_setup.py]
-	C:\somedirectory\> python get-pip.py
+	C:\...\BuildingSpeak> python get-pip.py
 
 With :file:`pip` installed, most packages can be installed with the following::
 
-	C:\somedirectory\> pip install my_package_name
+	C:\...\BuildingSpeak> pip install my_package_name
 
-
-
-Here's the full requirements.txt file::
+Make sure all of the following packages are installed on the local machine (they should already exist in the :file:`venv` contained in the BuildingSpeak directory.::
 
 	Django==1.5.1
 	South==0.8.1
@@ -71,3 +74,5 @@ Here's the full requirements.txt file::
 	rq==0.3.8
 	times==0.6.2
 	tropo-webapi-python==0.1.3
+	mandrill>=1.0.6
+	stripe==1.11.0

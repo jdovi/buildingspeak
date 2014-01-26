@@ -20,12 +20,11 @@ class MeterDataUploadForm(forms.Form):
     """Form to upload Meter bill
     data from Excel file."""
     bill_data_file = forms.FileField(required=False)
-    meter = forms.ChoiceField(required=False,
-                              choices=[(str(mtr.id) + ' - ' + mtr.name, mtr.id) for mtr in Meter.objects.all()])
+#    meter = forms.ChoiceField(required=False,
+#                              choices=[(str(mtr.id) + ' - ' + mtr.name, mtr.id) for mtr in Meter.objects.all()])
     
 class WeatherDataUploadForm(forms.Form):
     """Form to upload weather
     data file for Weather Station."""
     weather_data_file = forms.FileField(required=False)
-    weather_station = forms.ChoiceField(choices=[(str(ws.id) + ' - ' + ws.name, ws.id) for ws in WeatherStation.objects.all()])
-    
+#    weather_station = forms.ChoiceField(choices=[(str(ws.id) + ' - ' + ws.name, ws.id) for ws in WeatherStation.objects.all()])

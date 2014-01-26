@@ -1,19 +1,18 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Primary Models &mdash; BuildingSpeak 1 documentation</title>
-    
+    <title>Primary Models &mdash; BuildingSpeak v1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -23,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="BuildingSpeak 1 documentation" href="index.html" />
+    <link rel="top" title="BuildingSpeak v1 documentation" href="index.html" />
     <link rel="next" title="Examples 1" href="test_page1.html" />
     <link rel="prev" title="Primary Models" href="section_primary_models.html" /> 
   </head>
@@ -91,7 +90,7 @@
   <div class="section" id="primary-models">
 <span id="id1"></span><h1>Primary Models<a class="headerlink" href="#primary-models" title="Permalink to this headline">¶</a></h1>
 <p>The primary models and their relationships are shown in the following figure.</p>
-<a class="reference internal image-reference" href="_images/primary_models.png"><img alt="_images/primary_models.png" src="_images/primary_models.png" style="width: 500px;" /></a>
+<img alt="_images/primary_models.png" src="_images/primary_models.png" style="width: 500px;" />
 <p>The <tt class="file docutils literal"><span class="pre">User</span></tt> is Django&#8217;s built-in model, and the <tt class="file docutils literal"><span class="pre">UserProfile</span></tt> simply extends that model allowing custom fields to be connected to each <tt class="file docutils literal"><span class="pre">User</span></tt>, such as <tt class="file docutils literal"><span class="pre">mobile_phone</span></tt>.  Each <tt class="file docutils literal"><span class="pre">User</span></tt> may be connected to any number of <tt class="file docutils literal"><span class="pre">Accounts</span></tt>, and it is this relationship which defines what a <tt class="file docutils literal"><span class="pre">User</span></tt> can access in BuildingSpeak.  Future versions may connect <tt class="file docutils literal"><span class="pre">Users</span></tt> to lower-level models.</p>
 <p>An <tt class="file docutils literal"><span class="pre">Account</span></tt> is the top-level object in the BuildingSpeak universe.  Generally it will represent an organization, although there may be situations which call for multiple <tt class="file docutils literal"><span class="pre">Accounts</span></tt> to be created for one customer or organization.  <tt class="file docutils literal"><span class="pre">Buildings</span></tt> and <tt class="file docutils literal"><span class="pre">Meters</span></tt> are one-to-one with an <tt class="file docutils literal"><span class="pre">Account</span></tt> and represent what you&#8217;d expect: real world buildings and real world utility meters.</p>
 <p><tt class="file docutils literal"><span class="pre">Meters</span></tt> are devices that record the flow of some substance of interest, e.g. electricity, natural gas, and domestic water.  All fuel types supported by ENERGY STAR&#8217;s Portfolio Manager are supported by BuildingSpeak, along with domestic water (not considered a fuel).  Generally, <tt class="file docutils literal"><span class="pre">Meters</span></tt> are provided by a utility company and are the basis for the billing that utility provides to its customer.  However, larger commercial and institutional customers may have some of their own <tt class="file docutils literal"><span class="pre">Meters</span></tt> which they read and maintain themselves.</p>
@@ -129,7 +128,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2013, BuildingSpeak.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
   </body>
 </html>

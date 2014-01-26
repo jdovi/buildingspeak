@@ -16,6 +16,7 @@ Contents:
    :maxdepth: 2
 
    section_getting_started.rst
+   section_launching_new_db.rst
    section_primary_models.rst
    section_secondary_models.rst
    test_page1.rst
