@@ -75,8 +75,8 @@ class RateSchedule(KnowsChild):
     
     #relationships
     utility = models.ForeignKey('Utility')
-    riders = models.ManyToManyField('RateScheduleRider')
-    messages = models.ManyToManyField('Message')
+    riders = models.ManyToManyField('RateScheduleRider', blank=True)
+    messages = models.ManyToManyField('Message', blank=True)
     
     #file-related attributes
     rate_file = models.FileField(null=True, blank=True, upload_to=rate_file_path_rate_schedule, 

@@ -36,7 +36,7 @@ class MeterConsumptionModel(models.Model):
     
     #relationships
     meter = models.ForeignKey('Meter', null=True)
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
     
     #model parameters
     beta00p = models.FloatField(null=True, blank=True, help_text='value of parameter beta_00')
@@ -1069,7 +1069,7 @@ class MeterPeakDemandModel(models.Model):
     
     #relationships
     meter = models.ForeignKey('Meter', null=True)
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
     
     #model parameters
     beta00p = models.FloatField(null=True, blank=True, help_text='value of parameter beta_00')

@@ -17,7 +17,7 @@ class UnitSchedule(models.Model):
     name = models.CharField(max_length=200)
     
     #relationships
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
 
     #attributes
     cron_string = models.CharField(null=True, blank=True, max_length=200)
@@ -125,8 +125,8 @@ class OperatingSchedule(models.Model):
     name = models.CharField(max_length=200)
     
     #relationships
-    messages = models.ManyToManyField('Message')
-    units = models.ManyToManyField('UnitSchedule')
+    messages = models.ManyToManyField('Message', blank=True)
+    units = models.ManyToManyField('UnitSchedule', blank=True)
 
     #attributes
 

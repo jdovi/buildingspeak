@@ -44,9 +44,9 @@ class Space(models.Model):
     
     #relationships
     building = models.ForeignKey('Building')
-    messages = models.ManyToManyField('Message')
-    readers = models.ManyToManyField('Reader')
-    schedules = models.ManyToManyField('OperatingSchedule')
+    messages = models.ManyToManyField('Message', blank=True)
+    readers = models.ManyToManyField('Reader', blank=True)
+    schedules = models.ManyToManyField('OperatingSchedule', blank=True)
     meters = models.ManyToManyField('Meter', through='SpaceMeterApportionment')
     
     #file-related attributes

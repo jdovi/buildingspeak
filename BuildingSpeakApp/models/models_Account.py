@@ -31,13 +31,13 @@ class Account(models.Model):
     
     #relationships
     #: ManyToMany relationship to Message.
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
     #: ManyToMany relationship to User.
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, blank=True)
     #: ManyToMany relationship to Reader.
-    readers = models.ManyToManyField('Reader')
+    readers = models.ManyToManyField('Reader', blank=True)
     #: ManyToMany relationship to OperatingSchedule.
-    schedules = models.ManyToManyField('OperatingSchedule')
+    schedules = models.ManyToManyField('OperatingSchedule', blank=True)
 
     
     #file-related attributes

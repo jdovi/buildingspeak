@@ -193,7 +193,7 @@ class EfficiencyMeasure(models.Model):
                               help_text='expected December cost savings')
     
     #relationships
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
     meters = models.ManyToManyField('Meter', through='EMMeterApportionment')
     equipments = models.ManyToManyField('Equipment', through='EMEquipmentApportionment')
     weather_station = models.ForeignKey('WeatherStation')

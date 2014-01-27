@@ -70,9 +70,9 @@ class Meter(models.Model):
     utility = models.ForeignKey('Utility')
     rate_schedule = models.ForeignKey('RateSchedule')
     account = models.ForeignKey('Account')
-    messages = models.ManyToManyField('Message')
-    readers = models.ManyToManyField('Reader')
-    schedules = models.ManyToManyField('OperatingSchedule')
+    messages = models.ManyToManyField('Message', blank=True)
+    readers = models.ManyToManyField('Reader', blank=True)
+    schedules = models.ManyToManyField('OperatingSchedule', blank=True)
     
     #file-related attributes
     observed_file = models.FileField(null=True, blank=True, upload_to=data_file_path_meter, 

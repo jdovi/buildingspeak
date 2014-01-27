@@ -11,7 +11,7 @@ class Utility(models.Model):
     name = models.CharField(blank=True, max_length=200)
     
     #relationships
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
     
     #file-related attributes
     image_file = models.FileField(null=True, blank=True, upload_to=image_file_path_utility, 

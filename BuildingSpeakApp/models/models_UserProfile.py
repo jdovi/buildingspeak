@@ -14,7 +14,7 @@ class UserProfile(models.Model):
     organization = models.CharField(blank=True, max_length=200)
     
     #relationships
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
     user = models.OneToOneField(User)
     mobile_phone = models.CharField(blank=True, max_length=20)
     desk_phone = models.CharField(blank=True, max_length=20)

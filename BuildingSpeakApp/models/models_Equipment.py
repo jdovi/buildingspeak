@@ -19,11 +19,11 @@ class Equipment(models.Model):
     objects = InheritanceManager() #used with django-model-utils; query all Equipment subclasses together
     
     #relationships
-    messages = models.ManyToManyField('Message')
-    meters = models.ManyToManyField('Meter')
-    buildings = models.ManyToManyField('Building')
-    spaces = models.ManyToManyField('Space')
-    readers = models.ManyToManyField('Reader')
+    messages = models.ManyToManyField('Message', blank=True)
+    meters = models.ManyToManyField('Meter', blank=True)
+    buildings = models.ManyToManyField('Building', blank=True)
+    spaces = models.ManyToManyField('Space', blank=True)
+    readers = models.ManyToManyField('Reader', blank=True)
     schedule = models.ForeignKey('OperatingSchedule', null=True, blank=True)
 
     

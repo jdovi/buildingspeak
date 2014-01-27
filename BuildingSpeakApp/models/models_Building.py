@@ -117,9 +117,9 @@ class Building(models.Model):
     account = models.ForeignKey('Account')
     weather_station = models.ForeignKey('WeatherStation')
     meters = models.ManyToManyField('Meter', through='BuildingMeterApportionment')
-    messages = models.ManyToManyField('Message')
-    readers = models.ManyToManyField('Reader')
-    schedules = models.ManyToManyField('OperatingSchedule')
+    messages = models.ManyToManyField('Message', blank=True)
+    readers = models.ManyToManyField('Reader', blank=True)
+    schedules = models.ManyToManyField('OperatingSchedule', blank=True)
 
     
     #file-related attributes

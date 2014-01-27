@@ -26,10 +26,10 @@ class Monther(models.Model):
     help_text = models.CharField(blank=True, max_length=200)
 
     #relationships
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
     meter = models.ForeignKey('Meter')
-    consumption_model = models.ForeignKey('MeterConsumptionModel', null=True)
-    peak_demand_model = models.ForeignKey('MeterPeakDemandModel', null=True)
+    consumption_model = models.ForeignKey('MeterConsumptionModel', null=True, blank=True)
+    peak_demand_model = models.ForeignKey('MeterPeakDemandModel', null=True, blank=True)
     
     #functions
     def meter_for_admin(self):

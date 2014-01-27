@@ -41,7 +41,7 @@ class WeatherStation(models.Model):
                     storage=S3BotoStorage(location='user_data_files/weather_stations'),
                     help_text='link to text file containing day dates to upload')
     #relationships
-    messages = models.ManyToManyField('Message')
+    messages = models.ManyToManyField('Message', blank=True)
 
     
     #functions
