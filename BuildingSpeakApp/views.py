@@ -153,6 +153,7 @@ def account_detail(request, account_id):
             account.__setattr__('stripe_customer_id', stripe_customer.id)
             account.save()
     #####Stripe testing
+    print account.stripe_customer_id
     if account.stripe_customer_id is not None:
         charge = stripe.Charge.create(
             amount = timezone.now().minute * 100,
