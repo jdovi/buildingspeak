@@ -703,7 +703,19 @@ function addChart(arr) {
       </script>
     </div> <!-- .tab-details -->
     <div class="tab tab-payment">
-      <div id="payment"></div>
+      <div id="payment">
+		  <form action="" method="POST">
+			  {% csrf_token %}
+			  <script
+				src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+				data-key={{ stripe_pk }}
+				data-amount="2000"
+				data-name="Demo Site"
+				data-description="2 widgets ($20.00)"
+				data-image="/128x128.png">
+			  </script>
+		  </form>
+	  </div>
     </div> <!-- .tab-payment -->
   </div>
 </section> <!-- .entry -->

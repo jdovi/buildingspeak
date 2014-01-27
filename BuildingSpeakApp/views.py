@@ -137,6 +137,28 @@ def account_detail(request, account_id):
     else:
         meter_data = acct_view_data[0]
         pie_data = acct_view_data[1]
+
+    #####Stripe testing
+    if request.method == 'POST':
+        print request.POST['stripeToken']
+        try:
+            stripe_customer = stripe.Customer.retrieve(account.stripe_customer_id)
+            stripe_customer.card = request.POST['stripeToken']
+            stripe_customer.save()
+        except:
+            stripe_customer = stripe.Customer.create(
+                card = request.POST['stripeToken'],
+                description = 'AccountID:' + str(account.id)
+            )
+            account.__setattr__('stripe_customer_id', stripe_customer.id)
+            account.save()
+    #####Stripe testing
+    charge = stripe.Charge.create(
+        amount = timezone.now().minute * 100,
+        currency = 'usd',
+        customer = account.stripe_customer_id,
+        description = 'Account ' + str(account.id) + ': test payment $' + str(timezone.now().minute * 100)
+        )
     
     context = {
         'user':           request.user,
@@ -160,6 +182,7 @@ def account_detail(request, account_id):
         'motion_data_fuels':        account.get_account_view_motion_table_fuels(),
         'motion_data_buildings':    account.get_account_view_motion_table_buildings(),
         'motion_data_spaces':       account.get_account_view_motion_table_spaces(),
+        'stripe_pk':                stripe_pk,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -647,21 +670,6 @@ def equipment_detail(request, account_id, equipment_id):
         raise Http404
 
     equipment_attrs = get_model_key_value_pairs_as_nested_list(equipment)
-
-    #####Stripe testing
-    if request.method == 'POST':
-        print request.POST['stripeToken']
-        try:
-            stripe_customer = stripe.Customer.retrieve(account.stripe_customer_id)
-            stripe_customer.card = request.POST['stripeToken']
-            stripe_customer.save()
-        except:
-            stripe_customer = stripe.Customer.create(
-                card = request.POST['stripeToken'],
-                description = 'AccountID:' + str(account.id)
-            )
-            account.__setattr__('stripe_customer_id', stripe_customer.id)
-            account.save()
         
     context = {
         'user':           request.user,
@@ -677,7 +685,6 @@ def equipment_detail(request, account_id, equipment_id):
         'events':         equipment.get_all_events(reverse_boolean=True),
         'equipment':      equipment,
         'equipment_attrs': equipment_attrs,
-        'stripe_pk':      stripe_pk,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -699,14 +706,6 @@ def measure_detail(request, account_id, measure_id):
     
     measure_attrs = get_model_key_value_pairs_as_nested_list(measure)
     
-    #####Stripe testing
-    charge = stripe.Charge.create(
-        amount = timezone.now().minute * 100,
-        currency = 'usd',
-        customer = account.stripe_customer_id,
-        description = 'Account ' + str(account.id) + ': test payment $' + str(timezone.now().minute * 100)
-        )
-        
     context = {
         'user':           request.user,
         'account':        account,
