@@ -1,11 +1,30 @@
 from django.core.management.base import BaseCommand
 
+import urllib
+from decimal import Decimal
+
+from django.utils import timezone
+from django.core.files import File
+from django.contrib.auth.models import User
+
+from BuildingSpeak.settings import STATIC_URL
+
+from BuildingSpeakApp.models import UserProfile, Account, Building, Space, Meter, Equipment
+from BuildingSpeakApp.models import RooftopUnit
+from BuildingSpeakApp.models import MeterConsumptionModel, MeterPeakDemandModel
+from BuildingSpeakApp.models import SpaceMeterApportionment, BuildingMeterApportionment
+from BuildingSpeakApp.models import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
+from BuildingSpeakApp.models import WeatherStation, Utility
+from BuildingSpeakApp.models import GAPowerPandL, InfiniteEnergyGAGas, CityOfATLWWW
+
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        from django.contrib.auth.models import User
-        from BuildingSpeakApp.models import UserProfile
+
+    ###---Users
+        userJD = User.objects.get(username = 'jdovi')       #loaded to add to all new accounts
+        userDA = User.objects.get(username = 'dashley')     #loaded to add to all new accounts
         
         user1 = User(
             username = 'smucker',
@@ -19,20 +38,22 @@ class Command(BaseCommand):
             )
         user1.save()
         
+    ###---UserProfiles
         userprofile1 = UserProfile(
             user = user1,
             organization = 'City of Refuge, Inc. - ATL'
             )
         userprofile1.save()
         
-        #post-creation actions: upload image to UserProfile.image_file
+        #post-creation actions
+        file_url = STATIC_URL + 'temporary_files/user1_image_file.jpg'
+        result = urllib.urlretrieve(file_url)
+        file_obj = File(open(result[0]))
+        userprofile1.__setattr__('image_file', file_obj)
+        userprofile1.save()
         
-        from decimal import Decimal
-        from django.utils import timezone
-        from django.contrib.auth.models import User
-        from BuildingSpeakApp.models import Account
-        
-        CoRATL = Account(
+    ###---Account
+        acct1 = Account(
         name = 'City of Refuge, Inc. - ATL',
         account_type = 'Commercial',
         street_address = '1300 Joseph Boone Blvd',
@@ -48,18 +69,20 @@ class Command(BaseCommand):
         status = 'Active',
         monthly_payment = Decimal(0.0),
         )
-        CoRATL.save()
+        acct1.save()
         
-        CoRATL.users.add(User.objects.get(username = 'smucker'))
-        CoRATL.users.add(User.objects.get(username = 'dashley'))
+        #post-creation actions
+        acct1.users.add(User.objects.get(username = 'smucker'))
+        acct1.users.add(userJD)
+        acct1.users.add(userDA)
         
-        #post-creation actions:
-        #   1) if tracking, upload observed_file and/or provided_file and set tracking parameters in admin
-        #   2) upload photo to Account.image_file
+        file_url = STATIC_URL + 'temporary_files/account1_image_file.jpg'
+        result = urllib.urlretrieve(file_url)
+        file_obj = File(open(result[0]))
+        acct1.__setattr__('image_file', file_obj)
+        acct1.save()
         
-        from BuildingSpeakApp.models import Account, WeatherStation, Building
-        
-        acct = Account.objects.get(name = 'City of Refuge, Inc. - ATL')
+    ###---Buildings
         ws = WeatherStation.objects.get(name = 'ATL - downtown west')
         
         East = Building(
@@ -67,7 +90,7 @@ class Command(BaseCommand):
             building_type = 'Multi-Purpose',
             EIA_type = 'Other',
             ESPM_type = 'Other',
-            account = acct,
+            account = acct1,
             weather_station = ws,
             street_address = '1300 Joseph Boone Blvd',
             city = 'Atlanta',
@@ -84,13 +107,20 @@ class Command(BaseCommand):
             phone = '404-713-6994',
             )
         East.save()
+
+        #post-creation actions
+        file_url = STATIC_URL + 'temporary_files/east_bldg_image_file.jpg'
+        result = urllib.urlretrieve(file_url)
+        file_obj = File(open(result[0]))
+        East.__setattr__('image_file', file_obj)
+        East.save()
         
         West = Building(
             name = 'West Bldg',
             building_type = 'Multi-Purpose',
             EIA_type = 'Other',
             ESPM_type = 'Other',
-            account = acct,
+            account = acct1,
             weather_station = ws,
             street_address = '1300 Joseph Boone Blvd',
             city = 'Atlanta',
@@ -109,180 +139,172 @@ class Command(BaseCommand):
         West.save()
         
         #post-creation actions:
-        #   1) if tracking, upload observed_file and/or provided_file and set tracking parameters in admin
-        #   2) upload photo to Building.image_file
+        file_url = STATIC_URL + 'temporary_files/west_bldg_image_file.jpg'
+        result = urllib.urlretrieve(file_url)
+        file_obj = File(open(result[0]))
+        West.__setattr__('image_file', file_obj)
+        West.save()
         
-        from BuildingSpeakApp.models import Space, Building, Account
-        
-        acct = Account.objects.get(name = 'City of Refuge, Inc. - ATL')
-        east = Building.objects.filter(account = acct).get(name = 'East Bldg')
-        west = Building.objects.filter(account = acct).get(name = 'West Bldg')
-        
-        EdenI = Space(
+    ###---Spaces
+        EdenI_space = Space(
             name = 'Eden I',
-            building = west,
+            building = West,
             square_footage = 36000,
             max_occupancy = None,
             space_type = 'Dormitory',
             EIA_type = 'Lodging',
             ESPM_type = 'Dormitory / Residence Hall',
             )
-        EdenI.save()
+        EdenI_space.save()
         
-        kitchen = Space(
+        kitchen_space = Space(
             name = '180 Kitchen',
-            building = east,
+            building = East,
             square_footage = 4500,
             max_occupancy = None,
             space_type = 'Dining: Family',
             EIA_type = 'Food Service',
             ESPM_type = 'Other',
             )
-        kitchen.save()
+        kitchen_space.save()
         
-        dining = Space(
+        dining_space = Space(
             name = 'Dining Area',
-            building = east,
+            building = East,
             square_footage = 11500,
             max_occupancy = None,
             space_type = 'Dining: Family',
             EIA_type = 'Food Service',
             ESPM_type = 'Other',
             )
-        dining.save()
+        dining_space.save()
         
-        compATL = Space(
+        compATL_space = Space(
             name = 'Compassion ATL',
-            building = west,
+            building = West,
             square_footage = 36000,
             max_occupancy = None,
             space_type = 'Warehouse',
             EIA_type = 'Warehouse and Storage',
             ESPM_type = 'Warehouse (Refrigerated or Unrefrigerated)',
             )
-        compATL.save()
+        compATL_space.save()
         
-        EdenII = Space(
+        EdenII_space = Space(
             name = 'Eden II',
-            building = east,
+            building = East,
             square_footage = 9700,
             max_occupancy = None,
             space_type = 'Dormitory',
             EIA_type = 'Lodging',
             ESPM_type = 'Dormitory / Residence Hall',
             )
-        EdenII.save()
+        EdenII_space.save()
         
-        dorms = Space(
+        dorms_space = Space(
             name = 'Dorms',
-            building = east,
+            building = East,
             square_footage = 11000,
             max_occupancy = None,
             space_type = 'Dormitory',
             EIA_type = 'Lodging',
             ESPM_type = 'Dormitory / Residence Hall',
             )
-        dorms.save()
+        dorms_space.save()
         
-        gym = Space(
+        gym_space = Space(
             name = 'Gym',
-            building = east,
+            building = East,
             square_footage = 8700,
             max_occupancy = None,
             space_type = 'Gymnasium',
             EIA_type = 'Education',
             ESPM_type = 'K-12 School',
             )
-        gym.save()
+        gym_space.save()
         
-        clinic = Space(
+        clinic_space = Space(
             name = 'Clinic',
-            building = west,
+            building = West,
             square_footage = 8700,
             max_occupancy = None,
             space_type = 'Health Care Clinic',
             EIA_type = 'Health Care - Outpatient',
             ESPM_type = 'Medical Office',
             )
-        clinic.save()
+        clinic_space.save()
         
-        offices = Space(
+        offices_space = Space(
             name = 'Offices',
-            building = west,
+            building = West,
             square_footage = 10400,
             max_occupancy = None,
             space_type = 'Office',
             EIA_type = 'Office',
             ESPM_type = 'Office',
             )
-        offices.save()
+        offices_space.save()
         
-        playground = Space(
+        playground_space = Space(
             name = 'Playground',
-            building = west,
+            building = West,
             square_footage = 4800,
             max_occupancy = None,
             space_type = 'Gymnasium',
             EIA_type = 'Education',
             ESPM_type = 'K-12 School',
             )
-        playground.save()
+        playground_space.save()
         
-        school = Space(
+        school_space = Space(
             name = 'CORE',
-            building = east,
+            building = East,
             square_footage = 4400,
             max_occupancy = None,
             space_type = 'School/University',
             EIA_type = 'Education',
             ESPM_type = 'K-12 School',
             )
-        school.save()
+        school_space.save()
         
-        unfinished = Space(
+        unfinished_space = Space(
             name = 'Unfinished',
-            building = west,
+            building = West,
             square_footage = 44100,
             max_occupancy = None,
             space_type = 'Warehouse',
             EIA_type = 'Warehouse and Storage',
             ESPM_type = 'Warehouse (Refrigerated or Unrefrigerated)',
             )
-        unfinished.save()
+        unfinished_space.save()
         
-        newschool = Space(
+        newschool_space = Space(
             name = 'Bright Futures',
-            building = west,
+            building = West,
             square_footage = 7000,
             max_occupancy = None,
             space_type = 'School/University',
             EIA_type = 'Education',
             ESPM_type = 'K-12 School',
             )
-        newschool.save()
+        newschool_space.save()
         
-        newchurch = Space(
+        newchurch_space = Space(
             name = 'Church',
-            building = west,
+            building = West,
             square_footage = 5000,
             max_occupancy = None,
             space_type = 'Religious Building',
             EIA_type = 'Religious Worship',
             ESPM_type = 'House of Worship',
             )
-        newchurch.save()
+        newchurch_space.save()
         
         #post-creation actions:
         #   1) if tracking, upload observed_file and/or provided_file and set tracking parameters in admin
         #   2) upload photo to Space.image_file
         
-        from BuildingSpeakApp.models import Meter, SpaceMeterApportionment,BuildingMeterApportionment
-        from BuildingSpeakApp.models import Space, Building, Account, WeatherStation, Utility
-        from BuildingSpeakApp.models import GAPowerPandL, GAPowerRider, InfiniteEnergyGAGas, CityOfATLWWW
-        
-        acct = Account.objects.get(name = 'City of Refuge, Inc. - ATL')
-        ws = WeatherStation.objects.get(name = 'ATL - downtown west')
-        
+    ###---Meters
         gpc = Utility.objects.get(name = 'Georgia Power Company')
         infe = Utility.objects.get(name = 'Infinite Energy')
         atlw = Utility.objects.get(name = 'City of Atlanta, Dept. of Watershed Mgmt.')
@@ -295,24 +317,6 @@ class Command(BaseCommand):
         #gpc_toueo7 = GAPowerTOU.objects.get(name = 'GPC-TOU-EO-7') #####NEED TO MAKE
         #gpc_tougsd7 = GAPowerTOU.objects.get(name = 'GPC-TOU-GSD-7') #####NEED TO MAKE
         
-        east = Building.objects.filter(account = acct).get(name = 'East Bldg')
-        west = Building.objects.filter(account = acct).get(name = 'West Bldg')
-        
-        edenII = Space.objects.filter(building__account = acct).filter(building = east).get(name = 'Eden II')
-        dining = Space.objects.filter(building__account = acct).filter(building = east).get(name = 'Dining Area')
-        dorms = Space.objects.filter(building__account = acct).filter(building = east).get(name = 'Dorms')
-        gym = Space.objects.filter(building__account = acct).filter(building = east).get(name = 'Gym')
-        school = Space.objects.filter(building__account = acct).filter(building = east).get(name = 'CORE')
-        kitchen = Space.objects.filter(building__account = acct).filter(building = east).get(name = '180 Kitchen')
-        unfinished = Space.objects.filter(building__account = acct).filter(building = west).get(name = 'Unfinished')
-        newschool = Space.objects.filter(building__account = acct).filter(building = west).get(name = 'Bright Futures')
-        newchurch = Space.objects.filter(building__account = acct).filter(building = west).get(name = 'Church')
-        edenI = Space.objects.filter(building__account = acct).filter(building = west).get(name = 'Eden I')
-        compATL = Space.objects.filter(building__account = acct).filter(building = west).get(name = 'Compassion ATL')
-        clinic = Space.objects.filter(building__account = acct).filter(building = west).get(name = 'Clinic')
-        offices = Space.objects.filter(building__account = acct).filter(building = west).get(name = 'Offices')
-        playground = Space.objects.filter(building__account = acct).filter(building = west).get(name = 'Playground')
-        
         #kitch = Meter(
         #    name = 'East Bldg',
         #    utility_type = 'electricity',
@@ -322,7 +326,7 @@ class Command(BaseCommand):
         #    weather_station = ws,
         #    utility = gpc,
         #    rate_schedule = gpc_toueo7,
-        #    account = acct,
+        #    account = acct1,
         #    make = 'unknown',
         #    model = 'unknown',
         #    serial_number = 'unknown',
@@ -340,7 +344,7 @@ class Command(BaseCommand):
             weather_station = ws,
             utility = gpc,
             rate_schedule = gpc_plm8_sec_in,
-            account = acct,
+            account = acct1,
             make = 'unknown',
             model = 'unknown',
             serial_number = 'unknown',
@@ -358,7 +362,7 @@ class Command(BaseCommand):
             weather_station = ws,
             utility = gpc,
             rate_schedule = gpc_plm8_sec_in,
-            account = acct,
+            account = acct1,
             make = 'unknown',
             model = 'unknown',
             serial_number = 'unknown',
@@ -376,7 +380,7 @@ class Command(BaseCommand):
         #    weather_station = ws,
         #    utility = gpc,
         #    rate_schedule = gpc_toueo7,
-        #    account = acct,
+        #    account = acct1,
         #    make = 'unknown',
         #    model = 'unknown',
         #    serial_number = 'unknown',
@@ -394,7 +398,7 @@ class Command(BaseCommand):
         #    weather_station = ws,
         #    utility = gpc,
         #    rate_schedule = gpc_gs7,
-        #    account = acct,
+        #    account = acct1,
         #    make = 'unknown',
         #    model = 'unknown',
         #    serial_number = 'unknown',
@@ -412,7 +416,7 @@ class Command(BaseCommand):
             weather_station = ws,
             utility = gpc,
             rate_schedule = gpc_pls8_sec_in,
-            account = acct,
+            account = acct1,
             make = 'unknown',
             model = 'unknown',
             serial_number = 'unknown',
@@ -430,7 +434,7 @@ class Command(BaseCommand):
             weather_station = ws,
             utility = infe,
             rate_schedule = infebizgas,
-            account = acct,
+            account = acct1,
             make = 'unknown',
             model = 'unknown',
             serial_number = 'unknown',
@@ -448,7 +452,7 @@ class Command(BaseCommand):
             weather_station = ws,
             utility = infe,
             rate_schedule = infebizgas,
-            account = acct,
+            account = acct1,
             make = 'unknown',
             model = 'unknown',
             serial_number = 'unknown',
@@ -466,7 +470,7 @@ class Command(BaseCommand):
             weather_station = ws,
             utility = atlw,
             rate_schedule = atlwww,
-            account = acct,
+            account = acct1,
             make = 'unknown',
             model = 'unknown',
             serial_number = 'unknown',
@@ -484,7 +488,7 @@ class Command(BaseCommand):
             weather_station = ws,
             utility = atlw,
             rate_schedule = atlwww,
-            account = acct,
+            account = acct1,
             make = 'unknown',
             model = 'unknown',
             serial_number = 'unknown',
@@ -492,8 +496,6 @@ class Command(BaseCommand):
             utility_meter_number = 'NE049764661',
             )
         boone1300.save()
-        
-        
         
         #post-creation actions:
         #   1) if tracking, upload observed_file and/or provided_file and set tracking parameters in admin
