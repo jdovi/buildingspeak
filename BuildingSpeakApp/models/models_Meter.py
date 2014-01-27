@@ -14,6 +14,7 @@ from models_functions import *
 from models_Message import Message
 from models_Reader_ing import Reader
 from models_monthlies import Monther
+from models_MeterModels import MeterConsumptionModel, MeterPeakDemandModel
 
 class Meter(models.Model):
     """Model for any fuel or water
@@ -231,7 +232,7 @@ class Meter(models.Model):
             self.messages.add(m)
             print m
         return mdf
-    def upload_bill_data(self, file_location=0):
+    def upload_bill_data(self, file_location=0, create_models_if_nonexistent=True):
         """Input:
             [file_location]
                 (default: MeterInstance.bill_data_url)
@@ -344,6 +345,26 @@ class Meter(models.Model):
                                 readbd_a = readbd[readbd['Exists']==0]
                                 if len(readbd_a)>0:
                                     readbd_a = self.bill_data_calc_dd(df = readbd_a)
+                                    
+                                    if (create_models_if_nonexistent and 
+                                        self.monther_set.get(name='BILLx').consumption_model is None):
+                                            new_consumption_model = MeterConsumptionModel(
+                                                first_month = readbd_a.index[0].strftime('%m/%Y'),
+                                                last_month = readbd_a.index[-1].strftime('%m/%Y'),
+                                                prediction_alpha = 0.10,
+                                                meter = self)
+                                            new_consumption_model.save()
+                                            track_runs, track_Tccp, track_Thcp, best_run_results = new_consumption_model.set_best_model(self, df_new_meter = readbd_a)
+                                    if (create_models_if_nonexistent and 
+                                        self.monther_set.get(name='BILLx').peak_demand_model is None):
+                                            new_peak_demand_model = MeterPeakDemandModel(
+                                                first_month = readbd_a.index[0].strftime('%m/%Y'),
+                                                last_month = readbd_a.index[-1].strftime('%m/%Y'),
+                                                prediction_alpha = 0.10,
+                                                meter = self)
+                                            new_peak_demand_model.save()
+                                            track_runs, track_Tccp, track_Thcp, best_run_results = new_peak_demand_model.set_best_model(self, df_new_meter = readbd_a)
+                                            
                                     readbd_a = self.bill_data_calc_baseline(df = readbd_a)
                                     readbd_a = self.bill_data_calc_savings(df = readbd_a)
                                     readbd_a = self.bill_data_calc_dependents(df = readbd_a)

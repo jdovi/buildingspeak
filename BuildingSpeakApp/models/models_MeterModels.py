@@ -450,7 +450,7 @@ class MeterConsumptionModel(models.Model):
             1 * (min(0, np.sign(self.get_min_param())))  )
         return self.acceptance_score
         
-    def set_best_model(self):
+    def set_best_model(self, df_new_meter=None):
         """No inputs.  Runs
         through battery of
         model types at
@@ -471,7 +471,10 @@ class MeterConsumptionModel(models.Model):
             #not using prep_df, instead loading all needed columns once and then cycling through
             #as new models are added, need to add code here to make sure the new models are
             #    included in the search for the best fit model
-            df = self.get_baseline_df()
+            if df_new_meter is None:
+                df = self.get_baseline_df()
+            else:
+                df = df_new_meter
             df = df.drop(['CDD (consumption)', 'HDD (consumption)'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
             df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
@@ -524,7 +527,10 @@ class MeterConsumptionModel(models.Model):
                 try:
                     track_Tccp = pd.DataFrame()            
                     Thcp = 65
-                    df = self.get_baseline_df()
+                    if df_new_meter is None:
+                        df = self.get_baseline_df()
+                    else:
+                        df = df_new_meter
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['consumption/day'] = df['Consumption (act)']/df['Days']
                     df = df.drop(['HDD (consumption)'], axis = 1)
@@ -566,7 +572,10 @@ class MeterConsumptionModel(models.Model):
                 try:
                     track_Thcp = pd.DataFrame()            
                     Tccp = 65
-                    df = self.get_baseline_df()
+                    if df_new_meter is None:
+                        df = self.get_baseline_df()
+                    else:
+                        df = df_new_meter
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['consumption/day'] = df['Consumption (act)']/df['Days']
                     df = df.drop(['CDD (consumption)'], axis = 1)
@@ -607,7 +616,10 @@ class MeterConsumptionModel(models.Model):
             self.model_type = best_type
             self.Tccp = best_Tccp
             self.Thcp = best_Thcp
-            df = self.get_baseline_df()
+            if df_new_meter is None:
+                df = self.get_baseline_df()
+            else:
+                df = df_new_meter
             df = self.prep_df(df)
             df = df.sort_index()
             best_run_results = self.set_model_print_results(df = df,
@@ -1483,7 +1495,7 @@ class MeterPeakDemandModel(models.Model):
             1 * (min(0, np.sign(self.get_min_param())))  )
         return self.acceptance_score
         
-    def set_best_model(self):
+    def set_best_model(self, df_new_meter=None):
         """No inputs.  Runs
         through battery of
         model types at
@@ -1504,7 +1516,10 @@ class MeterPeakDemandModel(models.Model):
             #not using prep_df, instead loading all needed columns once and then cycling through
             #as new models are added, need to add code here to make sure the new models are
             #    included in the search for the best fit model
-            df = self.get_baseline_df()
+            if df_new_meter is None:
+                df = self.get_baseline_df()
+            else:
+                df = df_new_meter
             df = df.drop(['CDD (peak demand)', 'HDD (peak demand)'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
             df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
@@ -1557,7 +1572,10 @@ class MeterPeakDemandModel(models.Model):
                 try:
                     track_Tccp = pd.DataFrame()            
                     Thcp = 65
-                    df = self.get_baseline_df()
+                    if df_new_meter is None:
+                        df = self.get_baseline_df()
+                    else:
+                        df = df_new_meter
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
                     df = df.drop(['HDD (peak demand)'], axis = 1)
@@ -1599,7 +1617,10 @@ class MeterPeakDemandModel(models.Model):
                 try:
                     track_Thcp = pd.DataFrame()            
                     Tccp = 65
-                    df = self.get_baseline_df()
+                    if df_new_meter is None:
+                        df = self.get_baseline_df()
+                    else:
+                        df = df_new_meter
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
                     df = df.drop(['CDD (peak demand)'], axis = 1)
@@ -1640,7 +1661,10 @@ class MeterPeakDemandModel(models.Model):
             self.model_type = best_type
             self.Tccp = best_Tccp
             self.Thcp = best_Thcp
-            df = self.get_baseline_df()
+            if df_new_meter is None:
+                df = self.get_baseline_df()
+            else:
+                df = df_new_meter
             df = self.prep_df(df)
             df = df.sort_index()
             best_run_results = self.set_model_print_results(df = df,

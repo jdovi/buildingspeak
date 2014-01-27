@@ -456,6 +456,8 @@ class Command(BaseCommand):
         e1.__setattr__('nameplate_file', file_obj)
         e1.save()
         
+        e1.
+        
         e2 = Meter(
             name = 'Eden II',
             utility_type = 'electricity',
