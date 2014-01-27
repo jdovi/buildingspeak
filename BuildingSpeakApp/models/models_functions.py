@@ -556,8 +556,13 @@ def image_file_path_userprofile(instance, filename):
                      '%06d' % instance.pk,
                      filename])
 def image_file_path_account(instance, filename):
-    return '/'.join(['%06d' % instance.pk,
-                     filename])
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.pk,
+                           'account_image_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.pk,
+                           filename])
+    return result
 def image_file_path_building(instance, filename):
     return '/'.join(['%06d' % instance.account.pk,
                      'buildings',
