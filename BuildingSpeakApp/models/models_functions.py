@@ -502,59 +502,115 @@ def make_pandas_data_frame(list_of_series, series_names=[]):
 
 # these functions used to set upload_to variables passed to data file FileField attributes
 def data_file_path_equipment(instance, filename):
-    return '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
+                     'equipments',
+                     '%06d' % instance.pk + '_' + instance.name,
+                     'equipment_data_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
                      'equipments',
                      '%06d' % instance.pk + '_' + instance.name,
                      filename])
+    return result
 def data_file_path_account(instance, filename):
-    return '/'.join(['%06d' % instance.pk,
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.pk,
+                     'account_data_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.pk,
                      filename])
+    return result
 def data_file_path_building(instance, filename):
-    return '/'.join(['%06d' % instance.account.pk,
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.account.pk,
+                     'buildings',
+                     '%06d' % instance.pk + '_' + instance.name,
+                     'building_data_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.account.pk,
                      'buildings',
                      '%06d' % instance.pk + '_' + instance.name,
                      filename])
+    return result
 def data_file_path_meter(instance, filename):
-    return '/'.join(['%06d' % instance.account.pk,
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.account.pk,
+                     'meters',
+                     '%06d' % instance.pk + '_' + instance.name,
+                     'meter_data_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.account.pk,
                      'meters',
                      '%06d' % instance.pk + '_' + instance.name,
                      filename])
+    return result
 def bill_data_file_path_meter(instance, filename):
-    return '/'.join(['%06d' % instance.account.pk,
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.account.pk,
+                     'meters',
+                     '%06d' % instance.pk + '_' + instance.name,
+                     'bill_data_files',
+                     'meter_bill_data_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.account.pk,
                      'meters',
                      '%06d' % instance.pk + '_' + instance.name,
                      'bill_data_files',
                      filename])
-def data_file_path_floor(instance, filename):
-    return '/'.join(['%06d' % instance.building.account.pk,
+    return result
+def data_file_path_space(instance, filename):
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.building.account.pk,
                      'buildings',
                      '%06d' % instance.building.pk + '_' + instance.building.name,
-                     'floors',
+                     'spaces',
                      '%06d' % instance.pk + '_' + instance.name,
-                     filename])
-def data_file_path_space(instance, filename):
-    return '/'.join(['%06d' % instance.building.account.pk,
+                     'space_data_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.building.account.pk,
                      'buildings',
                      '%06d' % instance.building.pk + '_' + instance.building.name,
                      'spaces',
                      '%06d' % instance.pk + '_' + instance.name,
                      filename])
+    return result
 def rate_file_path_rate_schedule(instance, filename):
-    return '/'.join(['%06d' % instance.utility.pk,
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.utility.pk,
+                     'rate_schedules',
+                     '%06d' % instance.pk + '_' + instance.name,
+                     'rate_schedule_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.utility.pk,
                      'rate_schedules',
                      '%06d' % instance.pk + '_' + instance.name,
                      filename])
+    return result
 
 # these functions used to set upload_to variables passed to image file FileField attributes
 def image_file_path_equipment(instance, filename):
-    return '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
-                     'equipments',
-                     '%06d' % instance.pk + '_' + instance.name,
-                     filename])
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
+                             'equipments',
+                             '%06d' % instance.pk + '_' + instance.name,
+                             'equipment_image_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
+                             'equipments',
+                             '%06d' % instance.pk + '_' + instance.name,
+                             filename])
+    return result
 def image_file_path_userprofile(instance, filename):
-    return '/'.join(['user_profiles',
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['user_profiles',
+                     '%06d' % instance.pk,
+                     'userprofile_image_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['user_profiles',
                      '%06d' % instance.pk,
                      filename])
+    return result
 def image_file_path_account(instance, filename):
     if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
         result = '/'.join(['%06d' % instance.pk,
@@ -564,44 +620,79 @@ def image_file_path_account(instance, filename):
                            filename])
     return result
 def image_file_path_building(instance, filename):
-    return '/'.join(['%06d' % instance.account.pk,
-                     'buildings',
-                     '%06d' % instance.pk + '_' + instance.name,
-                     filename])
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.account.pk,
+                           'buildings',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           'building_image_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.account.pk,
+                           'buildings',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           filename])
+    return result
 def image_file_path_meter(instance, filename):
-    return '/'.join(['%06d' % instance.account.pk,
-                     'meters',
-                     '%06d' % instance.pk + '_' + instance.name,
-                     filename])
-def image_file_path_floor(instance, filename):
-    return '/'.join(['%06d' % instance.building.account.pk,
-                     'buildings',
-                     '%06d' % instance.building.pk + '_' + instance.building.name,
-                     'floors',
-                     '%06d' % instance.pk + '_' + instance.name,
-                     filename])
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.account.pk,
+                           'meters',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           'meter_image_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.account.pk,
+                           'meters',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           filename])
+    return result
 def image_file_path_space(instance, filename):
-    return '/'.join(['%06d' % instance.building.account.pk,
-                     'buildings',
-                     '%06d' % instance.building.pk + '_' + instance.building.name,
-                     'space',
-                     '%06d' % instance.pk + '_' + instance.name,
-                     filename])
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.building.account.pk,
+                           'buildings',
+                           '%06d' % instance.building.pk + '_' + instance.building.name,
+                           'space',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           'space_image_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.building.account.pk,
+                           'buildings',
+                           '%06d' % instance.building.pk + '_' + instance.building.name,
+                           'space',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           filename])
+    return result
 def image_file_path_utility(instance, filename):
-    return '/'.join(['%06d' % instance.pk,
-                     filename])
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.pk,
+                           'utility_image_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.pk,
+                           filename])
+    return result
 
 # these functions used to set upload_to variables passed to nameplate file FileField attributes
 def nameplate_file_path_equipment(instance, filename):
-    return '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
-                     'equipments',
-                     '%06d' % instance.pk + '_' + instance.name,
-                     filename])
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
+                           'equipments',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           'equipment_nameplate_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
+                           'equipments',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           filename])
+    return result
 def nameplate_file_path_meter(instance, filename):
-    return '/'.join(['%06d' % instance.account.pk,
-                     'meters',
-                     '%06d' % instance.pk + '_' + instance.name,
-                     filename])
+    if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
+        result = '/'.join(['%06d' % instance.account.pk,
+                           'meters',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           'meter_nameplate_file' + filename[-4:]])
+    else: #then it was loaded via admin and will have the original filename intact
+        result = '/'.join(['%06d' % instance.account.pk,
+                           'meters',
+                           '%06d' % instance.pk + '_' + instance.name,
+                           filename])
+    return result
 
 #these are helper functions used in development, have minimal if any error checking and validation
 def assign_period_datetime(time_series=[], dates=[]):
