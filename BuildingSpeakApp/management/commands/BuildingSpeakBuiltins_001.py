@@ -1,14 +1,63 @@
 from django.core.management.base import BaseCommand
 
 from decimal import Decimal
-from BuildingSpeakApp.models import GAPowerPandL, GAPowerRider, Utility
+from BuildingSpeakApp.models import WeatherStation, Utility
+from BuildingSpeakApp.models import InfiniteEnergyGAGas, CityOfATLWWW, GAPowerPandL, GAPowerRider
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        
-        GPC = Utility.objects.get(name='Georgia Power Company')
-        
+    ###---WeatherStations
+        ATLdw = WeatherStation(
+            name = 'ATL - downtown west',
+            description = '1300 Joseph Boone Blvd, Atlanta, GA 30314',
+            latitude = Decimal(33.7637360),
+            longitude = Decimal(-84.4301300),
+            tz_name = 'US/Eastern',
+            )
+        ATLdw.save()
+
+    ###---Utilitys
+        atlw = Utility(
+            name = 'City of Atlanta, Dept. of Watershed Mgmt.',
+            )
+        atlw.save()
+
+        infe = Utility(
+            name = 'Infinite Energy',
+            )
+        infe.save()
+
+        GPC = Utility(
+            name = 'Georgia Power Company',
+            )
+        GPC.save()
+
+    ###---RateSchedules
+        bizgas1 = InfiniteEnergyGAGas(
+            name = 'Fixed Business Rate',
+            utility = infe,
+            basic_service_charge = Decimal(20),
+            tax_percentage = Decimal(0.08),
+            therm_rate = Decimal(0.66),
+            )
+        bizgas1.save()
+
+        w_ww = CityOfATLWWW(
+            name = 'Water and Wastewater 2012',
+            utility = atlw,
+            base_charge = Decimal(13.12),
+            tax_percentage = Decimal(0.08),
+            tier1 = Decimal(4.0),
+            tier2 = Decimal(7.0),
+            tier3 = Decimal(999999999),
+            rate1 = Decimal(12.32),
+            rate2 = Decimal(18.98),
+            rate3 = Decimal(21.85),
+            security_surcharge = Decimal(0.15),
+            )
+        w_ww.save()
+
         GPCEECR2 = GAPowerRider(
             name = 'GPC-EECR-2',
             utility = GPC,
@@ -1378,6 +1427,3 @@ class Command(BaseCommand):
         GPCPLL8_tran_out.riders.add(GPCDSMC3)
         GPCPLL8_tran_out.riders.add(GPCFCR23tran)
         GPCPLL8_tran_out.riders.add(GPCMFF2out)
-        
-        #post-creation actions: upload rate/rider documents to 
-        #                       RateSchedule.rate_file and RateScheduleRider.rider_file
