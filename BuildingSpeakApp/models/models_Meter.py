@@ -344,7 +344,6 @@ class Meter(models.Model):
                                 #load data that not(Exists)
                                 readbd_a = readbd[readbd['Exists']==0]
                                 if len(readbd_a)>0:
-                                    readbd_a = self.bill_data_calc_dd(df = readbd_a)
                                     
                                     if (create_models_if_nonexistent and 
                                         self.monther_set.get(name='BILLx').consumption_model is None):
@@ -365,6 +364,7 @@ class Meter(models.Model):
                                             new_peak_demand_model.save()
                                             track_runs, track_Tccp, track_Thcp, best_run_results = new_peak_demand_model.set_best_model(df_new_meter = readbd_a)
                                             
+                                    readbd_a = self.bill_data_calc_dd(df = readbd_a)
                                     readbd_a = self.bill_data_calc_baseline(df = readbd_a)
                                     readbd_a = self.bill_data_calc_savings(df = readbd_a)
                                     readbd_a = self.bill_data_calc_dependents(df = readbd_a)
