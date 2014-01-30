@@ -301,7 +301,8 @@ class MeterConsumptionModel(models.Model):
             if Tccp is None: Tccp = self.Tccp
             if Thcp is None: Thcp = self.Thcp
             df = self.get_baseline_df()
-            df = df.drop(['CDD (consumption)', 'HDD (consumption)'], axis = 1)
+            if 'CDD (consumption)' in df.columns: df = df.drop(['CDD (consumption)'], axis = 1)
+            if 'HDD (consumption)' in df.columns: df = df.drop(['HDD (consumption)'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
             df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
             df = self.meter.weather_station.get_HDD_df(df, Thcp)
@@ -526,7 +527,7 @@ class MeterConsumptionModel(models.Model):
             #then, if model contains cooling term(s), find best Tccp
             if 'c' in best_type:
                 try:
-                    track_Tccp = pd.DataFrame()            
+                    track_Tccp = pd.DataFrame()
                     Thcp = 65
                     if df_new_meter is None:
                         df = self.get_baseline_df()
@@ -534,13 +535,13 @@ class MeterConsumptionModel(models.Model):
                         df = df_new_meter
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['consumption/day'] = df['Consumption (act)']/df['Days']
-                    df = df.drop(['HDD (consumption)'], axis = 1)
+                    if 'HDD (consumption)' in df.columns: df = df.drop(['HDD (consumption)'], axis = 1)
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
                     df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                     df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
                     for Tccp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['CDD (consumption)'], axis = 1)
+                        if 'CDD (consumption)' in df.columns: df = df.drop(['CDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
                         df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
                         df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
@@ -579,12 +580,12 @@ class MeterConsumptionModel(models.Model):
                         df = df_new_meter
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['consumption/day'] = df['Consumption (act)']/df['Days']
-                    df = df.drop(['CDD (consumption)'], axis = 1)
+                    if 'CDD (consumption)' in df.columns: df = df.drop(['CDD (consumption)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
                     df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
                     for Thcp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['HDD (consumption)'], axis = 1)
+                        if 'HDD (consumption)' in df.columns: df = df.drop(['HDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
                         df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                         df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
@@ -1347,7 +1348,8 @@ class MeterPeakDemandModel(models.Model):
             if Tccp is None: Tccp = self.Tccp
             if Thcp is None: Thcp = self.Thcp
             df = self.get_baseline_df()
-            df = df.drop(['CDD (peak demand)', 'HDD (peak demand)'], axis = 1)
+            if 'CDD (peak demand)' in df.columns: df = df.drop(['CDD (peak demand)'], axis = 1)
+            if 'HDD (peak demand)' in df.columns: df = df.drop(['HDD (peak demand)'], axis = 1)
             df = self.meter.weather_station.get_CDD_df(df, Tccp)
             df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
             df = self.meter.weather_station.get_HDD_df(df, Thcp)
@@ -1580,13 +1582,13 @@ class MeterPeakDemandModel(models.Model):
                         df = df_new_meter
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
-                    df = df.drop(['HDD (peak demand)'], axis = 1)
+                    if 'HDD (peak demand)' in df.columns: df = df.drop(['HDD (peak demand)'], axis = 1)
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
                     df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
                     df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
                     for Tccp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['CDD (peak demand)'], axis = 1)
+                        if 'CDD (peak demand)' in df.columns: df = df.drop(['CDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
                         df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
                         df['CDD (peak demand)/day'] = df['CDD (peak demand)']/df['Days']
@@ -1625,12 +1627,12 @@ class MeterPeakDemandModel(models.Model):
                         df = df_new_meter
                     df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
                     df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
-                    df = df.drop(['CDD (peak demand)'], axis = 1)
+                    if 'CDD (peak demand)' in df.columns: df = df.drop(['CDD (peak demand)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
                     df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
                     for Thcp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
-                        df = df.drop(['HDD (peak demand)'], axis = 1)
+                        if 'HDD (peak demand)' in df.columns: df = df.drop(['HDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
                         df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
                         df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']

@@ -354,9 +354,9 @@ class WeatherStation(models.Model):
             else:
                 try:
                     df = df.reindex(pd.date_range(start = start_date,
-                                                    end = end_date,
-                                                    freq = 'h'),
-                                    fill_value = NaN)
+                                                  end = end_date,
+                                                  freq = 'h'),
+                                                  fill_value = NaN)[:-1] #reindex adds a point
                 except:
                     m = Message(when=timezone.now(),
                                 message_type='Code Error',
@@ -458,9 +458,9 @@ class WeatherStation(models.Model):
             else:
                 try:
                     df = df.reindex(pd.date_range(start = start_date,
-                                                    end = end_date,
-                                                    freq = 'h'),
-                                    fill_value = NaN)
+                                                  end = end_date,
+                                                  freq = 'h'),
+                                                  fill_value = NaN)[:-1] #reindex adds a point
                 except:
                     m = Message(when=timezone.now(),
                                 message_type='Code Error',
@@ -566,8 +566,10 @@ class WeatherStation(models.Model):
                 wdpts['blank'] = 1
                 wdpts = wdpts['blank']
                 wdpts = wdpts.sort_index()
-                full_set = wdpts.reindex(pd.date_range(start = start_date, end = end_date, freq = 'h'),
-                                         fill_value = NaN)
+                full_set = wdpts.reindex(pd.date_range(start = start_date,
+                                                       end = end_date,
+                                                       freq = 'h'),
+                                                       fill_value = NaN)[:-1] #reindex adds a point
                 missing_hours = full_set[pd.isnull(full_set)]
                 station_timezone = tz(self.tz_name)
                 days_with_missing_hours = pd.Series(missing_hours.index).map(lambda xx: xx.tz_localize(UTC).astimezone(station_timezone)).map(pd.Timestamp.date).unique()
