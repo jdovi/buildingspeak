@@ -475,11 +475,12 @@ class MeterConsumptionModel(models.Model):
                 df = self.get_baseline_df()
             else:
                 df = df_new_meter
-            df = df.drop(['CDD (consumption)', 'HDD (consumption)'], axis = 1)
-            df = self.meter.weather_station.get_CDD_df(df, Tccp)
-            df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
-            df = self.meter.weather_station.get_HDD_df(df, Thcp)
-            df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
+            if 'CDD (consumption)' not in df.columns:
+                df = self.meter.weather_station.get_CDD_df(df, Tccp)
+                df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
+            if 'HDD (consumption)' not in df.columns:
+                df = self.meter.weather_station.get_HDD_df(df, Thcp)
+                df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
             df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
             df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
             df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
@@ -1520,11 +1521,12 @@ class MeterPeakDemandModel(models.Model):
                 df = self.get_baseline_df()
             else:
                 df = df_new_meter
-            df = df.drop(['CDD (peak demand)', 'HDD (peak demand)'], axis = 1)
-            df = self.meter.weather_station.get_CDD_df(df, Tccp)
-            df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
-            df = self.meter.weather_station.get_HDD_df(df, Thcp)
-            df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
+            if 'CDD (peak demand)' not in df.columns:
+                df = self.meter.weather_station.get_CDD_df(df, Tccp)
+                df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
+            if 'HDD (peak demand)' not in df.columns:
+                df = self.meter.weather_station.get_HDD_df(df, Thcp)
+                df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
             df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
             df['CDD (peak demand)/day'] = df['CDD (peak demand)']/df['Days']
             df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']

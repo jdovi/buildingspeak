@@ -9,11 +9,11 @@ from django.contrib.auth.models import User
 
 from BuildingSpeak.settings import STATIC_URL
 
-from BuildingSpeakApp.models import UserProfile, Account, Building, Space, Meter#, Equipment
-#from BuildingSpeakApp.models import RooftopUnit
+from BuildingSpeakApp.models import UserProfile, Account, Building, Space, Meter, Equipment
+from BuildingSpeakApp.models import RooftopUnit
 from BuildingSpeakApp.models import MeterConsumptionModel, MeterPeakDemandModel
 from BuildingSpeakApp.models import SpaceMeterApportionment, BuildingMeterApportionment
-#from BuildingSpeakApp.models import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
+from BuildingSpeakApp.models import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from BuildingSpeakApp.models import WeatherStation, Utility
 from BuildingSpeakApp.models import GAPowerPandL, InfiniteEnergyGAGas, CityOfATLWWW
 
@@ -61,21 +61,21 @@ class Command(BaseCommand):
     ###---Account
         try:
             acct1 = Account(
-            name = 'City of Refuge, Inc. - ATL',
-            account_type = 'Commercial',
-            street_address = '1300 Joseph Boone Blvd',
-            city = 'Atlanta',
-            state = 'GA',
-            zip_code = '30314',
-            launch_date = timezone.now(),
-            first_name = 'Steve',
-            last_name = 'Smucker',
-            title = 'Director of Maintenance',
-            email = 'smucker@cityofrefugeatl.org',
-            phone = '404-713-6994',
-            status = 'Active',
-            monthly_payment = Decimal(0.0),
-            )
+                name = 'City of Refuge, Inc. - ATL',
+                account_type = 'Commercial',
+                street_address = '1300 Joseph Boone Blvd',
+                city = 'Atlanta',
+                state = 'GA',
+                zip_code = '30314',
+                launch_date = timezone.now(),
+                first_name = 'Steve',
+                last_name = 'Smucker',
+                title = 'Director of Maintenance',
+                email = 'smucker@cityofrefugeatl.org',
+                phone = '404-713-6994',
+                status = 'Active',
+                monthly_payment = Decimal(0.0),
+                )
             acct1.save()
             
             #post-creation actions
