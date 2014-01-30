@@ -538,7 +538,7 @@ class MeterConsumptionModel(models.Model):
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
                     df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                     df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
-                    for Tccp in range(65, 66):
+                    for Tccp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         df = df.drop(['CDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
@@ -582,7 +582,7 @@ class MeterConsumptionModel(models.Model):
                     df = df.drop(['CDD (consumption)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
                     df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
-                    for Thcp in range(65, 66):
+                    for Thcp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         df = df.drop(['HDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
@@ -1584,7 +1584,7 @@ class MeterPeakDemandModel(models.Model):
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
                     df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
                     df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
-                    for Tccp in range(65, 66):
+                    for Tccp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         df = df.drop(['CDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
@@ -1628,7 +1628,7 @@ class MeterPeakDemandModel(models.Model):
                     df = df.drop(['CDD (peak demand)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
                     df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
-                    for Thcp in range(65, 66):
+                    for Thcp in range(55, 96):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         df = df.drop(['HDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
