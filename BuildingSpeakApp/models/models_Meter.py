@@ -353,6 +353,8 @@ class Meter(models.Model):
                                                 prediction_alpha = 0.10,
                                                 meter = self)
                                             new_consumption_model.save()
+                                            self.monther_set.get(name='BILLx').consumption_model = new_consumption_model
+                                            self.monther_set.get(name='BILLx').save()
                                             track_runs, track_Tccp, track_Thcp, best_run_results = new_consumption_model.set_best_model(df_new_meter = readbd_a)
                                     if (create_models_if_nonexistent and 
                                         self.monther_set.get(name='BILLx').peak_demand_model is None):
@@ -362,6 +364,8 @@ class Meter(models.Model):
                                                 prediction_alpha = 0.10,
                                                 meter = self)
                                             new_peak_demand_model.save()
+                                            self.monther_set.get(name='BILLx').peak_demand_model = new_peak_demand_model
+                                            self.monther_set.get(name='BILLx').save()
                                             track_runs, track_Tccp, track_Thcp, best_run_results = new_peak_demand_model.set_best_model(df_new_meter = readbd_a)
                                             
                                     readbd_a = self.bill_data_calc_dd(df = readbd_a)
