@@ -51,7 +51,7 @@ class Command(BaseCommand):
             
             #post-creation actions
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/user1_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             userprofile1.__setattr__('image_file', file_obj)
@@ -86,7 +86,7 @@ class Command(BaseCommand):
             acct1.users.add(userDA)
             
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/account1_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             acct1.__setattr__('image_file', file_obj)
@@ -123,7 +123,7 @@ class Command(BaseCommand):
     
             #post-creation actions
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/east_bldg_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             East.__setattr__('image_file', file_obj)
@@ -154,7 +154,7 @@ class Command(BaseCommand):
             
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/west_bldg_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             West.__setattr__('image_file', file_obj)
@@ -176,7 +176,7 @@ class Command(BaseCommand):
             EdenI_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/EdenI_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             EdenI_space.__setattr__('image_file', file_obj)
@@ -194,7 +194,7 @@ class Command(BaseCommand):
             kitchen_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/kitchen_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             kitchen_space.__setattr__('image_file', file_obj)
@@ -212,7 +212,7 @@ class Command(BaseCommand):
             dining_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/dining_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             dining_space.__setattr__('image_file', file_obj)
@@ -230,7 +230,7 @@ class Command(BaseCommand):
             compATL_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/compATL_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             compATL_space.__setattr__('image_file', file_obj)
@@ -248,7 +248,7 @@ class Command(BaseCommand):
             EdenII_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/EdenII_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             EdenII_space.__setattr__('image_file', file_obj)
@@ -266,7 +266,7 @@ class Command(BaseCommand):
             dorms_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/dorms_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             dorms_space.__setattr__('image_file', file_obj)
@@ -284,7 +284,7 @@ class Command(BaseCommand):
             gym_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/gym_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             gym_space.__setattr__('image_file', file_obj)
@@ -302,7 +302,7 @@ class Command(BaseCommand):
             clinic_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/clinic_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             clinic_space.__setattr__('image_file', file_obj)
@@ -320,7 +320,7 @@ class Command(BaseCommand):
             offices_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/offices_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             offices_space.__setattr__('image_file', file_obj)
@@ -338,7 +338,7 @@ class Command(BaseCommand):
             playground_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/playground_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             playground_space.__setattr__('image_file', file_obj)
@@ -356,7 +356,7 @@ class Command(BaseCommand):
             school_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/school_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             school_space.__setattr__('image_file', file_obj)
@@ -374,7 +374,7 @@ class Command(BaseCommand):
             unfinished_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/unfinished_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             unfinished_space.__setattr__('image_file', file_obj)
@@ -392,7 +392,7 @@ class Command(BaseCommand):
             newschool_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/newschool_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             newschool_space.__setattr__('image_file', file_obj)
@@ -410,7 +410,7 @@ class Command(BaseCommand):
             newchurch_space.save()
             #post-creation actions:
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/newchurch_space_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             newchurch_space.__setattr__('image_file', file_obj)
@@ -490,18 +490,18 @@ class Command(BaseCommand):
             e1.save()
             #post-creation actions:
             #--load image files
-            file_url = STATIC_URL + 'temporary_files/e1_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             e1.__setattr__('image_file', file_obj)
             e1.save()
-            file_url = STATIC_URL + 'temporary_files/e1_nameplate_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             e1.__setattr__('nameplate_file', file_obj)
             e1.save()
             #--load bill data file
-            file_url = STATIC_URL + 'temporary_files/e1_bill_data.csv'
+            file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             e1.__setattr__('bill_data_file', file_obj)
@@ -528,18 +528,18 @@ class Command(BaseCommand):
             e2.save()
             #post-creation actions:
             #--load image files
-            file_url = STATIC_URL + 'temporary_files/e2_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             e2.__setattr__('image_file', file_obj)
             e2.save()
-            file_url = STATIC_URL + 'temporary_files/e2_nameplate_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             e2.__setattr__('nameplate_file', file_obj)
             e2.save()
             #--load bill data file
-            file_url = STATIC_URL + 'temporary_files/e2_bill_data.csv'
+            file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             e2.__setattr__('bill_data_file', file_obj)
@@ -642,18 +642,18 @@ class Command(BaseCommand):
             clin.save()
             #post-creation actions:
             #--load image files
-            file_url = STATIC_URL + 'temporary_files/clin_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             clin.__setattr__('image_file', file_obj)
             clin.save()
-            file_url = STATIC_URL + 'temporary_files/clin_nameplate_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             clin.__setattr__('nameplate_file', file_obj)
             clin.save()
             #--load bill data file
-            file_url = STATIC_URL + 'temporary_files/clin_bill_data.csv'
+            file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             clin.__setattr__('bill_data_file', file_obj)
@@ -680,18 +680,18 @@ class Command(BaseCommand):
             gas1290.save()
             #post-creation actions:
             #--load image files
-            file_url = STATIC_URL + 'temporary_files/gas1290_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             gas1290.__setattr__('image_file', file_obj)
             gas1290.save()
-            file_url = STATIC_URL + 'temporary_files/gas1290_nameplate_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             gas1290.__setattr__('nameplate_file', file_obj)
             gas1290.save()
             #--load bill data file
-            file_url = STATIC_URL + 'temporary_files/gas1290_bill_data.csv'
+            file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             gas1290.__setattr__('bill_data_file', file_obj)
@@ -718,18 +718,18 @@ class Command(BaseCommand):
             gas1300.save()
             #post-creation actions:
             #--load image files
-            file_url = STATIC_URL + 'temporary_files/gas1300_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             gas1300.__setattr__('image_file', file_obj)
             gas1300.save()
-            file_url = STATIC_URL + 'temporary_files/gas1300_nameplate_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             gas1300.__setattr__('nameplate_file', file_obj)
             gas1300.save()
             #--load bill data file
-            file_url = STATIC_URL + 'temporary_files/gas1300_bill_data.csv'
+            file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             gas1300.__setattr__('bill_data_file', file_obj)
@@ -756,18 +756,18 @@ class Command(BaseCommand):
             simpson1290.save()
             #post-creation actions:
             #--load image files
-            file_url = STATIC_URL + 'temporary_files/simpson1290_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             simpson1290.__setattr__('image_file', file_obj)
             simpson1290.save()
-            file_url = STATIC_URL + 'temporary_files/simpson1290_nameplate_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             simpson1290.__setattr__('nameplate_file', file_obj)
             simpson1290.save()
             #--load bill data file
-            file_url = STATIC_URL + 'temporary_files/simpson1290_bill_data.csv'
+            file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             simpson1290.__setattr__('bill_data_file', file_obj)
@@ -794,18 +794,18 @@ class Command(BaseCommand):
             boone1300.save()
             #post-creation actions:
             #--load image files
-            file_url = STATIC_URL + 'temporary_files/boone1300_image_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             boone1300.__setattr__('image_file', file_obj)
             boone1300.save()
-            file_url = STATIC_URL + 'temporary_files/boone1300_nameplate_file.jpg'
+            file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             boone1300.__setattr__('nameplate_file', file_obj)
             boone1300.save()
             #--load bill data file
-            file_url = STATIC_URL + 'temporary_files/boone1300_bill_data.csv'
+            file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
             boone1300.__setattr__('bill_data_file', file_obj)

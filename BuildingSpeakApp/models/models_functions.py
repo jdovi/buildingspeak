@@ -506,7 +506,7 @@ def data_file_path_equipment(instance, filename):
         result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
                      'equipments',
                      '%06d' % instance.pk + '_' + instance.name,
-                     'equipment_data_file' + filename[-4:]])
+                     'equipment_data_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
                      'equipments',
@@ -516,7 +516,7 @@ def data_file_path_equipment(instance, filename):
 def data_file_path_account(instance, filename):
     if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
         result = '/'.join(['%06d' % instance.pk,
-                     'account_data_file' + filename[-4:]])
+                     'account_data_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.pk,
                      filename])
@@ -526,7 +526,7 @@ def data_file_path_building(instance, filename):
         result = '/'.join(['%06d' % instance.account.pk,
                      'buildings',
                      '%06d' % instance.pk + '_' + instance.name,
-                     'building_data_file' + filename[-4:]])
+                     'building_data_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.account.pk,
                      'buildings',
@@ -538,7 +538,7 @@ def data_file_path_meter(instance, filename):
         result = '/'.join(['%06d' % instance.account.pk,
                      'meters',
                      '%06d' % instance.pk + '_' + instance.name,
-                     'meter_data_file' + filename[-4:]])
+                     'meter_data_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.account.pk,
                      'meters',
@@ -551,7 +551,7 @@ def bill_data_file_path_meter(instance, filename):
                      'meters',
                      '%06d' % instance.pk + '_' + instance.name,
                      'bill_data_files',
-                     'meter_bill_data_file' + filename[-4:]])
+                     'meter_bill_data_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.account.pk,
                      'meters',
@@ -566,7 +566,7 @@ def data_file_path_space(instance, filename):
                      '%06d' % instance.building.pk + '_' + instance.building.name,
                      'spaces',
                      '%06d' % instance.pk + '_' + instance.name,
-                     'space_data_file' + filename[-4:]])
+                     'space_data_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.building.account.pk,
                      'buildings',
@@ -580,7 +580,7 @@ def rate_file_path_rate_schedule(instance, filename):
         result = '/'.join(['%06d' % instance.utility.pk,
                      'rate_schedules',
                      '%06d' % instance.pk + '_' + instance.name,
-                     'rate_schedule_file' + filename[-4:]])
+                     'rate_schedule_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.utility.pk,
                      'rate_schedules',
@@ -594,7 +594,7 @@ def image_file_path_equipment(instance, filename):
         result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
                              'equipments',
                              '%06d' % instance.pk + '_' + instance.name,
-                             'equipment_image_file' + filename[-4:]])
+                             'equipment_image_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
                              'equipments',
@@ -605,7 +605,7 @@ def image_file_path_userprofile(instance, filename):
     if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
         result = '/'.join(['user_profiles',
                      '%06d' % instance.pk,
-                     'userprofile_image_file' + filename[-4:]])
+                     'userprofile_image_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['user_profiles',
                      '%06d' % instance.pk,
@@ -614,7 +614,7 @@ def image_file_path_userprofile(instance, filename):
 def image_file_path_account(instance, filename):
     if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
         result = '/'.join(['%06d' % instance.pk,
-                           'account_image_file' + filename[-4:]])
+                           'account_image_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.pk,
                            filename])
@@ -624,7 +624,7 @@ def image_file_path_building(instance, filename):
         result = '/'.join(['%06d' % instance.account.pk,
                            'buildings',
                            '%06d' % instance.pk + '_' + instance.name,
-                           'building_image_file' + filename[-4:]])
+                           'building_image_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.account.pk,
                            'buildings',
@@ -636,7 +636,7 @@ def image_file_path_meter(instance, filename):
         result = '/'.join(['%06d' % instance.account.pk,
                            'meters',
                            '%06d' % instance.pk + '_' + instance.name,
-                           'meter_image_file' + filename[-4:]])
+                           'meter_image_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.account.pk,
                            'meters',
@@ -650,7 +650,7 @@ def image_file_path_space(instance, filename):
                            '%06d' % instance.building.pk + '_' + instance.building.name,
                            'space',
                            '%06d' % instance.pk + '_' + instance.name,
-                           'space_image_file' + filename[-4:]])
+                           'space_image_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.building.account.pk,
                            'buildings',
@@ -662,7 +662,7 @@ def image_file_path_space(instance, filename):
 def image_file_path_utility(instance, filename):
     if filename[0:5] == '/tmp/': #then we loaded it via static folder and mgmt command and lost original filename
         result = '/'.join(['%06d' % instance.pk,
-                           'utility_image_file' + filename[-4:]])
+                           'utility_image_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.pk,
                            filename])
@@ -674,7 +674,7 @@ def nameplate_file_path_equipment(instance, filename):
         result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
                            'equipments',
                            '%06d' % instance.pk + '_' + instance.name,
-                           'equipment_nameplate_file' + filename[-4:]])
+                           'equipment_nameplate_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.buildings.all()[0].account.pk,
                            'equipments',
@@ -686,7 +686,7 @@ def nameplate_file_path_meter(instance, filename):
         result = '/'.join(['%06d' % instance.account.pk,
                            'meters',
                            '%06d' % instance.pk + '_' + instance.name,
-                           'meter_nameplate_file' + filename[-4:]])
+                           'meter_nameplate_file' + '.' + filename.split('.')[-1]])
     else: #then it was loaded via admin and will have the original filename intact
         result = '/'.join(['%06d' % instance.account.pk,
                            'meters',
