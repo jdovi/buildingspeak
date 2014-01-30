@@ -9,11 +9,11 @@ from django.contrib.auth.models import User
 
 from BuildingSpeak.settings import STATIC_URL
 
-from BuildingSpeakApp.models import UserProfile, Account, Building, Space, Meter, Equipment
-from BuildingSpeakApp.models import RooftopUnit
+from BuildingSpeakApp.models import UserProfile, Account, Building, Space, Meter#, Equipment
+#from BuildingSpeakApp.models import RooftopUnit
 from BuildingSpeakApp.models import MeterConsumptionModel, MeterPeakDemandModel
 from BuildingSpeakApp.models import SpaceMeterApportionment, BuildingMeterApportionment
-from BuildingSpeakApp.models import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
+#from BuildingSpeakApp.models import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from BuildingSpeakApp.models import WeatherStation, Utility
 from BuildingSpeakApp.models import GAPowerPandL, InfiniteEnergyGAGas, CityOfATLWWW
 
@@ -48,7 +48,6 @@ class Command(BaseCommand):
                 organization = 'City of Refuge, Inc. - ATL'
                 )
             userprofile1.save()
-            
             #post-creation actions
             #--load image file
             file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
