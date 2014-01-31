@@ -181,6 +181,7 @@ class WeatherStation(models.Model):
                     m.save()
                     self.messages.add(m)
                     print m
+                df['CDD'] = df['CDD'].apply(lambda x: cap_negatives_with_NaN(x))
         else:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -255,6 +256,7 @@ class WeatherStation(models.Model):
                     m.save()
                     self.messages.add(m)
                     print m
+                df['HDD'] = df['HDD'].apply(lambda x: cap_negatives_with_NaN(x))
         else:
             m = Message(when=timezone.now(),
                         message_type='Code Error',

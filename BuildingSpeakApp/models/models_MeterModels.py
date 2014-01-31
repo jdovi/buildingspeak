@@ -539,7 +539,7 @@ class MeterConsumptionModel(models.Model):
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
                     df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                     df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
-                    for Tccp in range(55, 96):
+                    for Tccp in range(55, 96, 10):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         if 'CDD (consumption)' in df.columns: df = df.drop(['CDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
@@ -583,7 +583,7 @@ class MeterConsumptionModel(models.Model):
                     if 'CDD (consumption)' in df.columns: df = df.drop(['CDD (consumption)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
                     df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
-                    for Thcp in range(55, 96):
+                    for Thcp in range(55, 96, 10):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         if 'HDD (consumption)' in df.columns: df = df.drop(['HDD (consumption)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
@@ -660,6 +660,8 @@ class MeterConsumptionModel(models.Model):
         try:
             results = self.set_model(df, wname, xnames, yname, include_intercept)
             print results.summary()
+            print 'Tccp = ' + str(self.Tccp)
+            print 'Thcp = ' + str(self.Thcp)
             print 'acceptance score = ' + str(self.set_accept_score())
         except:
             m = Message(when=timezone.now(),
@@ -1586,7 +1588,7 @@ class MeterPeakDemandModel(models.Model):
                     df = self.meter.weather_station.get_HDD_df(df, Thcp)
                     df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
                     df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
-                    for Tccp in range(55, 96):
+                    for Tccp in range(55, 96, 10):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         if 'CDD (peak demand)' in df.columns: df = df.drop(['CDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_CDD_df(df, Tccp)
@@ -1630,7 +1632,7 @@ class MeterPeakDemandModel(models.Model):
                     if 'CDD (peak demand)' in df.columns: df = df.drop(['CDD (peak demand)'], axis = 1)
                     df = self.meter.weather_station.get_CDD_df(df, Tccp)
                     df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
-                    for Thcp in range(55, 96):
+                    for Thcp in range(55, 96, 10):
                         #must call/create here so that all wname, xnames, and ynames are in df-----
                         if 'HDD (peak demand)' in df.columns: df = df.drop(['HDD (peak demand)'], axis = 1)
                         df = self.meter.weather_station.get_HDD_df(df, Thcp)
@@ -1707,6 +1709,8 @@ class MeterPeakDemandModel(models.Model):
         try:
             results = self.set_model(df, wname, xnames, yname, include_intercept)
             print results.summary()
+            print 'Tccp = ' + str(self.Tccp)
+            print 'Thcp = ' + str(self.Thcp)
             print 'acceptance score = ' + str(self.set_accept_score())
         except:
             m = Message(when=timezone.now(),
