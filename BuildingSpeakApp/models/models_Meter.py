@@ -344,9 +344,10 @@ class Meter(models.Model):
                                 #load data that not(Exists)
                                 readbd_a = readbd[readbd['Exists']==0]
                                 if len(readbd_a)>0:
-                                    
+                                    new_consumption_model_df = new_peak_demand_model_df = None
                                     if (create_models_if_nonexistent and 
                                         self.monther_set.get(name='BILLx').consumption_model is None):
+                                            new_consumption_model_df = readbd_a
                                             new_consumption_model = MeterConsumptionModel(
                                                 first_month = readbd_a.index[0].strftime('%m/%Y'),
                                                 last_month = readbd_a.index[-1].strftime('%m/%Y'),
@@ -356,9 +357,10 @@ class Meter(models.Model):
                                             billx = self.monther_set.get(name='BILLx')
                                             billx.__setattr__('consumption_model', new_consumption_model)
                                             billx.save()
-                                            track_runs, track_Tccp, track_Thcp, best_run_results = new_consumption_model.set_best_model(df_new_meter = readbd_a)
+                                            track_runs, track_Tccp, track_Thcp, best_run_results = new_consumption_model.set_best_model(df_new_meter = new_consumption_model_df)
                                     if (create_models_if_nonexistent and 
                                         self.monther_set.get(name='BILLx').peak_demand_model is None):
+                                            new_peak_demand_model_df = readbd_a
                                             new_peak_demand_model = MeterPeakDemandModel(
                                                 first_month = readbd_a.index[0].strftime('%m/%Y'),
                                                 last_month = readbd_a.index[-1].strftime('%m/%Y'),
@@ -368,10 +370,10 @@ class Meter(models.Model):
                                             billx = self.monther_set.get(name='BILLx')
                                             billx.__setattr__('peak_demand_model', new_peak_demand_model)
                                             billx.save()
-                                            track_runs, track_Tccp, track_Thcp, best_run_results = new_peak_demand_model.set_best_model(df_new_meter = readbd_a)
-                                            
+                                            track_runs, track_Tccp, track_Thcp, best_run_results = new_peak_demand_model.set_best_model(df_new_meter = new_peak_demand_model_df)
+                                    
                                     readbd_a = self.bill_data_calc_dd(df = readbd_a)
-                                    readbd_a = self.bill_data_calc_baseline(df = readbd_a)
+                                    readbd_a = self.bill_data_calc_baseline(df = readbd_a, new_consumption_model_df = new_consumption_model_df, new_peak_demand_model_df = new_peak_demand_model_df)
                                     readbd_a = self.bill_data_calc_savings(df = readbd_a)
                                     readbd_a = self.bill_data_calc_dependents(df = readbd_a)
                                     readbd_a = self.bill_data_calc_kbtu(df = readbd_a)
@@ -908,7 +910,7 @@ class Meter(models.Model):
                 
         return df
 
-    def bill_data_calc_baseline(self, df):
+    def bill_data_calc_baseline(self, df, new_consumption_model_df = None, new_peak_demand_model_df = None):
         """function(df)
         
         Computes (base) and (base
@@ -928,7 +930,7 @@ class Meter(models.Model):
         else:
             if check:
                 try:
-                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').peak_demand_model.current_model_predict_df(df=df)
+                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').peak_demand_model.current_model_predict_df(df = df, new_meter_df = new_peak_demand_model_df)
                     df['Peak Demand (base)'] = predicted
                     df['Peak Demand (base delta)'] = predicted - lower_bound
                 except:
@@ -953,7 +955,7 @@ class Meter(models.Model):
         else:
             if check:
                 try:
-                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').consumption_model.current_model_predict_df(df=df)
+                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').consumption_model.current_model_predict_df(df = df, new_meter_df = new_consumption_model_df)
                     df['Consumption (base)'] = predicted
                     df['Consumption (base delta)'] = predicted - lower_bound
                 except:

@@ -200,26 +200,19 @@ class MeterConsumptionModel(models.Model):
         #for updates: look at set_best_model and add code as needed to ensure presence of
         #    needed columns for new models
         try:
-            print 'hello world'
-            print self.Tccp, self.Thcp, self.model_type
             current_model = self.get_available_models()[1][self.model_type]
             if current_model['wname'] == ['Days']:
                 df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
-            print 'check1'
             if 'CDD (consumption)/day' in current_model['xnames']:
                 if 'CDD (consumption)' not in df.columns:
-#                df = df.drop(['CDD (consumption)'], axis = 1) ##1/13/2014: don't replace XDD
-                    df = self.meter.weather_station.get_CDD_df(df, self.Tccp) ##1/13/2014: only get if not already present
+                    df = self.meter.weather_station.get_CDD_df(df, self.Tccp)
                     df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
                 df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
-            print 'check2'
             if 'HDD (consumption)/day' in current_model['xnames']:
                 if 'HDD (consumption)' not in df.columns:
-#                df = df.drop(['HDD (consumption)'], axis = 1) ##1/13/2014: don't replace XDD
-                    df = self.meter.weather_station.get_HDD_df(df, self.Thcp) ##1/13/2014: only get if not already present
+                    df = self.meter.weather_station.get_HDD_df(df, self.Thcp)
                     df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                 df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
-            print 'Consumption (act)' in df.columns
             if 'consumption/day' in current_model['yname']:
                 df['consumption/day'] = df['Consumption (act)']/df['Days']
         except:
@@ -680,7 +673,7 @@ class MeterConsumptionModel(models.Model):
             print m
             results = None
         return results
-    def get_model(self):
+    def get_model(self, df_new_meter = None):
         """No inputs. Returns
         model results object
         using model's current
@@ -703,7 +696,10 @@ class MeterConsumptionModel(models.Model):
             results = None
         else:
             try:
-                df = self.get_baseline_df()
+                if df_new_meter is None:
+                    df = self.get_baseline_df()
+                else:
+                    df = df_new_meter
                 df = self.prep_df(df)
                 df = df.sort_index()
 
@@ -998,7 +994,7 @@ class MeterConsumptionModel(models.Model):
             predicted = predstd = interval_l = interval_u = None
         return predicted, predstd, interval_l, interval_u
     
-    def model_predict_df(self, df, wname, xnames, include_intercept=True, alpha=0.10):
+    def model_predict_df(self, df, wname, xnames, include_intercept=True, alpha=0.10, new_meter_df = None):
         """function(df,wname,xnames,
                     include_intercept=True,
                     alpha=0.10)
@@ -1019,7 +1015,7 @@ class MeterConsumptionModel(models.Model):
             X = df[xnames].applymap(float).__array__()                  #create independent variable(s) vector
             w = df[wname].applymap(float).__array__().flatten()                   #create weighting vector, e.g. 'days in period'
             if include_intercept: X = sm.add_constant(X, prepend = True)      #beta[0] will be constant term when prepend=True
-            results = self.get_model()
+            results = self.get_model(new_meter_df = new_meter_df)
             predicted_norm, predstd_norm, interval_l_norm, interval_u_norm = self.model_predict(res=results, exog=X, weights=w, alpha=alpha)
             predicted = predicted_norm * w
             predstd = predstd_norm * w
@@ -1036,7 +1032,7 @@ class MeterConsumptionModel(models.Model):
             results = None
         return predicted, predstd, interval_l, interval_u
         
-    def current_model_predict_df(self, df):
+    def current_model_predict_df(self, df, new_meter_df = None):
         """function(df)
         
         Uses current model settings
@@ -1051,7 +1047,7 @@ class MeterConsumptionModel(models.Model):
             wname = available_models[1][self.model_type]['wname']
             xnames = available_models[1][self.model_type]['xnames']
             include_intercept = available_models[1][self.model_type]['include_intercept']
-            predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha)
+            predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha, new_meter_df = new_meter_df)
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -1261,15 +1257,13 @@ class MeterPeakDemandModel(models.Model):
                 df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
             if 'CDD (peak demand)/day' in current_model['xnames']:
                 if 'CDD (peak demand)' not in df.columns:
-#                df = df.drop(['CDD (peak demand)'], axis = 1) ##1/13/2014: don't replace XDD
-                    df = self.meter.weather_station.get_CDD_df(df, self.Tccp) ##1/13/2014: only get if not already present
-                df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
+                    df = self.meter.weather_station.get_CDD_df(df, self.Tccp)
+                    df.rename(columns={'CDD': 'CDD (peak demand)'}, inplace = True)
                 df['CDD (peak demand)/day'] = df['CDD (peak demand)']/df['Days']
             if 'HDD (peak demand)/day' in current_model['xnames']:
                 if 'HDD (peak demand)' not in df.columns:
-#                df = df.drop(['HDD (peak demand)'], axis = 1) ##1/13/2014: don't replace XDD
-                    df = self.meter.weather_station.get_HDD_df(df, self.Thcp) ##1/13/2014: only get if not already present
-                df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
+                    df = self.meter.weather_station.get_HDD_df(df, self.Thcp)
+                    df.rename(columns={'HDD': 'HDD (peak demand)'}, inplace = True)
                 df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
             if 'peak demand/day' in current_model['yname']:
                 df['peak demand/day'] = df['Peak Demand (act)']/df['Days']
@@ -1727,7 +1721,7 @@ class MeterPeakDemandModel(models.Model):
             print m
             results = None
         return results
-    def get_model(self):
+    def get_model(self, df_new_meter = None):
         """No inputs. Returns
         model results object
         using model's current
@@ -1750,7 +1744,10 @@ class MeterPeakDemandModel(models.Model):
             results = None
         else:
             try:
-                df = self.get_baseline_df()
+                if df_new_meter is None:
+                    df = self.get_baseline_df()
+                else:
+                    df = df_new_meter
                 df = self.prep_df(df)
                 df = df.sort_index()
 
@@ -2045,7 +2042,7 @@ class MeterPeakDemandModel(models.Model):
             predicted = predstd = interval_l = interval_u = None
         return predicted, predstd, interval_l, interval_u
     
-    def model_predict_df(self, df, wname, xnames, include_intercept=True, alpha=0.10):
+    def model_predict_df(self, df, wname, xnames, include_intercept=True, alpha=0.10, new_meter_df = None):
         """function(df,wname,xnames,
                     include_intercept=True,
                     alpha=0.10)
@@ -2066,7 +2063,7 @@ class MeterPeakDemandModel(models.Model):
             X = df[xnames].applymap(float).__array__()                  #create independent variable(s) vector
             w = df[wname].applymap(float).__array__().flatten()                   #create weighting vector, e.g. 'days in period'
             if include_intercept: X = sm.add_constant(X, prepend = True)      #beta[0] will be constant term when prepend=True
-            results = self.get_model()
+            results = self.get_model(new_meter_df = new_meter_df)
             predicted_norm, predstd_norm, interval_l_norm, interval_u_norm = self.model_predict(res=results, exog=X, weights=w, alpha=alpha)
             predicted = predicted_norm * w
             predstd = predstd_norm * w
@@ -2083,7 +2080,7 @@ class MeterPeakDemandModel(models.Model):
             results = None
         return predicted, predstd, interval_l, interval_u
         
-    def current_model_predict_df(self, df):
+    def current_model_predict_df(self, df, new_meter_df = None):
         """function(df)
         
         Uses current model settings
@@ -2097,7 +2094,7 @@ class MeterPeakDemandModel(models.Model):
             wname = available_models[1][self.model_type]['wname']
             xnames = available_models[1][self.model_type]['xnames']
             include_intercept = available_models[1][self.model_type]['include_intercept']
-            predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha)
+            predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha, new_meter_df = new_meter_df)
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
