@@ -556,8 +556,8 @@ class MeterConsumptionModel(models.Model):
                                                                      'Thcp': Thcp,
                                                                      'adj_r_squared': self.adj_r_squared},
                                                                      index=[str(self.adj_r_squared) + str(Tccp) + str(Thcp)]))
-                        best_Tccp_run = track_Tccp['adj_r_squared'].idxmax()
-                        best_Tccp = track_Tccp['Tccp'][best_Tccp_run]
+                    best_Tccp_run = track_Tccp['adj_r_squared'].idxmax()
+                    best_Tccp = track_Tccp['Tccp'][best_Tccp_run]
                 except:
                     m = Message(when=timezone.now(),
                                 message_type='Code Error',
@@ -601,8 +601,8 @@ class MeterConsumptionModel(models.Model):
                                                                      'Thcp': Thcp,
                                                                      'adj_r_squared': self.adj_r_squared},
                                                                      index=[str(self.adj_r_squared) + str(Tccp) + str(Thcp)]))
-                        best_Thcp_run = track_Thcp['adj_r_squared'].idxmax()
-                        best_Thcp = track_Thcp['Tccp'][best_Thcp_run]
+                    best_Thcp_run = track_Thcp['adj_r_squared'].idxmax()
+                    best_Thcp = track_Thcp['Thcp'][best_Thcp_run]
                 except:
                     m = Message(when=timezone.now(),
                                 message_type='Code Error',
@@ -779,6 +779,22 @@ class MeterConsumptionModel(models.Model):
                 print m
                 results = None
             else:
+                #first clear out all params
+                self.beta00p = self.beta00_se = self.beta00_t_stat = self.beta00_p_value = self.beta00_95_conf_int = 0.0
+                self.beta01p = self.beta01_se = self.beta01_t_stat = self.beta01_p_value = self.beta01_95_conf_int = 0.0
+                self.beta02p = self.beta02_se = self.beta02_t_stat = self.beta02_p_value = self.beta02_95_conf_int = 0.0
+                self.beta03p = self.beta03_se = self.beta03_t_stat = self.beta03_p_value = self.beta03_95_conf_int = 0.0
+                self.beta04p = self.beta04_se = self.beta04_t_stat = self.beta04_p_value = self.beta04_95_conf_int = 0.0
+                self.beta05p = self.beta05_se = self.beta05_t_stat = self.beta05_p_value = self.beta05_95_conf_int = 0.0
+                self.beta06p = self.beta06_se = self.beta06_t_stat = self.beta06_p_value = self.beta06_95_conf_int = 0.0
+                self.beta07p = self.beta07_se = self.beta07_t_stat = self.beta07_p_value = self.beta07_95_conf_int = 0.0
+                self.beta08p = self.beta08_se = self.beta08_t_stat = self.beta08_p_value = self.beta08_95_conf_int = 0.0
+                self.beta09p = self.beta09_se = self.beta09_t_stat = self.beta09_p_value = self.beta09_95_conf_int = 0.0
+                self.beta10p = self.beta10_se = self.beta10_t_stat = self.beta10_p_value = self.beta10_95_conf_int = 0.0
+                self.beta00v = self.beta01v = self.beta02v = self.beta03v = self.beta04v = self.beta05v = ''
+                self.beta06v = self.beta07v = self.beta08v = self.beta09v = self.beta10v = ''
+                
+                #then only set new params
                 if len(results.params)>0: 
                     self.beta00p = results.params[0]
                     if include_intercept:
@@ -1831,6 +1847,22 @@ class MeterPeakDemandModel(models.Model):
                 print m
                 results = None
             else:
+                #first clear out all params
+                self.beta00p = self.beta00_se = self.beta00_t_stat = self.beta00_p_value = self.beta00_95_conf_int = 0.0
+                self.beta01p = self.beta01_se = self.beta01_t_stat = self.beta01_p_value = self.beta01_95_conf_int = 0.0
+                self.beta02p = self.beta02_se = self.beta02_t_stat = self.beta02_p_value = self.beta02_95_conf_int = 0.0
+                self.beta03p = self.beta03_se = self.beta03_t_stat = self.beta03_p_value = self.beta03_95_conf_int = 0.0
+                self.beta04p = self.beta04_se = self.beta04_t_stat = self.beta04_p_value = self.beta04_95_conf_int = 0.0
+                self.beta05p = self.beta05_se = self.beta05_t_stat = self.beta05_p_value = self.beta05_95_conf_int = 0.0
+                self.beta06p = self.beta06_se = self.beta06_t_stat = self.beta06_p_value = self.beta06_95_conf_int = 0.0
+                self.beta07p = self.beta07_se = self.beta07_t_stat = self.beta07_p_value = self.beta07_95_conf_int = 0.0
+                self.beta08p = self.beta08_se = self.beta08_t_stat = self.beta08_p_value = self.beta08_95_conf_int = 0.0
+                self.beta09p = self.beta09_se = self.beta09_t_stat = self.beta09_p_value = self.beta09_95_conf_int = 0.0
+                self.beta10p = self.beta10_se = self.beta10_t_stat = self.beta10_p_value = self.beta10_95_conf_int = 0.0
+                self.beta00v = self.beta01v = self.beta02v = self.beta03v = self.beta04v = self.beta05v = ''
+                self.beta06v = self.beta07v = self.beta08v = self.beta09v = self.beta10v = ''
+                
+                #then only set new params
                 if len(results.params)>0: 
                     self.beta00p = results.params[0]
                     if include_intercept:
