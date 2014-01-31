@@ -200,21 +200,26 @@ class MeterConsumptionModel(models.Model):
         #for updates: look at set_best_model and add code as needed to ensure presence of
         #    needed columns for new models
         try:
+            print 'hello world'
+            print self.Tccp, self.Thcp, self.model_type
             current_model = self.get_available_models()[1][self.model_type]
             if current_model['wname'] == ['Days']:
                 df['Days'] = [(df['End Date'][i] - df['Start Date'][i]).days for i in range(0, len(df))]
+            print 'check1'
             if 'CDD (consumption)/day' in current_model['xnames']:
                 if 'CDD (consumption)' not in df.columns:
 #                df = df.drop(['CDD (consumption)'], axis = 1) ##1/13/2014: don't replace XDD
                     df = self.meter.weather_station.get_CDD_df(df, self.Tccp) ##1/13/2014: only get if not already present
                     df.rename(columns={'CDD': 'CDD (consumption)'}, inplace = True)
                 df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
+            print 'check2'
             if 'HDD (consumption)/day' in current_model['xnames']:
                 if 'HDD (consumption)' not in df.columns:
 #                df = df.drop(['HDD (consumption)'], axis = 1) ##1/13/2014: don't replace XDD
                     df = self.meter.weather_station.get_HDD_df(df, self.Thcp) ##1/13/2014: only get if not already present
                     df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                 df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
+            print 'check3'
             if 'consumption/day' in current_model['yname']:
                 df['consumption/day'] = df['Consumption (act)']/df['Days']
         except:
@@ -492,6 +497,7 @@ class MeterConsumptionModel(models.Model):
             #first run through models to find best model type at constant change point temperatures
             for run in available_models[0]:
                 try:
+                    print 'model_type = ' + run + '; Tccp = ' + str(Tccp) + '; Thcp = ' + str(Thcp)
                     results = self.set_model_print_results(df = df,
                                             wname = available_models[1][run]['wname'],
                                             xnames = available_models[1][run]['xnames'],
@@ -547,6 +553,7 @@ class MeterConsumptionModel(models.Model):
                         df['CDD (consumption)/day'] = df['CDD (consumption)']/df['Days']
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
+                        print 'model_type = ' + best_type + '; Tccp = ' + str(Tccp) + '; Thcp = ' + str(Thcp)
                         results = self.set_model_print_results(df = df,
                               wname = available_models[1][best_type]['wname'],
                               xnames = available_models[1][best_type]['xnames'],
@@ -591,6 +598,7 @@ class MeterConsumptionModel(models.Model):
                         df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
+                        print 'model_type = ' + best_type + '; Tccp = ' + str(Tccp) + '; Thcp = ' + str(Thcp)
                         results = self.set_model_print_results(df = df,
                               wname = available_models[1][best_type]['wname'],
                               xnames = available_models[1][best_type]['xnames'],
@@ -624,6 +632,7 @@ class MeterConsumptionModel(models.Model):
                 df = df_new_meter
             df = self.prep_df(df)
             df = df.sort_index()
+            print 'model_type = ' + best_type + '; Tccp = ' + str(best_Tccp) + '; Thcp = ' + str(best_Thcp)
             best_run_results = self.set_model_print_results(df = df,
                               wname = available_models[1][best_type]['wname'],
                               xnames = available_models[1][best_type]['xnames'],
@@ -660,8 +669,6 @@ class MeterConsumptionModel(models.Model):
         try:
             results = self.set_model(df, wname, xnames, yname, include_intercept)
             print results.summary()
-            print 'Tccp = ' + str(self.Tccp)
-            print 'Thcp = ' + str(self.Thcp)
             print 'acceptance score = ' + str(self.set_accept_score())
         except:
             m = Message(when=timezone.now(),
@@ -1709,8 +1716,6 @@ class MeterPeakDemandModel(models.Model):
         try:
             results = self.set_model(df, wname, xnames, yname, include_intercept)
             print results.summary()
-            print 'Tccp = ' + str(self.Tccp)
-            print 'Thcp = ' + str(self.Thcp)
             print 'acceptance score = ' + str(self.set_accept_score())
         except:
             m = Message(when=timezone.now(),
