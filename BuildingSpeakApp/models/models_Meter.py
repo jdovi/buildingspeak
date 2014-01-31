@@ -373,7 +373,9 @@ class Meter(models.Model):
                                             track_runs, track_Tccp, track_Thcp, best_run_results = new_peak_demand_model.set_best_model(df_new_meter = new_peak_demand_model_df)
                                     
                                     readbd_a = self.bill_data_calc_dd(df = readbd_a)
-                                    readbd_a = self.bill_data_calc_baseline(df = readbd_a, new_consumption_model_df = new_consumption_model_df, new_peak_demand_model_df = new_peak_demand_model_df)
+                                    readbd_a = self.bill_data_calc_baseline(df = readbd_a, 
+                                                                            new_consumption_model_df = new_consumption_model_df,
+                                                                            new_peak_demand_model_df = new_peak_demand_model_df)
                                     readbd_a = self.bill_data_calc_savings(df = readbd_a)
                                     readbd_a = self.bill_data_calc_dependents(df = readbd_a)
                                     readbd_a = self.bill_data_calc_kbtu(df = readbd_a)

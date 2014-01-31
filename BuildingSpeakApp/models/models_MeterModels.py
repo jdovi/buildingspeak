@@ -446,7 +446,7 @@ class MeterConsumptionModel(models.Model):
             1 * (-1*(self.F_stat_p_value > 0.1) + 1*(self.F_stat_p_value < 0.01)) +
             1 * (-1*(self.get_max_param_p_value() > 0.1) + 1*(self.get_max_param_p_value() < 0.01)) +
             1 * (10 - self.get_param_count()) +
-            1 * (min(0, np.sign(self.get_min_param())))  )
+            1 * (min(0, np.sign(self.get_min_param())))  ) + self.adj_r_squared
         return self.acceptance_score
         
     def set_best_model(self, df_new_meter=None):
@@ -1498,7 +1498,7 @@ class MeterPeakDemandModel(models.Model):
             1 * (-1*(self.F_stat_p_value > 0.1) + 1*(self.F_stat_p_value < 0.01)) +
             1 * (-1*(self.get_max_param_p_value() > 0.1) + 1*(self.get_max_param_p_value() < 0.01)) +
             1 * (10 - self.get_param_count()) +
-            1 * (min(0, np.sign(self.get_min_param())))  )
+            1 * (min(0, np.sign(self.get_min_param())))  ) + self.adj_r_squared
         return self.acceptance_score
         
     def set_best_model(self, df_new_meter=None):
@@ -1542,6 +1542,7 @@ class MeterPeakDemandModel(models.Model):
             #first run through models to find best model type at constant change point temperatures
             for run in available_models[0]:
                 try:
+                    print 'model_type = ' + run + '; Tccp = ' + str(Tccp) + '; Thcp = ' + str(Thcp)
                     results = self.set_model_print_results(df = df,
                                             wname = available_models[1][run]['wname'],
                                             xnames = available_models[1][run]['xnames'],
@@ -1597,6 +1598,7 @@ class MeterPeakDemandModel(models.Model):
                         df['CDD (peak demand)/day'] = df['CDD (peak demand)']/df['Days']
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
+                        print 'model_type = ' + best_type + '; Tccp = ' + str(Tccp) + '; Thcp = ' + str(Thcp)
                         results = self.set_model_print_results(df = df,
                               wname = available_models[1][best_type]['wname'],
                               xnames = available_models[1][best_type]['xnames'],
@@ -1641,6 +1643,7 @@ class MeterPeakDemandModel(models.Model):
                         df['HDD (peak demand)/day'] = df['HDD (peak demand)']/df['Days']
                         #--------------------------------------------------------------------------
                         df = df.sort_index()
+                        print 'model_type = ' + best_type + '; Tccp = ' + str(Tccp) + '; Thcp = ' + str(Thcp)
                         results = self.set_model_print_results(df = df,
                               wname = available_models[1][best_type]['wname'],
                               xnames = available_models[1][best_type]['xnames'],
@@ -1674,6 +1677,7 @@ class MeterPeakDemandModel(models.Model):
                 df = df_new_meter
             df = self.prep_df(df)
             df = df.sort_index()
+            print 'model_type = ' + best_type + '; Tccp = ' + str(best_Tccp) + '; Thcp = ' + str(best_Thcp)
             best_run_results = self.set_model_print_results(df = df,
                               wname = available_models[1][best_type]['wname'],
                               xnames = available_models[1][best_type]['xnames'],
