@@ -9,7 +9,7 @@ from models_RateSchedules import RateSchedule, RateScheduleRider
 
 
 class GAPowerPandL(RateSchedule):
-    use_input_billing_demand = models.BooleanField(blank=True, default=False,
+    use_input_billing_demand = models.BooleanField(blank=True, default=True,
                     help_text='use input Billing Demand instead of Calculated Billing Demand?')
     basic_service_charge = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=3,
                               help_text='monthly basic service charge',
@@ -204,8 +204,8 @@ class GAPowerPandL(RateSchedule):
     #functions expected by superclass RateSchedule
     def __unicode__(self):
         return self.name
-    def get_cost_df(self, df, billx):
-        """function(df, billx)
+    def get_cost_df(self, df, billx=None):
+        """function(df, billx=None)
         
         Given dataframe with monthly
         index and Peak Demand and
@@ -218,8 +218,16 @@ class GAPowerPandL(RateSchedule):
         Calculated Cost and Billing
         Demand columns."""
         try:
-            df = self.get_billing_demand_df(df=df, billx=billx)
+            if self.use_input_billing_demand and ('Billing Demand' not in df.columns): raise TypeError
+            if self.use_input_billing_demand:
+                if Decimal(NaN) not in df['Billing Demand']:
+                    df['Calculated Billing Demand'] = df['Billing Demand']  #if using input, this is 1st choice
+                else:
+                    df['Calculated Billing Demand'] = df['Peak Demand']     #if NaNs, then this is 2nd choice
+            else:
+                df = self.get_billing_demand_df(df = df, billx = billx)     #if not using input, must calculate it with historical data from billx
             if 'Calculated Billing Demand' not in df.columns: raise TypeError
+            df['Billing Demand'] = df['Calculated Billing Demand']
         except:
             m = Message(when=timezone.now(),
                     message_type='Code Error',
@@ -230,16 +238,10 @@ class GAPowerPandL(RateSchedule):
             print m
         else:
             try:
-                if self.use_input_billing_demand:
-                    df['k1'] = [min(df['Billing Demand'][i]*self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
-                    df['k2'] = [min(df['Billing Demand'][i]*(self.tier2-self.tier1),df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
-                    df['k3'] = [min(df['Billing Demand'][i]*(self.tier3-self.tier2),df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
-                    df['k4'] = [min(df['Billing Demand'][i]*(self.tier4-self.tier3),df['Consumption'][i]-df['k1'][i]-df['k2'][i]-df['k3'][i]) for i in range(0,len(df))]
-                else:
-                    df['k1'] = [min(df['Calculated Billing Demand'][i]*self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
-                    df['k2'] = [min(df['Calculated Billing Demand'][i]*(self.tier2-self.tier1),df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
-                    df['k3'] = [min(df['Calculated Billing Demand'][i]*(self.tier3-self.tier2),df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
-                    df['k4'] = [min(df['Calculated Billing Demand'][i]*(self.tier4-self.tier3),df['Consumption'][i]-df['k1'][i]-df['k2'][i]-df['k3'][i]) for i in range(0,len(df))]
+                df['k1'] = [min(df['Billing Demand'][i]*self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
+                df['k2'] = [min(df['Billing Demand'][i]*(self.tier2-self.tier1),df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
+                df['k3'] = [min(df['Billing Demand'][i]*(self.tier3-self.tier2),df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
+                df['k4'] = [min(df['Billing Demand'][i]*(self.tier4-self.tier3),df['Consumption'][i]-df['k1'][i]-df['k2'][i]-df['k3'][i]) for i in range(0,len(df))]
                 
                 df['k1a'] = [min(df['k1'][i],self.tier1a) for i in range(0,len(df))]
                 df['k1b'] = [min(df['k1'][i]-df['k1a'][i],self.tier1b-self.tier1a) for i in range(0,len(df))]
