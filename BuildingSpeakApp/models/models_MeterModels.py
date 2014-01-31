@@ -219,7 +219,7 @@ class MeterConsumptionModel(models.Model):
                     df = self.meter.weather_station.get_HDD_df(df, self.Thcp) ##1/13/2014: only get if not already present
                     df.rename(columns={'HDD': 'HDD (consumption)'}, inplace = True)
                 df['HDD (consumption)/day'] = df['HDD (consumption)']/df['Days']
-            print 'check3'
+            print 'Consumption (act)' in df.columns
             if 'consumption/day' in current_model['yname']:
                 df['consumption/day'] = df['Consumption (act)']/df['Days']
         except:
