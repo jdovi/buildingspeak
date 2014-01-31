@@ -994,7 +994,7 @@ class MeterConsumptionModel(models.Model):
             predicted = predstd = interval_l = interval_u = None
         return predicted, predstd, interval_l, interval_u
     
-    def model_predict_df(self, df, wname, xnames, include_intercept=True, alpha=0.10, new_meter_df = None):
+    def model_predict_df(self, df, wname, xnames, include_intercept=True, alpha=0.10, df_new_meter = None):
         """function(df,wname,xnames,
                     include_intercept=True,
                     alpha=0.10)
@@ -1015,7 +1015,7 @@ class MeterConsumptionModel(models.Model):
             X = df[xnames].applymap(float).__array__()                  #create independent variable(s) vector
             w = df[wname].applymap(float).__array__().flatten()                   #create weighting vector, e.g. 'days in period'
             if include_intercept: X = sm.add_constant(X, prepend = True)      #beta[0] will be constant term when prepend=True
-            results = self.get_model(new_meter_df = new_meter_df)
+            results = self.get_model(df_new_meter = df_new_meter)
             predicted_norm, predstd_norm, interval_l_norm, interval_u_norm = self.model_predict(res=results, exog=X, weights=w, alpha=alpha)
             predicted = predicted_norm * w
             predstd = predstd_norm * w
@@ -1032,7 +1032,7 @@ class MeterConsumptionModel(models.Model):
             results = None
         return predicted, predstd, interval_l, interval_u
         
-    def current_model_predict_df(self, df, new_meter_df = None):
+    def current_model_predict_df(self, df, df_new_meter = None):
         """function(df)
         
         Uses current model settings
@@ -1047,7 +1047,7 @@ class MeterConsumptionModel(models.Model):
             wname = available_models[1][self.model_type]['wname']
             xnames = available_models[1][self.model_type]['xnames']
             include_intercept = available_models[1][self.model_type]['include_intercept']
-            predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha, new_meter_df = new_meter_df)
+            predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha, df_new_meter = df_new_meter)
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -2046,7 +2046,7 @@ class MeterPeakDemandModel(models.Model):
             predicted = predstd = interval_l = interval_u = None
         return predicted, predstd, interval_l, interval_u
     
-    def model_predict_df(self, df, wname, xnames, include_intercept=True, alpha=0.10, new_meter_df = None):
+    def model_predict_df(self, df, wname, xnames, include_intercept=True, alpha=0.10, df_new_meter = None):
         """function(df,wname,xnames,
                     include_intercept=True,
                     alpha=0.10)
@@ -2067,7 +2067,7 @@ class MeterPeakDemandModel(models.Model):
             X = df[xnames].applymap(float).__array__()                  #create independent variable(s) vector
             w = df[wname].applymap(float).__array__().flatten()                   #create weighting vector, e.g. 'days in period'
             if include_intercept: X = sm.add_constant(X, prepend = True)      #beta[0] will be constant term when prepend=True
-            results = self.get_model(new_meter_df = new_meter_df)
+            results = self.get_model(df_new_meter = df_new_meter)
             predicted_norm, predstd_norm, interval_l_norm, interval_u_norm = self.model_predict(res=results, exog=X, weights=w, alpha=alpha)
             predicted = predicted_norm * w
             predstd = predstd_norm * w
@@ -2084,7 +2084,7 @@ class MeterPeakDemandModel(models.Model):
             results = None
         return predicted, predstd, interval_l, interval_u
         
-    def current_model_predict_df(self, df, new_meter_df = None):
+    def current_model_predict_df(self, df, df_new_meter = None):
         """function(df)
         
         Uses current model settings
@@ -2098,7 +2098,7 @@ class MeterPeakDemandModel(models.Model):
             wname = available_models[1][self.model_type]['wname']
             xnames = available_models[1][self.model_type]['xnames']
             include_intercept = available_models[1][self.model_type]['include_intercept']
-            predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha, new_meter_df = new_meter_df)
+            predicted, predstd, interval_l, interval_u = self.model_predict_df(df, wname, xnames, include_intercept, pred_alpha, df_new_meter = df_new_meter)
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',

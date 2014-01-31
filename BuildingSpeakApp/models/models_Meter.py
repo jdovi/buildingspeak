@@ -932,7 +932,7 @@ class Meter(models.Model):
         else:
             if check:
                 try:
-                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').peak_demand_model.current_model_predict_df(df = df, new_meter_df = new_peak_demand_model_df)
+                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').peak_demand_model.current_model_predict_df(df = df, df_new_meter = new_peak_demand_model_df)
                     df['Peak Demand (base)'] = predicted
                     df['Peak Demand (base delta)'] = predicted - lower_bound
                 except:
@@ -957,7 +957,7 @@ class Meter(models.Model):
         else:
             if check:
                 try:
-                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').consumption_model.current_model_predict_df(df = df, new_meter_df = new_consumption_model_df)
+                    predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').consumption_model.current_model_predict_df(df = df, df_new_meter = new_consumption_model_df)
                     df['Consumption (base)'] = predicted
                     df['Consumption (base delta)'] = predicted - lower_bound
                 except:
