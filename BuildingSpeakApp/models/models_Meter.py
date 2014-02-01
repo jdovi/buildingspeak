@@ -372,16 +372,25 @@ class Meter(models.Model):
                                             billx.save()
                                             track_runs, track_Tccp, track_Thcp, best_run_results = new_peak_demand_model.set_best_model(df_new_meter = new_peak_demand_model_df)
                                     
+                                    print 'check1'
                                     readbd_a = self.bill_data_calc_dd(df = readbd_a)
+                                    print 'check2'
                                     readbd_a = self.bill_data_calc_baseline(df = readbd_a, 
                                                                             new_consumption_model_df = new_consumption_model_df,
                                                                             new_peak_demand_model_df = new_peak_demand_model_df)
+                                    print 'check3'
                                     readbd_a = self.bill_data_calc_savings(df = readbd_a)
+                                    print 'check4'
                                     readbd_a = self.bill_data_calc_dependents(df = readbd_a)
+                                    print 'check5'
                                     readbd_a = self.bill_data_calc_kbtu(df = readbd_a)
+                                    print 'check6'
                                     readbd_a = self.bill_data_calc_costs(df = readbd_a)
+                                    print 'check7'
                                     readbd_a = self.monther_set.get(name='BILLx').create_missing_required_columns(df = readbd_a)
+                                    print 'check8'
                                     success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe(readbd_a)
+                                    print 'check9'
                                     if not success_a: raise TypeError
                             except:
                                 m = Message(when=timezone.now(),
@@ -604,14 +613,22 @@ class Meter(models.Model):
                                             forecast_df['HDD (peak demand)'] = forecast_df.index
                                             forecast_df['HDD (peak demand)'] = forecast_df['HDD (peak demand)'].apply(lambda ii: dd_pd['HDD'][ii.strftime('%b')])
                                             
+                                            print 'check10'
                                             forecast_df = self.bill_data_calc_baseline(df = forecast_df)
+                                            print 'check11'
                                             forecast_df = self.bill_data_calc_savings(df = forecast_df)
+                                            print 'check12'
                                             forecast_df = self.bill_data_calc_dependents(df = forecast_df)
+                                            print 'check13'
                                             forecast_df = self.bill_data_calc_kbtu(df = forecast_df)
+                                            print 'check14'
                                             forecast_df = self.monther_set.get(name='BILLx').create_missing_required_columns(df = forecast_df)
+                                            print 'check15'
                                             forecast_df = self.bill_data_calc_costs(df = forecast_df)
                                             
+                                            print 'check16'
                                             success_d = self.monther_set.get(name='BILLx').load_monther_period_dataframe(forecast_df)
+                                            print 'check17'
                                             if not success_d: raise TypeError
                                         except:
                                             m = Message(when=timezone.now(),

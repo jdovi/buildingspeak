@@ -476,12 +476,6 @@ def meter_detail(request, account_id, meter_id):
             if len(consumption_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
                 consumption_residual_plots = []
                 for i in range(1,len(consumption_model_residuals_table[0])):
-                    print consumption_model_residuals_table
-                    print len(consumption_model_residuals_table)
-                    print consumption_model_residuals_table[0]
-                    print len(consumption_model_residuals_table[0])
-                    print i
-                    
                     consumption_residual_plots.append([consumption_model_residuals_table[0][i],[[x[i],x[0]] for x in consumption_model_residuals_table]])
             else:
                 consumption_residual_plots = None
