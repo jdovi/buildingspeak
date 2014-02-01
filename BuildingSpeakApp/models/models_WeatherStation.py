@@ -88,6 +88,8 @@ class WeatherStation(models.Model):
             for i in range(0,len(df)):
                 df['Start Date'][i:i+1] = df.index[i].start_time
                 df['End Date'][i:i+1] = df.index[i].end_time
+            df['Start Date'] = df['Start Date'].apply(UTC.localize)
+            df['End Date'] = df['End Date'].apply(UTC.localize)
             df = self.get_HDD_df(df, base_temp_HDD=Thcp)
             df = self.get_CDD_df(df, base_temp_CDD=Tccp)
             df = df.sort_index()

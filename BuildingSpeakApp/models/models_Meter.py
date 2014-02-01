@@ -206,6 +206,8 @@ class Meter(models.Model):
                                'Consumption Savings_sum': 'Consumption (esave)',
                                'Peak Demand Savings_sum_delta': 'Peak Demand (esave delta)',
                                'Consumption Savings_sum_delta': 'Consumption (esave delta)'}, inplace = True)
+            df['Billing Demand (esave)'] = df['Peak Demand (esave)']
+            df['Billing Demand (esave delta)'] = df['Peak Demand (esave delta)']
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -938,6 +940,8 @@ class Meter(models.Model):
                     predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').peak_demand_model.current_model_predict_df(df = df, df_new_meter = new_peak_demand_model_df)
                     df['Peak Demand (base)'] = predicted
                     df['Peak Demand (base delta)'] = predicted - lower_bound
+                    df['Billing Demand (base)'] = predicted
+                    df['Billing Demand (base delta)'] = predicted - lower_bound
                 except:
                     m = Message(when=timezone.now(),
                             message_type='Code Error',
@@ -984,8 +988,10 @@ class Meter(models.Model):
         try:
             if 'Cost (esave)' in df.columns: df = df.drop(['Cost (esave)'], axis = 1)
             if 'Peak Demand (esave)' in df.columns: df = df.drop(['Peak Demand (esave)'], axis = 1)
+            if 'Billing Demand (esave)' in df.columns: df = df.drop(['Billing Demand (esave)'], axis = 1)
             if 'Consumption (esave)' in df.columns: df = df.drop(['Consumption (esave)'], axis = 1)
             if 'Peak Demand (esave delta)' in df.columns: df = df.drop(['Peak Demand (esave delta)'], axis = 1)
+            if 'Billing Demand (esave delta)' in df.columns: df = df.drop(['Billing Demand (esave delta)'], axis = 1)
             if 'Consumption (esave delta)' in df.columns: df = df.drop(['Consumption (esave delta)'], axis = 1)
             df = self.get_all_savings(df=df)
         except:
