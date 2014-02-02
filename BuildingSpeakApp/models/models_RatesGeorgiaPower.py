@@ -228,6 +228,10 @@ class GAPowerPandL(RateSchedule):
                 df = self.get_billing_demand_df(df = df, billx = billx)     #if not using input, must calculate it with historical data from billx
             if 'Calculated Billing Demand' not in df.columns: raise TypeError
             df['Billing Demand'] = df['Calculated Billing Demand']
+
+            df['Billing Demand'] = df['Billing Demand'].apply(Decimal)
+            df['Peak Demand'] = df['Peak Demand'].apply(Decimal)
+            df['Consumption'] = df['Consumption'].apply(Decimal)
         except:
             m = Message(when=timezone.now(),
                     message_type='Code Error',
@@ -238,43 +242,38 @@ class GAPowerPandL(RateSchedule):
             print m
         else:
             try:
-                print 'check1'
-                print 'Billing Demand' in df.columns
-                print 'Consumption' in df.columns
-                print df['Billing Demand']
-                print df['Consumption']
                 df['k1'] = [min(df['Billing Demand'][i]*self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
                 df['k2'] = [min(df['Billing Demand'][i]*(self.tier2-self.tier1),df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
                 df['k3'] = [min(df['Billing Demand'][i]*(self.tier3-self.tier2),df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
                 df['k4'] = [min(df['Billing Demand'][i]*(self.tier4-self.tier3),df['Consumption'][i]-df['k1'][i]-df['k2'][i]-df['k3'][i]) for i in range(0,len(df))]
-                print 'check2'
+                
                 df['k1a'] = [min(df['k1'][i],self.tier1a) for i in range(0,len(df))]
                 df['k1b'] = [min(df['k1'][i]-df['k1a'][i],self.tier1b-self.tier1a) for i in range(0,len(df))]
                 df['k1c'] = [min(df['k1'][i]-df['k1a'][i]-df['k1b'][i],self.tier1c-self.tier1b) for i in range(0,len(df))]
                 df['k1d'] = [min(df['k1'][i]-df['k1a'][i]-df['k1b'][i]-df['k1c'][i],self.tier1d-self.tier1c) for i in range(0,len(df))]
-                print 'check3'
+                
                 df['k2a'] = [min(df['k2'][i],self.tier2a) for i in range(0,len(df))]
                 df['k2b'] = [min(df['k2'][i]-df['k2a'][i],self.tier2b-self.tier2a) for i in range(0,len(df))]
                 df['k2c'] = [min(df['k2'][i]-df['k2a'][i]-df['k2b'][i],self.tier2c-self.tier2b) for i in range(0,len(df))]
                 df['k2d'] = [min(df['k2'][i]-df['k2a'][i]-df['k2b'][i]-df['k2c'][i],self.tier2d-self.tier2c) for i in range(0,len(df))]
-                print 'check4'
+                
                 df['k3a'] = [min(df['k3'][i],self.tier3a) for i in range(0,len(df))]
                 df['k3b'] = [min(df['k3'][i]-df['k3a'][i],self.tier3b-self.tier3a) for i in range(0,len(df))]
                 df['k3c'] = [min(df['k3'][i]-df['k3a'][i]-df['k3b'][i],self.tier3c-self.tier3b) for i in range(0,len(df))]
                 df['k3d'] = [min(df['k3'][i]-df['k3a'][i]-df['k3b'][i]-df['k3c'][i],self.tier3d-self.tier3c) for i in range(0,len(df))]
-                print 'check5'
+                
                 df['k4a'] = [min(df['k4'][i],self.tier4a) for i in range(0,len(df))]
                 df['k4b'] = [min(df['k4'][i]-df['k4a'][i],self.tier4b-self.tier4a) for i in range(0,len(df))]
                 df['k4c'] = [min(df['k4'][i]-df['k4a'][i]-df['k4b'][i],self.tier4c-self.tier4b) for i in range(0,len(df))]
                 df['k4d'] = [min(df['k4'][i]-df['k4a'][i]-df['k4b'][i]-df['k4c'][i],self.tier4d-self.tier4c) for i in range(0,len(df))]
-                print 'check6'
+                
                 df['checksum'] = (  df['k1a'] + df['k1b'] + df['k1c'] + df['k1d'] +
                                     df['k2a'] + df['k2b'] + df['k2c'] + df['k2d'] +
                                     df['k3a'] + df['k3b'] + df['k3c'] + df['k3d'] +
                                     df['k4a'] + df['k4b'] + df['k4c'] + df['k4d']   )
                 sum1 = df['checksum'].sum()
                 sum2 = df['Consumption'].sum()
-                print 'check7'
+                
                 if not(sum1 == Decimal(0) and sum2 == Decimal(0)):
                     if min(sum1,sum2)/max(sum1,sum2) < Decimal(0.999):
                         m = Message(when=timezone.now(),
@@ -285,7 +284,7 @@ class GAPowerPandL(RateSchedule):
                         self.messages.add(m)
                         print m
                         raise TypeError
-                print 'check8'
+                
                 df['Consumption Cost'] = (  df['k1a']*self.rate1a + df['k1b']*self.rate1b +
                                             df['k1c']*self.rate1c + df['k1d']*self.rate1d +
                                             df['k2a']*self.rate2a + df['k2b']*self.rate2b +
@@ -294,7 +293,7 @@ class GAPowerPandL(RateSchedule):
                                             df['k3c']*self.rate3c + df['k3d']*self.rate3d +
                                             df['k4a']*self.rate4a + df['k4b']*self.rate4b +
                                             df['k4c']*self.rate4c + df['k4d']*self.rate4d   )
-                print 'check9'
+                
             except:
                 m = Message(when=timezone.now(),
                         message_type='Code Warning',
