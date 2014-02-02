@@ -431,7 +431,7 @@ class Command(BaseCommand):
             #gpc_toueo7 = GAPowerTOU.objects.get(name = 'GPC-TOU-EO-7') #####NEED TO MAKE
             #gpc_tougsd7 = GAPowerTOU.objects.get(name = 'GPC-TOU-GSD-7') #####NEED TO MAKE
             
-            #kitch = Meter(
+            #east_main = Meter(
             #    name = 'East Bldg',
             #    utility_type = 'electricity',
             #    location = 'loading dock area of bldg',
@@ -447,27 +447,53 @@ class Command(BaseCommand):
             #    utility_account_number = '6126898026',
             #    utility_meter_number = '3081617',
             #    )
-            #kitch.save()
+            #east_main.save()
             #post-creation actions:
             #--load image files
-    #        file_url = STATIC_URL + 'temporary_files/kitch_image_file.jpg'
+    #        file_url = STATIC_URL + 'temporary_files/east_main_image_file.jpg'
     #        result = urllib.urlretrieve(file_url)
     #        file_obj = File(open(result[0]))
-    #        kitch.__setattr__('image_file', file_obj)
-    #        kitch.save()
-    #        file_url = STATIC_URL + 'temporary_files/kitch_nameplate_file.jpg'
+    #        east_main.__setattr__('image_file', file_obj)
+    #        east_main.save()
+    #        file_url = STATIC_URL + 'temporary_files/east_main_nameplate_file.jpg'
     #        result = urllib.urlretrieve(file_url)
     #        file_obj = File(open(result[0]))
-    #        kitch.__setattr__('nameplate_file', file_obj)
-    #        kitch.save()
-            #--load bill data file
-    #        file_url = STATIC_URL + 'temporary_files/kitch_bill_data.csv'
+    #        east_main.__setattr__('nameplate_file', file_obj)
+    #        east_main.save()
+            #--load bill data file, possibly create meter models
+    #        file_url = STATIC_URL + 'temporary_files/east_main_bill_data.csv'
     #        result = urllib.urlretrieve(file_url)
     #        file_obj = File(open(result[0]))
-    #        kitch.__setattr__('bill_data_file', file_obj)
-    #        kitch.save()
-    #        kitch.upload_bill_data(create_models_if_nonexistent=True)
-    #        kitch.save()
+    #        east_main.__setattr__('bill_data_file', file_obj)
+    #        east_main.save()
+    #        east_main.upload_bill_data(create_models_if_nonexistent=True)
+    #        east_main.save()
+            #--connect to buildings
+#            bma1 = BuildingMeterApportionment(meter = east_main,
+#                                              building = East,
+#                                              assigned_fraction = Decimal(1.0))
+#            bma1.save()
+            #--connect to spaces
+#            sma1 = SpaceMeterApportionment(meter = east_main,
+#                                           space = kitchen_space,
+#                                           assigned_fraction = Decimal(0.3))
+#            sma1.save()
+#            sma2 = SpaceMeterApportionment(meter = east_main,
+#                                           space = dining_space,
+#                                           assigned_fraction = Decimal(0.2))
+#            sma2.save()
+#            sma3 = SpaceMeterApportionment(meter = east_main,
+#                                           space = dorms_space,
+#                                           assigned_fraction = Decimal(0.1))
+#            sma3.save()
+#            sma4 = SpaceMeterApportionment(meter = east_main,
+#                                           space = gym_space,
+#                                           assigned_fraction = Decimal(0.2))
+#            sma4.save()
+#            sma5 = SpaceMeterApportionment(meter = east_main,
+#                                           space = school_space,
+#                                           assigned_fraction = Decimal(0.2))
+#            sma5.save()
     
             
             e1 = Meter(
@@ -499,7 +525,7 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             e1.__setattr__('nameplate_file', file_obj)
             e1.save()
-            #--load bill data file
+            #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
@@ -507,7 +533,18 @@ class Command(BaseCommand):
             e1.save()
             e1.upload_bill_data(create_models_if_nonexistent = True)
             e1.save()
-    
+            #--connect to buildings
+            bma1 = BuildingMeterApportionment(meter = e1,
+                                              building = West,
+                                              assigned_fraction = Decimal(1.0))
+            bma1.save()
+            #--connect to spaces
+            sma1 = SpaceMeterApportionment(meter = e1,
+                                           space = EdenI_space,
+                                           assigned_fraction = Decimal(1.0))
+            sma1.save()
+            
+            
             e2 = Meter(
                 name = 'Eden II',
                 utility_type = 'electricity',
@@ -537,7 +574,7 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             e2.__setattr__('nameplate_file', file_obj)
             e2.save()
-            #--load bill data file
+            #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
@@ -545,6 +582,16 @@ class Command(BaseCommand):
             e2.save()
             e2.upload_bill_data(create_models_if_nonexistent = True)
             e2.save()
+            #--connect to buildings
+            bma1 = BuildingMeterApportionment(meter = e2,
+                                              building = East,
+                                              assigned_fraction = Decimal(1.0))
+            bma1.save()
+            #--connect to spaces
+            sma1 = SpaceMeterApportionment(meter = e2,
+                                           space = EdenII_space,
+                                           assigned_fraction = Decimal(1.0))
+            sma1.save()
             
             #wh = Meter(
             #    name = 'West Bldg south',
@@ -575,7 +622,7 @@ class Command(BaseCommand):
     #        file_obj = File(open(result[0]))
     #        wh.__setattr__('nameplate_file', file_obj)
     #        wh.save()
-            #--load bill data file
+            #--load bill data file, possibly create meter models
     #        file_url = STATIC_URL + 'temporary_files/wh_bill_data.csv'
     #        result = urllib.urlretrieve(file_url)
     #        file_obj = File(open(result[0]))
@@ -583,9 +630,27 @@ class Command(BaseCommand):
     #        wh.save()
     #        wh.upload_bill_data(create_models_if_nonexistent = True)
     #        wh.save()
+            #--connect to buildings
+#            bma1 = BuildingMeterApportionment(meter = wh,
+#                                              building = West,
+#                                              assigned_fraction = Decimal(1.0))
+#            bma1.save()
+            #--connect to spaces
+#            sma1 = SpaceMeterApportionment(meter = wh,
+#                                           space = compATL_space,
+#                                           assigned_fraction = Decimal(0.3))
+#            sma1.save()
+#            sma2 = SpaceMeterApportionment(meter = wh,
+#                                           space = unfinished_space,
+#                                           assigned_fraction = Decimal(0.2))
+#            sma2.save()
+#            sma3 = SpaceMeterApportionment(meter = wh,
+#                                           space = offices_space,
+#                                           assigned_fraction = Decimal(0.5))
+#            sma3.save()
             
-            #playground = Meter(
-            #    name = 'Playground',
+            #newschool = Meter(
+            #    name = 'New School',
             #    utility_type = 'electricity',
             #    location = 'south of Eden I entrance on West Bldg',
             #    serves = 'Playground and unfinished area between Eden I and Clinic',
@@ -600,29 +665,47 @@ class Command(BaseCommand):
             #    utility_account_number = '6147898017',
             #    utility_meter_number = '3081616',
             #    )
-            #playground.save()
+            #newschool.save()
             #post-creation actions:
             #--load image files
-    #        file_url = STATIC_URL + 'temporary_files/playground_image_file.jpg'
+    #        file_url = STATIC_URL + 'temporary_files/newschool_image_file.jpg'
     #        result = urllib.urlretrieve(file_url)
     #        file_obj = File(open(result[0]))
-    #        playground.__setattr__('image_file', file_obj)
-    #        playground.save()
-    #        file_url = STATIC_URL + 'temporary_files/playground_nameplate_file.jpg'
+    #        newschool.__setattr__('image_file', file_obj)
+    #        newschool.save()
+    #        file_url = STATIC_URL + 'temporary_files/newschool_nameplate_file.jpg'
     #        result = urllib.urlretrieve(file_url)
     #        file_obj = File(open(result[0]))
-    #        playground.__setattr__('nameplate_file', file_obj)
-    #        playground.save()
-            #--load bill data file
-    #        file_url = STATIC_URL + 'temporary_files/playground_bill_data.csv'
+    #        newschool.__setattr__('nameplate_file', file_obj)
+    #        newschool.save()
+            #--load bill data file, possibly create meter models
+    #        file_url = STATIC_URL + 'temporary_files/newschool_bill_data.csv'
     #        result = urllib.urlretrieve(file_url)
     #        file_obj = File(open(result[0]))
-    #        playground.__setattr__('bill_data_file', file_obj)
-    #        playground.save()
-    #        playground.upload_bill_data(create_models_if_nonexistent = True)
-    #        playground.save()
+    #        newschool.__setattr__('bill_data_file', file_obj)
+    #        newschool.save()
+    #        newschool.upload_bill_data(create_models_if_nonexistent = True)
+    #        newschool.save()
+            #--connect to buildings
+#            bma1 = BuildingMeterApportionment(meter = newschool,
+#                                              building = West,
+#                                              assigned_fraction = Decimal(1.0))
+#            bma1.save()
+            #--connect to spaces
+#            sma1 = SpaceMeterApportionment(meter = newschool,
+#                                           space = playground_space,
+#                                           assigned_fraction = Decimal(0.1))
+#            sma1.save()
+#            sma2 = SpaceMeterApportionment(meter = newschool,
+#                                           space = newschool_space,
+#                                           assigned_fraction = Decimal(0.7))
+#            sma2.save()
+#            sma3 = SpaceMeterApportionment(meter = newschool,
+#                                           space = newchurch_space,
+#                                           assigned_fraction = Decimal(0.2))
+#            sma3.save()
             
-            clin = Meter(
+            clinic = Meter(
                 name = 'Clinic',
                 utility_type = 'electricity',
                 location = 'north of covered Clinic entrance on West Bldg',
@@ -638,27 +721,37 @@ class Command(BaseCommand):
                 utility_account_number = '1816415005',
                 utility_meter_number = '3046324',
                 )
-            clin.save()
+            clinic.save()
             #post-creation actions:
             #--load image files
             file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
-            clin.__setattr__('image_file', file_obj)
-            clin.save()
+            clinic.__setattr__('image_file', file_obj)
+            clinic.save()
             file_url = STATIC_URL + 'temporary_files/Dryden_Logo.png'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
-            clin.__setattr__('nameplate_file', file_obj)
-            clin.save()
-            #--load bill data file
+            clinic.__setattr__('nameplate_file', file_obj)
+            clinic.save()
+            #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
-            clin.__setattr__('bill_data_file', file_obj)
-            clin.save()
-            clin.upload_bill_data(create_models_if_nonexistent = True)
-            clin.save()
+            clinic.__setattr__('bill_data_file', file_obj)
+            clinic.save()
+            clinic.upload_bill_data(create_models_if_nonexistent = True)
+            clinic.save()
+            #--connect to buildings
+            bma1 = BuildingMeterApportionment(meter = clinic,
+                                              building = West,
+                                              assigned_fraction = Decimal(1.0))
+            bma1.save()
+            #--connect to spaces
+            sma1 = SpaceMeterApportionment(meter = clinic,
+                                           space = clinic_space,
+                                           assigned_fraction = Decimal(1.0))
+            sma1.save()
             
             gas1290 = Meter(
                 name = 'East Bldg',
@@ -689,7 +782,7 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             gas1290.__setattr__('nameplate_file', file_obj)
             gas1290.save()
-            #--load bill data file
+            #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
@@ -697,6 +790,36 @@ class Command(BaseCommand):
             gas1290.save()
             gas1290.upload_bill_data(create_models_if_nonexistent = True)
             gas1290.save()
+            #--connect to buildings
+            bma1 = BuildingMeterApportionment(meter = gas1290,
+                                              building = East,
+                                              assigned_fraction = Decimal(1.0))
+            bma1.save()
+            #--connect to spaces
+            sma1 = SpaceMeterApportionment(meter = gas1290,
+                                           space = dorms_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma1.save()
+            sma2 = SpaceMeterApportionment(meter = gas1290,
+                                           space = kitchen_space,
+                                           assigned_fraction = Decimal(0.4))
+            sma2.save()
+            sma3 = SpaceMeterApportionment(meter = gas1290,
+                                           space = dining_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma3.save()
+            sma4 = SpaceMeterApportionment(meter = gas1290,
+                                           space = gym_space,
+                                           assigned_fraction = Decimal(0.2))
+            sma4.save()
+            sma5 = SpaceMeterApportionment(meter = gas1290,
+                                           space = school_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma5.save()
+            sma6 = SpaceMeterApportionment(meter = gas1290,
+                                           space = EdenII_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma6.save()
             
             gas1300 = Meter(
                 name = 'West Bldg',
@@ -727,7 +850,7 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             gas1300.__setattr__('nameplate_file', file_obj)
             gas1300.save()
-            #--load bill data file
+            #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
@@ -735,6 +858,36 @@ class Command(BaseCommand):
             gas1300.save()
             gas1300.upload_bill_data(create_models_if_nonexistent = True)
             gas1300.save()
+            #--connect to buildings
+            bma1 = BuildingMeterApportionment(meter = gas1300,
+                                              building = West,
+                                              assigned_fraction = Decimal(1.0))
+            bma1.save()
+            #--connect to spaces
+            sma1 = SpaceMeterApportionment(meter = gas1300,
+                                           space = playground_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma1.save()
+            sma2 = SpaceMeterApportionment(meter = gas1300,
+                                           space = newschool_space,
+                                           assigned_fraction = Decimal(0.2))
+            sma2.save()
+            sma3 = SpaceMeterApportionment(meter = gas1300,
+                                           space = newchurch_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma3.save()
+            sma4 = SpaceMeterApportionment(meter = gas1300,
+                                           space = EdenI_space,
+                                           assigned_fraction = Decimal(0.3))
+            sma4.save()
+            sma5 = SpaceMeterApportionment(meter = gas1300,
+                                           space = clinic_space,
+                                           assigned_fraction = Decimal(0.15))
+            sma5.save()
+            sma6 = SpaceMeterApportionment(meter = gas1300,
+                                           space = offices_space,
+                                           assigned_fraction = Decimal(0.15))
+            sma6.save()
             
             simpson1290 = Meter(
                 name = '1290 Simpson',
@@ -765,7 +918,7 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             simpson1290.__setattr__('nameplate_file', file_obj)
             simpson1290.save()
-            #--load bill data file
+            #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
@@ -773,6 +926,20 @@ class Command(BaseCommand):
             simpson1290.save()
             simpson1290.upload_bill_data(create_models_if_nonexistent = True)
             simpson1290.save()
+            #--connect to buildings
+            bma1 = BuildingMeterApportionment(meter = simpson1290,
+                                              building = East,
+                                              assigned_fraction = Decimal(1.0))
+            bma1.save()
+            #--connect to spaces
+            sma1 = SpaceMeterApportionment(meter = simpson1290,
+                                           space = kitchen_space,
+                                           assigned_fraction = Decimal(0.7))
+            sma1.save()
+            sma2 = SpaceMeterApportionment(meter = simpson1290,
+                                           space = EdenII_space,
+                                           assigned_fraction = Decimal(0.3))
+            sma2.save()
             
             boone1300 = Meter(
                 name = '1300 Boone',
@@ -803,7 +970,7 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             boone1300.__setattr__('nameplate_file', file_obj)
             boone1300.save()
-            #--load bill data file
+            #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'temporary_files/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0]))
@@ -811,6 +978,34 @@ class Command(BaseCommand):
             boone1300.save()
             boone1300.upload_bill_data(create_models_if_nonexistent = True)
             boone1300.save()
+            #--connect to buildings
+            bma1 = BuildingMeterApportionment(meter = boone1300,
+                                              building = West,
+                                              assigned_fraction = Decimal(1.0))
+            bma1.save()
+            #--connect to spaces
+            sma1 = SpaceMeterApportionment(meter = simpson1290,
+                                           space = EdenI_space,
+                                           assigned_fraction = Decimal(0.5))
+            sma1.save()
+            sma2 = SpaceMeterApportionment(meter = simpson1290,
+                                           space = clinic_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma2.save()
+            sma3 = SpaceMeterApportionment(meter = simpson1290,
+                                           space = newschool_space,
+                                           assigned_fraction = Decimal(0.2))
+            sma3.save()
+            sma4 = SpaceMeterApportionment(meter = simpson1290,
+                                           space = offices_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma4.save()
+            sma5 = SpaceMeterApportionment(meter = simpson1290,
+                                           space = compATL_space,
+                                           assigned_fraction = Decimal(0.1))
+            sma5.save()
+
+
         except:
             print 'Failed to create new Meters.'
 
