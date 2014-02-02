@@ -241,6 +241,8 @@ class GAPowerPandL(RateSchedule):
                 print 'check1'
                 print 'Billing Demand' in df.columns
                 print 'Consumption' in df.columns
+                print Decimal(NaN) in df['Billing Demand']
+                print Decimal(NaN) in df['Consumption']
                 df['k1'] = [min(df['Billing Demand'][i]*self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
                 df['k2'] = [min(df['Billing Demand'][i]*(self.tier2-self.tier1),df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
                 df['k3'] = [min(df['Billing Demand'][i]*(self.tier3-self.tier2),df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
