@@ -1023,6 +1023,10 @@ class Meter(models.Model):
 
             df['Peak Demand (exp delta)'] = df['Peak Demand (base delta)'] - df['Peak Demand (esave delta)']
             df['Consumption (exp delta)'] = df['Consumption (base delta)'] - df['Consumption (esave delta)']
+            
+            df['Billing Demand (exp)'] = df['Peak Demand (exp)']
+            df['Billing Demand (asave)'] = df['Peak Demand (asave)']
+            df['Billing Demand (exp delta)'] = df['Peak Demand (exp delta)']
         except:
             m = Message(when=timezone.now(),
                     message_type='Code Warning',
@@ -1073,16 +1077,18 @@ class Meter(models.Model):
                 
                 df['Consumption'] = df['Consumption (base)'] - df['Consumption (base delta)']
                 df['Peak Demand'] = df['Peak Demand (base)'] - df['Peak Demand (base delta)']
+                df['Billing Demand'] = df['Peak Demand']
                 df['Cost (base delta)'] = (df['Cost (base)'] -
                                             self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
                 
                 df['Consumption'] = df['Consumption (esave)'] - df['Consumption (esave delta)']
                 df['Peak Demand'] = df['Peak Demand (esave)'] - df['Peak Demand (esave delta)']
+                df['Billing Demand'] = df['Peak Demand']
                 df['Cost (esave delta)'] = (df['Cost (esave)'] -
                                             self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
                 df['Cost (esave delta)'] = df['Cost (esave delta)'].apply(lambda x: cap_negatives_with_NaN(x))
                 
-                df = df.drop(['Consumption', 'Peak Demand'], axis = 1)
+                df = df.drop(['Consumption', 'Peak Demand', 'Billing Demand'], axis = 1)
                 
                 df['Cost (exp delta)'] = df['Cost (base delta)'] - df['Cost (esave delta)']
             except:
