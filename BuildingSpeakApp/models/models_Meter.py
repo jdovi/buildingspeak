@@ -1610,9 +1610,6 @@ class Meter(models.Model):
             mthr.save()
             mthr = Monther(meter=self,name='BILLx',help_text='monthly values from utility bill')
             mthr.save()
-        if self.bill_data_import:
-            super(Meter, self).save(*args, **kwargs)
-            self.upload_bill_data()
         super(Meter, self).save(*args, **kwargs)
     class Meta:
         app_label = 'BuildingSpeakApp'

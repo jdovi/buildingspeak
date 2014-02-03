@@ -22,7 +22,7 @@ class InfiniteEnergyGAGas(RateSchedule):
     #functions expected by superclass RateSchedule
     def __unicode__(self):
         return self.name
-    def get_cost_df(self, df):
+    def get_cost_df(self, df, billx=None):
         """function(df)
         
         Given dataframe with monthly
@@ -30,6 +30,10 @@ class InfiniteEnergyGAGas(RateSchedule):
         Consumption, returns dataframe
         with Calculated Cost column."""
         try:
+            df['Billing Demand'] = df['Billing Demand'].apply(Decimal)
+            df['Peak Demand'] = df['Peak Demand'].apply(Decimal)
+            df['Consumption'] = df['Consumption'].apply(Decimal)
+
             df['Consumption Cost'] = df['Consumption']*self.therm_rate
         except:
             m = Message(when=timezone.now(),

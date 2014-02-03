@@ -41,7 +41,7 @@ class CityOfATLWWW(RateSchedule):
     #functions expected by superclass RateSchedule
     def __unicode__(self):
         return self.name
-    def get_cost_df(self, df):
+    def get_cost_df(self, df, billx=None):
         """function(df)
         
         Given dataframe with monthly
@@ -49,6 +49,10 @@ class CityOfATLWWW(RateSchedule):
         Consumption, returns dataframe
         with Calculated Cost column."""
         try:
+            df['Billing Demand'] = df['Billing Demand'].apply(Decimal)
+            df['Peak Demand'] = df['Peak Demand'].apply(Decimal)
+            df['Consumption'] = df['Consumption'].apply(Decimal)
+            
             df['k1'] = [min(self.tier1,df['Consumption'][i]) for i in range(0,len(df))]
             df['k2'] = [min(self.tier2-self.tier1,df['Consumption'][i]-df['k1'][i]) for i in range(0,len(df))]
             df['k3'] = [min(self.tier3-self.tier2,df['Consumption'][i]-df['k1'][i]-df['k2'][i]) for i in range(0,len(df))]
