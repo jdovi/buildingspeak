@@ -377,13 +377,13 @@ def meter_detail(request, account_id, meter_id):
         bill_data['Days'] = [(bill_data['End Date'][i] - bill_data['Start Date'][i]).days+1 for i in range(0, len(bill_data))]
         
         #now we create the additional columns to manipulate the stored data for display to user
-        bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)'].replace(to_value = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
+        bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
         bill_data[cost_per_day] = bill_data['Cost (act)'] / bill_data['Days']
         bill_data[cost] = bill_data['Cost (act)']
         bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
         bill_data[consumption] = bill_data['Consumption (act)']
         bill_data[consumption_kBtu] = bill_data['kBtu Consumption (act)']
-        bill_data[cost_per_kBtu] = bill_data['Cost (act)'] / bill_data['kBtu Consumption (act)'].replace(to_value = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
+        bill_data[cost_per_kBtu] = bill_data['Cost (act)'] / bill_data['kBtu Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
         bill_data[kBtu_per_day] = bill_data['kBtu Consumption (act)'] / bill_data['Days']
         
         #totals and useful ratios table calculations
