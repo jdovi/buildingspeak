@@ -128,24 +128,343 @@ class Meter(models.Model):
     utility_meter_number = models.CharField(blank=True, max_length=200, help_text='provider''s meter number')
     
     #functions
-    def get_meter_view_motion_table(self):
-        """No inputs.
+    def get_meter_view_meter_data(self, bill_data):
+        """function(bill_data)
+        
+        Returns tables of totals, ratios,
+        and monthly values.
+        """
+        if bill_data is None:
+            totals_table = False
+            ratios_table = False
+            cost_by_month = False
+            consumption_by_month = False
+            demand_by_month = False
+            kbtu_by_month = False
+            kbtuh_by_month = False
+        else:
+            bill_data = bill_data.sort_index()
+            #additional column names to be created; these are manipulations of the stored data
+            cost_per_consumption = '$/' + self.units.split(',')[1]
+            consumption_per_day = self.units.split(',')[1] + '/day'
+            consumption = self.units.split(',')[1]
+            consumption_kBtu = 'kBtu'
+            cost = '$'
+            cost_per_day = '$/day'
+            cost_per_kBtu = '$/kBtu'
+            kBtu_per_day = 'kBtu/day'
+            bill_data['Days'] = [(bill_data['End Date'][i] - bill_data['Start Date'][i]).days+1 for i in range(0, len(bill_data))]
+            
+            #now we create the additional columns to manipulate the stored data for display to user
+            bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
+            bill_data[cost_per_day] = bill_data['Cost (act)'] / bill_data['Days']
+            bill_data[cost] = bill_data['Cost (act)']
+            bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
+            bill_data[consumption] = bill_data['Consumption (act)']
+            bill_data[consumption_kBtu] = bill_data['kBtu Consumption (act)']
+            bill_data[cost_per_kBtu] = bill_data['Cost (act)'] / bill_data['kBtu Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
+            bill_data[kBtu_per_day] = bill_data['kBtu Consumption (act)'] / bill_data['Days']
+            
+            #totals and useful ratios table calculations
+            #first we construct a dataframe of the right length with only the columns we want
+            bill_data_totals = pd.DataFrame(columns = [consumption_per_day,
+                                                       cost_per_day,
+                                                       cost_per_consumption,
+                                                       consumption_kBtu,
+                                                       consumption,
+                                                       cost,
+                                                       cost_per_kBtu,
+                                                       kBtu_per_day],
+                                                      index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual'])
+            #this column will get populated and then used to sort after we've jumped from Periods to Jan,Feb,etc.
+            bill_data_totals['Month Integer'] = range(1,14)
+            
+            #now we loop through the 12 months and overwrite the old values with summations over all occurrences
+            #    of a given month, and then we replace the index with text values Jan, Feb, etc.
+            for m in bill_data_totals.index:
+                i = bill_data_totals['Month Integer'][m]
+                if i in [j.month for j in bill_data.index]:
+                    sum_cons = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
+                    if sum_cons == Decimal(0.0): sum_cons = Decimal(NaN)
+                    bill_data_totals[cost_per_consumption][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / sum_cons
+                    bill_data_totals[cost_per_day][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum())
+                    bill_data_totals[cost][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum()
+                    bill_data_totals[consumption_per_day][m] = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum())
+                    bill_data_totals[consumption][m] = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
+                    bill_data_totals[consumption_kBtu][m] = bill_data['kBtu Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum()
+                    sum_kbtu_cons = bill_data['kBtu Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum()
+                    if sum_kbtu_cons == Decimal(0.0): sum_kbtu_cons = Decimal(NaN)
+                    bill_data_totals[cost_per_kBtu][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / sum_kbtu_cons
+                    bill_data_totals[kBtu_per_day][m] = bill_data['kBtu Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum())
+                else:
+                    bill_data_totals[cost_per_consumption][m] = Decimal(NaN)
+                    bill_data_totals[cost_per_day][m] =         Decimal(NaN)
+                    bill_data_totals[cost][m] =                 Decimal(NaN)
+                    bill_data_totals[consumption_per_day][m] =  Decimal(NaN)
+                    bill_data_totals[consumption][m] =          Decimal(NaN)
+                    bill_data_totals[consumption_kBtu][m] =     Decimal(NaN)
+                    bill_data_totals[cost_per_kBtu][m] =        Decimal(NaN)
+                    bill_data_totals[kBtu_per_day][m] =         Decimal(NaN)
+                    
+            bill_data_totals = bill_data_totals.sort(columns='Month Integer')
+            bill_data_totals.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual']
+            
+            #now we add the Annual row, which will be a column if and when we transpose
+            sum_cons = bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
+            if sum_cons == Decimal(0.0): sum_cons = Decimal(NaN)
+            bill_data_totals[cost_per_consumption]['Annual'] = bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / sum_cons
+            bill_data_totals[cost_per_day]['Annual'] =         bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum())
+            bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum()
+            bill_data_totals[consumption_per_day]['Annual'] =  bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum())
+            bill_data_totals[consumption]['Annual'] =          bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
+            bill_data_totals[consumption_kBtu]['Annual'] =     bill_data['kBtu Consumption (act)'][[not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum()
+            sum_kbtu_cons = bill_data['kBtu Consumption (act)'][[not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum()
+            if sum_kbtu_cons == Decimal(0.0): sum_kbtu_cons = Decimal(NaN)
+            bill_data_totals[cost_per_kBtu]['Annual'] = bill_data['Cost (act)'].sum() / sum_kbtu_cons
+            bill_data_totals[kBtu_per_day]['Annual'] =  bill_data['kBtu Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+            
+            #no longer needed once we've sorted
+            bill_data_totals = bill_data_totals.drop(['Month Integer'],1)
+            
+            #totals table only has values as opposed to ratios, so we pull relevant columns and set format
+            totals_table_df = bill_data_totals[[cost,consumption,consumption_kBtu]]
+            totals_column_dict = {cost: lambda x: '${:,.2f}'.format(x),
+                                  consumption: lambda x: '{:,.0f}'.format(x),
+                                  consumption_kBtu: lambda x: '{:,.0f}'.format(x)}
+            totals_table = get_df_as_table_with_formats(df = totals_table_df,
+                                                        columndict = totals_column_dict,
+                                                        index_name = 'Metric',
+                                                        transpose_bool = True)
+        
+            #ratios table only has ratios as opposed to totals, so we pull relevant columns and set format
+            ratios_table_df = bill_data_totals[[cost_per_consumption,consumption_per_day,cost_per_day,cost_per_kBtu,kBtu_per_day]]
+            ratios_column_dict = {cost_per_consumption: lambda x: '${:,.2f}'.format(x),
+                                  consumption_per_day: lambda x: '{:,.0f}'.format(x),
+                                  cost_per_day: lambda x: '${:,.2f}'.format(x),
+                                  cost_per_kBtu: lambda x: '${:,.2f}'.format(x),
+                                  kBtu_per_day: lambda x: '{:,.0f}'.format(x)}
+            ratios_table = get_df_as_table_with_formats(df = ratios_table_df,
+                                                        columndict = ratios_column_dict,
+                                                        index_name = 'Metric',
+                                                        transpose_bool = True)
+            
+            #now create monthly charts if data exists; set to False for template if no data
+            cost_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Cost (base)','Cost (exp)','Cost (esave)','Cost (act)','Cost (asave)'])
+            if len(cost_by_month) == 1: cost_by_month = False
+            consumption_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Consumption (base)','Consumption (exp)','Consumption (esave)','Consumption (act)','Consumption (asave)'])
+            if len(consumption_by_month) == 1: consumption_by_month = False
+            demand_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Peak Demand (base)','Peak Demand (exp)','Peak Demand (esave)','Peak Demand (act)','Peak Demand (asave)'])
+            if len(demand_by_month) == 1: demand_by_month = False
+            kbtu_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','kBtu Consumption (base)','kBtu Consumption (exp)','kBtu Consumption (esave)','kBtu Consumption (act)','kBtu Consumption (asave)'])
+            if len(kbtu_by_month) == 1: kbtu_by_month = False
+            kbtuh_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','kBtuh Peak Demand (base)','kBtuh Peak Demand (exp)','kBtuh Peak Demand (esave)','kBtuh Peak Demand (act)','kBtuh Peak Demand (asave)'])
+            if len(kbtuh_by_month) == 1: kbtuh_by_month = False
+            
+        return [totals_table, ratios_table, cost_by_month, consumption_by_month, demand_by_month, kbtu_by_month, kbtuh_by_month]
+
+    def get_meter_view_meter_model_data(self, bill_data):
+        """function(bill_data)
+        
+        Returns tables of MeterModel statistics.
+        """
+        if bill_data is None:
+            consumption_residual_plots = None  #iterables in templates need None
+            peak_demand_residual_plots = None  #iterables in templates need None
+            consumption_model_stats_table = False
+            peak_demand_model_stats_table = False
+            consumption_model_residuals_histogram = False
+            peak_demand_model_residuals_histogram = False
+        else:
+            bill_data = bill_data.sort_index()
+            
+            #pull model stats and residuals if model exists; set False if no model but None for vars iterated over in template
+            if self.monther_set.get(name='BILLx').consumption_model is None:
+                consumption_model_stats_table = False
+                consumption_model_residuals_table = False
+                consumption_model_residuals_histogram = False
+                consumption_residual_plots = None
+            else:
+                consumption_model_stats_table = self.monther_set.get(name='BILLx').consumption_model.get_model_stats_as_table()
+                consumption_model_residuals_table = self.monther_set.get(name='BILLx').consumption_model.get_residuals_and_indvars_as_table()
+                consumption_model_residuals = [x[0] for x in consumption_model_residuals_table[1:]]
+                ccount,cdiv = np.histogram(consumption_model_residuals)
+                consumption_model_residuals_histogram = [['Bins', 'Frequency']]
+                consumption_model_residuals_histogram.extend([[cdiv[i],float(ccount[i])] for i in range(0,len(ccount))])
+                if len(consumption_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
+                    consumption_residual_plots = []
+                    for i in range(1,len(consumption_model_residuals_table[0])):
+                        consumption_residual_plots.append([consumption_model_residuals_table[0][i],[[x[i],x[0]] for x in consumption_model_residuals_table]])
+                else:
+                    consumption_residual_plots = None
+                
+            #pull model stats and residuals if model exists; set False if no model but None for vars iterated over in template
+            if self.monther_set.get(name='BILLx').peak_demand_model is None:
+                peak_demand_model_stats_table = False
+                peak_demand_model_residuals_table = False
+                peak_demand_model_residuals_histogram = False
+                peak_demand_residual_plots = None
+            else:
+                peak_demand_model_stats_table = self.monther_set.get(name='BILLx').peak_demand_model.get_model_stats_as_table()    
+                peak_demand_model_residuals_table = self.monther_set.get(name='BILLx').peak_demand_model.get_residuals_and_indvars_as_table()
+                peak_demand_model_residuals = [x[0] for x in peak_demand_model_residuals_table[1:]]
+                pcount,pdiv = np.histogram(peak_demand_model_residuals)
+                peak_demand_model_residuals_histogram = [['Bins', 'Frequency']]
+                peak_demand_model_residuals_histogram.extend([[pdiv[i],float(pcount[i])] for i in range(0,len(pcount))])
+                if len(peak_demand_model_residuals_table[0]) > 1: #if there are any independent variables, need to construct column pairs
+                    peak_demand_residual_plots = []
+                    for i in range(1,len(peak_demand_model_residuals_table[0])):
+                        peak_demand_residual_plots.append([peak_demand_model_residuals_table[0][i],[[x[i],x[0]] for x in peak_demand_model_residuals_table]])
+                else:
+                    peak_demand_residual_plots = None
+        return [consumption_residual_plots, 
+                peak_demand_residual_plots, 
+                consumption_model_stats_table, 
+                peak_demand_model_stats_table, 
+                consumption_model_residuals_histogram, 
+                peak_demand_model_residuals_histogram]
+        
+    def get_meter_view_five_year_data(self, bill_data):
+        """function(month_first, month_last)
+        
+        Returns tables of five year data.
+        """
+        if bill_data is None:
+            five_year_table_cost = None
+            five_year_table_cons = None
+            five_year_table_kBtu = None
+        else:
+            bill_data = bill_data.sort_index()
+            month_curr = pd.Period(timezone.now(), freq='M')
+            year_curr = month_curr.year
+            mi = pd.Period(year = year_curr-3, month = 1, freq = 'M')
+            mf = pd.Period(year = year_curr+1, month = 12, freq = 'M')
+            
+            five_years = pd.DataFrame(bill_data, index = pd.period_range(start = mi, end = mf, freq = 'M'))
+            five_years = five_years.sort_index()
+            first_calc_month = five_years.index[five_years['Cost (act)'].apply(decimal_isnan)][0]
+            last_act_month = first_calc_month - 1
+            
+            five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
+                                     'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
+                                     'HDD (consumption)']].applymap(nan2zero)
+            five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
+                                     'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
+                                     'HDD (consumption)']].applymap(float)
+            
+            five_year_table_cost = [['Year','Cost (act)','Cost (exp)','CDD (consumption)','HDD (consumption)']]
+            five_year_table_cost.append([str(five_years.index[0].year),
+                                    five_years['Cost (act)'][0:12].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][0:12].sum(),
+                                    five_years['HDD (consumption)'][0:12].sum()
+                                    ])
+            five_year_table_cost.append([str(five_years.index[12].year),
+                                    five_years['Cost (act)'][12:24].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][12:24].sum(),
+                                    five_years['HDD (consumption)'][12:24].sum()
+                                    ])
+            five_year_table_cost.append([str(five_years.index[24].year),
+                                    five_years['Cost (act)'][24:36].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][24:36].sum(),
+                                    five_years['HDD (consumption)'][24:36].sum()
+                                    ])
+            five_year_table_cost.append([str(five_years.index[36].year),
+                                    five_years['Cost (act)'][36:last_act_month].sum(),
+                                    five_years['Cost (exp)'][first_calc_month:48].sum(),
+                                    five_years['CDD (consumption)'][36:48].sum(),
+                                    five_years['HDD (consumption)'][36:48].sum()
+                                    ])
+            five_year_table_cost.append([str(five_years.index[48].year),
+                                    0,
+                                    five_years['Cost (exp)'][48:60].sum(),
+                                    five_years['CDD (consumption)'][48:60].sum(),
+                                    five_years['HDD (consumption)'][48:60].sum()
+                                    ])
+            
+            five_year_table_cons = [['Year','Consumption (act)','Consumption (exp)','CDD (consumption)','HDD (consumption)']]
+            five_year_table_cons.append([str(five_years.index[0].year),
+                                    five_years['Consumption (act)'][0:12].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][0:12].sum(),
+                                    five_years['HDD (consumption)'][0:12].sum()
+                                    ])
+            five_year_table_cons.append([str(five_years.index[12].year),
+                                    five_years['Consumption (act)'][12:24].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][12:24].sum(),
+                                    five_years['HDD (consumption)'][12:24].sum()
+                                    ])
+            five_year_table_cons.append([str(five_years.index[24].year),
+                                    five_years['Consumption (act)'][24:36].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][24:36].sum(),
+                                    five_years['HDD (consumption)'][24:36].sum()
+                                    ])
+            five_year_table_cons.append([str(five_years.index[36].year),
+                                    five_years['Consumption (act)'][36:last_act_month].sum(),
+                                    five_years['Consumption (exp)'][first_calc_month:48].sum(),
+                                    five_years['CDD (consumption)'][36:48].sum(),
+                                    five_years['HDD (consumption)'][36:48].sum()
+                                    ])
+            five_year_table_cons.append([str(five_years.index[48].year),
+                                    0,
+                                    five_years['Consumption (exp)'][48:60].sum(),
+                                    five_years['CDD (consumption)'][48:60].sum(),
+                                    five_years['HDD (consumption)'][48:60].sum()
+                                    ])
+            
+            five_year_table_kBtu = [['Year','kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)','HDD (consumption)']]
+            five_year_table_kBtu.append([str(five_years.index[0].year),
+                                    five_years['kBtu Consumption (act)'][0:12].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][0:12].sum(),
+                                    five_years['HDD (consumption)'][0:12].sum()
+                                    ])
+            five_year_table_kBtu.append([str(five_years.index[12].year),
+                                    five_years['kBtu Consumption (act)'][12:24].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][12:24].sum(),
+                                    five_years['HDD (consumption)'][12:24].sum()
+                                    ])
+            five_year_table_kBtu.append([str(five_years.index[24].year),
+                                    five_years['kBtu Consumption (act)'][24:36].sum(),
+                                    0,
+                                    five_years['CDD (consumption)'][24:36].sum(),
+                                    five_years['HDD (consumption)'][24:36].sum()
+                                    ])
+            five_year_table_kBtu.append([str(five_years.index[36].year),
+                                    five_years['kBtu Consumption (act)'][36:last_act_month].sum(),
+                                    five_years['kBtu Consumption (exp)'][first_calc_month:48].sum(),
+                                    five_years['CDD (consumption)'][36:48].sum(),
+                                    five_years['HDD (consumption)'][36:48].sum()
+                                    ])
+            five_year_table_kBtu.append([str(five_years.index[48].year),
+                                    0,
+                                    five_years['kBtu Consumption (exp)'][48:60].sum(),
+                                    five_years['CDD (consumption)'][48:60].sum(),
+                                    five_years['HDD (consumption)'][48:60].sum()
+                                    ])
+        return [five_year_table_cost, five_year_table_cons, five_year_table_kBtu]
+        
+    def get_meter_view_motion_table(self, bill_data):
+        """function(bill_data)
         
         Returns table for motion chart on
         Meter's detail view.  List of lists
         with the following columns: MeterName,
         Date, Cost, kBtu, CDD, HDD.
         """
-        df = self.get_bill_data_period_dataframe()
-        if df is not None:
-            df[['Cost (act)',
+        if bill_data is not None:
+            bill_data[['Cost (act)',
                 'kBtu Consumption (act)',
                 'CDD (consumption)',
-                'HDD (consumption)']] = df[['Cost (act)',
+                'HDD (consumption)']] = bill_data[['Cost (act)',
                                             'kBtu Consumption (act)',
                                             'CDD (consumption)',
                                             'HDD (consumption)']].applymap(nan2zero)
-            result = get_df_motion_table(df,
+            result = get_df_motion_table(bill_data,
                                          ['Meter',str(self.name)],
                                          lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
                                          ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)'])

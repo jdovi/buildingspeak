@@ -8,8 +8,8 @@ from django.core import urlresolvers
 from decimal import Decimal
 from datetime import datetime, timedelta
 from storages.backends.s3boto import S3BotoStorage
-from rq import Queue
-from worker import conn
+#from rq import Queue
+#from worker import conn
 
 
 from models_functions import *

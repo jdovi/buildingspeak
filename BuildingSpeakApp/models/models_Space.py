@@ -224,7 +224,8 @@ class Space(models.Model):
         """
         result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
         for meter in self.meters.all():
-            meter_table = meter.get_meter_view_motion_table()
+            bill_data = meter.get_bill_data_period_dataframe(first_month = '', last_month = '')
+            meter_table = meter.get_meter_view_motion_table(bill_data = bill_data)
             for i in meter_table[1:]:
                 i.append(str(meter.utility_type))
                 result.append(i)
@@ -454,11 +455,16 @@ class Space(models.Model):
         return five_year_data
 
     def get_space_view_meter_data(self, month_first, month_last):
-        """function(month_first, month_last)
-        month_first/month_last = Periods(freq='M')
+        """
+        Returns tables of summed meter data for a given date range.
         
-        Returns meter data for Space's views
-        in a list: [meter_data, pie_data]."""
+        :argument month_first: The first desired month.
+        :type month_first: Period(freq='M')
+        :argument month_last: The last desired month.
+        :type month_last: Period(freq='M')
+        :returns: Meter data for Space's views in a list: [meter_data, pie_data].
+        
+        """
         #if there are no meters, skip all meter data calcs
         try:
             first_month = month_first.strftime('%m/%Y')
@@ -520,7 +526,8 @@ class Space(models.Model):
                 utility_groups = ['Space Total']
                 utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
                 
-                #meter_dict holds all info and dataframes for each utility group, starting with Total non-water
+                #meter_dict holds all info and dataframes for each utility group, starting with Total
+                #note that water is included for Cost, so Cons/PD can never be used here but kBtu/kBtuh can
                 meter_dict = {'Space Total': {'name': 'Space Total',
                                                         'costu': 'USD',
                                                         'consu': 'kBtu',
@@ -528,13 +535,13 @@ class Space(models.Model):
                                                         'df': convert_units_sum_meters(
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
-                                                                #self.meters.filter(~Q(utility_type = 'domestic water')), 
+                                                                #self.meter_set.filter(~Q(utility_type = 'domestic water')), 
                                                                 self.meters.all(),
                                                                 first_month=first_month, 
                                                                 last_month=last_month )
                                                         } }
                 
-                #cycle through all utility types present in this building, get info and dataframes
+                #cycle through all utility types present in this space, get info and dataframes
                 for utype in sorted(set([str(x.utility_type) for x in self.meters.all()])):
                     utype = str(utype)
                     meter_dict[utype] = {}
@@ -551,7 +558,7 @@ class Space(models.Model):
                 
                 #remove all utility types for which no data was found (returned df is None)
                 temp = [meter_dict.__delitem__(x) for x in meter_dict.keys() if meter_dict[x]['df'] is None]
-
+        
                 #now that dataframes are available, create data tables for each utility type, inc. Total
                 for utype in meter_dict.keys():
                     #additional column names to be created; these are manipulations of the stored data
@@ -573,7 +580,7 @@ class Space(models.Model):
                     bill_data[consumption] = bill_data['Consumption (act)']
                     bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
                     bill_data[consumption_per_sf] = bill_data['Consumption (act)'] / self.square_footage
-                    bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)'].replace(to_value = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
+                    bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)']
                     
                     #totals and useful ratios table calculations
                     #first we construct the dataframe we want
@@ -581,21 +588,19 @@ class Space(models.Model):
                                                     index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual'])
                     #this column will get populated and then used to sort after we've jumped from Periods to Jan,Feb,etc.
                     bill_data_totals['Month Integer'] = range(1,14)
-        
+                    
                     #now we loop through the 12 months and overwrite the old values with summations over all occurrences
                     #    of a given month, and then we replace the index with text values Jan, Feb, etc.
                     for m in bill_data_totals.index:
                         i = bill_data_totals['Month Integer'][m]
                         if i in [j.month for j in bill_data.index]:
-                            bill_data_totals[cost][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum()
-                            bill_data_totals[cost_per_day][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum())
-                            bill_data_totals[cost_per_sf][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / self.square_footage
-                            bill_data_totals[consumption][m] = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
-                            bill_data_totals[consumption_per_day][m] = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum())
-                            bill_data_totals[consumption_per_sf][m] = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum() / self.square_footage
-                            sum_cons = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
-                            if sum_cons == Decimal(0.0): sum_cons = Decimal(NaN)
-                            bill_data_totals[cost_per_consumption][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / sum_cons
+                            bill_data_totals[cost][m] = bill_data['Cost (act)'][[x.month==i for x in bill_data.index]].sum()
+                            bill_data_totals[cost_per_day][m] = bill_data['Cost (act)'][[x.month==i for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i for x in bill_data.index]].sum())
+                            bill_data_totals[cost_per_sf][m] = bill_data['Cost (act)'][[x.month==i for x in bill_data.index]].sum() / self.square_footage
+                            bill_data_totals[consumption][m] = bill_data['Consumption (act)'][[x.month==i for x in bill_data.index]].sum()
+                            bill_data_totals[consumption_per_day][m] = bill_data['Consumption (act)'][[x.month==i for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i for x in bill_data.index]].sum())
+                            bill_data_totals[consumption_per_sf][m] = bill_data['Consumption (act)'][[x.month==i for x in bill_data.index]].sum() / self.square_footage
+                            bill_data_totals[cost_per_consumption][m] = bill_data['Cost (act)'][[x.month==i for x in bill_data.index]].sum() / bill_data['Consumption (act)'][[x.month==i for x in bill_data.index]].sum()
                         else:
                             bill_data_totals[cost][m] = Decimal(NaN)
                             bill_data_totals[cost_per_day][m] = Decimal(NaN)
@@ -608,15 +613,13 @@ class Space(models.Model):
                     bill_data_totals.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual']
         
                     #now we add the Annual row, which will be a column if and when we transpose
-                    bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum()
-                    bill_data_totals[cost_per_day]['Annual'] =          bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum())
-                    bill_data_totals[cost_per_sf]['Annual'] =           bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / self.square_footage
-                    bill_data_totals[consumption]['Annual'] =           bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
-                    bill_data_totals[consumption_per_day]['Annual'] =   bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum())
-                    bill_data_totals[consumption_per_sf]['Annual'] =    bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum() / self.square_footage
-                    sum_cons = bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
-                    if sum_cons == Decimal(0.0): sum_cons = Decimal(NaN)
-                    bill_data_totals[cost_per_consumption]['Annual'] =  bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / sum_cons
+                    bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'].sum()
+                    bill_data_totals[cost_per_day]['Annual'] =          bill_data['Cost (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+                    bill_data_totals[cost_per_sf]['Annual'] =           bill_data['Cost (act)'].sum() / self.square_footage
+                    bill_data_totals[consumption]['Annual'] =           bill_data['Consumption (act)'].sum()
+                    bill_data_totals[consumption_per_day]['Annual'] =   bill_data['Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+                    bill_data_totals[consumption_per_sf]['Annual'] =    bill_data['Consumption (act)'].sum() / self.square_footage
+                    bill_data_totals[cost_per_consumption]['Annual'] =  bill_data['Cost (act)'].sum() / bill_data['Consumption (act)'].sum()
                     
                     #no longer needed once we've sorted
                     bill_data_totals = bill_data_totals.drop(['Month Integer'],1)
@@ -669,21 +672,21 @@ class Space(models.Model):
                     pass #if necessary, weed out empty tables here
                 
                 #getting pie chart data; cost data includes all Meters; kBtu data excludes domestic water Meters
-                pie_cost_by_meter =     [['Meter','Cost','Utility Type']]
+                pie_cost_by_meter =     [['Meter','Cost']]
                 pie_cost_by_type =      [['Utility Type','Cost']]
-                pie_kBtu_by_meter =     [['Meter','kBtu','Utility Type']]
+                pie_kBtu_by_meter =     [['Meter','kBtu']]
                 pie_kBtu_by_type =      [['Utility Type','kBtu']]
                 pies_by_meter =         [['Meter','Cost','kBtu','Utility Type']]
                 
                 #for breakdown by Meter, cycle through all Meters and exclude domestic water from kBtu calcs
                 for meter in self.meters.all():
-                    cost_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).exclude(act_cost=Decimal(NaN)).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).aggregate(Sum('act_cost'))['act_cost__sum']
+                    cost_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).aggregate(Sum('act_cost'))['act_cost__sum']
                     if cost_sum is None or np.isnan(float(cost_sum)): cost_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
-                    pie_cost_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum), str(meter.utility_type)])
+                    pie_cost_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum)])
                     if meter.utility_type != 'domestic water':
-                        kBtu_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).exclude(act_kBtu_consumption=Decimal(NaN)).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
+                        kBtu_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
                         if kBtu_sum is None or np.isnan(float(kBtu_sum)): kBtu_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
-                        pie_kBtu_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(kBtu_sum), str(meter.utility_type)])
+                        pie_kBtu_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(kBtu_sum)])
                         pies_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum), float(kBtu_sum), str(meter.utility_type)])
                 
                 #for breakdown by utility type, cycle through all utility groups and exclude domestic water from kBtu calcs

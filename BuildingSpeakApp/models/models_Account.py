@@ -286,7 +286,8 @@ class Account(models.Model):
         """
         result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
         for meter in self.meter_set.all():
-            meter_table = meter.get_meter_view_motion_table()
+            bill_data = meter.get_bill_data_period_dataframe(first_month = '', last_month = '')
+            meter_table = meter.get_meter_view_motion_table(bill_data = bill_data)
             if meter_table is not None and len(meter_table) > 1:
                 for i in meter_table[1:]:
                     i.append(str(meter.utility_type))
