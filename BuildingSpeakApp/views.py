@@ -106,11 +106,11 @@ def application_error(request):
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
     total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
-    
+    print 'check1'
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
     month_curr = pd.Period(timezone.now(),freq='M')-39 #current month, final month in sequence
     month_prev = month_curr - 1                     #previous month, first in sequence
-    
+    print 'check2'
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
         bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
@@ -125,20 +125,20 @@ def account_detail(request, account_id):
                           bldg_view_data_prev[0],
                           bldg_view_data_prev[1],
                           ])
-
+    print 'check3'
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40                            #final month in sequence
     acct_view_data = account.get_account_view_meter_data(month_first=month_first,
                                                          month_last=month_last)
     five_year_data = account.get_account_view_five_year_data()
-
+    print 'check4'
     if acct_view_data is None:
         meter_data = None
         pie_data = None
     else:
         meter_data = acct_view_data[0]
         pie_data = acct_view_data[1]
-
+    print 'check5'
     #####Stripe testing
     if request.method == 'POST':
         print request.POST['stripeToken']
@@ -161,7 +161,7 @@ def account_detail(request, account_id):
             customer = account.stripe_customer_id,
             description = 'Account ' + str(account.id) + ': test payment $' + str(timezone.now().minute * 100)
             )
-    
+    print 'check6'
     context = {
         'user':           request.user,
         'account':        account,
@@ -171,7 +171,7 @@ def account_detail(request, account_id):
         'meters':         account.meter_set.order_by('name'),
         'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct().order_by('name'),
         'measures':       EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name'),
-
+        
         'alerts':         account.get_all_alerts(reverse_boolean=True),
         'events':         account.get_all_events(reverse_boolean=True),
         'account_attrs':  account_attrs,
