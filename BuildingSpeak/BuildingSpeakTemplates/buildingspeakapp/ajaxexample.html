@@ -37,7 +37,7 @@ $(document).ready(function() {
 				csrfmiddlewaretoken: '{{ csrf_token }}'
 				},
 			success : function(json) {
-				$('#resultB').html( 'And the second ajax script has a 2 second longer pause.');
+				$('#resultB').html( 'And then the longer-delay ajax script finished.');
 				},
 			error : function(xhr,errmsg,err) {
 				alert(xhr.status + ": " + xhr.responseText);
@@ -54,9 +54,11 @@ $(document).ready(function() {
  
 <div id="resultA">
 	<img src="{{ STATIC_PREFIX }}app/img/loading.gif" />
+	Scanning your face with your webcam to see who you are...
 </div>
 <div id="resultB">
 	<img src="{{ STATIC_PREFIX }}app/img/loading.gif" />
+	...
 </div>
 
 
