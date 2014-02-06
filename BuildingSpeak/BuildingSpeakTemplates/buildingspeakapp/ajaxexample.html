@@ -18,7 +18,7 @@ $(document).ready(function() {
 				csrfmiddlewaretoken: '{{ csrf_token }}'
 				},
 			success : function(json) {
-				$('#result').append( 'Hello ' + json.server_response + '. ');
+				$('#resultA').append( 'Hello ' + json.server_response + '. ');
 				},
 			error : function(xhr,errmsg,err) {
 				alert(xhr.status + ": " + xhr.responseText);
@@ -37,7 +37,7 @@ $(document).ready(function() {
 				csrfmiddlewaretoken: '{{ csrf_token }}'
 				},
 			success : function(json) {
-				$('#result').append( 'And the second ajax script has a 2 second longer pause.');
+				$('#resultB').append( 'And the second ajax script has a 2 second longer pause.');
 				},
 			error : function(xhr,errmsg,err) {
 				alert(xhr.status + ": " + xhr.responseText);
@@ -52,10 +52,12 @@ $(document).ready(function() {
 <input id="button" type="button" value="send to server"></input>
 </form>
  
-<div id="result">
-	<img src="{{ STATIC_PREFIX }}app/img/loading.gif" />
+<div id="resultA">
 	<img src="{{ STATIC_PREFIX }}app/img/loading.gif" />
 </div>
- 
+<div id="resultB">
+	<img src="{{ STATIC_PREFIX }}app/img/loading.gif" />
+</div>
+
 
 {% endblock %}
