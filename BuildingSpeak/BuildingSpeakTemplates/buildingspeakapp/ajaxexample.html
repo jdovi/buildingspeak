@@ -9,14 +9,12 @@
 <script type='text/javascript' src='http://code.jquery.com/jquery-1.8.2.js'></script>
 <script type="text/javascript">
 $(document).ready(function() {
-	$("#button").click(function() {
-		var input_string = $("#forminput").val();
 		$.ajax({
 			url : "/ajaxexample_json",
 			type : "POST",
 			dataType: "json",
 			data : {
-				client_response : input_string,
+				client_response : "abcdefg",
 				csrfmiddlewaretoken: '{{ csrf_token }}'
 				},
 			success : function(json) {
@@ -26,8 +24,6 @@ $(document).ready(function() {
 				alert(xhr.status + ": " + xhr.responseText);
 				}
 			});
-		return false;
-	});
 });
 </script>
  
