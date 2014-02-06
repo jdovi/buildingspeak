@@ -41,11 +41,19 @@ def main(request):
     return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
     
 def ajax(request):
+#    if request.POST.has_key('client_response'):
+#        x = request.POST['client_response']
+#        y = socket.gethostbyname(x)
+#        response_dict = {}
+#        response_dict.update({'server_response': y })
+#        return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
+#    else:
+#        return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
     if request.POST.has_key('client_response'):
         x = request.POST['client_response']
         y = socket.gethostbyname(x)
         response_dict = {}
-        response_dict.update({'server_response': y })
+        response_dict.update({'server_response': request.user.username })
         return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
     else:
         return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
