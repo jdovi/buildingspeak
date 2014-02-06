@@ -46,11 +46,6 @@ $(document).ready(function() {
 });
 </script>
 
-<form method="post" name="example form" >
-{% csrf_token %}
-<input name="example" id="forminput" type="text">
-<input id="button" type="button" value="send to server"></input>
-</form>
  
 <div id="resultA">
 	<img src="{{ STATIC_PREFIX }}app/img/loading.gif" />
