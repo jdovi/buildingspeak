@@ -60,7 +60,7 @@ def ajax(request):
         elif x == 'second_script':
             sleep(12)
             response_dict = {}
-            response_dict.update({'server_response': timezone.now() })
+            response_dict.update({'server_response': 'abcd' })
             return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
     else:
         return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))

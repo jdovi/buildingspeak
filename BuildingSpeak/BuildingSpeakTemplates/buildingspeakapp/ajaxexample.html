@@ -18,7 +18,7 @@ $(document).ready(function() {
 				csrfmiddlewaretoken: '{{ csrf_token }}'
 				},
 			success : function(json) {
-				$('#result').append( 'Hello ' + json.server_response);
+				$('#result').append( 'Hello ' + json.server_response + '. ');
 				},
 			error : function(xhr,errmsg,err) {
 				alert(xhr.status + ": " + xhr.responseText);
@@ -37,7 +37,7 @@ $(document).ready(function() {
 				csrfmiddlewaretoken: '{{ csrf_token }}'
 				},
 			success : function(json) {
-				$('#result').append( 'And now the second ajax script executes at ' + json.server_response);
+				$('#result').append( 'And the second ajax script has a 2 second longer pause.');
 				},
 			error : function(xhr,errmsg,err) {
 				alert(xhr.status + ": " + xhr.responseText);
