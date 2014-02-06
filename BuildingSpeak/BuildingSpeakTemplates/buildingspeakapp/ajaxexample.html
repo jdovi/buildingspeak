@@ -14,11 +14,11 @@ $(document).ready(function() {
 			type : "POST",
 			dataType: "json",
 			data : {
-				client_response : "abcdefg",
+				client_response : "first_script",
 				csrfmiddlewaretoken: '{{ csrf_token }}'
 				},
 			success : function(json) {
-				$('#result').append( 'Server Response: ' + json.server_response);
+				$('#result').append( 'Hello ' + json.server_response);
 				},
 			error : function(xhr,errmsg,err) {
 				alert(xhr.status + ": " + xhr.responseText);
@@ -26,7 +26,26 @@ $(document).ready(function() {
 			});
 });
 </script>
- 
+<script type="text/javascript">
+$(document).ready(function() {
+		$.ajax({
+			url : "/ajaxexample_json",
+			type : "POST",
+			dataType: "json",
+			data : {
+				client_response : "second_script",
+				csrfmiddlewaretoken: '{{ csrf_token }}'
+				},
+			success : function(json) {
+				$('#result').append( 'And now the second ajax script executes at ' + json.server_response);
+				},
+			error : function(xhr,errmsg,err) {
+				alert(xhr.status + ": " + xhr.responseText);
+				}
+			});
+});
+</script>
+
 <form method="post" name="example form" >
 {% csrf_token %}
 <input name="example" id="forminput" type="text">
