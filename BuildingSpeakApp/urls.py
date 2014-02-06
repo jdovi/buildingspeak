@@ -39,7 +39,7 @@ urlpatterns = patterns('',
     url(r'^tropo/user/(?P<caller_id>\d+)/account/(?P<account_id>\d+)/(?P<topic>[a-z]+)/(?P<model_id>\d+)/request-type/(?P<request_type>[1-2]+)/catch-request/$',
         views.tropo_catch_request, name='tropo_catch_request'),
     
-    url(r'^ajaxexample$', 'digajax.views.main'),
-    url(r'^ajaxexample_json$', 'digajax.views.ajax'),
+    url(r'^ajaxexample$', views.main, name='main'),
+    url(r'^ajaxexample_json$', views.ajax, name='ajax'),
 
 )
