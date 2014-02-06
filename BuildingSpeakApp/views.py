@@ -1,6 +1,10 @@
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, render_to_response, get_object_or_404
+from django.template import RequestContext
+from django.utils import simplejson
+import socket
+
 from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, WeatherStation, EfficiencyMeasure
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm
 from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, decimal_isnan, nan2zero
@@ -33,6 +37,19 @@ class ResultsMessage(object):
     subject = 'Success!'
     comment = ''
     
+def main(request):
+    return render_to_response('ajaxexample.html', context_instance=RequestContext(request))
+    
+def ajax(request):
+    if request.POST.has_key('client_response'):
+        x = request.POST['client_response']
+        y = socket.gethostbyname(x)
+        response_dict = {}
+        response_dict.update({'server_response': y })
+        return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
+    else:
+        return render_to_response('ajaxexample.html', context_instance=RequestContext(request))
+
 @login_required
 def index(request):
     accounts = request.user.account_set.order_by('id')
@@ -106,11 +123,11 @@ def application_error(request):
 def account_detail(request, account_id):
     account = get_object_or_404(Account, pk=account_id)
     total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
-    print 'check1'
+    
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
     month_curr = pd.Period(timezone.now(),freq='M')-39 #current month, final month in sequence
     month_prev = month_curr - 1                     #previous month, first in sequence
-    print 'check2'
+    
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
         bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
@@ -125,7 +142,7 @@ def account_detail(request, account_id):
                           bldg_view_data_prev[0],
                           bldg_view_data_prev[1],
                           ])
-    print 'check3'
+    
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40                            #final month in sequence
     acct_view_data = account.get_account_view_meter_data(month_first=month_first,
