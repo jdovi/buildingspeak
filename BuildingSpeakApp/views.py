@@ -23,6 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rq import Queue
 from worker import conn
 from django.conf import settings
+from time import sleep
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -57,6 +58,7 @@ def ajax(request):
 ##        return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
 ##    else:
 ##        return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
+    sleep(10)
     response_dict = {}
     response_dict.update({'server_response': request.user.username })
     return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
