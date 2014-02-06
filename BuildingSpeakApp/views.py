@@ -38,7 +38,7 @@ class ResultsMessage(object):
     comment = ''
     
 def main(request):
-    return render_to_response('ajaxexample.html', context_instance=RequestContext(request))
+    return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
     
 def ajax(request):
     if request.POST.has_key('client_response'):
@@ -48,7 +48,7 @@ def ajax(request):
         response_dict.update({'server_response': y })
         return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
     else:
-        return render_to_response('ajaxexample.html', context_instance=RequestContext(request))
+        return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
 
 @login_required
 def index(request):
