@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.utils import simplejson
 import socket
 
-from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, WeatherStation, EfficiencyMeasure
+from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, WeatherStation, EfficiencyMeasure, Monthling
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm
 from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, decimal_isnan, nan2zero
 from BuildingSpeakApp.models import get_monthly_dataframe_as_table, get_df_as_table_with_formats
@@ -60,7 +60,7 @@ def time_test(request):
     t8 = timezone.now()
     meter_df = meter.get_bill_data_period_dataframe() #get Meter's dataframe
     t9 = timezone.now()
-    meter_monthlings = meter.monthling_set.filter(when__gte=datetime(2000,1,1,tzinfo=UTC)).filter(when__lte=timezone.now()).order_by('when') #get Meter's monthlings
+    meter_monthlings = Monthling.objects.filter(meter=meter) #get Meter's monthlings
     t10 = timezone.now()
     
     context = {
