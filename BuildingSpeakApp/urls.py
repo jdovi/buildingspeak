@@ -41,5 +41,6 @@ urlpatterns = patterns('',
     
     url(r'^ajaxexample$', views.main, name='main'),
     url(r'^ajaxexample_json$', views.ajax, name='ajax'),
+    url(r'^time_test$', views.time_test, name='time_test'),
 
 )

@@ -38,6 +38,13 @@ class ResultsMessage(object):
     subject = 'Success!'
     comment = ''
     
+def time_test(request):
+    
+    context = {
+    'results_set': [['test1', 17.0],['test2', 19.5]],
+    }
+    return render(request, 'buildingspeakapp/time_test.html', context)
+    
 def main(request):
     return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
     

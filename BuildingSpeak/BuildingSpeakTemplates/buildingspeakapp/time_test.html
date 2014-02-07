@@ -1,0 +1,23 @@
+{% extends 'app_base.html' %}
+{% block body %}
+
+<head>
+<meta charset="utf-8">
+</head>
+
+<table>
+  <tbody>
+	  <tr>
+		<td>Test Name</td>
+		<td>Runtime (ms)</td>
+	  </tr>
+	{% for name,result in results_set %}
+	  <tr>
+		<td>{{ name }}</td>
+		<td>{{ result }}</td>
+	  </tr>
+	{% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
