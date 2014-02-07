@@ -39,17 +39,39 @@ class ResultsMessage(object):
     comment = ''
     
 def time_test(request):
-    account = Account.objects.all()[0]
+    t0 = timezone.now()
+    account = Account.objects.all()[0] #get Account
+    t1 = timezone.now()
+    accounts = request.user.account_set.order_by('id') #get User's Accounts
+    t2 = timezone.now()
+    buildings = account.building_set.order_by('name') #get Account's Buildings
+    t3 = timezone.now()
+    spaces = Space.objects.filter(Q(building__account=account) | Q(meters__account=account)).distinct().order_by('name') #get Account's Spaces
+    t4 = timezone.now()
+    meters = account.meter_set.order_by('name') #get Account's Meters
+    t5 = timezone.now()
+    equipments = Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct().order_by('name') #get Account's Equipments
+    t6 = timezone.now()
+    measures = EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name') #get Account's Measures
+    t7 = timezone.now()
+    
     context = {
         'user':           request.user,
         'account':        account,
-        'accounts':       request.user.account_set.order_by('id'),
-        'buildings':      account.building_set.order_by('name'),
-        'spaces':         Space.objects.filter(Q(building__account=account) | Q(meters__account=account)).distinct().order_by('name'),
-        'meters':         account.meter_set.order_by('name'),
-        'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct().order_by('name'),
-        'measures':       EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name'),
-        'results_set': [['test1', 17.0],['test2', 19.5]],
+        'accounts':       accounts,
+        'buildings':      buildings,
+        'spaces':         spaces,
+        'meters':         meters,
+        'equipments':     equipments,
+        'measures':       measures,
+        'results_set': [['get Account',             str((t1-t0).seconds) + ',' + str((t1-t0).microseconds)],
+                        ['get User''s Accounts',    str((t2-t1).seconds) + ',' + str((t2-t1).microseconds)],
+                        ['get User''s Buildings',   str((t3-t2).seconds) + ',' + str((t3-t2).microseconds)],
+                        ['get User''s Spaces',      str((t4-t3).seconds) + ',' + str((t4-t3).microseconds)],
+                        ['get User''s Meters',      str((t5-t4).seconds) + ',' + str((t5-t4).microseconds)],
+                        ['get User''s Equipments',  str((t6-t5).seconds) + ',' + str((t6-t5).microseconds)],
+                        ['get User''s Measures',    str((t7-t6).seconds) + ',' + str((t7-t6).microseconds)],
+                         ]
     }
     return render(request, 'buildingspeakapp/time_test.html', context)
     
