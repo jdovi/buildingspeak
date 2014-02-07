@@ -54,6 +54,10 @@ def time_test(request):
     t6 = timezone.now()
     measures = EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name') #get Account's Measures
     t7 = timezone.now()
+    meter = Meter.objects.get(name='Eden I') #get Meter
+    t8 = timezone.now()
+    meter_df = meter.get_bill_data_period_dataframe() #get Meter's dataframe
+    t9 = timezone.now()
     
     context = {
         'user':           request.user,
@@ -64,6 +68,8 @@ def time_test(request):
         'meters':         meters,
         'equipments':     equipments,
         'measures':       measures,
+        'meter':          meter,
+        'meter_df':       meter_df,
         'results_set': [['get Account',             '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0)],
                         ['get User''s Accounts',    '{0:,.0f}'.format((t2-t1).seconds*1000.0 + (t2-t1).microseconds/1000.0)],
                         ['get User''s Buildings',   '{0:,.0f}'.format((t3-t2).seconds*1000.0 + (t3-t2).microseconds/1000.0)],
@@ -71,6 +77,8 @@ def time_test(request):
                         ['get User''s Meters',      '{0:,.0f}'.format((t5-t4).seconds*1000.0 + (t5-t4).microseconds/1000.0)],
                         ['get User''s Equipments',  '{0:,.0f}'.format((t6-t5).seconds*1000.0 + (t6-t5).microseconds/1000.0)],
                         ['get User''s Measures',    '{0:,.0f}'.format((t7-t6).seconds*1000.0 + (t7-t6).microseconds/1000.0)],
+                        ['get Meter',               '{0:,.0f}'.format((t8-t7).seconds*1000.0 + (t8-t7).microseconds/1000.0)],
+                        ['get Meter''s pandas dataframe',    '{0:,.0f}'.format((t9-t8).seconds*1000.0 + (t9-t8).microseconds/1000.0)],
                          ]
     }
     return render(request, 'buildingspeakapp/time_test.html', context)
