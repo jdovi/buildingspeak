@@ -553,6 +553,23 @@ class Meter(models.Model):
             self.messages.add(m)
             print m
         return mdf
+    def get_bill_data_period_dataframe2(self, first_month='', last_month=''):
+        """function(first_month,last_month)
+            (optional inputs)
+            
+        Takes mm/yyyy strings and returns
+        a dataframe of bill data for that
+        range."""
+        mdf = self.monther_set.get(name='BILLx').get_monther_period_dataframe2(first_month=first_month, last_month=last_month)
+        if mdf is None:
+            m = Message(when=timezone.now(),
+                        message_type='Code Warning',
+                        subject='Retrieve data failed.',
+                        comment='Meter %s get_bill_data_period_dataframe function found no bill data, aborting and returning None.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        return mdf
     def upload_bill_data(self, file_location=0, create_models_if_nonexistent=True):
         """Input:
             [file_location]
