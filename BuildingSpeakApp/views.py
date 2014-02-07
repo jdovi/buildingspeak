@@ -87,7 +87,7 @@ def time_test(request):
                         ["get Meter",               '{0:,.0f}'.format((t8-t7).seconds*1000.0 + (t8-t7).microseconds/1000.0)],
                         ["get Meter's monthlings in pandas dataframe",       '{0:,.0f}'.format((t9-t8).seconds*1000.0 + (t9-t8).microseconds/1000.0)],
                         ["get Meter's monthlings directly",    '{0:,.0f}'.format((t10-t9).seconds*1000.0 + (t10-t9).microseconds/1000.0)],
-                        ["get Meter's dataframe revised",      '{0:,.0f}'.format((t11-t10).seconds*1000.0 + (t11-t10).microseconds/1000.0)],
+                        ["get Meter's monthlings in pandas dataframe - revised",      '{0:,.0f}'.format((t11-t10).seconds*1000.0 + (t11-t10).microseconds/1000.0)],
                          ]
     }
     return render(request, 'buildingspeakapp/time_test.html', context)
