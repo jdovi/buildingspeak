@@ -39,9 +39,17 @@ class ResultsMessage(object):
     comment = ''
     
 def time_test(request):
-    
+    account = Account.objects.all()[0]
     context = {
-    'results_set': [['test1', 17.0],['test2', 19.5]],
+        'user':           request.user,
+        'account':        account,
+        'accounts':       request.user.account_set.order_by('id'),
+        'buildings':      account.building_set.order_by('name'),
+        'spaces':         Space.objects.filter(Q(building__account=account) | Q(meters__account=account)).distinct().order_by('name'),
+        'meters':         account.meter_set.order_by('name'),
+        'equipments':     Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct().order_by('name'),
+        'measures':       EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name'),
+        'results_set': [['test1', 17.0],['test2', 19.5]],
     }
     return render(request, 'buildingspeakapp/time_test.html', context)
     
