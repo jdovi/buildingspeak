@@ -112,283 +112,73 @@ class Monther(models.Model):
                 try:
                     t1 = (first_month.to_timestamp()+timedelta(days=10,hours=11,minutes=11,seconds=11)).tz_localize(UTC)
                     t2 = (last_month.to_timestamp()+timedelta(days=10,hours=11,minutes=11,seconds=11)).tz_localize(UTC)
-                    t = [x.when for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')]
-                    start_date = pd.Series([x.start_date for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    end_date = pd.Series([x.end_date for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+
+                    mlg_set = self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')
+
+                    t = [x.when for x in mlg_set]
+                    start_date = pd.Series([x.start_date for x in mlg_set],index=t)
+                    end_date = pd.Series([x.end_date for x in mlg_set],index=t)
                     
-                    cdd_peak_demand = pd.Series([x.cdd_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    hdd_peak_demand = pd.Series([x.hdd_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    cdd_consumption = pd.Series([x.cdd_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    hdd_consumption = pd.Series([x.hdd_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+                    cdd_peak_demand = pd.Series([x.cdd_peak_demand for x in mlg_set],index=t)
+                    hdd_peak_demand = pd.Series([x.hdd_peak_demand for x in mlg_set],index=t)
+                    cdd_consumption = pd.Series([x.cdd_consumption for x in mlg_set],index=t)
+                    hdd_consumption = pd.Series([x.hdd_consumption for x in mlg_set],index=t)
         
-                    base_bdm = pd.Series([x.base_billing_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_pdm = pd.Series([x.base_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_con = pd.Series([x.base_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_kpd = pd.Series([x.base_kBtuh_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_kco = pd.Series([x.base_kBtu_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_dol = pd.Series([x.base_cost for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+                    base_bdm = pd.Series([x.base_billing_demand for x in mlg_set],index=t)
+                    base_pdm = pd.Series([x.base_peak_demand for x in mlg_set],index=t)
+                    base_con = pd.Series([x.base_consumption for x in mlg_set],index=t)
+                    base_kpd = pd.Series([x.base_kBtuh_peak_demand for x in mlg_set],index=t)
+                    base_kco = pd.Series([x.base_kBtu_consumption for x in mlg_set],index=t)
+                    base_dol = pd.Series([x.base_cost for x in mlg_set],index=t)
         
-                    exp_bdm = pd.Series([x.exp_billing_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_pdm = pd.Series([x.exp_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_con = pd.Series([x.exp_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_kpd = pd.Series([x.exp_kBtuh_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_kco = pd.Series([x.exp_kBtu_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_dol = pd.Series([x.exp_cost for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+                    exp_bdm = pd.Series([x.exp_billing_demand for x in mlg_set],index=t)
+                    exp_pdm = pd.Series([x.exp_peak_demand for x in mlg_set],index=t)
+                    exp_con = pd.Series([x.exp_consumption for x in mlg_set],index=t)
+                    exp_kpd = pd.Series([x.exp_kBtuh_peak_demand for x in mlg_set],index=t)
+                    exp_kco = pd.Series([x.exp_kBtu_consumption for x in mlg_set],index=t)
+                    exp_dol = pd.Series([x.exp_cost for x in mlg_set],index=t)
         
-                    act_bdm = pd.Series([x.act_billing_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    act_pdm = pd.Series([x.act_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    act_con = pd.Series([x.act_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    act_kpd = pd.Series([x.act_kBtuh_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    act_kco = pd.Series([x.act_kBtu_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    act_dol = pd.Series([x.act_cost for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+                    act_bdm = pd.Series([x.act_billing_demand for x in mlg_set],index=t)
+                    act_pdm = pd.Series([x.act_peak_demand for x in mlg_set],index=t)
+                    act_con = pd.Series([x.act_consumption for x in mlg_set],index=t)
+                    act_kpd = pd.Series([x.act_kBtuh_peak_demand for x in mlg_set],index=t)
+                    act_kco = pd.Series([x.act_kBtu_consumption for x in mlg_set],index=t)
+                    act_dol = pd.Series([x.act_cost for x in mlg_set],index=t)
         
-                    esave_bdm = pd.Series([x.esave_billing_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_pdm = pd.Series([x.esave_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_con = pd.Series([x.esave_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_kpd = pd.Series([x.esave_kBtuh_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_kco = pd.Series([x.esave_kBtu_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_dol = pd.Series([x.esave_cost for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+                    esave_bdm = pd.Series([x.esave_billing_demand for x in mlg_set],index=t)
+                    esave_pdm = pd.Series([x.esave_peak_demand for x in mlg_set],index=t)
+                    esave_con = pd.Series([x.esave_consumption for x in mlg_set],index=t)
+                    esave_kpd = pd.Series([x.esave_kBtuh_peak_demand for x in mlg_set],index=t)
+                    esave_kco = pd.Series([x.esave_kBtu_consumption for x in mlg_set],index=t)
+                    esave_dol = pd.Series([x.esave_cost for x in mlg_set],index=t)
         
-                    asave_bdm = pd.Series([x.asave_billing_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    asave_pdm = pd.Series([x.asave_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    asave_con = pd.Series([x.asave_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    asave_kpd = pd.Series([x.asave_kBtuh_peak_demand for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    asave_kco = pd.Series([x.asave_kBtu_consumption for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    asave_dol = pd.Series([x.asave_cost for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+                    asave_bdm = pd.Series([x.asave_billing_demand for x in mlg_set],index=t)
+                    asave_pdm = pd.Series([x.asave_peak_demand for x in mlg_set],index=t)
+                    asave_con = pd.Series([x.asave_consumption for x in mlg_set],index=t)
+                    asave_kpd = pd.Series([x.asave_kBtuh_peak_demand for x in mlg_set],index=t)
+                    asave_kco = pd.Series([x.asave_kBtu_consumption for x in mlg_set],index=t)
+                    asave_dol = pd.Series([x.asave_cost for x in mlg_set],index=t)
         
-                    base_bdm_d = pd.Series([x.base_billing_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_pdm_d = pd.Series([x.base_peak_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_con_d = pd.Series([x.base_consumption_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_kpd_d = pd.Series([x.base_kBtuh_peak_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_kco_d = pd.Series([x.base_kBtu_consumption_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    base_dol_d = pd.Series([x.base_cost_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+                    base_bdm_d = pd.Series([x.base_billing_demand_delta for x in mlg_set],index=t)
+                    base_pdm_d = pd.Series([x.base_peak_demand_delta for x in mlg_set],index=t)
+                    base_con_d = pd.Series([x.base_consumption_delta for x in mlg_set],index=t)
+                    base_kpd_d = pd.Series([x.base_kBtuh_peak_demand_delta for x in mlg_set],index=t)
+                    base_kco_d = pd.Series([x.base_kBtu_consumption_delta for x in mlg_set],index=t)
+                    base_dol_d = pd.Series([x.base_cost_delta for x in mlg_set],index=t)
         
-                    exp_bdm_d = pd.Series([x.exp_billing_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_pdm_d = pd.Series([x.exp_peak_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_con_d = pd.Series([x.exp_consumption_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_kpd_d = pd.Series([x.exp_kBtuh_peak_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_kco_d = pd.Series([x.exp_kBtu_consumption_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    exp_dol_d = pd.Series([x.exp_cost_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
+                    exp_bdm_d = pd.Series([x.exp_billing_demand_delta for x in mlg_set],index=t)
+                    exp_pdm_d = pd.Series([x.exp_peak_demand_delta for x in mlg_set],index=t)
+                    exp_con_d = pd.Series([x.exp_consumption_delta for x in mlg_set],index=t)
+                    exp_kpd_d = pd.Series([x.exp_kBtuh_peak_demand_delta for x in mlg_set],index=t)
+                    exp_kco_d = pd.Series([x.exp_kBtu_consumption_delta for x in mlg_set],index=t)
+                    exp_dol_d = pd.Series([x.exp_cost_delta for x in mlg_set],index=t)
         
-                    esave_bdm_d = pd.Series([x.esave_billing_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_pdm_d = pd.Series([x.esave_peak_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_con_d = pd.Series([x.esave_consumption_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_kpd_d = pd.Series([x.esave_kBtuh_peak_demand_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_kco_d = pd.Series([x.esave_kBtu_consumption_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-                    esave_dol_d = pd.Series([x.esave_cost_delta for x in self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')],index=t)
-    
-                    df = pd.DataFrame({
-                                        'Start Date' : start_date,
-                                        'End Date' : end_date,
-                                        
-                                        'CDD (peak demand)' : cdd_peak_demand,
-                                        'HDD (peak demand)' : hdd_peak_demand,
-                                        'CDD (consumption)' : cdd_consumption,
-                                        'HDD (consumption)' : hdd_consumption,
-        
-                                        'Billing Demand (base)' : base_bdm,
-                                        'Peak Demand (base)' : base_pdm,
-                                        'Consumption (base)' : base_con,
-                                        'kBtuh Peak Demand (base)' : base_kpd,
-                                        'kBtu Consumption (base)' : base_kco,
-                                        'Cost (base)' : base_dol,
-        
-                                        'Billing Demand (exp)' : exp_bdm,
-                                        'Peak Demand (exp)' : exp_pdm,
-                                        'Consumption (exp)' : exp_con,
-                                        'kBtuh Peak Demand (exp)' : exp_kpd,
-                                        'kBtu Consumption (exp)' : exp_kco,
-                                        'Cost (exp)' : exp_dol,
-        
-                                        'Billing Demand (act)' : act_bdm,
-                                        'Peak Demand (act)' : act_pdm,
-                                        'Consumption (act)' : act_con,
-                                        'kBtuh Peak Demand (act)' : act_kpd,
-                                        'kBtu Consumption (act)' : act_kco,
-                                        'Cost (act)' : act_dol,
-        
-                                        'Billing Demand (esave)' : esave_bdm,
-                                        'Peak Demand (esave)' : esave_pdm,
-                                        'Consumption (esave)' : esave_con,
-                                        'kBtuh Peak Demand (esave)' : esave_kpd,
-                                        'kBtu Consumption (esave)' : esave_kco,
-                                        'Cost (esave)' : esave_dol,
-        
-                                        'Billing Demand (asave)' : asave_bdm,
-                                        'Peak Demand (asave)' : asave_pdm,
-                                        'Consumption (asave)' : asave_con,
-                                        'kBtuh Peak Demand (asave)' : asave_kpd,
-                                        'kBtu Consumption (asave)' : asave_kco,
-                                        'Cost (asave)' : asave_dol,
-        
-                                        'Billing Demand (base delta)' : base_bdm_d,
-                                        'Peak Demand (base delta)' : base_pdm_d,
-                                        'Consumption (base delta)' : base_con_d,
-                                        'kBtuh Peak Demand (base delta)' : base_kpd_d,
-                                        'kBtu Consumption (base delta)' : base_kco_d,
-                                        'Cost (base delta)' : base_dol_d,
-        
-                                        'Billing Demand (exp delta)' : exp_bdm_d,
-                                        'Peak Demand (exp delta)' : exp_pdm_d,
-                                        'Consumption (exp delta)' : exp_con_d,
-                                        'kBtuh Peak Demand (exp delta)' : exp_kpd_d,
-                                        'kBtu Consumption (exp delta)' : exp_kco_d,
-                                        'Cost (exp delta)' : exp_dol_d,
-        
-                                        'Billing Demand (esave delta)' : esave_bdm_d,
-                                        'Peak Demand (esave delta)' : esave_pdm_d,
-                                        'Consumption (esave delta)' : esave_con_d,
-                                        'kBtuh Peak Demand (esave delta)' : esave_kpd_d,
-                                        'kBtu Consumption (esave delta)' : esave_kco_d,
-                                        'Cost (esave delta)' : esave_dol_d,
-                                        })
-                    df.index = df.index.to_period(freq='M')
-                    df = df.sort_index()
-                except:
-                    m = Message(when=timezone.now(),
-                                  message_type='Code Error',
-                                  subject='Unable to retrieve data.',
-                                  comment='Monther %s get_monther_period_dataframe unable to retrieve data.' % self.id)
-                    m.save()
-                    self.messages.add(m)
-                    print m
-                    df = None
-        return df
-    def get_monther_period_dataframe2(self,  first_month='', last_month=''):
-        """Optional inputs:
-              first_month
-              last_month
-                  as 'mm/yyyy'
-        
-        Returns Monther's dataframe."""
-        
-        try:
-            if self.monthling_set.count() == 0:
-                m = Message(when=timezone.now(),
-                            message_type='Code Warning',
-                            subject='Nothing to return.',
-                            comment='Monther %s, get_monther_period_dataframe called when no Monthlings present.' % self.id)
-                m.save()
-                self.messages.add(m)
-                print m
-                df = None
-            else:
-                min_month = pd.Period(self.monthling_set.all().aggregate(Min('when'))['when__min'], freq='M')
-                max_month = pd.Period(self.monthling_set.all().aggregate(Max('when'))['when__max'], freq='M')
-                if first_month == '':
-                    first_month = pd.Period(min_month, freq='M')
-                else:
-                    first_month = pd.Period(first_month, freq='M')
-                if last_month == '':
-                    last_month = pd.Period(max_month, freq='M')
-                else:
-                    last_month = pd.Period(last_month, freq='M')
-                
-                first_month_n = first_month.year + first_month.month/100.0
-                last_month_n = last_month.year + last_month.month/100.0
-                min_month_n = min_month.year + min_month.month/100.0
-                max_month_n = max_month.year + max_month.month/100.0
-                if last_month_n < first_month_n: #then switch them
-                    first_month,first_month_n,last_month,last_month_n = last_month,last_month_n,first_month,first_month_n
-        except:
-            m = Message(when=timezone.now(),
-                          message_type='Code Error',
-                          subject='Unable to calculate range.',
-                          comment='Monther %s get_monther_period_dataframe failed to determine data range.' % self.id)
-            m.save()
-            self.messages.add(m)
-            print m
-            df = None
-        else:
-            try: #here we give as much data in the requested range as we have, unless there isn't any
-                if (last_month_n < min_month_n) or (first_month_n > max_month_n): raise ValueError
-                elif (max_month_n >= last_month_n >= min_month_n) and (first_month_n < min_month_n):
-                    first_month = min_month
-                elif (max_month_n >= last_month_n >= min_month_n) and (min_month_n <= first_month_n <= max_month_n):
-                    pass
-                elif (last_month_n > max_month_n) and (min_month_n <= first_month_n <= max_month_n):
-                    last_month = max_month
-                elif (first_month_n <= min_month_n) and (last_month_n >= max_month_n):
-                    first_month = min_month
-                    last_month = max_month
-            except:
-                m = Message(when=timezone.now(),
-                              message_type='Code Warning',
-                              subject='Requested data range does not exist.',
-                              comment='Monther %s get_monther_period_dataframe given range where no data exists.' % self.id)
-                m.save()
-                self.messages.add(m)
-                print m
-                df = None
-            else:
-                try:
-                    monthling_set = self.monthling_set.filter(when__gte=t1).filter(when__lte=t2).order_by('when')
-                    t1 = (first_month.to_timestamp()+timedelta(days=10,hours=11,minutes=11,seconds=11)).tz_localize(UTC)
-                    t2 = (last_month.to_timestamp()+timedelta(days=10,hours=11,minutes=11,seconds=11)).tz_localize(UTC)
-                    t = [x.when for x in monthling_set]
-                    start_date = pd.Series([x.start_date for x in monthling_set],index=t)
-                    end_date = pd.Series([x.end_date for x in monthling_set],index=t)
-                    
-                    cdd_peak_demand = pd.Series([x.cdd_peak_demand for x in monthling_set],index=t)
-                    hdd_peak_demand = pd.Series([x.hdd_peak_demand for x in monthling_set],index=t)
-                    cdd_consumption = pd.Series([x.cdd_consumption for x in monthling_set],index=t)
-                    hdd_consumption = pd.Series([x.hdd_consumption for x in monthling_set],index=t)
-        
-                    base_bdm = pd.Series([x.base_billing_demand for x in monthling_set],index=t)
-                    base_pdm = pd.Series([x.base_peak_demand for x in monthling_set],index=t)
-                    base_con = pd.Series([x.base_consumption for x in monthling_set],index=t)
-                    base_kpd = pd.Series([x.base_kBtuh_peak_demand for x in monthling_set],index=t)
-                    base_kco = pd.Series([x.base_kBtu_consumption for x in monthling_set],index=t)
-                    base_dol = pd.Series([x.base_cost for x in monthling_set],index=t)
-        
-                    exp_bdm = pd.Series([x.exp_billing_demand for x in monthling_set],index=t)
-                    exp_pdm = pd.Series([x.exp_peak_demand for x in monthling_set],index=t)
-                    exp_con = pd.Series([x.exp_consumption for x in monthling_set],index=t)
-                    exp_kpd = pd.Series([x.exp_kBtuh_peak_demand for x in monthling_set],index=t)
-                    exp_kco = pd.Series([x.exp_kBtu_consumption for x in monthling_set],index=t)
-                    exp_dol = pd.Series([x.exp_cost for x in monthling_set],index=t)
-        
-                    act_bdm = pd.Series([x.act_billing_demand for x in monthling_set],index=t)
-                    act_pdm = pd.Series([x.act_peak_demand for x in monthling_set],index=t)
-                    act_con = pd.Series([x.act_consumption for x in monthling_set],index=t)
-                    act_kpd = pd.Series([x.act_kBtuh_peak_demand for x in monthling_set],index=t)
-                    act_kco = pd.Series([x.act_kBtu_consumption for x in monthling_set],index=t)
-                    act_dol = pd.Series([x.act_cost for x in monthling_set],index=t)
-        
-                    esave_bdm = pd.Series([x.esave_billing_demand for x in monthling_set],index=t)
-                    esave_pdm = pd.Series([x.esave_peak_demand for x in monthling_set],index=t)
-                    esave_con = pd.Series([x.esave_consumption for x in monthling_set],index=t)
-                    esave_kpd = pd.Series([x.esave_kBtuh_peak_demand for x in monthling_set],index=t)
-                    esave_kco = pd.Series([x.esave_kBtu_consumption for x in monthling_set],index=t)
-                    esave_dol = pd.Series([x.esave_cost for x in monthling_set],index=t)
-        
-                    asave_bdm = pd.Series([x.asave_billing_demand for x in monthling_set],index=t)
-                    asave_pdm = pd.Series([x.asave_peak_demand for x in monthling_set],index=t)
-                    asave_con = pd.Series([x.asave_consumption for x in monthling_set],index=t)
-                    asave_kpd = pd.Series([x.asave_kBtuh_peak_demand for x in monthling_set],index=t)
-                    asave_kco = pd.Series([x.asave_kBtu_consumption for x in monthling_set],index=t)
-                    asave_dol = pd.Series([x.asave_cost for x in monthling_set],index=t)
-        
-                    base_bdm_d = pd.Series([x.base_billing_demand_delta for x in monthling_set],index=t)
-                    base_pdm_d = pd.Series([x.base_peak_demand_delta for x in monthling_set],index=t)
-                    base_con_d = pd.Series([x.base_consumption_delta for x in monthling_set],index=t)
-                    base_kpd_d = pd.Series([x.base_kBtuh_peak_demand_delta for x in monthling_set],index=t)
-                    base_kco_d = pd.Series([x.base_kBtu_consumption_delta for x in monthling_set],index=t)
-                    base_dol_d = pd.Series([x.base_cost_delta for x in monthling_set],index=t)
-        
-                    exp_bdm_d = pd.Series([x.exp_billing_demand_delta for x in monthling_set],index=t)
-                    exp_pdm_d = pd.Series([x.exp_peak_demand_delta for x in monthling_set],index=t)
-                    exp_con_d = pd.Series([x.exp_consumption_delta for x in monthling_set],index=t)
-                    exp_kpd_d = pd.Series([x.exp_kBtuh_peak_demand_delta for x in monthling_set],index=t)
-                    exp_kco_d = pd.Series([x.exp_kBtu_consumption_delta for x in monthling_set],index=t)
-                    exp_dol_d = pd.Series([x.exp_cost_delta for x in monthling_set],index=t)
-        
-                    esave_bdm_d = pd.Series([x.esave_billing_demand_delta for x in monthling_set],index=t)
-                    esave_pdm_d = pd.Series([x.esave_peak_demand_delta for x in monthling_set],index=t)
-                    esave_con_d = pd.Series([x.esave_consumption_delta for x in monthling_set],index=t)
-                    esave_kpd_d = pd.Series([x.esave_kBtuh_peak_demand_delta for x in monthling_set],index=t)
-                    esave_kco_d = pd.Series([x.esave_kBtu_consumption_delta for x in monthling_set],index=t)
-                    esave_dol_d = pd.Series([x.esave_cost_delta for x in monthling_set],index=t)
+                    esave_bdm_d = pd.Series([x.esave_billing_demand_delta for x in mlg_set],index=t)
+                    esave_pdm_d = pd.Series([x.esave_peak_demand_delta for x in mlg_set],index=t)
+                    esave_con_d = pd.Series([x.esave_consumption_delta for x in mlg_set],index=t)
+                    esave_kpd_d = pd.Series([x.esave_kBtuh_peak_demand_delta for x in mlg_set],index=t)
+                    esave_kco_d = pd.Series([x.esave_kBtu_consumption_delta for x in mlg_set],index=t)
+                    esave_dol_d = pd.Series([x.esave_cost_delta for x in mlg_set],index=t)
     
                     df = pd.DataFrame({
                                         'Start Date' : start_date,
