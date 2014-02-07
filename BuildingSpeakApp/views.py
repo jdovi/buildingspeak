@@ -60,7 +60,7 @@ def time_test(request):
     t8 = timezone.now()
     meter_df = meter.get_bill_data_period_dataframe() #get Meter's dataframe
     t9 = timezone.now()
-    meter_monthlings = Monthling.objects.filter(meter=meter) #get Meter's monthlings
+    meter_monthlings = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')) #get Meter's monthlings
     t10 = timezone.now()
     
     context = {
