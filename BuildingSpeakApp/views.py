@@ -24,6 +24,8 @@ from rq import Queue
 from worker import conn
 from django.conf import settings
 from time import sleep
+from pytz import UTC
+from datetime import datetime
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -58,6 +60,8 @@ def time_test(request):
     t8 = timezone.now()
     meter_df = meter.get_bill_data_period_dataframe() #get Meter's dataframe
     t9 = timezone.now()
+    meter_monthlings = meter.monthling_set.filter(when__gte=datetime(2000,1,1,tzinfo=UTC)).filter(when__lte=timezone.now()).order_by('when') #get Meter's monthlings
+    t10 = timezone.now()
     
     context = {
         'user':           request.user,
@@ -70,6 +74,7 @@ def time_test(request):
         'measures':       measures,
         'meter':          meter,
         'meter_df':       meter_df,
+        'meter_monthlings': meter_monthlings,
         'results_set': [['get Account',             '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0)],
                         ['get User''s Accounts',    '{0:,.0f}'.format((t2-t1).seconds*1000.0 + (t2-t1).microseconds/1000.0)],
                         ['get User''s Buildings',   '{0:,.0f}'.format((t3-t2).seconds*1000.0 + (t3-t2).microseconds/1000.0)],
@@ -78,7 +83,8 @@ def time_test(request):
                         ['get User''s Equipments',  '{0:,.0f}'.format((t6-t5).seconds*1000.0 + (t6-t5).microseconds/1000.0)],
                         ['get User''s Measures',    '{0:,.0f}'.format((t7-t6).seconds*1000.0 + (t7-t6).microseconds/1000.0)],
                         ['get Meter',               '{0:,.0f}'.format((t8-t7).seconds*1000.0 + (t8-t7).microseconds/1000.0)],
-                        ['get Meter''s pandas dataframe',    '{0:,.0f}'.format((t9-t8).seconds*1000.0 + (t9-t8).microseconds/1000.0)],
+                        ['get Meter''s pandas dataframe',       '{0:,.0f}'.format((t9-t8).seconds*1000.0 + (t9-t8).microseconds/1000.0)],
+                        ['get Meter''s monthlings directly',    '{0:,.0f}'.format((t10-t9).seconds*1000.0 + (t10-t9).microseconds/1000.0)],
                          ]
     }
     return render(request, 'buildingspeakapp/time_test.html', context)
