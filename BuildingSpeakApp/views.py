@@ -64,13 +64,13 @@ def time_test(request):
         'meters':         meters,
         'equipments':     equipments,
         'measures':       measures,
-        'results_set': [['get Account',             str((t1-t0).seconds) + ',' + str((t1-t0).microseconds)],
-                        ['get User''s Accounts',    str((t2-t1).seconds) + ',' + str((t2-t1).microseconds)],
-                        ['get User''s Buildings',   str((t3-t2).seconds) + ',' + str((t3-t2).microseconds)],
-                        ['get User''s Spaces',      str((t4-t3).seconds) + ',' + str((t4-t3).microseconds)],
-                        ['get User''s Meters',      str((t5-t4).seconds) + ',' + str((t5-t4).microseconds)],
-                        ['get User''s Equipments',  str((t6-t5).seconds) + ',' + str((t6-t5).microseconds)],
-                        ['get User''s Measures',    str((t7-t6).seconds) + ',' + str((t7-t6).microseconds)],
+        'results_set': [['get Account',             '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0)],
+                        ['get User''s Accounts',    '{0:,.0f}'.format((t2-t1).seconds*1000.0 + (t2-t1).microseconds/1000.0)],
+                        ['get User''s Buildings',   '{0:,.0f}'.format((t3-t2).seconds*1000.0 + (t3-t2).microseconds/1000.0)],
+                        ['get User''s Spaces',      '{0:,.0f}'.format((t4-t3).seconds*1000.0 + (t4-t3).microseconds/1000.0)],
+                        ['get User''s Meters',      '{0:,.0f}'.format((t5-t4).seconds*1000.0 + (t5-t4).microseconds/1000.0)],
+                        ['get User''s Equipments',  '{0:,.0f}'.format((t6-t5).seconds*1000.0 + (t6-t5).microseconds/1000.0)],
+                        ['get User''s Measures',    '{0:,.0f}'.format((t7-t6).seconds*1000.0 + (t7-t6).microseconds/1000.0)],
                          ]
     }
     return render(request, 'buildingspeakapp/time_test.html', context)
