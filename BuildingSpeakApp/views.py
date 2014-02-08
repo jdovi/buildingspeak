@@ -20,8 +20,8 @@ from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from tropo import Tropo, Session, Result
 from django.views.decorators.csrf import csrf_exempt
-from rq import Queue
-from worker import conn
+#from rq import Queue
+#from worker import conn
 from django.conf import settings
 from time import sleep
 from pytz import UTC
@@ -402,9 +402,9 @@ def meter_detail(request, account_id, meter_id):
             form.initial['bill_data_file'] = latest_bill_data_file
             meter.save()
             try:
-                q = Queue(connection=conn)
-                result = q.enqueue(meter.upload_bill_data)
-#                meter.upload_bill_data()
+#                q = Queue(connection=conn)
+#                result = q.enqueue(meter.upload_bill_data)
+                meter.upload_bill_data()
                 m = ResultsMessage()
                 m.comment = 'Bill data has been uploaded.'
             except:
