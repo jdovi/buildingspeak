@@ -19,24 +19,14 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-#        'NAME': '',                      # Or path to database file if using sqlite3.
-#        'USER': '',                      # Not used with sqlite3.
-#        'PASSWORD': '',                  # Not used with sqlite3.
-#        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-#        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-#    }
-#}
-DATABASES = {    
-    'default': {        
-    'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': 'buildingspeaklocaldb',
-    'USER': 'dashley',
-    'PASSWORD': 'Dryden030211!',
-    'HOST': 'localhost',
-    'PORT': '5432',
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -46,7 +36,7 @@ ALLOWED_HOSTS = ['.buildingspeak-staging.herokuapp.com',
                  '.buildingspeak-staging.com',
                  '.buildingspeak-production.herokuapp.com',
                  '.buildingspeak-production.com',
-                 '127.0.0.1']
+                 ]
 
 ###
 # Local time zone for this installation. Choices can be found here:
@@ -83,12 +73,9 @@ MEDIA_URL = ''
 
 
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-#AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-#AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY') 
-#AWS_STORAGE_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME')
-AWS_ACCESS_KEY_ID='AKIAJNY56FTUQIU7W6BQ'
-AWS_SECRET_ACCESS_KEY='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'
-AWS_STORAGE_BUCKET_NAME='buildingspeak-dev'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY') 
+AWS_STORAGE_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME')
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -142,10 +129,8 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-#MANDRILL_APIKEY = os.environ.get('MANDRILL_APIKEY')
-#MANDRILL_USERNAME = os.environ.get('MANDRILL_USERNAME')
-MANDRILL_APIKEY='F8Oh5iJbxPCLLkna3Ct3hg'
-MANDRILL_USERNAME='app17333324@heroku.com'
+MANDRILL_APIKEY = os.environ.get('MANDRILL_APIKEY')
+MANDRILL_USERNAME = os.environ.get('MANDRILL_USERNAME')
 SEND_BROKEN_LINK_EMAILS = True
 EMAIL_HOST = 'smtp.mandrillapp.com'
 EMAIL_HOST_USER = MANDRILL_USERNAME
@@ -154,10 +139,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-#STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
-#STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
-STRIPE_SECRET_KEY='sk_test_KK0v9Vi9wWxmOM0WSh5LhTJz'
-STRIPE_PUBLISHABLE_KEY='pk_test_vFUB28YFgYJBzjOSM98WNKbB'
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
 
 LOGIN_URL = '/login'
 
@@ -222,5 +205,5 @@ LOGGING = {
 }
 
 # Parse database configuration from $DATABASE_URL
-#import dj_database_url
-#DATABASES['default'] =  dj_database_url.config()
+import dj_database_url
+DATABASES['default'] =  dj_database_url.config()
