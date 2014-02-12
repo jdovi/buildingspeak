@@ -1118,6 +1118,13 @@ class Command(BaseCommand):
                                 )
             off01.save()
             #post-creation actions:
+            #--connect to buildings
+            off01.buildings.add(West)
+            #--connect to spaces
+            off01.spaces.add(offices_space)
+            #--connect to meters
+            off01.meters.add(wh)        #electric
+            off01.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1129,13 +1136,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             off01.__setattr__('nameplate_file', file_obj)
             off01.save()
-            #--connect to buildings
-            off01.buildings.add(West)
-            #--connect to spaces
-            off01.spaces.add(offices_space)
-            #--connect to meters
-            off01.meters.add(wh)        #electric
-            off01.meters.add(gas1300)   #gas
 
             off02 = PackageUnit(name = 'OFF-02',
                                 equipment_type = 'Package Unit',
@@ -1195,6 +1195,13 @@ class Command(BaseCommand):
                                 )
             off02.save()
             #post-creation actions:
+            #--connect to buildings
+            off02.buildings.add(West)
+            #--connect to spaces
+            off02.spaces.add(offices_space)
+            #--connect to meters
+            off02.meters.add(wh)        #electric
+            off02.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1206,13 +1213,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             off02.__setattr__('nameplate_file', file_obj)
             off02.save()
-            #--connect to buildings
-            off02.buildings.add(West)
-            #--connect to spaces
-            off02.spaces.add(offices_space)
-            #--connect to meters
-            off02.meters.add(wh)        #electric
-            off02.meters.add(gas1300)   #gas
 
             off03 = PackageUnit(name = 'OFF-03',
                                 equipment_type = 'Package Unit',
@@ -1272,6 +1272,13 @@ class Command(BaseCommand):
                                 )
             off03.save()
             #post-creation actions:
+            #--connect to buildings
+            off03.buildings.add(West)
+            #--connect to spaces
+            off03.spaces.add(offices_space)
+            #--connect to meters
+            off03.meters.add(wh)        #electric
+            off03.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1283,13 +1290,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             off03.__setattr__('nameplate_file', file_obj)
             off03.save()
-            #--connect to buildings
-            off03.buildings.add(West)
-            #--connect to spaces
-            off03.spaces.add(offices_space)
-            #--connect to meters
-            off03.meters.add(wh)        #electric
-            off03.meters.add(gas1300)   #gas
 
             off04 = PackageUnit(name = 'OFF-04',
                                 equipment_type = 'Package Unit',
@@ -1349,6 +1349,13 @@ class Command(BaseCommand):
                                 )
             off04.save()
             #post-creation actions:
+            #--connect to buildings
+            off04.buildings.add(West)
+            #--connect to spaces
+            off04.spaces.add(offices_space)
+            #--connect to meters
+            off04.meters.add(wh)       #electric
+            off04.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1360,13 +1367,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             off04.__setattr__('nameplate_file', file_obj)
             off04.save()
-            #--connect to buildings
-            off04.buildings.add(West)
-            #--connect to spaces
-            off04.spaces.add(offices_space)
-            #--connect to meters
-            off04.meters.add(wh)       #electric
-            off04.meters.add(gas1300)   #gas
 
             off05 = PackageUnit(name = 'OFF-05',
                                 equipment_type = 'Package Unit',
@@ -1426,6 +1426,13 @@ class Command(BaseCommand):
                                 )
             off05.save()
             #post-creation actions:
+            #--connect to buildings
+            off05.buildings.add(West)
+            #--connect to spaces
+            off05.spaces.add(offices_space)
+            #--connect to meters
+            off05.meters.add(wh)       #electric
+            off05.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1437,13 +1444,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             off05.__setattr__('nameplate_file', file_obj)
             off05.save()
-            #--connect to buildings
-            off05.buildings.add(West)
-            #--connect to spaces
-            off05.spaces.add(offices_space)
-            #--connect to meters
-            off05.meters.add(wh)       #electric
-            off05.meters.add(gas1300)   #gas
 
             off06 = PackageUnit(name = 'OFF-06',
                                 equipment_type = 'Package Unit',
@@ -1503,6 +1503,13 @@ class Command(BaseCommand):
                                 )
             off06.save()
             #post-creation actions:
+            #--connect to buildings
+            off06.buildings.add(West)
+            #--connect to spaces
+            off06.spaces.add(offices_space)
+            #--connect to meters
+            off05.meters.add(wh)       #electric
+            off06.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1514,13 +1521,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             off06.__setattr__('nameplate_file', file_obj)
             off06.save()
-            #--connect to buildings
-            off06.buildings.add(West)
-            #--connect to spaces
-            off06.spaces.add(offices_space)
-            #--connect to meters
-            off05.meters.add(wh)       #electric
-            off06.meters.add(gas1300)   #gas
 
             cli01 = PackageUnit(name = 'CLI-01',
                                 equipment_type = 'Package Unit',
@@ -1580,6 +1580,13 @@ class Command(BaseCommand):
                                 )
             cli01.save()
             #post-creation actions:
+            #--connect to buildings
+            cli01.buildings.add(West)
+            #--connect to spaces
+            cli01.spaces.add(clinic_space)
+            #--connect to meters
+            cli01.meters.add(clinic)    #electric
+            cli01.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1591,13 +1598,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             cli01.__setattr__('nameplate_file', file_obj)
             cli01.save()
-            #--connect to buildings
-            cli01.buildings.add(West)
-            #--connect to spaces
-            cli01.spaces.add(clinic_space)
-            #--connect to meters
-            cli01.meters.add(clinic)    #electric
-            cli01.meters.add(gas1300)   #gas
 
             cli02 = PackageUnit(name = 'CLI-02',
                                 equipment_type = 'Package Unit',
@@ -1657,6 +1657,13 @@ class Command(BaseCommand):
                                 )
             cli02.save()
             #post-creation actions:
+            #--connect to buildings
+            cli02.buildings.add(West)
+            #--connect to spaces
+            cli02.spaces.add(clinic_space)
+            #--connect to meters
+            cli02.meters.add(clinic)    #electric
+            cli02.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1668,13 +1675,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             cli02.__setattr__('nameplate_file', file_obj)
             cli02.save()
-            #--connect to buildings
-            cli02.buildings.add(West)
-            #--connect to spaces
-            cli02.spaces.add(clinic_space)
-            #--connect to meters
-            cli02.meters.add(clinic)    #electric
-            cli02.meters.add(gas1300)   #gas
 
             cli03 = PackageUnit(name = 'CLI-03',
                                 equipment_type = 'Package Unit',
@@ -1734,6 +1734,13 @@ class Command(BaseCommand):
                                 )
             cli03.save()
             #post-creation actions:
+            #--connect to buildings
+            cli03.buildings.add(West)
+            #--connect to spaces
+            cli03.spaces.add(clinic_space)
+            #--connect to meters
+            cli03.meters.add(clinic)    #electric
+            cli03.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1745,13 +1752,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             cli03.__setattr__('nameplate_file', file_obj)
             cli03.save()
-            #--connect to buildings
-            cli03.buildings.add(West)
-            #--connect to spaces
-            cli03.spaces.add(clinic_space)
-            #--connect to meters
-            cli03.meters.add(clinic)    #electric
-            cli03.meters.add(gas1300)   #gas
 
             cli04 = PackageUnit(name = 'CLI-04',
                                 equipment_type = 'Package Unit',
@@ -1811,6 +1811,13 @@ class Command(BaseCommand):
                                 )
             cli04.save()
             #post-creation actions:
+            #--connect to buildings
+            cli04.buildings.add(West)
+            #--connect to spaces
+            cli04.spaces.add(clinic_space)
+            #--connect to meters
+            cli04.meters.add(clinic)    #electric
+            cli04.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1822,13 +1829,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             cli04.__setattr__('nameplate_file', file_obj)
             cli04.save()
-            #--connect to buildings
-            cli04.buildings.add(West)
-            #--connect to spaces
-            cli04.spaces.add(clinic_space)
-            #--connect to meters
-            cli04.meters.add(clinic)    #electric
-            cli04.meters.add(gas1300)   #gas
 
             cli05 = PackageUnit(name = 'CLI-05',
                                 equipment_type = 'Package Unit',
@@ -1888,6 +1888,13 @@ class Command(BaseCommand):
                                 )
             cli05.save()
             #post-creation actions:
+            #--connect to buildings
+            cli05.buildings.add(West)
+            #--connect to spaces
+            cli05.spaces.add(clinic_space)
+            #--connect to meters
+            cli05.meters.add(clinic)    #electric
+            cli05.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1899,13 +1906,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             cli05.__setattr__('nameplate_file', file_obj)
             cli05.save()
-            #--connect to buildings
-            cli05.buildings.add(West)
-            #--connect to spaces
-            cli05.spaces.add(clinic_space)
-            #--connect to meters
-            cli05.meters.add(clinic)    #electric
-            cli05.meters.add(gas1300)   #gas
 
             ev101 = PackageUnit(name = 'EV1-01',
                                 equipment_type = 'Package Unit',
@@ -1965,6 +1965,13 @@ class Command(BaseCommand):
                                 )
             ev101.save()
             #post-creation actions:
+            #--connect to buildings
+            ev101.buildings.add(West)
+            #--connect to spaces
+            ev101.spaces.add(EdenI_space)
+            #--connect to meters
+            ev101.meters.add(e1)        #electric
+            ev101.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -1976,13 +1983,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev101.__setattr__('nameplate_file', file_obj)
             ev101.save()
-            #--connect to buildings
-            ev101.buildings.add(West)
-            #--connect to spaces
-            ev101.spaces.add(EdenI_space)
-            #--connect to meters
-            ev101.meters.add(e1)        #electric
-            ev101.meters.add(gas1300)   #gas
 
             ev102 = PackageUnit(name = 'EV1-02',
                                 equipment_type = 'Package Unit',
@@ -2042,6 +2042,13 @@ class Command(BaseCommand):
                                 )
             ev102.save()
             #post-creation actions:
+            #--connect to buildings
+            ev102.buildings.add(West)
+            #--connect to spaces
+            ev102.spaces.add(EdenI_space)
+            #--connect to meters
+            ev102.meters.add(e1)        #electric
+            ev102.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2053,13 +2060,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev102.__setattr__('nameplate_file', file_obj)
             ev102.save()
-            #--connect to buildings
-            ev102.buildings.add(West)
-            #--connect to spaces
-            ev102.spaces.add(EdenI_space)
-            #--connect to meters
-            ev102.meters.add(e1)        #electric
-            ev102.meters.add(gas1300)   #gas
 
             ev103 = PackageUnit(name = 'EV1-03',
                                 equipment_type = 'Package Unit',
@@ -2119,6 +2119,13 @@ class Command(BaseCommand):
                                 )
             ev103.save()
             #post-creation actions:
+            #--connect to buildings
+            ev103.buildings.add(West)
+            #--connect to spaces
+            ev103.spaces.add(EdenI_space)
+            #--connect to meters
+            ev103.meters.add(e1)        #electric
+            ev103.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2130,13 +2137,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev103.__setattr__('nameplate_file', file_obj)
             ev103.save()
-            #--connect to buildings
-            ev103.buildings.add(West)
-            #--connect to spaces
-            ev103.spaces.add(EdenI_space)
-            #--connect to meters
-            ev103.meters.add(e1)        #electric
-            ev103.meters.add(gas1300)   #gas
 
             ev104 = PackageUnit(name = 'EV1-04',
                                 equipment_type = 'Package Unit',
@@ -2196,6 +2196,13 @@ class Command(BaseCommand):
                                 )
             ev104.save()
             #post-creation actions:
+            #--connect to buildings
+            ev104.buildings.add(West)
+            #--connect to spaces
+            ev104.spaces.add(EdenI_space)
+            #--connect to meters
+            ev104.meters.add(e1)        #electric
+            ev104.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2207,13 +2214,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev104.__setattr__('nameplate_file', file_obj)
             ev104.save()
-            #--connect to buildings
-            ev104.buildings.add(West)
-            #--connect to spaces
-            ev104.spaces.add(EdenI_space)
-            #--connect to meters
-            ev104.meters.add(e1)        #electric
-            ev104.meters.add(gas1300)   #gas
 
             ev105 = PackageUnit(name = 'EV1-05',
                                 equipment_type = 'Package Unit',
@@ -2273,6 +2273,13 @@ class Command(BaseCommand):
                                 )
             ev105.save()
             #post-creation actions:
+            #--connect to buildings
+            ev105.buildings.add(West)
+            #--connect to spaces
+            ev105.spaces.add(EdenI_space)
+            #--connect to meters
+            ev105.meters.add(e1)        #electric
+            ev105.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2284,13 +2291,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev105.__setattr__('nameplate_file', file_obj)
             ev105.save()
-            #--connect to buildings
-            ev105.buildings.add(West)
-            #--connect to spaces
-            ev105.spaces.add(EdenI_space)
-            #--connect to meters
-            ev105.meters.add(e1)        #electric
-            ev105.meters.add(gas1300)   #gas
 
             ev106 = PackageUnit(name = 'EV1-06',
                                 equipment_type = 'Package Unit',
@@ -2350,6 +2350,13 @@ class Command(BaseCommand):
                                 )
             ev106.save()
             #post-creation actions:
+            #--connect to buildings
+            ev106.buildings.add(West)
+            #--connect to spaces
+            ev106.spaces.add(EdenI_space)
+            #--connect to meters
+            ev106.meters.add(e1)        #electric
+            ev106.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2361,13 +2368,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev106.__setattr__('nameplate_file', file_obj)
             ev106.save()
-            #--connect to buildings
-            ev106.buildings.add(West)
-            #--connect to spaces
-            ev106.spaces.add(EdenI_space)
-            #--connect to meters
-            ev106.meters.add(e1)        #electric
-            ev106.meters.add(gas1300)   #gas
 
             ev107 = PackageUnit(name = 'EV1-07',
                                 equipment_type = 'Package Unit',
@@ -2427,6 +2427,13 @@ class Command(BaseCommand):
                                 )
             ev107.save()
             #post-creation actions:
+            #--connect to buildings
+            ev107.buildings.add(West)
+            #--connect to spaces
+            ev107.spaces.add(EdenI_space)
+            #--connect to meters
+            ev107.meters.add(e1)        #electric
+            ev107.meters.add(gas1300)   #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2438,13 +2445,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev107.__setattr__('nameplate_file', file_obj)
             ev107.save()
-            #--connect to buildings
-            ev107.buildings.add(West)
-            #--connect to spaces
-            ev107.spaces.add(EdenI_space)
-            #--connect to meters
-            ev107.meters.add(e1)        #electric
-            ev107.meters.add(gas1300)   #gas
 
             ev201 = PackageUnit(name = 'EV2-01',
                                 equipment_type = 'Package Unit',
@@ -2504,6 +2504,12 @@ class Command(BaseCommand):
                                 )
             ev201.save()
             #post-creation actions:
+            #--connect to buildings
+            ev201.buildings.add(East)
+            #--connect to spaces
+            ev201.spaces.add(EdenII_space)
+            #--connect to meters
+            ev201.meters.add(e2)            #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2515,12 +2521,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev201.__setattr__('nameplate_file', file_obj)
             ev201.save()
-            #--connect to buildings
-            ev201.buildings.add(East)
-            #--connect to spaces
-            ev201.spaces.add(EdenII_space)
-            #--connect to meters
-            ev201.meters.add(e2)            #electric
 
             ev202 = PackageUnit(name = 'EV2-02',
                                 equipment_type = 'Package Unit',
@@ -2580,6 +2580,12 @@ class Command(BaseCommand):
                                 )
             ev202.save()
             #post-creation actions:
+            #--connect to buildings
+            ev202.buildings.add(East)
+            #--connect to spaces
+            ev202.spaces.add(EdenII_space)
+            #--connect to meters
+            ev202.meters.add(e2)            #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2591,12 +2597,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev202.__setattr__('nameplate_file', file_obj)
             ev202.save()
-            #--connect to buildings
-            ev202.buildings.add(East)
-            #--connect to spaces
-            ev202.spaces.add(EdenII_space)
-            #--connect to meters
-            ev202.meters.add(e2)            #electric
 
             ev203 = PackageUnit(name = 'EV2-03',
                                 equipment_type = 'Package Unit',
@@ -2656,6 +2656,12 @@ class Command(BaseCommand):
                                 )
             ev203.save()
             #post-creation actions:
+            #--connect to buildings
+            ev203.buildings.add(East)
+            #--connect to spaces
+            ev203.spaces.add(EdenII_space)
+            #--connect to meters
+            ev203.meters.add(e2)            #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2667,12 +2673,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev203.__setattr__('nameplate_file', file_obj)
             ev203.save()
-            #--connect to buildings
-            ev203.buildings.add(East)
-            #--connect to spaces
-            ev203.spaces.add(EdenII_space)
-            #--connect to meters
-            ev203.meters.add(e2)            #electric
 
             ev204 = PackageUnit(name = 'EV2-04',
                                 equipment_type = 'Package Unit',
@@ -2732,6 +2732,12 @@ class Command(BaseCommand):
                                 )
             ev204.save()
             #post-creation actions:
+            #--connect to buildings
+            ev204.buildings.add(East)
+            #--connect to spaces
+            ev204.spaces.add(EdenII_space)
+            #--connect to meters
+            ev204.meters.add(e2)            #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2743,12 +2749,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev204.__setattr__('nameplate_file', file_obj)
             ev204.save()
-            #--connect to buildings
-            ev204.buildings.add(East)
-            #--connect to spaces
-            ev204.spaces.add(EdenII_space)
-            #--connect to meters
-            ev204.meters.add(e2)            #electric
 
             ev205 = PackageUnit(name = 'EV2-05',
                                 equipment_type = 'Package Unit',
@@ -2808,6 +2808,12 @@ class Command(BaseCommand):
                                 )
             ev205.save()
             #post-creation actions:
+            #--connect to buildings
+            ev205.buildings.add(East)
+            #--connect to spaces
+            ev205.spaces.add(EdenII_space)
+            #--connect to meters
+            ev205.meters.add(e2)            #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2819,12 +2825,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             ev205.__setattr__('nameplate_file', file_obj)
             ev205.save()
-            #--connect to buildings
-            ev205.buildings.add(East)
-            #--connect to spaces
-            ev205.spaces.add(EdenII_space)
-            #--connect to meters
-            ev205.meters.add(e2)            #electric
 
             vgd01 = PackageUnit(name = 'VGD-01',
                                 equipment_type = 'Package Unit',
@@ -2884,6 +2884,13 @@ class Command(BaseCommand):
                                 )
             vgd01.save()
             #post-creation actions:
+            #--connect to buildings
+            vgd01.buildings.add(East)
+            #--connect to spaces
+            vgd01.spaces.add(dorms_space)
+            #--connect to meters
+            vgd01.meters.add(east_main)    #electric
+            vgd01.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2895,13 +2902,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             vgd01.__setattr__('nameplate_file', file_obj)
             vgd01.save()
-            #--connect to buildings
-            vgd01.buildings.add(East)
-            #--connect to spaces
-            vgd01.spaces.add(dorms_space)
-            #--connect to meters
-            vgd01.meters.add(east_main)    #electric
-            vgd01.meters.add(gas1290)       #gas
 
             vgd02 = PackageUnit(name = 'VGD-02',
                                 equipment_type = 'Package Unit',
@@ -2961,6 +2961,13 @@ class Command(BaseCommand):
                                 )
             vgd02.save()
             #post-creation actions:
+            #--connect to buildings
+            vgd02.buildings.add(East)
+            #--connect to spaces
+            vgd02.spaces.add(dorms_space)
+            #--connect to meters
+            vgd02.meters.add(east_main)    #electric
+            vgd02.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -2972,13 +2979,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             vgd02.__setattr__('nameplate_file', file_obj)
             vgd02.save()
-            #--connect to buildings
-            vgd02.buildings.add(East)
-            #--connect to spaces
-            vgd02.spaces.add(dorms_space)
-            #--connect to meters
-            vgd02.meters.add(east_main)    #electric
-            vgd02.meters.add(gas1290)       #gas
 
             vgd03 = PackageUnit(name = 'VGD-03',
                                 equipment_type = 'Package Unit',
@@ -3038,6 +3038,13 @@ class Command(BaseCommand):
                                 )
             vgd03.save()
             #post-creation actions:
+            #--connect to buildings
+            vgd03.buildings.add(East)
+            #--connect to spaces
+            vgd03.spaces.add(dorms_space)
+            #--connect to meters
+            vgd03.meters.add(east_main)    #electric
+            vgd03.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3049,13 +3056,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             vgd03.__setattr__('nameplate_file', file_obj)
             vgd03.save()
-            #--connect to buildings
-            vgd03.buildings.add(East)
-            #--connect to spaces
-            vgd03.spaces.add(dorms_space)
-            #--connect to meters
-            vgd03.meters.add(east_main)    #electric
-            vgd03.meters.add(gas1290)       #gas
 
             vgd04 = PackageUnit(name = 'VGD-04',
                                 equipment_type = 'Package Unit',
@@ -3115,6 +3115,13 @@ class Command(BaseCommand):
                                 )
             vgd04.save()
             #post-creation actions:
+            #--connect to buildings
+            vgd04.buildings.add(East)
+            #--connect to spaces
+            vgd04.spaces.add(dorms_space)
+            #--connect to meters
+            vgd04.meters.add(east_main)    #electric
+            vgd04.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3126,13 +3133,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             vgd04.__setattr__('nameplate_file', file_obj)
             vgd04.save()
-            #--connect to buildings
-            vgd04.buildings.add(East)
-            #--connect to spaces
-            vgd04.spaces.add(dorms_space)
-            #--connect to meters
-            vgd04.meters.add(east_main)    #electric
-            vgd04.meters.add(gas1290)       #gas
 
             kdh01 = PackageUnit(name = 'KDH-01',
                                 equipment_type = 'Package Unit',
@@ -3192,6 +3192,14 @@ class Command(BaseCommand):
                                 )
             kdh01.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh01.buildings.add(East)
+            #--connect to spaces
+            kdh01.spaces.add(kitchen_space)
+            kdh01.spaces.add(dining_space)
+            #--connect to meters
+            kdh01.meters.add(east_main)    #electric
+            kdh01.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3203,14 +3211,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh01.__setattr__('nameplate_file', file_obj)
             kdh01.save()
-            #--connect to buildings
-            kdh01.buildings.add(East)
-            #--connect to spaces
-            kdh01.spaces.add(kitchen_space)
-            kdh01.spaces.add(dining_space)
-            #--connect to meters
-            kdh01.meters.add(east_main)    #electric
-            kdh01.meters.add(gas1290)       #gas
 
             kdh02 = PackageUnit(name = 'KDH-02',
                                 equipment_type = 'Package Unit',
@@ -3270,6 +3270,14 @@ class Command(BaseCommand):
                                 )
             kdh02.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh02.buildings.add(East)
+            #--connect to spaces
+            kdh02.spaces.add(kitchen_space)
+            kdh02.spaces.add(dining_space)
+            #--connect to meters
+            kdh02.meters.add(east_main)    #electric
+            kdh02.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3281,14 +3289,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh02.__setattr__('nameplate_file', file_obj)
             kdh02.save()
-            #--connect to buildings
-            kdh02.buildings.add(East)
-            #--connect to spaces
-            kdh02.spaces.add(kitchen_space)
-            kdh02.spaces.add(dining_space)
-            #--connect to meters
-            kdh02.meters.add(east_main)    #electric
-            kdh02.meters.add(gas1290)       #gas
 
             kdh03 = PackageUnit(name = 'KDH-03',
                                 equipment_type = 'Package Unit',
@@ -3348,6 +3348,14 @@ class Command(BaseCommand):
                                 )
             kdh03.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh03.buildings.add(East)
+            #--connect to spaces
+            kdh03.spaces.add(kitchen_space)
+            kdh03.spaces.add(dining_space)
+            #--connect to meters
+            kdh03.meters.add(east_main)    #electric
+            kdh03.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3359,14 +3367,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh03.__setattr__('nameplate_file', file_obj)
             kdh03.save()
-            #--connect to buildings
-            kdh03.buildings.add(East)
-            #--connect to spaces
-            kdh03.spaces.add(kitchen_space)
-            kdh03.spaces.add(dining_space)
-            #--connect to meters
-            kdh03.meters.add(east_main)    #electric
-            kdh03.meters.add(gas1290)       #gas
 
             kdh04 = PackageUnit(name = 'KDH-04',
                                 equipment_type = 'Package Unit',
@@ -3426,6 +3426,14 @@ class Command(BaseCommand):
                                 )
             kdh04.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh04.buildings.add(East)
+            #--connect to spaces
+            kdh04.spaces.add(kitchen_space)
+            kdh04.spaces.add(dining_space)
+            #--connect to meters
+            kdh04.meters.add(east_main)    #electric
+            kdh04.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3437,14 +3445,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh04.__setattr__('nameplate_file', file_obj)
             kdh04.save()
-            #--connect to buildings
-            kdh04.buildings.add(East)
-            #--connect to spaces
-            kdh04.spaces.add(kitchen_space)
-            kdh04.spaces.add(dining_space)
-            #--connect to meters
-            kdh04.meters.add(east_main)    #electric
-            kdh04.meters.add(gas1290)       #gas
 
             kdh05 = PackageUnit(name = 'KDH-05',
                                 equipment_type = 'Package Unit',
@@ -3504,6 +3504,14 @@ class Command(BaseCommand):
                                 )
             kdh05.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh05.buildings.add(East)
+            #--connect to spaces
+            kdh05.spaces.add(kitchen_space)
+            kdh05.spaces.add(dining_space)
+            #--connect to meters
+            kdh05.meters.add(east_main)    #electric
+            kdh05.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3515,14 +3523,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh05.__setattr__('nameplate_file', file_obj)
             kdh05.save()
-            #--connect to buildings
-            kdh05.buildings.add(East)
-            #--connect to spaces
-            kdh05.spaces.add(kitchen_space)
-            kdh05.spaces.add(dining_space)
-            #--connect to meters
-            kdh05.meters.add(east_main)    #electric
-            kdh05.meters.add(gas1290)       #gas
 
             kdh06 = PackageUnit(name = 'KDH-06',
                                 equipment_type = 'Package Unit',
@@ -3582,6 +3582,14 @@ class Command(BaseCommand):
                                 )
             kdh06.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh06.buildings.add(East)
+            #--connect to spaces
+            kdh06.spaces.add(kitchen_space)
+            kdh06.spaces.add(dining_space)
+            #--connect to meters
+            kdh06.meters.add(east_main)    #electric
+            kdh06.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3593,14 +3601,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh06.__setattr__('nameplate_file', file_obj)
             kdh06.save()
-            #--connect to buildings
-            kdh06.buildings.add(East)
-            #--connect to spaces
-            kdh06.spaces.add(kitchen_space)
-            kdh06.spaces.add(dining_space)
-            #--connect to meters
-            kdh06.meters.add(east_main)    #electric
-            kdh06.meters.add(gas1290)       #gas
 
             kdh07 = PackageUnit(name = 'KDH-07',
                                 equipment_type = 'Package Unit',
@@ -3660,6 +3660,14 @@ class Command(BaseCommand):
                                 )
             kdh07.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh07.buildings.add(East)
+            #--connect to spaces
+            kdh07.spaces.add(kitchen_space)
+            kdh07.spaces.add(dining_space)
+            #--connect to meters
+            kdh07.meters.add(east_main)    #electric
+            kdh07.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3671,14 +3679,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh07.__setattr__('nameplate_file', file_obj)
             kdh07.save()
-            #--connect to buildings
-            kdh07.buildings.add(East)
-            #--connect to spaces
-            kdh07.spaces.add(kitchen_space)
-            kdh07.spaces.add(dining_space)
-            #--connect to meters
-            kdh07.meters.add(east_main)    #electric
-            kdh07.meters.add(gas1290)       #gas
 
             kdh08 = PackageUnit(name = 'KDH-08',
                                 equipment_type = 'Package Unit',
@@ -3738,6 +3738,14 @@ class Command(BaseCommand):
                                 )
             kdh08.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh08.buildings.add(East)
+            #--connect to spaces
+            kdh08.spaces.add(kitchen_space)
+            kdh08.spaces.add(dining_space)
+            #--connect to meters
+            kdh08.meters.add(east_main)    #electric
+            kdh08.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3749,14 +3757,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh08.__setattr__('nameplate_file', file_obj)
             kdh08.save()
-            #--connect to buildings
-            kdh08.buildings.add(East)
-            #--connect to spaces
-            kdh08.spaces.add(kitchen_space)
-            kdh08.spaces.add(dining_space)
-            #--connect to meters
-            kdh08.meters.add(east_main)    #electric
-            kdh08.meters.add(gas1290)       #gas
 
             kdh09 = PackageUnit(name = 'KDH-09',
                                 equipment_type = 'Package Unit',
@@ -3816,6 +3816,14 @@ class Command(BaseCommand):
                                 )
             kdh09.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh09.buildings.add(East)
+            #--connect to spaces
+            kdh09.spaces.add(kitchen_space)
+            kdh09.spaces.add(dining_space)
+            #--connect to meters
+            kdh09.meters.add(east_main)    #electric
+            kdh09.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3827,14 +3835,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh09.__setattr__('nameplate_file', file_obj)
             kdh09.save()
-            #--connect to buildings
-            kdh09.buildings.add(East)
-            #--connect to spaces
-            kdh09.spaces.add(kitchen_space)
-            kdh09.spaces.add(dining_space)
-            #--connect to meters
-            kdh09.meters.add(east_main)    #electric
-            kdh09.meters.add(gas1290)       #gas
 
             kdh10 = PackageUnit(name = 'KDH-10',
                                 equipment_type = 'Package Unit',
@@ -3894,6 +3894,14 @@ class Command(BaseCommand):
                                 )
             kdh10.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh10.buildings.add(East)
+            #--connect to spaces
+            kdh10.spaces.add(kitchen_space)
+            kdh10.spaces.add(dining_space)
+            #--connect to meters
+            kdh10.meters.add(east_main)    #electric
+            kdh10.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3905,14 +3913,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh10.__setattr__('nameplate_file', file_obj)
             kdh10.save()
-            #--connect to buildings
-            kdh10.buildings.add(East)
-            #--connect to spaces
-            kdh10.spaces.add(kitchen_space)
-            kdh10.spaces.add(dining_space)
-            #--connect to meters
-            kdh10.meters.add(east_main)    #electric
-            kdh10.meters.add(gas1290)       #gas
 
             kdh11 = PackageUnit(name = 'KDH-11',
                                 equipment_type = 'Package Unit',
@@ -3972,6 +3972,13 @@ class Command(BaseCommand):
                                 )
             kdh11.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh11.buildings.add(East)
+            #--connect to spaces
+            kdh11.spaces.add(kitchen_space)
+            kdh11.spaces.add(dining_space)
+            #--connect to meters
+            kdh11.meters.add(east_main)    #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -3983,13 +3990,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh11.__setattr__('nameplate_file', file_obj)
             kdh11.save()
-            #--connect to buildings
-            kdh11.buildings.add(East)
-            #--connect to spaces
-            kdh11.spaces.add(kitchen_space)
-            kdh11.spaces.add(dining_space)
-            #--connect to meters
-            kdh11.meters.add(east_main)    #electric
 
             kdh12 = PackageUnit(name = 'KDH-12',
                                 equipment_type = 'Package Unit',
@@ -4049,6 +4049,13 @@ class Command(BaseCommand):
                                 )
             kdh12.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh12.buildings.add(East)
+            #--connect to spaces
+            kdh12.spaces.add(kitchen_space)
+            kdh12.spaces.add(dining_space)
+            #--connect to meters
+            kdh12.meters.add(east_main)    #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -4060,13 +4067,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh12.__setattr__('nameplate_file', file_obj)
             kdh12.save()
-            #--connect to buildings
-            kdh12.buildings.add(East)
-            #--connect to spaces
-            kdh12.spaces.add(kitchen_space)
-            kdh12.spaces.add(dining_space)
-            #--connect to meters
-            kdh12.meters.add(east_main)    #electric
 
             kdh13 = PackageUnit(name = 'KDH-13',
                                 equipment_type = 'Package Unit',
@@ -4126,6 +4126,13 @@ class Command(BaseCommand):
                                 )
             kdh13.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh13.buildings.add(East)
+            #--connect to spaces
+            kdh13.spaces.add(kitchen_space)
+            kdh13.spaces.add(dining_space)
+            #--connect to meters
+            kdh13.meters.add(east_main)    #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -4137,13 +4144,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh13.__setattr__('nameplate_file', file_obj)
             kdh13.save()
-            #--connect to buildings
-            kdh13.buildings.add(East)
-            #--connect to spaces
-            kdh13.spaces.add(kitchen_space)
-            kdh13.spaces.add(dining_space)
-            #--connect to meters
-            kdh13.meters.add(east_main)    #electric
 
             kdh14 = PackageUnit(name = 'KDH-14',
                                 equipment_type = 'Package Unit',
@@ -4203,6 +4203,13 @@ class Command(BaseCommand):
                                 )
             kdh14.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh14.buildings.add(East)
+            #--connect to spaces
+            kdh14.spaces.add(kitchen_space)
+            kdh14.spaces.add(dining_space)
+            #--connect to meters
+            kdh14.meters.add(east_main)    #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -4214,13 +4221,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh14.__setattr__('nameplate_file', file_obj)
             kdh14.save()
-            #--connect to buildings
-            kdh14.buildings.add(East)
-            #--connect to spaces
-            kdh14.spaces.add(kitchen_space)
-            kdh14.spaces.add(dining_space)
-            #--connect to meters
-            kdh14.meters.add(east_main)    #electric
 
             kdh15 = PackageUnit(name = 'KDH-15',
                                 equipment_type = 'Package Unit',
@@ -4280,6 +4280,13 @@ class Command(BaseCommand):
                                 )
             kdh15.save()
             #post-creation actions:
+            #--connect to buildings
+            kdh15.buildings.add(East)
+            #--connect to spaces
+            kdh15.spaces.add(kitchen_space)
+            kdh15.spaces.add(dining_space)
+            #--connect to meters
+            kdh15.meters.add(east_main)    #electric
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -4291,13 +4298,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             kdh15.__setattr__('nameplate_file', file_obj)
             kdh15.save()
-            #--connect to buildings
-            kdh15.buildings.add(East)
-            #--connect to spaces
-            kdh15.spaces.add(kitchen_space)
-            kdh15.spaces.add(dining_space)
-            #--connect to meters
-            kdh15.meters.add(east_main)    #electric
 
             gyc01 = PackageUnit(name = 'GYC-01',
                                 equipment_type = 'Package Unit',
@@ -4357,6 +4357,14 @@ class Command(BaseCommand):
                                 )
             gyc01.save()
             #post-creation actions:
+            #--connect to buildings
+            gyc01.buildings.add(East)
+            #--connect to spaces
+            gyc01.spaces.add(gym_space)
+            gyc01.spaces.add(school_space)
+            #--connect to meters
+            gyc01.meters.add(east_main)    #electric
+            gyc01.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -4368,14 +4376,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             gyc01.__setattr__('nameplate_file', file_obj)
             gyc01.save()
-            #--connect to buildings
-            gyc01.buildings.add(East)
-            #--connect to spaces
-            gyc01.spaces.add(gym_space)
-            gyc01.spaces.add(school_space)
-            #--connect to meters
-            gyc01.meters.add(east_main)    #electric
-            gyc01.meters.add(gas1290)       #gas
 
             gyc02 = PackageUnit(name = 'GYC-02',
                                 equipment_type = 'Package Unit',
@@ -4435,6 +4435,14 @@ class Command(BaseCommand):
                                 )
             gyc02.save()
             #post-creation actions:
+            #--connect to buildings
+            gyc02.buildings.add(East)
+            #--connect to spaces
+            gyc02.spaces.add(gym_space)
+            gyc02.spaces.add(school_space)
+            #--connect to meters
+            gyc02.meters.add(east_main)    #electric
+            gyc02.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -4446,14 +4454,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             gyc02.__setattr__('nameplate_file', file_obj)
             gyc02.save()
-            #--connect to buildings
-            gyc02.buildings.add(East)
-            #--connect to spaces
-            gyc02.spaces.add(gym_space)
-            gyc02.spaces.add(school_space)
-            #--connect to meters
-            gyc02.meters.add(east_main)    #electric
-            gyc02.meters.add(gas1290)       #gas
 
             gyc03 = PackageUnit(name = 'GYC-03',
                                 equipment_type = 'Package Unit',
@@ -4513,6 +4513,13 @@ class Command(BaseCommand):
                                 )
             gyc03.save()
             #post-creation actions:
+            #--connect to buildings
+            gyc03.buildings.add(East)
+            #--connect to spaces
+            gyc03.spaces.add(school_space)
+            #--connect to meters
+            gyc03.meters.add(east_main)    #electric            
+            gyc03.meters.add(gas1290)       #gas
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
@@ -4524,13 +4531,6 @@ class Command(BaseCommand):
             file_obj = File(open(result[0]))
             gyc03.__setattr__('nameplate_file', file_obj)
             gyc03.save()
-            #--connect to buildings
-            gyc03.buildings.add(East)
-            #--connect to spaces
-            gyc03.spaces.add(school_space)
-            #--connect to meters
-            gyc03.meters.add(east_main)    #electric            
-            gyc03.meters.add(gas1290)       #gas
 
         except:
             print 'Failed to create new Equipment.'
