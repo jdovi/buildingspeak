@@ -1,11 +1,14 @@
 from django.core.management.base import BaseCommand
 
 import urllib
+from pytz import UTC
 from decimal import Decimal
+from datetime import datetime
 
 from django.utils import timezone
 from django.core.files import File
 from django.contrib.auth.models import User
+from django.db.models import Max, Min, Q, Sum
 
 from BuildingSpeak.settings import STATIC_URL
 
@@ -432,7 +435,7 @@ class Command(BaseCommand):
             #gpc_tougsd7 = GAPowerTOU.objects.get(name = 'GPC-TOU-GSD-7') #####NEED TO MAKE
             
             east_main = Meter(
-                name = 'East Bldg',
+                name = 'East Bldg (electric)',
                 utility_type = 'electricity',
                 location = 'loading dock area of bldg',
                 serves = 'all of East Bldg except Eden II',
@@ -498,7 +501,7 @@ class Command(BaseCommand):
     
             
             e1 = Meter(
-                name = 'Eden I',
+                name = 'Eden I (electric)',
                 utility_type = 'electricity',
                 location = 'northwest corner of West Bldg',
                 serves = 'Eden I',
@@ -547,7 +550,7 @@ class Command(BaseCommand):
             
             
             e2 = Meter(
-                name = 'Eden II',
+                name = 'Eden II (electric)',
                 utility_type = 'electricity',
                 location = 'northwest corner of East Bldg',
                 serves = 'Eden II',
@@ -595,7 +598,7 @@ class Command(BaseCommand):
             sma1.save()
             
             wh = Meter(
-                name = 'West Bldg south',
+                name = 'West Bldg south (electric)',
                 utility_type = 'electricity',
                 location = 'just south of Offices entrance on West Bldg',
                 serves = 'Offices and Compassion ATL',
@@ -652,7 +655,7 @@ class Command(BaseCommand):
             sma3.save()
             
             newschool = Meter(
-                name = 'New School',
+                name = 'New School (electric)',
                 utility_type = 'electricity',
                 location = 'south of Eden I entrance on West Bldg',
                 serves = 'Playground and unfinished area between Eden I and Clinic',
@@ -709,7 +712,7 @@ class Command(BaseCommand):
             sma3.save()
             
             clinic = Meter(
-                name = 'Clinic',
+                name = 'Clinic (electric)',
                 utility_type = 'electricity',
                 location = 'north of covered Clinic entrance on West Bldg',
                 serves = 'Clinic',
@@ -757,7 +760,7 @@ class Command(BaseCommand):
             sma1.save()
             
             gas1290 = Meter(
-                name = 'East Bldg',
+                name = 'East Bldg (natural gas)',
                 utility_type = 'natural gas',
                 location = 'unknown',
                 serves = 'East Bldg heating and domestic hot water',
@@ -825,7 +828,7 @@ class Command(BaseCommand):
             sma6.save()
             
             gas1300 = Meter(
-                name = 'West Bldg',
+                name = 'West Bldg (natural gas)',
                 utility_type = 'natural gas',
                 location = 'unknown',
                 serves = 'West Bldg heating and domestic hot water',
@@ -893,7 +896,7 @@ class Command(BaseCommand):
             sma6.save()
             
             simpson1290 = Meter(
-                name = '1290 Simpson',
+                name = '1290 Simpson (water)',
                 utility_type = 'domestic water',
                 location = 'unknown',
                 serves = 'unknown',
@@ -945,7 +948,7 @@ class Command(BaseCommand):
             sma2.save()
             
             boone1300 = Meter(
-                name = '1300 Boone',
+                name = '1300 Boone (water)',
                 utility_type = 'domestic water',
                 location = 'unknown',
                 serves = 'unknown',
@@ -1009,7 +1012,7 @@ class Command(BaseCommand):
             sma5.save()
 
             simpson1300 = Meter(
-                name = '1300 Simpson',
+                name = '1300 Simpson (water)',
                 utility_type = 'domestic water',
                 location = 'unknown',
                 serves = 'fire service',
@@ -4538,6 +4541,80 @@ class Command(BaseCommand):
 
     ###---Measures
         try:
-            pass
+            em1_elec = EfficiencyMeasure(name = 'Controls on 23 RTUs (electric)',
+                                            when = datetime(2014,3,1,tzinfo=UTC),
+                                            utility_type = 'electricity',
+                                            units = 'kW,kWh',
+                                            annual_consumption_savings = 58000.0,
+                                            peak_demand_savings = 0.0,
+                                            annual_cost_savings = 7500.0,
+                                            percent_uncertainty = 0.05,
+                                            percent_cool = 0.47,
+                                            percent_heat = 0.53,
+                                            percent_flat = 0.0,
+                                            percent_fixed = 0.0,
+                                            
+                                            weather_station = ws,
+                                            )
+            em1_elec.save()
+            #post-creation actions:
+            #--apportion annual savings numbers to individual months
+            em1_elec.apportion_savings()
+            #--create intermediate models to assign to Meters
+            emma1 = EMMeterApportionment(efficiency_measure = em1_elec,
+                                         meter = e2,
+                                         assigned_fraction = 0.58)
+            emma1.save()
+            emma2 = EMMeterApportionment(efficiency_measure = em1_elec,
+                                         meter = east_main,
+                                         assigned_fraction = 0.42)
+            emma2.save()
+            #--create intermediate models to assign to Equipment
+            for equip in [ev201,ev202,ev203,ev204,ev205]:
+                emeaX = EMEquipmentApportionment(efficiency_measure = em1_elec,
+                                             equipment = equip,
+                                             assigned_fraction = 0.116)
+                emeaX.save()
+            
+            for equip in [vgd01,vgd02,vgd03,vgd04,kdh01,kdh02,kdh03,kdh04,kdh05,kdh06,
+                          kdh07,kdh08,kdh09,kdh10,gyc01,gyc02,gyc03]:
+                emeaX = EMEquipmentApportionment(efficiency_measure = em1_elec,
+                                             equipment = equip,
+                                             assigned_fraction = 0.0247)
+                emeaX.save()
+
+            
+            em1_gas = EfficiencyMeasure(name = 'Controls on 23 RTUs (gas)',
+                                        when = datetime(2014,3,1,tzinfo=UTC),
+                                        utility_type = 'natural gas',
+                                        units = 'therms/h,therms',
+                                        annual_consumption_savings = 1500.0,
+                                        peak_demand_savings = 0.0,
+                                        annual_cost_savings = 1100.0,
+                                        percent_uncertainty = 0.05,
+                                        percent_cool = 0.0,
+                                        percent_heat = 1.0,
+                                        percent_flat = 0.0,
+                                        percent_fixed = 0.0,
+                                        
+                                        weather_station = ws,
+                                        )
+            em1_gas.save()
+            #post-creation actions:
+            #--apportion annual savings numbers to individual months
+            em1_gas.apportion_savings()
+            #--create intermediate models to assign to Meters
+            emma1 = EMMeterApportionment(efficiency_measure = em1_gas,
+                                         meter = gas1290,
+                                         assigned_fraction = 1.0)
+            emma1.save()
+            #--create intermediate models to assign to Equipment
+            for equip in [vgd01,vgd02,vgd03,vgd04,kdh01,kdh02,kdh03,kdh04,kdh05,kdh06,
+                          kdh07,kdh08,kdh09,kdh10,gyc01,gyc02,gyc03]:
+                emeaX = EMEquipmentApportionment(efficiency_measure = em1_elec,
+                                             equipment = equip,
+                                             assigned_fraction = 0.0588)
+                emeaX.save()
+            
         except:
             print 'Failed to create new Measures.'
