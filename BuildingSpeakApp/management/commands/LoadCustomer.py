@@ -4624,7 +4624,7 @@ class Command(BaseCommand):
 #                emeaX = EMEquipmentApportionment(efficiency_measure = em1_elec,
 #                                             equipment = equip,
 #                                             assigned_fraction = 0.0588)
-                emeaX.save()
+#                emeaX.save()
             
         except:
             print 'Failed to create new Measures.'
