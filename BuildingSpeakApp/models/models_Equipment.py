@@ -13,26 +13,27 @@ from models_Reader_ing import Reader
 class Equipment(models.Model):
     """Model for all energy consuming
     Equipment.  Specific Equipment
-    classes such as RooftopUnit inherit
+    classes such as PackageUnit inherit
     from this class.  Accepts photo and
     nameplate image files."""
     objects = InheritanceManager() #used with django-model-utils; query all Equipment subclasses together
     
     #relationships
-    messages = models.ManyToManyField('Message', blank=True)
-    meters = models.ManyToManyField('Meter', blank=True)
-    buildings = models.ManyToManyField('Building', blank=True)
-    spaces = models.ManyToManyField('Space', blank=True)
-    readers = models.ManyToManyField('Reader', blank=True)
+    messages = models.ManyToManyField('Message', blank=True, null=True)
+    meters = models.ManyToManyField('Meter', blank=True, null=True)
+    buildings = models.ManyToManyField('Building', blank=True, null=True)
+    spaces = models.ManyToManyField('Space', blank=True, null=True)
+    readers = models.ManyToManyField('Reader', blank=True, null=True)
     schedule = models.ForeignKey('OperatingSchedule', null=True, blank=True)
 
     
     #administrative info
     name = models.CharField(blank=True, max_length=200)
     equipment_type = models.CharField(blank=True, max_length=200,
-                    help_text='equipment type identifier, e.g. Rooftop Unit, Pump, etc.',
-                    choices=[('Rooftop Unit', 'Rooftop Unit'),
-                             ('Pump', 'Pump')])
+                    help_text='equipment type identifier, e.g. Package Unit, Pump, etc.',
+                    choices=[('Package Unit', 'Package Unit'),
+                             ('Pump', 'Pump'),
+                             ('Lighting', 'Lighting')])
     location = models.CharField(blank=True, max_length=200)
     description = models.CharField(blank=True, max_length=200)
     

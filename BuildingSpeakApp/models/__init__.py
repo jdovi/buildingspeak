@@ -16,6 +16,7 @@ from models_Account import Account
 from models_Building import Building, BuildingMeterApportionment
 from models_EfficiencyMeasure import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from models_Equipment import Equipment
+from models_Equipment_PackageUnit import PackageUnit
 from models_Space import Space, SpaceMeterApportionment
 from models_Meter import Meter
 from models_monthlies import Monther, Monthling
@@ -25,7 +26,6 @@ from models_RatesGeorgiaPower import GAPowerPandL, GAPowerRider
 from models_RatesInfiniteEnergy import InfiniteEnergyGAGas
 from models_RatesCityofAtlantaDWM import CityOfATLWWW
 from models_Reader_ing import Reader, Reading
-from models_RooftopUnit import RooftopUnit
 from models_schedules import UnitSchedule, OperatingSchedule
 from models_Utility import Utility
 from models_UserProfile import UserProfile

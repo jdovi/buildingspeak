@@ -535,7 +535,9 @@ class Account(models.Model):
             first_month = month_first.strftime('%m/%Y')
             last_month = month_last.strftime('%m/%Y')
             
-            if len(self.meter_set.all()) < 1:
+            meter_set = self.meter_set.all()
+            
+            if len(meter_set) < 1:
                 result = None
             else:
                 column_list_sum = ['Billing Demand (act)',
@@ -589,7 +591,7 @@ class Account(models.Model):
                 #meter_data is what will be passed to the template
                 meter_data = []
                 utility_groups = ['Account Total']
-                utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meter_set.all()])))
+                utility_groups.extend(sorted(set([str(x.utility_type) for x in meter_set])))
                 
                 #meter_dict holds all info and dataframes for each utility group, starting with Total
                 #note that water is included for Cost, so Cons/PD can never be used here but kBtu/kBtuh can
@@ -601,13 +603,13 @@ class Account(models.Model):
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
                                                                 #self.meter_set.filter(~Q(utility_type = 'domestic water')), 
-                                                                self.meter_set.all(),
+                                                                meter_set,
                                                                 first_month=first_month, 
                                                                 last_month=last_month )
                                                         } }
                 
                 #cycle through all utility types present in this account, get info and dataframes
-                for utype in sorted(set([str(x.utility_type) for x in self.meter_set.all()])):
+                for utype in sorted(set([str(x.utility_type) for x in meter_set])):
                     utype = str(utype)
                     meter_dict[utype] = {}
                     meter_dict[utype]['name'] = utype
@@ -744,7 +746,7 @@ class Account(models.Model):
                 pies_by_meter =         [['Meter','Cost','kBtu','Utility Type']]
                 
                 #for breakdown by Meter, cycle through all Meters and exclude domestic water from kBtu calcs
-                for meter in self.meter_set.all():
+                for meter in meter_set:
                     cost_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).aggregate(Sum('act_cost'))['act_cost__sum']
                     if cost_sum is None or np.isnan(float(cost_sum)): cost_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
                     pie_cost_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum)])
