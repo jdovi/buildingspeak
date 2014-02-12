@@ -2,7 +2,7 @@ from BuildingSpeakApp.models import Account, Building, Meter, Equipment, Space, 
 from BuildingSpeakApp.models import BuildingMeterApportionment, SpaceMeterApportionment
 from BuildingSpeakApp.models import EMMeterApportionment, EMEquipmentApportionment
 from BuildingSpeakApp.models import MeterConsumptionModel, MeterPeakDemandModel
-from BuildingSpeakApp.models import RooftopUnit, Reader, Reading, Message
+from BuildingSpeakApp.models import PackageUnit, Reader, Reading, Message
 from BuildingSpeakApp.models import UnitSchedule, OperatingSchedule, Utility
 from BuildingSpeakApp.models import RateSchedule, RateScheduleRider
 from BuildingSpeakApp.models import Monther, Monthling
@@ -421,7 +421,7 @@ class SpaceAdmin(admin.ModelAdmin):
     search_fields = ['name', 'id', 'space_type', 'square_footage', 'max_occupancy']
     list_filter = ['space_type']
     
-class RooftopUnitAdmin(admin.ModelAdmin):
+class PackageUnitAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Nameplate',   {'fields': ['name',
                                     'age',
@@ -806,7 +806,7 @@ admin.site.register(MeterPeakDemandModel, MeterPeakDemandModelAdmin)
 admin.site.register(EfficiencyMeasure, EfficiencyMeasureAdmin)
 admin.site.register(Equipment, EquipmentAdmin)
 admin.site.register(Space, SpaceAdmin)
-admin.site.register(RooftopUnit, RooftopUnitAdmin)
+admin.site.register(PackageUnit, PackageUnitAdmin)
 admin.site.register(Reader, ReaderAdmin)
 admin.site.register(Reading, ReadingAdmin)
 admin.site.register(Message, MessageAdmin)
