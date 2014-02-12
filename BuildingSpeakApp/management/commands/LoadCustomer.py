@@ -61,7 +61,7 @@ class Command(BaseCommand):
     ###---Account
         try:
             acct1 = Account(
-                name = 'City of Refuge, Inc. - ATL',
+                name = 'Town of Refuge, Inc. - ATL',
                 account_type = 'Commercial',
                 street_address = '1300 Joseph Boone Blvd',
                 city = 'Atlanta',
