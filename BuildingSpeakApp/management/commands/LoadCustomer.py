@@ -4568,8 +4568,6 @@ class Command(BaseCommand):
                                             )
             em1_elec.save()
             #post-creation actions:
-            #--apportion annual savings numbers to individual months
-            em1_elec.apportion_savings()
             #--create intermediate models to assign to Meters
             emma1 = EMMeterApportionment(efficiency_measure = em1_elec,
                                          meter = e2,
@@ -4592,6 +4590,8 @@ class Command(BaseCommand):
 #                                             equipment = equip,
 #                                             assigned_fraction = 0.0247)
 #                emeaX.save()
+            #--apportion annual savings numbers to individual months
+            em1_elec.apportion_savings()
 
             
 #            em1_gas = EfficiencyMeasure(name = 'Controls on 23 RTUs (gas)',
