@@ -1218,7 +1218,7 @@ class Command(BaseCommand):
                                 equipment_type = 'Package Unit',
                                 location = 'West Bldg rooftop',
                                 description = '',
-                                serves = 'Kid’s Cave',
+                                serves = 'Kids Cave',
                                 age = None,
                                 make = 'Payne',
                                 model = '588ANW030080ACAD',
