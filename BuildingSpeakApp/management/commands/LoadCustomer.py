@@ -4556,14 +4556,14 @@ class Command(BaseCommand):
                                         when = datetime(2014,3,1,tzinfo=UTC),
                                         utility_type = 'electricity',
                                         units = 'kW,kWh',
-                                        annual_consumption_savings = 58000.0,
-                                        peak_demand_savings = 0.0,
-                                        annual_cost_savings = 7500.0,
-                                        percent_uncertainty = 0.05,
-                                        percent_cool = 0.47,
-                                        percent_heat = 0.53,
-                                        percent_flat = 0.0,
-                                        percent_fixed = 0.0,
+                                        annual_consumption_savings = Decimal(58000.0),
+                                        peak_demand_savings = Decimal(0.0),
+                                        annual_cost_savings = Decimal(7500.0),
+                                        percent_uncertainty = Decimal(0.05),
+                                        percent_cool = Decimal(0.47),
+                                        percent_heat = Decimal(0.53),
+                                        percent_flat = Decimal(0.0),
+                                        percent_fixed = Decimal(0.0),
                                         
                                         weather_station = ws,
                                         )
@@ -4573,19 +4573,19 @@ class Command(BaseCommand):
         print 'check2'
         emma1 = EMMeterApportionment(efficiency_measure = em1_elec,
                                      meter = e2,
-                                     assigned_fraction = 0.58)
+                                     assigned_fraction = Decimal(0.58))
         emma1.save()
         print 'check3'
         emma2 = EMMeterApportionment(efficiency_measure = em1_elec,
                                      meter = east_main,
-                                     assigned_fraction = 0.42)
+                                     assigned_fraction = Decimal(0.42))
         emma2.save()
         #--create intermediate models to assign to Equipment
         print 'check4'
         for equip in [ev201,ev202,ev203,ev204,ev205]:
             emeaX = EMEquipmentApportionment(efficiency_measure = em1_elec,
                                          equipment = equip,
-                                         assigned_fraction = 0.116)
+                                         assigned_fraction = Decimal(0.116))
             emeaX.save()
             
 #            for equip in [vgd01,vgd02,vgd03,vgd04,kdh01,kdh02,kdh03,kdh04,kdh05,kdh06,
