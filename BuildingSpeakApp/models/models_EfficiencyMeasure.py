@@ -222,70 +222,70 @@ class EfficiencyMeasure(models.Model):
         percent cool, heat, and
         flat values."""
         
-#        try:
-        df = pd.DataFrame({'Days': [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]},
-                         index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'])
-        if Tccp is None: Tccp = 65.0
-        if Thcp is None: Thcp = 65.0
-        dd = self.weather_station.get_average_monthly_degree_days(Tccp, Thcp)
-        df['CDD'] = dd['CDD']
-        df['HDD'] = dd['HDD']
-        
-        df['flat'] = (df['Days']/365.0).apply(Decimal) * self.percent_flat
-        df['cool'] = (df['CDD']/df['CDD'].sum()).apply(Decimal) * self.percent_cool
-        df['heat'] = (df['HDD']/df['HDD'].sum()).apply(Decimal) * self.percent_heat
-        numlist = [1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 
-                                 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0]
-        df['fixed'] = pd.Series([float(self.percent_fixed) * x for x in numlist], index=df.index).apply(Decimal)
-        
-        self.jan_cons = (df['flat'][0] + df['heat'][0] + df['cool'][0] + df['fixed'][0]) * self.annual_consumption_savings
-        self.feb_cons = (df['flat'][1] + df['heat'][1] + df['cool'][1] + df['fixed'][1]) * self.annual_consumption_savings
-        self.mar_cons = (df['flat'][2] + df['heat'][2] + df['cool'][2] + df['fixed'][2]) * self.annual_consumption_savings
-        self.apr_cons = (df['flat'][3] + df['heat'][3] + df['cool'][3] + df['fixed'][3]) * self.annual_consumption_savings
-        self.may_cons = (df['flat'][4] + df['heat'][4] + df['cool'][4] + df['fixed'][4]) * self.annual_consumption_savings
-        self.jun_cons = (df['flat'][5] + df['heat'][5] + df['cool'][5] + df['fixed'][5]) * self.annual_consumption_savings
-        self.jul_cons = (df['flat'][6] + df['heat'][6] + df['cool'][6] + df['fixed'][6]) * self.annual_consumption_savings
-        self.aug_cons = (df['flat'][7] + df['heat'][7] + df['cool'][7] + df['fixed'][7]) * self.annual_consumption_savings
-        self.sep_cons = (df['flat'][8] + df['heat'][8] + df['cool'][8] + df['fixed'][8]) * self.annual_consumption_savings
-        self.oct_cons = (df['flat'][9] + df['heat'][9] + df['cool'][9] + df['fixed'][9]) * self.annual_consumption_savings
-        self.nov_cons = (df['flat'][10] + df['heat'][10] + df['cool'][10] + df['fixed'][10]) * self.annual_consumption_savings
-        self.dec_cons = (df['flat'][11] + df['heat'][11] + df['cool'][11] + df['fixed'][11]) * self.annual_consumption_savings
+        try:
+            df = pd.DataFrame({'Days': [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]},
+                             index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'])
+            if Tccp is None: Tccp = 65.0
+            if Thcp is None: Thcp = 65.0
+            dd = self.weather_station.get_average_monthly_degree_days(Tccp, Thcp)
+            df['CDD'] = dd['CDD']
+            df['HDD'] = dd['HDD']
+            
+            df['flat'] = (df['Days']/365.0).apply(Decimal) * self.percent_flat
+            df['cool'] = (df['CDD']/df['CDD'].sum()).apply(Decimal) * self.percent_cool
+            df['heat'] = (df['HDD']/df['HDD'].sum()).apply(Decimal) * self.percent_heat
+            numlist = [1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 
+                                     1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0, 1.0/12.0]
+            df['fixed'] = pd.Series([float(self.percent_fixed) * x for x in numlist], index=df.index).apply(Decimal)
+            
+            self.jan_cons = (df['flat'][0] + df['heat'][0] + df['cool'][0] + df['fixed'][0]) * self.annual_consumption_savings
+            self.feb_cons = (df['flat'][1] + df['heat'][1] + df['cool'][1] + df['fixed'][1]) * self.annual_consumption_savings
+            self.mar_cons = (df['flat'][2] + df['heat'][2] + df['cool'][2] + df['fixed'][2]) * self.annual_consumption_savings
+            self.apr_cons = (df['flat'][3] + df['heat'][3] + df['cool'][3] + df['fixed'][3]) * self.annual_consumption_savings
+            self.may_cons = (df['flat'][4] + df['heat'][4] + df['cool'][4] + df['fixed'][4]) * self.annual_consumption_savings
+            self.jun_cons = (df['flat'][5] + df['heat'][5] + df['cool'][5] + df['fixed'][5]) * self.annual_consumption_savings
+            self.jul_cons = (df['flat'][6] + df['heat'][6] + df['cool'][6] + df['fixed'][6]) * self.annual_consumption_savings
+            self.aug_cons = (df['flat'][7] + df['heat'][7] + df['cool'][7] + df['fixed'][7]) * self.annual_consumption_savings
+            self.sep_cons = (df['flat'][8] + df['heat'][8] + df['cool'][8] + df['fixed'][8]) * self.annual_consumption_savings
+            self.oct_cons = (df['flat'][9] + df['heat'][9] + df['cool'][9] + df['fixed'][9]) * self.annual_consumption_savings
+            self.nov_cons = (df['flat'][10] + df['heat'][10] + df['cool'][10] + df['fixed'][10]) * self.annual_consumption_savings
+            self.dec_cons = (df['flat'][11] + df['heat'][11] + df['cool'][11] + df['fixed'][11]) * self.annual_consumption_savings
 
-        self.jan_peak = (df['flat'][0] + df['heat'][0] + df['cool'][0] + df['fixed'][0]) * self.peak_demand_savings
-        self.feb_peak = (df['flat'][1] + df['heat'][1] + df['cool'][1] + df['fixed'][1]) * self.peak_demand_savings
-        self.mar_peak = (df['flat'][2] + df['heat'][2] + df['cool'][2] + df['fixed'][2]) * self.peak_demand_savings
-        self.apr_peak = (df['flat'][3] + df['heat'][3] + df['cool'][3] + df['fixed'][3]) * self.peak_demand_savings
-        self.may_peak = (df['flat'][4] + df['heat'][4] + df['cool'][4] + df['fixed'][4]) * self.peak_demand_savings
-        self.jun_peak = (df['flat'][5] + df['heat'][5] + df['cool'][5] + df['fixed'][5]) * self.peak_demand_savings
-        self.jul_peak = (df['flat'][6] + df['heat'][6] + df['cool'][6] + df['fixed'][6]) * self.peak_demand_savings
-        self.aug_peak = (df['flat'][7] + df['heat'][7] + df['cool'][7] + df['fixed'][7]) * self.peak_demand_savings
-        self.sep_peak = (df['flat'][8] + df['heat'][8] + df['cool'][8] + df['fixed'][8]) * self.peak_demand_savings
-        self.oct_peak = (df['flat'][9] + df['heat'][9] + df['cool'][9] + df['fixed'][9]) * self.peak_demand_savings
-        self.nov_peak = (df['flat'][10] + df['heat'][10] + df['cool'][10] + df['fixed'][10]) * self.peak_demand_savings
-        self.dec_peak = (df['flat'][11] + df['heat'][11] + df['cool'][11] + df['fixed'][11]) * self.peak_demand_savings
+            self.jan_peak = (df['flat'][0] + df['heat'][0] + df['cool'][0] + df['fixed'][0]) * self.peak_demand_savings
+            self.feb_peak = (df['flat'][1] + df['heat'][1] + df['cool'][1] + df['fixed'][1]) * self.peak_demand_savings
+            self.mar_peak = (df['flat'][2] + df['heat'][2] + df['cool'][2] + df['fixed'][2]) * self.peak_demand_savings
+            self.apr_peak = (df['flat'][3] + df['heat'][3] + df['cool'][3] + df['fixed'][3]) * self.peak_demand_savings
+            self.may_peak = (df['flat'][4] + df['heat'][4] + df['cool'][4] + df['fixed'][4]) * self.peak_demand_savings
+            self.jun_peak = (df['flat'][5] + df['heat'][5] + df['cool'][5] + df['fixed'][5]) * self.peak_demand_savings
+            self.jul_peak = (df['flat'][6] + df['heat'][6] + df['cool'][6] + df['fixed'][6]) * self.peak_demand_savings
+            self.aug_peak = (df['flat'][7] + df['heat'][7] + df['cool'][7] + df['fixed'][7]) * self.peak_demand_savings
+            self.sep_peak = (df['flat'][8] + df['heat'][8] + df['cool'][8] + df['fixed'][8]) * self.peak_demand_savings
+            self.oct_peak = (df['flat'][9] + df['heat'][9] + df['cool'][9] + df['fixed'][9]) * self.peak_demand_savings
+            self.nov_peak = (df['flat'][10] + df['heat'][10] + df['cool'][10] + df['fixed'][10]) * self.peak_demand_savings
+            self.dec_peak = (df['flat'][11] + df['heat'][11] + df['cool'][11] + df['fixed'][11]) * self.peak_demand_savings
 
-        self.jan_cost = (df['flat'][0] + df['heat'][0] + df['cool'][0] + df['fixed'][0]) * self.annual_cost_savings
-        self.feb_cost = (df['flat'][1] + df['heat'][1] + df['cool'][1] + df['fixed'][1]) * self.annual_cost_savings
-        self.mar_cost = (df['flat'][2] + df['heat'][2] + df['cool'][2] + df['fixed'][2]) * self.annual_cost_savings
-        self.apr_cost = (df['flat'][3] + df['heat'][3] + df['cool'][3] + df['fixed'][3]) * self.annual_cost_savings
-        self.may_cost = (df['flat'][4] + df['heat'][4] + df['cool'][4] + df['fixed'][4]) * self.annual_cost_savings
-        self.jun_cost = (df['flat'][5] + df['heat'][5] + df['cool'][5] + df['fixed'][5]) * self.annual_cost_savings
-        self.jul_cost = (df['flat'][6] + df['heat'][6] + df['cool'][6] + df['fixed'][6]) * self.annual_cost_savings
-        self.aug_cost = (df['flat'][7] + df['heat'][7] + df['cool'][7] + df['fixed'][7]) * self.annual_cost_savings
-        self.sep_cost = (df['flat'][8] + df['heat'][8] + df['cool'][8] + df['fixed'][8]) * self.annual_cost_savings
-        self.oct_cost = (df['flat'][9] + df['heat'][9] + df['cool'][9] + df['fixed'][9]) * self.annual_cost_savings
-        self.nov_cost = (df['flat'][10] + df['heat'][10] + df['cool'][10] + df['fixed'][10]) * self.annual_cost_savings
-        self.dec_cost = (df['flat'][11] + df['heat'][11] + df['cool'][11] + df['fixed'][11]) * self.annual_cost_savings
-#        except:
-#            m = Message(when=timezone.now(),
-#                        message_type='Code Error',
-#                        subject='Calculation failed.',
-#                        comment='EfficiencyMeasure %s apportion_savings failed, function aborted.' % self.id)
-#            m.save()
-#            self.messages.add(m)
-#            print m
-#        else:
-        self.save()
+            self.jan_cost = (df['flat'][0] + df['heat'][0] + df['cool'][0] + df['fixed'][0]) * self.annual_cost_savings
+            self.feb_cost = (df['flat'][1] + df['heat'][1] + df['cool'][1] + df['fixed'][1]) * self.annual_cost_savings
+            self.mar_cost = (df['flat'][2] + df['heat'][2] + df['cool'][2] + df['fixed'][2]) * self.annual_cost_savings
+            self.apr_cost = (df['flat'][3] + df['heat'][3] + df['cool'][3] + df['fixed'][3]) * self.annual_cost_savings
+            self.may_cost = (df['flat'][4] + df['heat'][4] + df['cool'][4] + df['fixed'][4]) * self.annual_cost_savings
+            self.jun_cost = (df['flat'][5] + df['heat'][5] + df['cool'][5] + df['fixed'][5]) * self.annual_cost_savings
+            self.jul_cost = (df['flat'][6] + df['heat'][6] + df['cool'][6] + df['fixed'][6]) * self.annual_cost_savings
+            self.aug_cost = (df['flat'][7] + df['heat'][7] + df['cool'][7] + df['fixed'][7]) * self.annual_cost_savings
+            self.sep_cost = (df['flat'][8] + df['heat'][8] + df['cool'][8] + df['fixed'][8]) * self.annual_cost_savings
+            self.oct_cost = (df['flat'][9] + df['heat'][9] + df['cool'][9] + df['fixed'][9]) * self.annual_cost_savings
+            self.nov_cost = (df['flat'][10] + df['heat'][10] + df['cool'][10] + df['fixed'][10]) * self.annual_cost_savings
+            self.dec_cost = (df['flat'][11] + df['heat'][11] + df['cool'][11] + df['fixed'][11]) * self.annual_cost_savings
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Calculation failed.',
+                        comment='EfficiencyMeasure %s apportion_savings failed, function aborted.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+        else:
+            self.save()
     def get_savings_dictionary(self):
         """No inputs.  Returns
         dictionary of consumption,
