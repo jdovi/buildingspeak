@@ -4550,39 +4550,43 @@ class Command(BaseCommand):
         ev204 = Equipment.objects.filter(Q(buildings__account=acct1) | Q(meters__account=acct1)).distinct().get(name='EV2-04')
         ev205 = Equipment.objects.filter(Q(buildings__account=acct1) | Q(meters__account=acct1)).distinct().get(name='EV2-05')
 
-        try:
-            em1_elec = EfficiencyMeasure(name = 'Controls on 23 RTUs (electric)',
-                                            when = datetime(2014,3,1,tzinfo=UTC),
-                                            utility_type = 'electricity',
-                                            units = 'kW,kWh',
-                                            annual_consumption_savings = 58000.0,
-                                            peak_demand_savings = 0.0,
-                                            annual_cost_savings = 7500.0,
-                                            percent_uncertainty = 0.05,
-                                            percent_cool = 0.47,
-                                            percent_heat = 0.53,
-                                            percent_flat = 0.0,
-                                            percent_fixed = 0.0,
-                                            
-                                            weather_station = ws,
-                                            )
-            em1_elec.save()
-            #post-creation actions:
-            #--create intermediate models to assign to Meters
-            emma1 = EMMeterApportionment(efficiency_measure = em1_elec,
-                                         meter = e2,
-                                         assigned_fraction = 0.58)
-            emma1.save()
-            emma2 = EMMeterApportionment(efficiency_measure = em1_elec,
-                                         meter = east_main,
-                                         assigned_fraction = 0.42)
-            emma2.save()
-            #--create intermediate models to assign to Equipment
-            for equip in [ev201,ev202,ev203,ev204,ev205]:
-                emeaX = EMEquipmentApportionment(efficiency_measure = em1_elec,
-                                             equipment = equip,
-                                             assigned_fraction = 0.116)
-                emeaX.save()
+#        try:
+        print 'check1'
+        em1_elec = EfficiencyMeasure(name = 'Controls on 23 RTUs (electric)',
+                                        when = datetime(2014,3,1,tzinfo=UTC),
+                                        utility_type = 'electricity',
+                                        units = 'kW,kWh',
+                                        annual_consumption_savings = 58000.0,
+                                        peak_demand_savings = 0.0,
+                                        annual_cost_savings = 7500.0,
+                                        percent_uncertainty = 0.05,
+                                        percent_cool = 0.47,
+                                        percent_heat = 0.53,
+                                        percent_flat = 0.0,
+                                        percent_fixed = 0.0,
+                                        
+                                        weather_station = ws,
+                                        )
+        em1_elec.save()
+        #post-creation actions:
+        #--create intermediate models to assign to Meters
+        print 'check2'
+        emma1 = EMMeterApportionment(efficiency_measure = em1_elec,
+                                     meter = e2,
+                                     assigned_fraction = 0.58)
+        emma1.save()
+        print 'check3'
+        emma2 = EMMeterApportionment(efficiency_measure = em1_elec,
+                                     meter = east_main,
+                                     assigned_fraction = 0.42)
+        emma2.save()
+        #--create intermediate models to assign to Equipment
+        print 'check4'
+        for equip in [ev201,ev202,ev203,ev204,ev205]:
+            emeaX = EMEquipmentApportionment(efficiency_measure = em1_elec,
+                                         equipment = equip,
+                                         assigned_fraction = 0.116)
+            emeaX.save()
             
 #            for equip in [vgd01,vgd02,vgd03,vgd04,kdh01,kdh02,kdh03,kdh04,kdh05,kdh06,
 #                          kdh07,kdh08,kdh09,kdh10,gyc01,gyc02,gyc03]:
@@ -4591,7 +4595,8 @@ class Command(BaseCommand):
 #                                             assigned_fraction = 0.0247)
 #                emeaX.save()
             #--apportion annual savings numbers to individual months
-            em1_elec.apportion_savings()
+        print 'check5'
+        em1_elec.apportion_savings()
 
             
 #            em1_gas = EfficiencyMeasure(name = 'Controls on 23 RTUs (gas)',
@@ -4626,5 +4631,5 @@ class Command(BaseCommand):
 #                                             assigned_fraction = 0.0588)
 #                emeaX.save()
             
-        except:
-            print 'Failed to create new Measures.'
+#        except:
+#            print 'Failed to create new Measures.'
