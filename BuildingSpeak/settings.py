@@ -19,25 +19,22 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-#        'NAME': '',                      # Or path to database file if using sqlite3.
-#        'USER': '',                      # Not used with sqlite3.
-#        'PASSWORD': '',                  # Not used with sqlite3.
-#        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-#        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-#    }
-#}
-
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['.buildingspeak-staging.herokuapp.com',
-                 '.buildingspeak-staging.com',
-                 '.buildingspeak-production.herokuapp.com',
-                 '.buildingspeak-production.com',
-                 ]
+if 'heroku' in DJANGO_ROOT:
+    ALLOWED_HOSTS = ['.buildingspeak-staging.herokuapp.com',
+                     '.buildingspeak-staging.com',
+                     '.buildingspeak-production.herokuapp.com',
+                     '.buildingspeak-production.com',
+                     ]
+else:
+    ALLOWED_HOSTS = ['.buildingspeak-staging.herokuapp.com',
+                     '.buildingspeak-staging.com',
+                     '.buildingspeak-production.herokuapp.com',
+                     '.buildingspeak-production.com',
+                     '127.0.0.1',
+                     ]
 
 ###
 # Local time zone for this installation. Choices can be found here:
@@ -261,8 +258,9 @@ LOGGING = {
 
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
-DATABASES = {}
-DATABASES['default'] =  dj_database_url.config()
-
-print os.environ.get('USERNAME')
-print PROJECT_DIR
+if 'heroku' in DJANGO_ROOT:
+    DATABASES = {}
+    DATABASES['default'] =  dj_database_url.config()
+else:
+    import ast
+    DATABASES = ast.literal_eval(os.environ.get('LOCAL_DJANGO_DATABASE'))

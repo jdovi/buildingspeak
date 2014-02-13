@@ -8,8 +8,6 @@ from django.core import urlresolvers
 from decimal import Decimal
 from datetime import datetime, timedelta
 from storages.backends.s3boto import S3BotoStorage
-from rq import Queue
-from worker import conn
 
 
 from models_functions import *
@@ -1131,12 +1129,6 @@ class WeatherStation(models.Model):
                             success = None
         self.weather_data_import = False
         return success
-    def save(self, *args, **kwargs):
-        if self.weather_data_import:
-            super(WeatherStation, self).save(*args, **kwargs)
-            q = Queue(connection=conn)
-            result = q.enqueue(self.load_weather_file)
-        super(WeatherStation, self).save(*args, **kwargs)
     class Meta:
         app_label = 'BuildingSpeakApp'
 
