@@ -108,14 +108,32 @@ class PackageUnit(Equipment):
                             help_text='Package Unit: lower temperature bound, ' + u"\u00b0" + 'F',
                             default=Decimal(-50))
     #parameters
-    d = ArrayField(blank=True, null=True, dbtype='decimal',
-                            help_text='Package Unit: VFD efficiency curve coefficients, [d0, d1, d2]')
-    m = ArrayField(blank=True, null=True, dbtype='decimal',
-                            help_text='Package Unit: motor efficiency curve coefficients, [m0, m1, m2, m3]')
-    f = ArrayField(blank=True, null=True, dbtype='decimal',
-                            help_text='Package Unit: fan curve coefficients, [f0, f1, f2]')
-    e = ArrayField(blank=True, null=True, dbtype='decimal',
-                            help_text='Package Unit: fan efficiency curve coefficients, [e0, e1, e2]')
+    d0 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: VFD efficiency curve coefficient d0')
+    d1 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: VFD efficiency curve coefficient d1')
+    d2 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: VFD efficiency curve coefficient d2')
+    m0 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: motor efficiency curve coefficient m0')
+    m1 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: motor efficiency curve coefficient m1')
+    m2 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: motor efficiency curve coefficient m2')
+    m3 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: motor efficiency curve coefficient m3')
+    f0 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: fan curve coefficient f0')
+    f1 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: fan curve coefficient f1')
+    f2 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: fan curve coefficient f2')
+    e0 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: fan efficiency curve coefficient e0')
+    e1 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: fan efficiency curve coefficient e1')
+    e2 = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
+                            help_text='Package Unit: fan efficiency curve coefficient e2')
     #setpoint values
     SCOC = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=3,
                             help_text='Package Unit: occupied cooling setpoint, ' + u"\u00b0" + 'F',
