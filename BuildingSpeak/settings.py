@@ -70,7 +70,13 @@ MEDIA_ROOT = ''
 MEDIA_URL = ''
 
 
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+if 'heroku' in DJANGO_ROOT:
+    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+else: #even locally, use S3 as long as internet is available
+    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+#else: #to work locally without internet, use this line instead
+#    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY') 
 AWS_STORAGE_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME')
@@ -79,14 +85,22 @@ AWS_STORAGE_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME')
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-#DRA: seems this would be the heroku folder, but since S3 is used, this seems unused
-STATIC_ROOT = '/static/'
-
+if 'heroku' in DJANGO_ROOT:
+    STATIC_ROOT = '/static/'
+else:
+    STATIC_ROOT = '/static/'
+#else: #won't generally collect locally, but if we do, collect to here
+#    STATIC_ROOT = 'C:/Users/dashley/Desktop/Dryden/BuildingSpeak/static/'
+    
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-#DRA: whatever is in local BuildingSpeakApp/static/ folder gets dumped here
-STATIC_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-
+if 'heroku' in DJANGO_ROOT:
+    STATIC_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+else: #still use S3 when developing locally; if no internet, comment out and use the next else
+    STATIC_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+#else:  #use this to at least pull css/js/etc. from local folder when no internet available
+#    STATIC_URL = '/static/'
+    
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -257,8 +271,8 @@ LOGGING = {
 
 
 # Parse database configuration from $DATABASE_URL
-import dj_database_url
 if 'heroku' in DJANGO_ROOT:
+    import dj_database_url
     DATABASES = {}
     DATABASES['default'] =  dj_database_url.config()
 else:

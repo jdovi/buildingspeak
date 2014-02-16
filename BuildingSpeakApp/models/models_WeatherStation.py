@@ -43,9 +43,24 @@ class WeatherStation(models.Model):
 
     
     #functions
+    def get_list_of_days(self):
+        try:
+            wdp_set = self.weatherdatapoint_set.order_by('time')
+            result = list(set([i.time.strftime('%Y-%m-%d') for i in wdp_set]))
+        except:
+            result = None
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Retrieve data failed.',
+                        comment='WeatherStation %s get_list_of_days failed, function aborted.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m            
+        return result        
     def get_newest_date(self):
         try:
-            result = self.weatherdatapoint_set.order_by('time')[self.weatherdatapoint_set.order_by('time').count()-1]
+            wdp_set = self.weatherdatapoint_set.order_by('time')
+            result = wdp_set[wdp_set.count()-1]
         except:
             result = None
             m = Message(when=timezone.now(),
@@ -76,9 +91,10 @@ class WeatherStation(models.Model):
         available up to the
         most recent 3 years."""
         try:
-            oldest = max(self.weatherdatapoint_set.order_by('time')[0].time,
+            wdp_set = self.weatherdatapoint_set.order_by('time')
+            oldest = max(wdp_set[0].time,
                          timezone.now()-timedelta(hours=24*365*3))
-            newest = min(self.weatherdatapoint_set.order_by('time').reverse()[0].time,
+            newest = min(wdp_set.reverse()[0].time,
                          timezone.now())
             df = pd.DataFrame({'Start Date': datetime(2000,1,1,tzinfo=UTC),
                                'End Date': datetime(2000,1,1,tzinfo=UTC)},
@@ -854,6 +870,7 @@ class WeatherStation(models.Model):
         try:
             try:
                 checktype = isinstance(date,datetime)
+                if not checktype: raise TypeError
             except:
                 m = Message(when=timezone.now(),
                             message_type='Code Error',
@@ -867,7 +884,7 @@ class WeatherStation(models.Model):
                 if checktype:
                     try:
                         forecast = Forecastio("10b931b8efd054dfd24502d9de6477ed")
-                        result = forecast.loadForecast(self.latitude,self.longitude, time=date, units='us', lazy=True)
+                        result = forecast.loadForecast(self.latitude, self.longitude, time=date, units='us', lazy=True)
                         hourlypts = forecast.getHourly()
                         dailypt = forecast.getDaily()
                     except:

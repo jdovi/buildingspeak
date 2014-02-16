@@ -57,7 +57,7 @@ def time_test(request):
     t6 = timezone.now()
     measures = EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name') #get Account's Measures
     t7 = timezone.now()
-    meter = Meter.objects.get(name='Eden I') #get Meter
+    meter = Meter.objects.get(name='Eden I (electric)') #get Meter
     t8 = timezone.now()
     meter_df = meter.get_bill_data_period_dataframe() #get Meter's dataframe
     t9 = timezone.now()

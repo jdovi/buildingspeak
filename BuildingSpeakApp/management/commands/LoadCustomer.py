@@ -55,7 +55,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/UserImages/default_user_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             userprofile1.__setattr__('image_file', file_obj)
             userprofile1.save()
         except:
@@ -90,7 +90,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/AccountImage_CityOfRefuge.gif'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             acct1.__setattr__('image_file', file_obj)
             acct1.save()
         except:
@@ -127,7 +127,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_EastBldg.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             East.__setattr__('image_file', file_obj)
             East.save()
             
@@ -158,7 +158,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_WestBldg.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             West.__setattr__('image_file', file_obj)
             West.save()
         except:
@@ -180,7 +180,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             EdenI_space.__setattr__('image_file', file_obj)
             EdenI_space.save()
             
@@ -198,7 +198,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kitchen_space.__setattr__('image_file', file_obj)
             kitchen_space.save()
             
@@ -216,7 +216,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             dining_space.__setattr__('image_file', file_obj)
             dining_space.save()
             
@@ -234,7 +234,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_compATL.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             compATL_space.__setattr__('image_file', file_obj)
             compATL_space.save()
             
@@ -252,7 +252,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             EdenII_space.__setattr__('image_file', file_obj)
             EdenII_space.save()
             
@@ -270,7 +270,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             dorms_space.__setattr__('image_file', file_obj)
             dorms_space.save()
             
@@ -288,7 +288,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_gym.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gym_space.__setattr__('image_file', file_obj)
             gym_space.save()
             
@@ -306,7 +306,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             clinic_space.__setattr__('image_file', file_obj)
             clinic_space.save()
             
@@ -324,7 +324,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             offices_space.__setattr__('image_file', file_obj)
             offices_space.save()
             
@@ -342,7 +342,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             playground_space.__setattr__('image_file', file_obj)
             playground_space.save()
             
@@ -360,7 +360,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_school.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             school_space.__setattr__('image_file', file_obj)
             school_space.save()
             
@@ -378,7 +378,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             unfinished_space.__setattr__('image_file', file_obj)
             unfinished_space.save()
             
@@ -396,7 +396,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             newschool_space.__setattr__('image_file', file_obj)
             newschool_space.save()
             
@@ -414,7 +414,7 @@ class Command(BaseCommand):
             #--load image file
             file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             newchurch_space.__setattr__('image_file', file_obj)
             newchurch_space.save()
         except:
@@ -456,18 +456,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastMain.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             east_main.__setattr__('image_file', file_obj)
             east_main.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastMain.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             east_main.__setattr__('nameplate_file', file_obj)
             east_main.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             east_main.__setattr__('bill_data_file', file_obj)
             east_main.save()
             east_main.upload_bill_data(create_models_if_nonexistent=True)
@@ -521,18 +521,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenI.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             e1.__setattr__('image_file', file_obj)
             e1.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenI.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             e1.__setattr__('nameplate_file', file_obj)
             e1.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             e1.__setattr__('bill_data_file', file_obj)
             e1.save()
             e1.upload_bill_data(create_models_if_nonexistent = True)
@@ -570,18 +570,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenII.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             e2.__setattr__('image_file', file_obj)
             e2.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenII.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             e2.__setattr__('nameplate_file', file_obj)
             e2.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             e2.__setattr__('bill_data_file', file_obj)
             e2.save()
             e2.upload_bill_data(create_models_if_nonexistent = True)
@@ -619,18 +619,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Warehouse.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             wh.__setattr__('image_file', file_obj)
             wh.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Warehouse.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             wh.__setattr__('nameplate_file', file_obj)
             wh.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             wh.__setattr__('bill_data_file', file_obj)
             wh.save()
             wh.upload_bill_data(create_models_if_nonexistent = True)
@@ -676,18 +676,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_NewSchool.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             newschool.__setattr__('image_file', file_obj)
             newschool.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_NewSchool.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             newschool.__setattr__('nameplate_file', file_obj)
             newschool.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             newschool.__setattr__('bill_data_file', file_obj)
             newschool.save()
             newschool.upload_bill_data(create_models_if_nonexistent = True)
@@ -732,18 +732,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Clinic.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             clinic.__setattr__('image_file', file_obj)
             clinic.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Clinic.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             clinic.__setattr__('nameplate_file', file_obj)
             clinic.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             clinic.__setattr__('bill_data_file', file_obj)
             clinic.save()
             clinic.upload_bill_data(create_models_if_nonexistent = True)
@@ -780,18 +780,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastGas.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gas1290.__setattr__('image_file', file_obj)
             gas1290.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastGas.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gas1290.__setattr__('nameplate_file', file_obj)
             gas1290.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gas1290.__setattr__('bill_data_file', file_obj)
             gas1290.save()
             gas1290.upload_bill_data(create_models_if_nonexistent = True)
@@ -848,18 +848,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_WestGas.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gas1300.__setattr__('image_file', file_obj)
             gas1300.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_WestGas.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gas1300.__setattr__('nameplate_file', file_obj)
             gas1300.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gas1300.__setattr__('bill_data_file', file_obj)
             gas1300.save()
             gas1300.upload_bill_data(create_models_if_nonexistent = True)
@@ -916,18 +916,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1290.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             simpson1290.__setattr__('image_file', file_obj)
             simpson1290.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1290.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             simpson1290.__setattr__('nameplate_file', file_obj)
             simpson1290.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             simpson1290.__setattr__('bill_data_file', file_obj)
             simpson1290.save()
             simpson1290.upload_bill_data(create_models_if_nonexistent = True)
@@ -968,18 +968,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Boone1300.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             boone1300.__setattr__('image_file', file_obj)
             boone1300.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Boone1300.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             boone1300.__setattr__('nameplate_file', file_obj)
             boone1300.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             boone1300.__setattr__('bill_data_file', file_obj)
             boone1300.save()
             boone1300.upload_bill_data(create_models_if_nonexistent = True)
@@ -1032,18 +1032,18 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1300.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             simpson1300.__setattr__('image_file', file_obj)
             simpson1300.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1300.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             simpson1300.__setattr__('nameplate_file', file_obj)
             simpson1300.save()
             #--load bill data file, possibly create meter models
             file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             simpson1300.__setattr__('bill_data_file', file_obj)
             simpson1300.save()
             simpson1300.upload_bill_data(create_models_if_nonexistent = True)
@@ -1131,12 +1131,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off01.__setattr__('image_file', file_obj)
             off01.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off01.__setattr__('nameplate_file', file_obj)
             off01.save()
 
@@ -1208,12 +1208,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off02.__setattr__('image_file', file_obj)
             off02.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off02.__setattr__('nameplate_file', file_obj)
             off02.save()
 
@@ -1285,12 +1285,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off03.__setattr__('image_file', file_obj)
             off03.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off03.__setattr__('nameplate_file', file_obj)
             off03.save()
 
@@ -1362,12 +1362,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off04.__setattr__('image_file', file_obj)
             off04.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off04.__setattr__('nameplate_file', file_obj)
             off04.save()
 
@@ -1439,12 +1439,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off05.__setattr__('image_file', file_obj)
             off05.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off05.__setattr__('nameplate_file', file_obj)
             off05.save()
 
@@ -1516,12 +1516,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off06.__setattr__('image_file', file_obj)
             off06.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             off06.__setattr__('nameplate_file', file_obj)
             off06.save()
 
@@ -1593,12 +1593,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli01.__setattr__('image_file', file_obj)
             cli01.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli01.__setattr__('nameplate_file', file_obj)
             cli01.save()
 
@@ -1670,12 +1670,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli02.__setattr__('image_file', file_obj)
             cli02.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli02.__setattr__('nameplate_file', file_obj)
             cli02.save()
 
@@ -1747,12 +1747,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli03.__setattr__('image_file', file_obj)
             cli03.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli03.__setattr__('nameplate_file', file_obj)
             cli03.save()
 
@@ -1824,12 +1824,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli04.__setattr__('image_file', file_obj)
             cli04.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli04.__setattr__('nameplate_file', file_obj)
             cli04.save()
 
@@ -1901,12 +1901,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli05.__setattr__('image_file', file_obj)
             cli05.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             cli05.__setattr__('nameplate_file', file_obj)
             cli05.save()
 
@@ -1978,12 +1978,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev101.__setattr__('image_file', file_obj)
             ev101.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev101.__setattr__('nameplate_file', file_obj)
             ev101.save()
 
@@ -2055,12 +2055,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev102.__setattr__('image_file', file_obj)
             ev102.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev102.__setattr__('nameplate_file', file_obj)
             ev102.save()
 
@@ -2132,12 +2132,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev103.__setattr__('image_file', file_obj)
             ev103.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev103.__setattr__('nameplate_file', file_obj)
             ev103.save()
 
@@ -2209,12 +2209,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev104.__setattr__('image_file', file_obj)
             ev104.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev104.__setattr__('nameplate_file', file_obj)
             ev104.save()
 
@@ -2286,12 +2286,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev105.__setattr__('image_file', file_obj)
             ev105.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev105.__setattr__('nameplate_file', file_obj)
             ev105.save()
 
@@ -2363,12 +2363,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev106.__setattr__('image_file', file_obj)
             ev106.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev106.__setattr__('nameplate_file', file_obj)
             ev106.save()
 
@@ -2440,12 +2440,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev107.__setattr__('image_file', file_obj)
             ev107.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev107.__setattr__('nameplate_file', file_obj)
             ev107.save()
 
@@ -2516,12 +2516,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev201.__setattr__('image_file', file_obj)
             ev201.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev201.__setattr__('nameplate_file', file_obj)
             ev201.save()
 
@@ -2592,12 +2592,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev202.__setattr__('image_file', file_obj)
             ev202.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev202.__setattr__('nameplate_file', file_obj)
             ev202.save()
 
@@ -2668,12 +2668,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev203.__setattr__('image_file', file_obj)
             ev203.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev203.__setattr__('nameplate_file', file_obj)
             ev203.save()
 
@@ -2744,12 +2744,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev204.__setattr__('image_file', file_obj)
             ev204.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev204.__setattr__('nameplate_file', file_obj)
             ev204.save()
 
@@ -2820,12 +2820,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev205.__setattr__('image_file', file_obj)
             ev205.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             ev205.__setattr__('nameplate_file', file_obj)
             ev205.save()
 
@@ -2897,12 +2897,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             vgd01.__setattr__('image_file', file_obj)
             vgd01.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             vgd01.__setattr__('nameplate_file', file_obj)
             vgd01.save()
 
@@ -2974,12 +2974,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             vgd02.__setattr__('image_file', file_obj)
             vgd02.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             vgd02.__setattr__('nameplate_file', file_obj)
             vgd02.save()
 
@@ -3051,12 +3051,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             vgd03.__setattr__('image_file', file_obj)
             vgd03.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             vgd03.__setattr__('nameplate_file', file_obj)
             vgd03.save()
 
@@ -3128,12 +3128,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             vgd04.__setattr__('image_file', file_obj)
             vgd04.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             vgd04.__setattr__('nameplate_file', file_obj)
             vgd04.save()
 
@@ -3206,12 +3206,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh01.__setattr__('image_file', file_obj)
             kdh01.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh01.__setattr__('nameplate_file', file_obj)
             kdh01.save()
 
@@ -3284,12 +3284,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh02.__setattr__('image_file', file_obj)
             kdh02.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh02.__setattr__('nameplate_file', file_obj)
             kdh02.save()
 
@@ -3362,12 +3362,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh03.__setattr__('image_file', file_obj)
             kdh03.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh03.__setattr__('nameplate_file', file_obj)
             kdh03.save()
 
@@ -3440,12 +3440,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh04.__setattr__('image_file', file_obj)
             kdh04.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh04.__setattr__('nameplate_file', file_obj)
             kdh04.save()
 
@@ -3518,12 +3518,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh05.__setattr__('image_file', file_obj)
             kdh05.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh05.__setattr__('nameplate_file', file_obj)
             kdh05.save()
 
@@ -3596,12 +3596,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh06.__setattr__('image_file', file_obj)
             kdh06.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh06.__setattr__('nameplate_file', file_obj)
             kdh06.save()
 
@@ -3674,12 +3674,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh07.__setattr__('image_file', file_obj)
             kdh07.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh07.__setattr__('nameplate_file', file_obj)
             kdh07.save()
 
@@ -3752,12 +3752,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh08.__setattr__('image_file', file_obj)
             kdh08.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh08.__setattr__('nameplate_file', file_obj)
             kdh08.save()
 
@@ -3830,12 +3830,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh09.__setattr__('image_file', file_obj)
             kdh09.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh09.__setattr__('nameplate_file', file_obj)
             kdh09.save()
 
@@ -3908,12 +3908,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh10.__setattr__('image_file', file_obj)
             kdh10.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh10.__setattr__('nameplate_file', file_obj)
             kdh10.save()
 
@@ -3985,12 +3985,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh11.__setattr__('image_file', file_obj)
             kdh11.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh11.__setattr__('nameplate_file', file_obj)
             kdh11.save()
 
@@ -4062,12 +4062,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh12.__setattr__('image_file', file_obj)
             kdh12.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh12.__setattr__('nameplate_file', file_obj)
             kdh12.save()
 
@@ -4139,12 +4139,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh13.__setattr__('image_file', file_obj)
             kdh13.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh13.__setattr__('nameplate_file', file_obj)
             kdh13.save()
 
@@ -4216,12 +4216,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh14.__setattr__('image_file', file_obj)
             kdh14.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh14.__setattr__('nameplate_file', file_obj)
             kdh14.save()
 
@@ -4293,12 +4293,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh15.__setattr__('image_file', file_obj)
             kdh15.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             kdh15.__setattr__('nameplate_file', file_obj)
             kdh15.save()
 
@@ -4371,12 +4371,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gyc01.__setattr__('image_file', file_obj)
             gyc01.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gyc01.__setattr__('nameplate_file', file_obj)
             gyc01.save()
 
@@ -4449,12 +4449,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gyc02.__setattr__('image_file', file_obj)
             gyc02.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gyc02.__setattr__('nameplate_file', file_obj)
             gyc02.save()
 
@@ -4526,12 +4526,12 @@ class Command(BaseCommand):
             #--load image files
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-photo.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gyc03.__setattr__('image_file', file_obj)
             gyc03.save()
             file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-nameplate.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             gyc03.__setattr__('nameplate_file', file_obj)
             gyc03.save()
 

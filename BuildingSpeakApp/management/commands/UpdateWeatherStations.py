@@ -15,13 +15,13 @@ class Command(BaseCommand):
 
         for ws in WeatherStation.objects.all():
             try:
-                newest_date = ws.get_newest_date()
-                if newest_date is None: newest_date = datetime(2011, 1, 1, tzinfo = UTC)
-                date_range = pd.date_range(start = newest_date,
-                                           end = timezone.now())
-                list_of_days = [i.to_datetime() for i in date_range]
-                for j in list_of_days:
-                    result = ws.load_weather_day(j)
-                    if result and j.day == 1: print 'Running %s for Weather Station %s.' % (j.strftime('%Y-%m-%d'), ws.name)
+                required_days = [i.strftime('%Y-%m-%d') for i in pd.date_range(start = datetime(2009, 1, 1, tzinfo = UTC),
+                                                                               end = timezone.now())]
+                stored_days = ws.get_list_of_days()
+                days_to_load = [i for i in required_days if i not in stored_days]
+                for j in days_to_load:
+                    result = ws.load_weather_day(UTC.localize(datetime.strptime(j,'%Y-%m-%d')))
             except:
                 print 'Failed to completely update WeatherStation %s.' % ws.name
+            else:
+                print 'Updated WeatherStation %s.' % ws.name

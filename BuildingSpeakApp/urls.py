@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url
+from django.conf import settings
 
 from BuildingSpeakApp import views
 
@@ -44,3 +45,4 @@ urlpatterns = patterns('',
     url(r'^time_test$', views.time_test, name='time_test'),
 
 )
+

@@ -26,6 +26,8 @@ class Command(BaseCommand):
             ATLdw.save()
         except:
             print 'Failed to create new WeatherStations.'
+        else:
+            print 'Created new WeatherStations.'
         
     ###---Utilitys
         try:
@@ -35,9 +37,9 @@ class Command(BaseCommand):
             atlw.save()
             #post-creation actions
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/UtilityImage_ATL_Water.png'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/UtilityImage_ATL_Water.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             atlw.__setattr__('image_file', file_obj)
             atlw.save()
             
@@ -47,9 +49,9 @@ class Command(BaseCommand):
             infe.save()
             #post-creation actions
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/UtilityImage_Infinite_Energy.jpg'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/UtilityImage_Infinite_Energy.jpg'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             infe.__setattr__('image_file', file_obj)
             infe.save()
             
@@ -59,14 +61,16 @@ class Command(BaseCommand):
             GPC.save()
             #post-creation actions
             #--load image file
-            file_url = STATIC_URL + 'temporary_files/UtilityImage_Georgia_Power.png'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/UtilityImage_Georgia_Power.png'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPC.__setattr__('image_file', file_obj)
             GPC.save()
         except:
             print 'Failed to create new Utilities.'
-        
+        else:
+            print 'Created new Utilities.'
+
     ###---Riders
         try:
             GPCECCR2 = GAPowerRider(
@@ -83,9 +87,9 @@ class Command(BaseCommand):
             GPCECCR2.save()
             #post-creation actions
             #--load rider file
-            file_url = STATIC_URL + 'temporary_files/RiderFile_Georgia_Power_ECCR-2.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RiderFile_Georgia_Power_ECCR-2.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCECCR2.__setattr__('rider_file', file_obj)
             GPCECCR2.save()
             
@@ -103,9 +107,9 @@ class Command(BaseCommand):
             GPCNCCR3.save()
             #post-creation actions
             #--load rider file
-            file_url = STATIC_URL + 'temporary_files/RiderFile_Georgia_Power_NCCR-3.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RiderFile_Georgia_Power_NCCR-3.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCNCCR3.__setattr__('rider_file', file_obj)
             GPCNCCR3.save()
             
@@ -123,9 +127,9 @@ class Command(BaseCommand):
             GPCDSMC3.save()
             #post-creation actions
             #--load rider file
-            file_url = STATIC_URL + 'temporary_files/RiderFile_Georgia_Power_DSM-C-3.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RiderFile_Georgia_Power_DSM-C-3.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCDSMC3.__setattr__('rider_file', file_obj)
             GPCDSMC3.save()
             
@@ -143,9 +147,9 @@ class Command(BaseCommand):
             GPCFCR23sec.save()
             #post-creation actions
             #--load rider file
-            file_url = STATIC_URL + 'temporary_files/RiderFile_Georgia_Power_FCR-23.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RiderFile_Georgia_Power_FCR-23.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCFCR23sec.__setattr__('rider_file', file_obj)
             GPCFCR23sec.save()
             
@@ -163,9 +167,9 @@ class Command(BaseCommand):
             GPCFCR23prim.save()
             #post-creation actions
             #--load rider file
-            file_url = STATIC_URL + 'temporary_files/RiderFile_Georgia_Power_FCR-23.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RiderFile_Georgia_Power_FCR-23.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCFCR23prim.__setattr__('rider_file', file_obj)
             GPCFCR23prim.save()
             
@@ -183,9 +187,9 @@ class Command(BaseCommand):
             GPCFCR23tran.save()
             #post-creation actions
             #--load rider file
-            file_url = STATIC_URL + 'temporary_files/RiderFile_Georgia_Power_FCR-23.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RiderFile_Georgia_Power_FCR-23.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCFCR23tran.__setattr__('rider_file', file_obj)
             GPCFCR23tran.save()
             
@@ -203,9 +207,9 @@ class Command(BaseCommand):
             GPCMFF2in.save()
             #post-creation actions
             #--load rider file
-            file_url = STATIC_URL + 'temporary_files/RiderFile_Georgia_Power_MFF-2.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RiderFile_Georgia_Power_MFF-2.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCMFF2in.__setattr__('rider_file', file_obj)
             GPCMFF2in.save()
             
@@ -223,13 +227,15 @@ class Command(BaseCommand):
             GPCMFF2out.save()
             #post-creation actions
             #--load rider file
-            file_url = STATIC_URL + 'temporary_files/RiderFile_Georgia_Power_MFF-2.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RiderFile_Georgia_Power_MFF-2.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCMFF2out.__setattr__('rider_file', file_obj)
             GPCMFF2out.save()
         except:
             print 'Failed to create new RateScheduleRiders.'
+        else:
+            print 'Created new RateScheduleRiders.'
         
     ###---RateSchedules
         try:
@@ -258,9 +264,9 @@ class Command(BaseCommand):
             w_ww.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_City_of_Atlanta_water.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_City_of_Atlanta_water.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             w_ww.__setattr__('rate_file', file_obj)
             w_ww.save()
             
@@ -331,9 +337,9 @@ class Command(BaseCommand):
             GPCPLS8_sec_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_Georgia_Power_PLS-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_Georgia_Power_PLS-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLS8_sec_in.__setattr__('rate_file', file_obj)
             GPCPLS8_sec_in.save()
             #--add riders
@@ -409,9 +415,9 @@ class Command(BaseCommand):
             GPCPLM8_sec_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLM-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLM-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLM8_sec_in.__setattr__('rate_file', file_obj)
             GPCPLM8_sec_in.save()
             #--add riders
@@ -487,9 +493,9 @@ class Command(BaseCommand):
             GPCPLL8_sec_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLL-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLL-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLL8_sec_in.__setattr__('rate_file', file_obj)
             GPCPLL8_sec_in.save()
             #--add riders
@@ -566,9 +572,9 @@ class Command(BaseCommand):
             GPCPLS8_sec_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLS-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLS-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLS8_sec_out.__setattr__('rate_file', file_obj)
             GPCPLS8_sec_out.save()
             #--add riders
@@ -644,9 +650,9 @@ class Command(BaseCommand):
             GPCPLM8_sec_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLM-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLM-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLM8_sec_out.__setattr__('rate_file', file_obj)
             GPCPLM8_sec_out.save()
             #--add riders
@@ -722,9 +728,9 @@ class Command(BaseCommand):
             GPCPLL8_sec_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLL-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLL-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLL8_sec_out.__setattr__('rate_file', file_obj)
             GPCPLL8_sec_out.save()
             #--add riders
@@ -801,9 +807,9 @@ class Command(BaseCommand):
             GPCPLS8_prim_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLS-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLS-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLS8_prim_in.__setattr__('rate_file', file_obj)
             GPCPLS8_prim_in.save()
             #--add riders
@@ -879,9 +885,9 @@ class Command(BaseCommand):
             GPCPLM8_prim_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLM-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLM-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLM8_prim_in.__setattr__('rate_file', file_obj)
             GPCPLM8_prim_in.save()
             #--add riders
@@ -957,9 +963,9 @@ class Command(BaseCommand):
             GPCPLL8_prim_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLL-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLL-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLL8_prim_in.__setattr__('rate_file', file_obj)
             GPCPLL8_prim_in.save()
             #--add riders
@@ -1036,9 +1042,9 @@ class Command(BaseCommand):
             GPCPLS8_prim_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLS-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLS-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLS8_prim_out.__setattr__('rate_file', file_obj)
             GPCPLS8_prim_out.save()
             #--add riders
@@ -1114,9 +1120,9 @@ class Command(BaseCommand):
             GPCPLM8_prim_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLM-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLM-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLM8_prim_out.__setattr__('rate_file', file_obj)
             GPCPLM8_prim_out.save()
             #--add riders
@@ -1192,9 +1198,9 @@ class Command(BaseCommand):
             GPCPLL8_prim_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLL-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLL-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLL8_prim_out.__setattr__('rate_file', file_obj)
             GPCPLL8_prim_out.save()
             #--add riders
@@ -1271,9 +1277,9 @@ class Command(BaseCommand):
             GPCPLS8_tran_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLS-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLS-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLS8_tran_in.__setattr__('rate_file', file_obj)
             GPCPLS8_tran_in.save()
             #--add riders
@@ -1349,9 +1355,9 @@ class Command(BaseCommand):
             GPCPLM8_tran_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLM-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLM-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLM8_tran_in.__setattr__('rate_file', file_obj)
             GPCPLM8_tran_in.save()
             #--add riders
@@ -1427,9 +1433,9 @@ class Command(BaseCommand):
             GPCPLL8_tran_in.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLL-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLL-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLL8_tran_in.__setattr__('rate_file', file_obj)
             GPCPLL8_tran_in.save()
             #--add riders
@@ -1506,9 +1512,9 @@ class Command(BaseCommand):
             GPCPLS8_tran_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLS-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLS-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLS8_tran_out.__setattr__('rate_file', file_obj)
             GPCPLS8_tran_out.save()
             #--add riders
@@ -1584,9 +1590,9 @@ class Command(BaseCommand):
             GPCPLM8_tran_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLM-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLM-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLM8_tran_out.__setattr__('rate_file', file_obj)
             GPCPLM8_tran_out.save()
             #--add riders
@@ -1662,9 +1668,9 @@ class Command(BaseCommand):
             GPCPLL8_tran_out.save()
             #post-creation actions
             #--load rate file
-            file_url = STATIC_URL + 'temporary_files/RateFile_GeorgiaPower_PLL-8.pdf'
+            file_url = STATIC_URL + 'upload_files/BuildingSpeakBuiltins_001/RateFile_GeorgiaPower_PLL-8.pdf'
             result = urllib.urlretrieve(file_url)
-            file_obj = File(open(result[0]))
+            file_obj = File(open(result[0],'rb'))
             GPCPLL8_tran_out.__setattr__('rate_file', file_obj)
             GPCPLL8_tran_out.save()
             #--add riders
@@ -1675,3 +1681,5 @@ class Command(BaseCommand):
             GPCPLL8_tran_out.riders.add(GPCMFF2out)
         except:
             print 'Failed to create new RateSchedules.'
+        else:
+            print 'Created new RateSchedules.'
