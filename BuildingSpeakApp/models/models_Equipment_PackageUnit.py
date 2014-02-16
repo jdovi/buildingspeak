@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils import timezone
 from decimal import Decimal
-from djorm_pgarray.fields import ArrayField
 
 from models_functions import *
 from models_Equipment import Equipment
