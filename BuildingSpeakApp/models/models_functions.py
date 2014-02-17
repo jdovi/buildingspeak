@@ -1,12 +1,57 @@
-#import dbarray
 import math
 import numpy as np
 import pandas as pd
+import urllib, urllib2
 from pytz import UTC
+from PIL import Image
 from decimal import Decimal
+from StringIO import StringIO
 from datetime import datetime, timedelta
 
+from django.core.files import File
+from django.core.files.base import ContentFile
 
+def set_file_field(model_instance, field_name, file_url):
+    """function(model_instance, field_name, file_url)
+    
+    Saves the file at the given file_url to the
+    given ImageFile attribute of model_instance.
+    
+    Created for JPEGs, which don't seem to copy
+    successfully the way other files do. Utilizes
+    Pillow/PIL, but doesn't actually leverage the
+    JPEG support...more of a workaround.
+    """
+    try:
+        file_ext = file_url.split('.')[-1]
+        if file_ext in ['JPEG','jpeg','JPG','jpg']:
+            input_file = StringIO(urllib2.urlopen(file_url).read())
+            output_file = StringIO()
+            img = Image.open(input_file)
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            img.save(output_file, "JPEG")
+            model_instance.__getattribute__(field_name).save(file_url.split('/')[-1],
+                                            ContentFile(output_file.getvalue()),
+                                            save=False)
+        elif file_ext in ['PNG','png','GIF','gif','CSV','csv']:
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            model_instance.__setattr__(field_name, file_obj)
+            model_instance.save()
+        else:
+            print 'Code Error: set_file_field given invalid file type on Model %s, field %s, file at %s.' % (model_instance.name, field_name, file_url)
+    except:
+        try:
+            if not (isinstance(model_instance.name, basestring) and
+                    isinstance(field_name, basestring) and
+                    isinstance(file_url, basestring)):
+                raise TypeError
+        except:
+            print 'Code Error: set_file_field failed; unable to provide specific information.'
+        else:
+            print 'Code Error: set_file_field failed on Model %s, field %s, file at %s.' % (model_instance.name, field_name, file_url)
+    
 def max_with_NaNs(x):
     """function(x)
     type(x) = list of Decimals

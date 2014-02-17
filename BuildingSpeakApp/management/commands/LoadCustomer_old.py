@@ -1,21 +1,25 @@
 from django.core.management.base import BaseCommand
 
+import urllib
 from pytz import UTC
 from decimal import Decimal
 from datetime import datetime
 
 from django.utils import timezone
+from django.core.files import File
 from django.contrib.auth.models import User
+from django.db.models import Max, Min, Q, Sum
 
 from BuildingSpeak.settings import STATIC_URL
 
-from BuildingSpeakApp.models import UserProfile, Account, Building, Space, Meter
+from BuildingSpeakApp.models import UserProfile, Account, Building, Space, Meter, Equipment
 from BuildingSpeakApp.models import PackageUnit
+from BuildingSpeakApp.models import MeterConsumptionModel, MeterPeakDemandModel
 from BuildingSpeakApp.models import SpaceMeterApportionment, BuildingMeterApportionment
 from BuildingSpeakApp.models import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from BuildingSpeakApp.models import WeatherStation, Utility
 from BuildingSpeakApp.models import GAPowerPandL, InfiniteEnergyGAGas, CityOfATLWWW
-from BuildingSpeakApp.models import set_file_field
+from BuildingSpeakApp.models import set_image_field_jpeg
 
 
 
@@ -51,9 +55,12 @@ class Command(BaseCommand):
             userprofile1.save()
             #post-creation actions
             #--load image file
-            set_file_field(userprofile1,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/UserImages/default_user_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/UserImages/default_user_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            userprofile1.__setattr__('image_file', file_obj)
+            userprofile1.save()
+            set_image_field_jpeg(cli01,'image_file',file_url)
         except:
             print 'Failed to create new UserProfiles.'
         
@@ -84,9 +91,11 @@ class Command(BaseCommand):
             acct1.users.add(userDA)
             
             #--load image file
-            set_file_field(acct1,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/AccountImage_CityOfRefuge.gif')
+            file_url = STATIC_URL + 'upload_files/NewAccount/AccountImage_CityOfRefuge.gif'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            acct1.__setattr__('image_file', file_obj)
+            acct1.save()
         except:
             print 'Failed to create new Accounts.'
         
@@ -119,9 +128,11 @@ class Command(BaseCommand):
     
             #post-creation actions
             #--load image file
-            set_file_field(East,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_EastBldg.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_EastBldg.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            East.__setattr__('image_file', file_obj)
+            East.save()
             
             West = Building(
                 name = 'West Bldg',
@@ -148,9 +159,11 @@ class Command(BaseCommand):
             
             #post-creation actions:
             #--load image file
-            set_file_field(West,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_WestBldg.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_WestBldg.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            West.__setattr__('image_file', file_obj)
+            West.save()
         except:
             print 'Failed to create new Buildings.'
         
@@ -168,9 +181,11 @@ class Command(BaseCommand):
             EdenI_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(EdenI_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            EdenI_space.__setattr__('image_file', file_obj)
+            EdenI_space.save()
             
             kitchen_space = Space(
                 name = '180 Kitchen',
@@ -184,9 +199,11 @@ class Command(BaseCommand):
             kitchen_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(kitchen_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kitchen_space.__setattr__('image_file', file_obj)
+            kitchen_space.save()
             
             dining_space = Space(
                 name = 'Dining Area',
@@ -200,9 +217,11 @@ class Command(BaseCommand):
             dining_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(dining_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            dining_space.__setattr__('image_file', file_obj)
+            dining_space.save()
             
             compATL_space = Space(
                 name = 'Compassion ATL',
@@ -216,9 +235,11 @@ class Command(BaseCommand):
             compATL_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(compATL_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_compATL.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_compATL.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            compATL_space.__setattr__('image_file', file_obj)
+            compATL_space.save()
             
             EdenII_space = Space(
                 name = 'Eden II',
@@ -232,9 +253,11 @@ class Command(BaseCommand):
             EdenII_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(EdenII_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            EdenII_space.__setattr__('image_file', file_obj)
+            EdenII_space.save()
             
             dorms_space = Space(
                 name = 'Dorms',
@@ -248,9 +271,11 @@ class Command(BaseCommand):
             dorms_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(dorms_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            dorms_space.__setattr__('image_file', file_obj)
+            dorms_space.save()
             
             gym_space = Space(
                 name = 'Gym',
@@ -264,9 +289,11 @@ class Command(BaseCommand):
             gym_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(gym_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_gym.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_gym.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gym_space.__setattr__('image_file', file_obj)
+            gym_space.save()
             
             clinic_space = Space(
                 name = 'Clinic',
@@ -280,9 +307,11 @@ class Command(BaseCommand):
             clinic_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(clinic_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            clinic_space.__setattr__('image_file', file_obj)
+            clinic_space.save()
             
             offices_space = Space(
                 name = 'Offices',
@@ -296,9 +325,11 @@ class Command(BaseCommand):
             offices_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(offices_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            offices_space.__setattr__('image_file', file_obj)
+            offices_space.save()
             
             playground_space = Space(
                 name = 'Playground',
@@ -312,9 +343,11 @@ class Command(BaseCommand):
             playground_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(playground_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            playground_space.__setattr__('image_file', file_obj)
+            playground_space.save()
             
             school_space = Space(
                 name = 'CORE',
@@ -328,9 +361,11 @@ class Command(BaseCommand):
             school_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(school_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_school.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_school.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            school_space.__setattr__('image_file', file_obj)
+            school_space.save()
             
             unfinished_space = Space(
                 name = 'Unfinished',
@@ -344,9 +379,11 @@ class Command(BaseCommand):
             unfinished_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(unfinished_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            unfinished_space.__setattr__('image_file', file_obj)
+            unfinished_space.save()
             
             newschool_space = Space(
                 name = 'Bright Futures',
@@ -360,9 +397,11 @@ class Command(BaseCommand):
             newschool_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(newschool_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            newschool_space.__setattr__('image_file', file_obj)
+            newschool_space.save()
             
             newchurch_space = Space(
                 name = 'Church',
@@ -376,9 +415,11 @@ class Command(BaseCommand):
             newchurch_space.save()
             #post-creation actions:
             #--load image file
-            set_file_field(newchurch_space,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
+            file_url = STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            newchurch_space.__setattr__('image_file', file_obj)
+            newchurch_space.save()
         except:
             print 'Failed to create new Spaces.'        
         
@@ -416,16 +457,22 @@ class Command(BaseCommand):
             east_main.save()
             #post-creation actions:
             #--load image files
-            set_file_field(east_main,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastMain.jpg')
-            set_file_field(east_main,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastMain.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastMain.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            east_main.__setattr__('image_file', file_obj)
+            east_main.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastMain.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            east_main.__setattr__('nameplate_file', file_obj)
+            east_main.save()
             #--load bill data file, possibly create meter models
-            set_file_field(east_main,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            east_main.__setattr__('bill_data_file', file_obj)
+            east_main.save()
             east_main.upload_bill_data(create_models_if_nonexistent=True)
             east_main.save()
             #--connect to buildings
@@ -475,16 +522,22 @@ class Command(BaseCommand):
             e1.save()
             #post-creation actions:
             #--load image files
-            set_file_field(e1,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenI.jpg')
-            set_file_field(e1,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenI.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenI.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            e1.__setattr__('image_file', file_obj)
+            e1.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenI.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            e1.__setattr__('nameplate_file', file_obj)
+            e1.save()
             #--load bill data file, possibly create meter models
-            set_file_field(e1,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            e1.__setattr__('bill_data_file', file_obj)
+            e1.save()
             e1.upload_bill_data(create_models_if_nonexistent = True)
             e1.save()
             #--connect to buildings
@@ -518,16 +571,22 @@ class Command(BaseCommand):
             e2.save()
             #post-creation actions:
             #--load image files
-            set_file_field(e2,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenII.jpg')
-            set_file_field(e2,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenII.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenII.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            e2.__setattr__('image_file', file_obj)
+            e2.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenII.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            e2.__setattr__('nameplate_file', file_obj)
+            e2.save()
             #--load bill data file, possibly create meter models
-            set_file_field(e2,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            e2.__setattr__('bill_data_file', file_obj)
+            e2.save()
             e2.upload_bill_data(create_models_if_nonexistent = True)
             e2.save()
             #--connect to buildings
@@ -561,16 +620,22 @@ class Command(BaseCommand):
             wh.save()
             #post-creation actions:
             #--load image files
-            set_file_field(wh,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Warehouse.jpg')
-            set_file_field(wh,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Warehouse.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Warehouse.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            wh.__setattr__('image_file', file_obj)
+            wh.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Warehouse.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            wh.__setattr__('nameplate_file', file_obj)
+            wh.save()
             #--load bill data file, possibly create meter models
-            set_file_field(wh,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            wh.__setattr__('bill_data_file', file_obj)
+            wh.save()
             wh.upload_bill_data(create_models_if_nonexistent = True)
             wh.save()
             #--connect to buildings
@@ -612,16 +677,22 @@ class Command(BaseCommand):
             newschool.save()
             #post-creation actions:
             #--load image files
-            set_file_field(newschool,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_NewSchool.jpg')
-            set_file_field(newschool,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_NewSchool.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_NewSchool.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            newschool.__setattr__('image_file', file_obj)
+            newschool.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_NewSchool.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            newschool.__setattr__('nameplate_file', file_obj)
+            newschool.save()
             #--load bill data file, possibly create meter models
-            set_file_field(newschool,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            newschool.__setattr__('bill_data_file', file_obj)
+            newschool.save()
             newschool.upload_bill_data(create_models_if_nonexistent = True)
             newschool.save()
             #--connect to buildings
@@ -662,16 +733,22 @@ class Command(BaseCommand):
             clinic.save()
             #post-creation actions:
             #--load image files
-            set_file_field(clinic,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Clinic.jpg')
-            set_file_field(clinic,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Clinic.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Clinic.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            clinic.__setattr__('image_file', file_obj)
+            clinic.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Clinic.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            clinic.__setattr__('nameplate_file', file_obj)
+            clinic.save()
             #--load bill data file, possibly create meter models
-            set_file_field(clinic,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            clinic.__setattr__('bill_data_file', file_obj)
+            clinic.save()
             clinic.upload_bill_data(create_models_if_nonexistent = True)
             clinic.save()
             #--connect to buildings
@@ -704,16 +781,22 @@ class Command(BaseCommand):
             gas1290.save()
             #post-creation actions:
             #--load image files
-            set_file_field(gas1290,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastGas.jpg')
-            set_file_field(gas1290,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastGas.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastGas.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gas1290.__setattr__('image_file', file_obj)
+            gas1290.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastGas.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gas1290.__setattr__('nameplate_file', file_obj)
+            gas1290.save()
             #--load bill data file, possibly create meter models
-            set_file_field(gas1290,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gas1290.__setattr__('bill_data_file', file_obj)
+            gas1290.save()
             gas1290.upload_bill_data(create_models_if_nonexistent = True)
             gas1290.save()
             #--connect to buildings
@@ -766,16 +849,22 @@ class Command(BaseCommand):
             gas1300.save()
             #post-creation actions:
             #--load image files
-            set_file_field(gas1300,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_WestGas.jpg')
-            set_file_field(gas1300,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_WestGas.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_WestGas.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gas1300.__setattr__('image_file', file_obj)
+            gas1300.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_WestGas.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gas1300.__setattr__('nameplate_file', file_obj)
+            gas1300.save()
             #--load bill data file, possibly create meter models
-            set_file_field(gas1300,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gas1300.__setattr__('bill_data_file', file_obj)
+            gas1300.save()
             gas1300.upload_bill_data(create_models_if_nonexistent = True)
             gas1300.save()
             #--connect to buildings
@@ -828,16 +917,22 @@ class Command(BaseCommand):
             simpson1290.save()
             #post-creation actions:
             #--load image files
-            set_file_field(simpson1290,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1290.jpg')
-            set_file_field(simpson1290,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1290.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1290.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            simpson1290.__setattr__('image_file', file_obj)
+            simpson1290.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1290.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            simpson1290.__setattr__('nameplate_file', file_obj)
+            simpson1290.save()
             #--load bill data file, possibly create meter models
-            set_file_field(simpson1290,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            simpson1290.__setattr__('bill_data_file', file_obj)
+            simpson1290.save()
             simpson1290.upload_bill_data(create_models_if_nonexistent = True)
             simpson1290.save()
             #--connect to buildings
@@ -874,16 +969,22 @@ class Command(BaseCommand):
             boone1300.save()
             #post-creation actions:
             #--load image files
-            set_file_field(boone1300,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Boone1300.jpg')
-            set_file_field(boone1300,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Boone1300.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Boone1300.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            boone1300.__setattr__('image_file', file_obj)
+            boone1300.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Boone1300.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            boone1300.__setattr__('nameplate_file', file_obj)
+            boone1300.save()
             #--load bill data file, possibly create meter models
-            set_file_field(boone1300,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            boone1300.__setattr__('bill_data_file', file_obj)
+            boone1300.save()
             boone1300.upload_bill_data(create_models_if_nonexistent = True)
             boone1300.save()
             #--connect to buildings
@@ -932,16 +1033,22 @@ class Command(BaseCommand):
             simpson1300.save()
             #post-creation actions:
             #--load image files
-            set_file_field(simpson1300,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1300.jpg')
-            set_file_field(simpson1300,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1300.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1300.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            simpson1300.__setattr__('image_file', file_obj)
+            simpson1300.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1300.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            simpson1300.__setattr__('nameplate_file', file_obj)
+            simpson1300.save()
             #--load bill data file, possibly create meter models
-            set_file_field(simpson1300,
-                            'bill_data_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv')
+            file_url = STATIC_URL + 'upload_files/NewAccount/MeterBillData/Eden_I_Electric.csv'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            simpson1300.__setattr__('bill_data_file', file_obj)
+            simpson1300.save()
             simpson1300.upload_bill_data(create_models_if_nonexistent = True)
             simpson1300.save()
             #--connect to buildings
@@ -1005,19 +1112,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1034,12 +1132,16 @@ class Command(BaseCommand):
             off01.meters.add(wh)        #electric
             off01.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(off01,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-photo.jpg')
-            set_file_field(off01,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off01.__setattr__('image_file', file_obj)
+            off01.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off01.__setattr__('nameplate_file', file_obj)
+            off01.save()
 
             off02 = PackageUnit(name = 'OFF-02',
                                 equipment_type = 'Package Unit',
@@ -1087,19 +1189,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1116,12 +1209,16 @@ class Command(BaseCommand):
             off02.meters.add(wh)        #electric
             off02.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(off02,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-photo.jpg')
-            set_file_field(off02,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off02.__setattr__('image_file', file_obj)
+            off02.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off02.__setattr__('nameplate_file', file_obj)
+            off02.save()
 
             off03 = PackageUnit(name = 'OFF-03',
                                 equipment_type = 'Package Unit',
@@ -1169,19 +1266,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1198,12 +1286,16 @@ class Command(BaseCommand):
             off03.meters.add(wh)        #electric
             off03.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(off03,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-photo.jpg')
-            set_file_field(off03,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off03.__setattr__('image_file', file_obj)
+            off03.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off03.__setattr__('nameplate_file', file_obj)
+            off03.save()
 
             off04 = PackageUnit(name = 'OFF-04',
                                 equipment_type = 'Package Unit',
@@ -1251,19 +1343,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1280,12 +1363,16 @@ class Command(BaseCommand):
             off04.meters.add(wh)       #electric
             off04.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(off04,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-photo.jpg')
-            set_file_field(off04,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off04.__setattr__('image_file', file_obj)
+            off04.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off04.__setattr__('nameplate_file', file_obj)
+            off04.save()
 
             off05 = PackageUnit(name = 'OFF-05',
                                 equipment_type = 'Package Unit',
@@ -1333,19 +1420,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1362,12 +1440,16 @@ class Command(BaseCommand):
             off05.meters.add(wh)       #electric
             off05.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(off05,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-photo.jpg')
-            set_file_field(off05,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off05.__setattr__('image_file', file_obj)
+            off05.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off05.__setattr__('nameplate_file', file_obj)
+            off05.save()
 
             off06 = PackageUnit(name = 'OFF-06',
                                 equipment_type = 'Package Unit',
@@ -1415,19 +1497,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1444,12 +1517,16 @@ class Command(BaseCommand):
             off05.meters.add(wh)       #electric
             off06.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(off06,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-photo.jpg')
-            set_file_field(off06,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off06.__setattr__('image_file', file_obj)
+            off06.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            off06.__setattr__('nameplate_file', file_obj)
+            off06.save()
 
             cli01 = PackageUnit(name = 'CLI-01',
                                 equipment_type = 'Package Unit',
@@ -1497,19 +1574,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1526,12 +1594,16 @@ class Command(BaseCommand):
             cli01.meters.add(clinic)    #electric
             cli01.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(cli01,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-photo.jpg')
-            set_file_field(cli01,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli01.__setattr__('image_file', file_obj)
+            cli01.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli01.__setattr__('nameplate_file', file_obj)
+            cli01.save()
 
             cli02 = PackageUnit(name = 'CLI-02',
                                 equipment_type = 'Package Unit',
@@ -1579,19 +1651,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1608,12 +1671,16 @@ class Command(BaseCommand):
             cli02.meters.add(clinic)    #electric
             cli02.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(cli02,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-photo.jpg')
-            set_file_field(cli02,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli02.__setattr__('image_file', file_obj)
+            cli02.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli02.__setattr__('nameplate_file', file_obj)
+            cli02.save()
 
             cli03 = PackageUnit(name = 'CLI-03',
                                 equipment_type = 'Package Unit',
@@ -1661,19 +1728,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1690,12 +1748,16 @@ class Command(BaseCommand):
             cli03.meters.add(clinic)    #electric
             cli03.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(cli03,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-photo.jpg')
-            set_file_field(cli03,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli03.__setattr__('image_file', file_obj)
+            cli03.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli03.__setattr__('nameplate_file', file_obj)
+            cli03.save()
 
             cli04 = PackageUnit(name = 'CLI-04',
                                 equipment_type = 'Package Unit',
@@ -1743,19 +1805,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1772,12 +1825,16 @@ class Command(BaseCommand):
             cli04.meters.add(clinic)    #electric
             cli04.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(cli04,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-photo.jpg')
-            set_file_field(cli04,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli04.__setattr__('image_file', file_obj)
+            cli04.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli04.__setattr__('nameplate_file', file_obj)
+            cli04.save()
 
             cli05 = PackageUnit(name = 'CLI-05',
                                 equipment_type = 'Package Unit',
@@ -1825,19 +1882,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1854,12 +1902,16 @@ class Command(BaseCommand):
             cli05.meters.add(clinic)    #electric
             cli05.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(cli05,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-photo.jpg')
-            set_file_field(cli05,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli05.__setattr__('image_file', file_obj)
+            cli05.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            cli05.__setattr__('nameplate_file', file_obj)
+            cli05.save()
 
             ev101 = PackageUnit(name = 'EV1-01',
                                 equipment_type = 'Package Unit',
@@ -1907,19 +1959,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -1936,12 +1979,16 @@ class Command(BaseCommand):
             ev101.meters.add(e1)        #electric
             ev101.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(ev101,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-photo.jpg')
-            set_file_field(ev101,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev101.__setattr__('image_file', file_obj)
+            ev101.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev101.__setattr__('nameplate_file', file_obj)
+            ev101.save()
 
             ev102 = PackageUnit(name = 'EV1-02',
                                 equipment_type = 'Package Unit',
@@ -1989,19 +2036,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2018,12 +2056,16 @@ class Command(BaseCommand):
             ev102.meters.add(e1)        #electric
             ev102.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(ev102,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-photo.jpg')
-            set_file_field(ev102,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-nameplate.jp')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev102.__setattr__('image_file', file_obj)
+            ev102.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev102.__setattr__('nameplate_file', file_obj)
+            ev102.save()
 
             ev103 = PackageUnit(name = 'EV1-03',
                                 equipment_type = 'Package Unit',
@@ -2071,19 +2113,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2100,12 +2133,16 @@ class Command(BaseCommand):
             ev103.meters.add(e1)        #electric
             ev103.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(ev103,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-photo.jpg')
-            set_file_field(ev103,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev103.__setattr__('image_file', file_obj)
+            ev103.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev103.__setattr__('nameplate_file', file_obj)
+            ev103.save()
 
             ev104 = PackageUnit(name = 'EV1-04',
                                 equipment_type = 'Package Unit',
@@ -2153,19 +2190,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2182,12 +2210,16 @@ class Command(BaseCommand):
             ev104.meters.add(e1)        #electric
             ev104.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(ev104,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-photo.jpg')
-            set_file_field(ev104,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev104.__setattr__('image_file', file_obj)
+            ev104.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev104.__setattr__('nameplate_file', file_obj)
+            ev104.save()
 
             ev105 = PackageUnit(name = 'EV1-05',
                                 equipment_type = 'Package Unit',
@@ -2235,19 +2267,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2264,12 +2287,16 @@ class Command(BaseCommand):
             ev105.meters.add(e1)        #electric
             ev105.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(ev105,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-photo.jpg')
-            set_file_field(ev105,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev105.__setattr__('image_file', file_obj)
+            ev105.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev105.__setattr__('nameplate_file', file_obj)
+            ev105.save()
 
             ev106 = PackageUnit(name = 'EV1-06',
                                 equipment_type = 'Package Unit',
@@ -2317,19 +2344,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2346,12 +2364,16 @@ class Command(BaseCommand):
             ev106.meters.add(e1)        #electric
             ev106.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(ev106,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-photo.jpg')
-            set_file_field(ev106,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev106.__setattr__('image_file', file_obj)
+            ev106.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev106.__setattr__('nameplate_file', file_obj)
+            ev106.save()
 
             ev107 = PackageUnit(name = 'EV1-07',
                                 equipment_type = 'Package Unit',
@@ -2399,19 +2421,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2428,12 +2441,16 @@ class Command(BaseCommand):
             ev107.meters.add(e1)        #electric
             ev107.meters.add(gas1300)   #gas
             #--load image files
-            set_file_field(ev107,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-photo.jpg')
-            set_file_field(ev107,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev107.__setattr__('image_file', file_obj)
+            ev107.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev107.__setattr__('nameplate_file', file_obj)
+            ev107.save()
 
             ev201 = PackageUnit(name = 'EV2-01',
                                 equipment_type = 'Package Unit',
@@ -2481,19 +2498,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2509,12 +2517,16 @@ class Command(BaseCommand):
             #--connect to meters
             ev201.meters.add(e2)            #electric
             #--load image files
-            set_file_field(ev201,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-photo.jpg')
-            set_file_field(ev201,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev201.__setattr__('image_file', file_obj)
+            ev201.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev201.__setattr__('nameplate_file', file_obj)
+            ev201.save()
 
             ev202 = PackageUnit(name = 'EV2-02',
                                 equipment_type = 'Package Unit',
@@ -2562,19 +2574,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2590,12 +2593,16 @@ class Command(BaseCommand):
             #--connect to meters
             ev202.meters.add(e2)            #electric
             #--load image files
-            set_file_field(ev202,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-photo.jpg')
-            set_file_field(ev202,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev202.__setattr__('image_file', file_obj)
+            ev202.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev202.__setattr__('nameplate_file', file_obj)
+            ev202.save()
 
             ev203 = PackageUnit(name = 'EV2-03',
                                 equipment_type = 'Package Unit',
@@ -2643,19 +2650,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2671,12 +2669,16 @@ class Command(BaseCommand):
             #--connect to meters
             ev203.meters.add(e2)            #electric
             #--load image files
-            set_file_field(ev203,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-photo.jpg')
-            set_file_field(ev203,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev203.__setattr__('image_file', file_obj)
+            ev203.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev203.__setattr__('nameplate_file', file_obj)
+            ev203.save()
 
             ev204 = PackageUnit(name = 'EV2-04',
                                 equipment_type = 'Package Unit',
@@ -2724,19 +2726,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2752,12 +2745,16 @@ class Command(BaseCommand):
             #--connect to meters
             ev204.meters.add(e2)            #electric
             #--load image files
-            set_file_field(ev204,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-photo.jpg')
-            set_file_field(ev204,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev204.__setattr__('image_file', file_obj)
+            ev204.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev204.__setattr__('nameplate_file', file_obj)
+            ev204.save()
 
             ev205 = PackageUnit(name = 'EV2-05',
                                 equipment_type = 'Package Unit',
@@ -2805,19 +2802,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2833,12 +2821,16 @@ class Command(BaseCommand):
             #--connect to meters
             ev205.meters.add(e2)            #electric
             #--load image files
-            set_file_field(ev205,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-photo.jpg')
-            set_file_field(ev205,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev205.__setattr__('image_file', file_obj)
+            ev205.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            ev205.__setattr__('nameplate_file', file_obj)
+            ev205.save()
 
             vgd01 = PackageUnit(name = 'VGD-01',
                                 equipment_type = 'Package Unit',
@@ -2886,19 +2878,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2915,12 +2898,16 @@ class Command(BaseCommand):
             vgd01.meters.add(east_main)    #electric
             vgd01.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(vgd01,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-photo.jpg')
-            set_file_field(vgd01,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            vgd01.__setattr__('image_file', file_obj)
+            vgd01.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            vgd01.__setattr__('nameplate_file', file_obj)
+            vgd01.save()
 
             vgd02 = PackageUnit(name = 'VGD-02',
                                 equipment_type = 'Package Unit',
@@ -2968,19 +2955,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -2997,12 +2975,16 @@ class Command(BaseCommand):
             vgd02.meters.add(east_main)    #electric
             vgd02.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(vgd02,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-photo.jpg')
-            set_file_field(vgd02,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            vgd02.__setattr__('image_file', file_obj)
+            vgd02.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            vgd02.__setattr__('nameplate_file', file_obj)
+            vgd02.save()
 
             vgd03 = PackageUnit(name = 'VGD-03',
                                 equipment_type = 'Package Unit',
@@ -3050,19 +3032,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3079,12 +3052,16 @@ class Command(BaseCommand):
             vgd03.meters.add(east_main)    #electric
             vgd03.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(vgd03,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-photo.jpg')
-            set_file_field(vgd03,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            vgd03.__setattr__('image_file', file_obj)
+            vgd03.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            vgd03.__setattr__('nameplate_file', file_obj)
+            vgd03.save()
 
             vgd04 = PackageUnit(name = 'VGD-04',
                                 equipment_type = 'Package Unit',
@@ -3132,19 +3109,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3161,12 +3129,16 @@ class Command(BaseCommand):
             vgd04.meters.add(east_main)    #electric
             vgd04.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(vgd04,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-photo.jpg')
-            set_file_field(vgd04,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            vgd04.__setattr__('image_file', file_obj)
+            vgd04.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            vgd04.__setattr__('nameplate_file', file_obj)
+            vgd04.save()
 
             kdh01 = PackageUnit(name = 'KDH-01',
                                 equipment_type = 'Package Unit',
@@ -3214,19 +3186,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3244,12 +3207,16 @@ class Command(BaseCommand):
             kdh01.meters.add(east_main)    #electric
             kdh01.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh01,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-photo.jpg')
-            set_file_field(kdh01,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh01.__setattr__('image_file', file_obj)
+            kdh01.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh01.__setattr__('nameplate_file', file_obj)
+            kdh01.save()
 
             kdh02 = PackageUnit(name = 'KDH-02',
                                 equipment_type = 'Package Unit',
@@ -3297,19 +3264,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3327,12 +3285,16 @@ class Command(BaseCommand):
             kdh02.meters.add(east_main)    #electric
             kdh02.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh02,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-photo.jpg')
-            set_file_field(kdh02,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh02.__setattr__('image_file', file_obj)
+            kdh02.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh02.__setattr__('nameplate_file', file_obj)
+            kdh02.save()
 
             kdh03 = PackageUnit(name = 'KDH-03',
                                 equipment_type = 'Package Unit',
@@ -3380,19 +3342,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3410,12 +3363,16 @@ class Command(BaseCommand):
             kdh03.meters.add(east_main)    #electric
             kdh03.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh03,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-photo.jpg')
-            set_file_field(kdh03,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-nameplate.jp')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh03.__setattr__('image_file', file_obj)
+            kdh03.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh03.__setattr__('nameplate_file', file_obj)
+            kdh03.save()
 
             kdh04 = PackageUnit(name = 'KDH-04',
                                 equipment_type = 'Package Unit',
@@ -3463,19 +3420,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3493,12 +3441,16 @@ class Command(BaseCommand):
             kdh04.meters.add(east_main)    #electric
             kdh04.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh04,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-photo.jpg')
-            set_file_field(kdh04,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh04.__setattr__('image_file', file_obj)
+            kdh04.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh04.__setattr__('nameplate_file', file_obj)
+            kdh04.save()
 
             kdh05 = PackageUnit(name = 'KDH-05',
                                 equipment_type = 'Package Unit',
@@ -3546,19 +3498,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3576,12 +3519,16 @@ class Command(BaseCommand):
             kdh05.meters.add(east_main)    #electric
             kdh05.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh05,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-photo.jpg')
-            set_file_field(kdh05,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh05.__setattr__('image_file', file_obj)
+            kdh05.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh05.__setattr__('nameplate_file', file_obj)
+            kdh05.save()
 
             kdh06 = PackageUnit(name = 'KDH-06',
                                 equipment_type = 'Package Unit',
@@ -3629,19 +3576,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3659,12 +3597,16 @@ class Command(BaseCommand):
             kdh06.meters.add(east_main)    #electric
             kdh06.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh06,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-photo.jpg')
-            set_file_field(kdh06,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh06.__setattr__('image_file', file_obj)
+            kdh06.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh06.__setattr__('nameplate_file', file_obj)
+            kdh06.save()
 
             kdh07 = PackageUnit(name = 'KDH-07',
                                 equipment_type = 'Package Unit',
@@ -3712,19 +3654,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3742,12 +3675,16 @@ class Command(BaseCommand):
             kdh07.meters.add(east_main)    #electric
             kdh07.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh07,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-photo.jpg')
-            set_file_field(kdh07,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh07.__setattr__('image_file', file_obj)
+            kdh07.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh07.__setattr__('nameplate_file', file_obj)
+            kdh07.save()
 
             kdh08 = PackageUnit(name = 'KDH-08',
                                 equipment_type = 'Package Unit',
@@ -3795,19 +3732,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3825,12 +3753,16 @@ class Command(BaseCommand):
             kdh08.meters.add(east_main)    #electric
             kdh08.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh08,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-photo.jpg')
-            set_file_field(kdh08,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh08.__setattr__('image_file', file_obj)
+            kdh08.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh08.__setattr__('nameplate_file', file_obj)
+            kdh08.save()
 
             kdh09 = PackageUnit(name = 'KDH-09',
                                 equipment_type = 'Package Unit',
@@ -3878,19 +3810,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3908,12 +3831,16 @@ class Command(BaseCommand):
             kdh09.meters.add(east_main)    #electric
             kdh09.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh09,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-photo.jpg')
-            set_file_field(kdh09,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh09.__setattr__('image_file', file_obj)
+            kdh09.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh09.__setattr__('nameplate_file', file_obj)
+            kdh09.save()
 
             kdh10 = PackageUnit(name = 'KDH-10',
                                 equipment_type = 'Package Unit',
@@ -3961,19 +3888,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -3991,12 +3909,16 @@ class Command(BaseCommand):
             kdh10.meters.add(east_main)    #electric
             kdh10.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(kdh10,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-photo.jpg')
-            set_file_field(kdh10,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh10.__setattr__('image_file', file_obj)
+            kdh10.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh10.__setattr__('nameplate_file', file_obj)
+            kdh10.save()
 
             kdh11 = PackageUnit(name = 'KDH-11',
                                 equipment_type = 'Package Unit',
@@ -4044,19 +3966,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -4073,12 +3986,16 @@ class Command(BaseCommand):
             #--connect to meters
             kdh11.meters.add(east_main)    #electric
             #--load image files
-            set_file_field(kdh11,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-photo.jpg')
-            set_file_field(kdh11,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh11.__setattr__('image_file', file_obj)
+            kdh11.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh11.__setattr__('nameplate_file', file_obj)
+            kdh11.save()
 
             kdh12 = PackageUnit(name = 'KDH-12',
                                 equipment_type = 'Package Unit',
@@ -4126,19 +4043,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -4155,12 +4063,16 @@ class Command(BaseCommand):
             #--connect to meters
             kdh12.meters.add(east_main)    #electric
             #--load image files
-            set_file_field(kdh12,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-photo.jpg')
-            set_file_field(kdh12,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh12.__setattr__('image_file', file_obj)
+            kdh12.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh12.__setattr__('nameplate_file', file_obj)
+            kdh12.save()
 
             kdh13 = PackageUnit(name = 'KDH-13',
                                 equipment_type = 'Package Unit',
@@ -4208,19 +4120,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -4237,12 +4140,16 @@ class Command(BaseCommand):
             #--connect to meters
             kdh13.meters.add(east_main)    #electric
             #--load image files
-            set_file_field(kdh13,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-photo.jpg')
-            set_file_field(kdh13,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh13.__setattr__('image_file', file_obj)
+            kdh13.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh13.__setattr__('nameplate_file', file_obj)
+            kdh13.save()
 
             kdh14 = PackageUnit(name = 'KDH-14',
                                 equipment_type = 'Package Unit',
@@ -4290,19 +4197,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -4319,12 +4217,16 @@ class Command(BaseCommand):
             #--connect to meters
             kdh14.meters.add(east_main)    #electric
             #--load image files
-            set_file_field(kdh14,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-photo.jpg')
-            set_file_field(kdh14,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh14.__setattr__('image_file', file_obj)
+            kdh14.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh14.__setattr__('nameplate_file', file_obj)
+            kdh14.save()
 
             kdh15 = PackageUnit(name = 'KDH-15',
                                 equipment_type = 'Package Unit',
@@ -4372,19 +4274,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -4401,12 +4294,16 @@ class Command(BaseCommand):
             #--connect to meters
             kdh15.meters.add(east_main)    #electric
             #--load image files
-            set_file_field(kdh15,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-photo.jpg')
-            set_file_field(kdh15,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh15.__setattr__('image_file', file_obj)
+            kdh15.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            kdh15.__setattr__('nameplate_file', file_obj)
+            kdh15.save()
 
             gyc01 = PackageUnit(name = 'GYC-01',
                                 equipment_type = 'Package Unit',
@@ -4454,19 +4351,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -4484,12 +4372,16 @@ class Command(BaseCommand):
             gyc01.meters.add(east_main)    #electric
             gyc01.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(gyc01,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-photo.jpg')
-            set_file_field(gyc01,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gyc01.__setattr__('image_file', file_obj)
+            gyc01.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gyc01.__setattr__('nameplate_file', file_obj)
+            gyc01.save()
 
             gyc02 = PackageUnit(name = 'GYC-02',
                                 equipment_type = 'Package Unit',
@@ -4537,19 +4429,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -4567,12 +4450,16 @@ class Command(BaseCommand):
             gyc02.meters.add(east_main)    #electric
             gyc02.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(gyc02,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-photo.jpg')
-            set_file_field(gyc02,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gyc02.__setattr__('image_file', file_obj)
+            gyc02.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gyc02.__setattr__('nameplate_file', file_obj)
+            gyc02.save()
 
             gyc03 = PackageUnit(name = 'GYC-03',
                                 equipment_type = 'Package Unit',
@@ -4620,19 +4507,10 @@ class Command(BaseCommand):
                                 speed_min = None,
                                 T_max = None,
                                 T_min = None,
-                                d0 = None,
-                                d1 = None,
-                                d2 = None,
-                                m0 = None,
-                                m1 = None,
-                                m2 = None,
-                                m3 = None,
-                                f0 = None,
-                                f1 = None,
-                                f2 = None,
-                                e0 = None,
-                                e1 = None,
-                                e2 = None,
+                                d = None,
+                                m = None,
+                                f = None,
+                                e = None,
                                 SCOC = None,
                                 SCUN = None,
                                 SHOC = None,
@@ -4649,12 +4527,16 @@ class Command(BaseCommand):
             gyc03.meters.add(east_main)    #electric            
             gyc03.meters.add(gas1290)       #gas
             #--load image files
-            set_file_field(gyc03,
-                            'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-photo.jpg')
-            set_file_field(gyc03,
-                            'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-nameplate.jpg')
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-photo.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gyc03.__setattr__('image_file', file_obj)
+            gyc03.save()
+            file_url = STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-nameplate.jpg'
+            result = urllib.urlretrieve(file_url)
+            file_obj = File(open(result[0],'rb'))
+            gyc03.__setattr__('nameplate_file', file_obj)
+            gyc03.save()
 
         except:
             print 'Failed to create new Equipment.'
