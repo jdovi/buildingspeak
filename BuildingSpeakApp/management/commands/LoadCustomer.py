@@ -121,7 +121,7 @@ class Command(BaseCommand):
             #--load image file
             set_file_field(East,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_EastBldg.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_EastBldg.JPG')
             
             West = Building(
                 name = 'West Bldg',
@@ -150,7 +150,7 @@ class Command(BaseCommand):
             #--load image file
             set_file_field(West,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_WestBldg.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_WestBldg.JPG')
         except:
             print 'Failed to create new Buildings.'
         
@@ -218,7 +218,7 @@ class Command(BaseCommand):
             #--load image file
             set_file_field(compATL_space,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_compATL.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_compATL.JPG')
             
             EdenII_space = Space(
                 name = 'Eden II',
@@ -266,7 +266,7 @@ class Command(BaseCommand):
             #--load image file
             set_file_field(gym_space,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_gym.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_gym.JPG')
             
             clinic_space = Space(
                 name = 'Clinic',
@@ -330,7 +330,7 @@ class Command(BaseCommand):
             #--load image file
             set_file_field(school_space,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_school.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/SpaceImages/SpaceImage_school.JPG')
             
             unfinished_space = Space(
                 name = 'Unfinished',
@@ -418,10 +418,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(east_main,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastMain.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastMain.JPG')
             set_file_field(east_main,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastMain.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastMain.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(east_main,
                             'bill_data_file',
@@ -477,10 +477,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(e1,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenI.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenI.JPG')
             set_file_field(e1,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenI.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenI.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(e1,
                             'bill_data_file',
@@ -520,10 +520,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(e2,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenII.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EdenII.JPG')
             set_file_field(e2,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenII.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EdenII.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(e2,
                             'bill_data_file',
@@ -563,10 +563,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(wh,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Warehouse.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Warehouse.JPG')
             set_file_field(wh,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Warehouse.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Warehouse.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(wh,
                             'bill_data_file',
@@ -614,10 +614,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(newschool,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_NewSchool.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_NewSchool.JPG')
             set_file_field(newschool,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_NewSchool.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_NewSchool.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(newschool,
                             'bill_data_file',
@@ -664,10 +664,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(clinic,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Clinic.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Clinic.JPG')
             set_file_field(clinic,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Clinic.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Clinic.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(clinic,
                             'bill_data_file',
@@ -706,10 +706,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(gas1290,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastGas.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastGas.JPG')
             set_file_field(gas1290,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastGas.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastGas.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(gas1290,
                             'bill_data_file',
@@ -768,10 +768,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(gas1300,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_WestGas.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_WestGas.JPG')
             set_file_field(gas1300,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_WestGas.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_WestGas.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(gas1300,
                             'bill_data_file',
@@ -830,10 +830,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(simpson1290,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1290.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1290.JPG')
             set_file_field(simpson1290,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1290.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1290.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(simpson1290,
                             'bill_data_file',
@@ -876,10 +876,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(boone1300,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Boone1300.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Boone1300.JPG')
             set_file_field(boone1300,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Boone1300.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Boone1300.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(boone1300,
                             'bill_data_file',
@@ -934,10 +934,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(simpson1300,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1300.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1300.JPG')
             set_file_field(simpson1300,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1300.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1300.JPG')
             #--load bill data file, possibly create meter models
             set_file_field(simpson1300,
                             'bill_data_file',
@@ -1036,10 +1036,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(off01,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-photo.JPG')
             set_file_field(off01,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-01-nameplate.JPG')
 
             off02 = PackageUnit(name = 'OFF-02',
                                 equipment_type = 'Package Unit',
@@ -1118,10 +1118,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(off02,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-photo.JPG')
             set_file_field(off02,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-02-nameplate.JPG')
 
             off03 = PackageUnit(name = 'OFF-03',
                                 equipment_type = 'Package Unit',
@@ -1200,10 +1200,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(off03,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-photo.JPG')
             set_file_field(off03,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-03-nameplate.JPG')
 
             off04 = PackageUnit(name = 'OFF-04',
                                 equipment_type = 'Package Unit',
@@ -1282,10 +1282,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(off04,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-photo.JPG')
             set_file_field(off04,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-04-nameplate.JPG')
 
             off05 = PackageUnit(name = 'OFF-05',
                                 equipment_type = 'Package Unit',
@@ -1364,10 +1364,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(off05,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-photo.JPG')
             set_file_field(off05,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-05-nameplate.JPG')
 
             off06 = PackageUnit(name = 'OFF-06',
                                 equipment_type = 'Package Unit',
@@ -1446,10 +1446,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(off06,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-photo.JPG')
             set_file_field(off06,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/OFF-06-nameplate.JPG')
 
             cli01 = PackageUnit(name = 'CLI-01',
                                 equipment_type = 'Package Unit',
@@ -1528,10 +1528,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(cli01,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-photo.JPG')
             set_file_field(cli01,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-01-nameplate.JPG')
 
             cli02 = PackageUnit(name = 'CLI-02',
                                 equipment_type = 'Package Unit',
@@ -1610,10 +1610,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(cli02,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-photo.JPG')
             set_file_field(cli02,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-02-nameplate.JPG')
 
             cli03 = PackageUnit(name = 'CLI-03',
                                 equipment_type = 'Package Unit',
@@ -1692,10 +1692,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(cli03,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-photo.JPG')
             set_file_field(cli03,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-03-nameplate.JPG')
 
             cli04 = PackageUnit(name = 'CLI-04',
                                 equipment_type = 'Package Unit',
@@ -1774,10 +1774,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(cli04,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-photo.JPG')
             set_file_field(cli04,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-04-nameplate.JPG')
 
             cli05 = PackageUnit(name = 'CLI-05',
                                 equipment_type = 'Package Unit',
@@ -1856,10 +1856,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(cli05,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-photo.JPG')
             set_file_field(cli05,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/CLI-05-nameplate.JPG')
 
             ev101 = PackageUnit(name = 'EV1-01',
                                 equipment_type = 'Package Unit',
@@ -1938,10 +1938,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev101,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-photo.JPG')
             set_file_field(ev101,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-01-nameplate.JPG')
 
             ev102 = PackageUnit(name = 'EV1-02',
                                 equipment_type = 'Package Unit',
@@ -2020,7 +2020,7 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev102,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-photo.JPG')
             set_file_field(ev102,
                             'nameplate_file',
                             STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-nameplate.jp')
@@ -2102,10 +2102,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev103,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-photo.JPG')
             set_file_field(ev103,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-03-nameplate.JPG')
 
             ev104 = PackageUnit(name = 'EV1-04',
                                 equipment_type = 'Package Unit',
@@ -2184,10 +2184,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev104,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-photo.JPG')
             set_file_field(ev104,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-04-nameplate.JPG')
 
             ev105 = PackageUnit(name = 'EV1-05',
                                 equipment_type = 'Package Unit',
@@ -2266,10 +2266,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev105,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-photo.JPG')
             set_file_field(ev105,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-05-nameplate.JPG')
 
             ev106 = PackageUnit(name = 'EV1-06',
                                 equipment_type = 'Package Unit',
@@ -2348,10 +2348,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev106,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-photo.JPG')
             set_file_field(ev106,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-06-nameplate.JPG')
 
             ev107 = PackageUnit(name = 'EV1-07',
                                 equipment_type = 'Package Unit',
@@ -2430,10 +2430,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev107,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-photo.JPG')
             set_file_field(ev107,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-07-nameplate.JPG')
 
             ev201 = PackageUnit(name = 'EV2-01',
                                 equipment_type = 'Package Unit',
@@ -2511,10 +2511,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev201,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-photo.JPG')
             set_file_field(ev201,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-01-nameplate.JPG')
 
             ev202 = PackageUnit(name = 'EV2-02',
                                 equipment_type = 'Package Unit',
@@ -2592,10 +2592,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev202,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-photo.JPG')
             set_file_field(ev202,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-02-nameplate.JPG')
 
             ev203 = PackageUnit(name = 'EV2-03',
                                 equipment_type = 'Package Unit',
@@ -2673,10 +2673,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev203,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-photo.JPG')
             set_file_field(ev203,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-03-nameplate.JPG')
 
             ev204 = PackageUnit(name = 'EV2-04',
                                 equipment_type = 'Package Unit',
@@ -2754,10 +2754,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev204,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-photo.JPG')
             set_file_field(ev204,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-04-nameplate.JPG')
 
             ev205 = PackageUnit(name = 'EV2-05',
                                 equipment_type = 'Package Unit',
@@ -2835,10 +2835,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(ev205,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-photo.JPG')
             set_file_field(ev205,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV2-05-nameplate.JPG')
 
             vgd01 = PackageUnit(name = 'VGD-01',
                                 equipment_type = 'Package Unit',
@@ -2917,10 +2917,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(vgd01,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-photo.JPG')
             set_file_field(vgd01,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-01-nameplate.JPG')
 
             vgd02 = PackageUnit(name = 'VGD-02',
                                 equipment_type = 'Package Unit',
@@ -2999,10 +2999,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(vgd02,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-photo.JPG')
             set_file_field(vgd02,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-02-nameplate.JPG')
 
             vgd03 = PackageUnit(name = 'VGD-03',
                                 equipment_type = 'Package Unit',
@@ -3081,10 +3081,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(vgd03,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-photo.JPG')
             set_file_field(vgd03,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-03-nameplate.JPG')
 
             vgd04 = PackageUnit(name = 'VGD-04',
                                 equipment_type = 'Package Unit',
@@ -3163,10 +3163,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(vgd04,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-photo.JPG')
             set_file_field(vgd04,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/VGD-04-nameplate.JPG')
 
             kdh01 = PackageUnit(name = 'KDH-01',
                                 equipment_type = 'Package Unit',
@@ -3246,10 +3246,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh01,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-photo.JPG')
             set_file_field(kdh01,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-01-nameplate.JPG')
 
             kdh02 = PackageUnit(name = 'KDH-02',
                                 equipment_type = 'Package Unit',
@@ -3329,10 +3329,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh02,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-photo.JPG')
             set_file_field(kdh02,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-02-nameplate.JPG')
 
             kdh03 = PackageUnit(name = 'KDH-03',
                                 equipment_type = 'Package Unit',
@@ -3412,7 +3412,7 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh03,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-photo.JPG')
             set_file_field(kdh03,
                             'nameplate_file',
                             STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-nameplate.jp')
@@ -3495,10 +3495,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh04,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-photo.JPG')
             set_file_field(kdh04,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-04-nameplate.JPG')
 
             kdh05 = PackageUnit(name = 'KDH-05',
                                 equipment_type = 'Package Unit',
@@ -3578,10 +3578,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh05,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-photo.JPG')
             set_file_field(kdh05,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-05-nameplate.JPG')
 
             kdh06 = PackageUnit(name = 'KDH-06',
                                 equipment_type = 'Package Unit',
@@ -3661,10 +3661,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh06,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-photo.JPG')
             set_file_field(kdh06,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-06-nameplate.JPG')
 
             kdh07 = PackageUnit(name = 'KDH-07',
                                 equipment_type = 'Package Unit',
@@ -3744,10 +3744,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh07,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-photo.JPG')
             set_file_field(kdh07,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-07-nameplate.JPG')
 
             kdh08 = PackageUnit(name = 'KDH-08',
                                 equipment_type = 'Package Unit',
@@ -3827,10 +3827,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh08,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-photo.JPG')
             set_file_field(kdh08,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-08-nameplate.JPG')
 
             kdh09 = PackageUnit(name = 'KDH-09',
                                 equipment_type = 'Package Unit',
@@ -3910,10 +3910,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh09,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-photo.JPG')
             set_file_field(kdh09,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-09-nameplate.JPG')
 
             kdh10 = PackageUnit(name = 'KDH-10',
                                 equipment_type = 'Package Unit',
@@ -3993,10 +3993,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh10,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-photo.JPG')
             set_file_field(kdh10,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-10-nameplate.JPG')
 
             kdh11 = PackageUnit(name = 'KDH-11',
                                 equipment_type = 'Package Unit',
@@ -4075,10 +4075,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh11,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-photo.JPG')
             set_file_field(kdh11,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-11-nameplate.JPG')
 
             kdh12 = PackageUnit(name = 'KDH-12',
                                 equipment_type = 'Package Unit',
@@ -4157,10 +4157,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh12,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-photo.JPG')
             set_file_field(kdh12,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-12-nameplate.JPG')
 
             kdh13 = PackageUnit(name = 'KDH-13',
                                 equipment_type = 'Package Unit',
@@ -4239,10 +4239,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh13,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-photo.JPG')
             set_file_field(kdh13,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-13-nameplate.JPG')
 
             kdh14 = PackageUnit(name = 'KDH-14',
                                 equipment_type = 'Package Unit',
@@ -4321,10 +4321,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh14,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-photo.JPG')
             set_file_field(kdh14,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-14-nameplate.JPG')
 
             kdh15 = PackageUnit(name = 'KDH-15',
                                 equipment_type = 'Package Unit',
@@ -4403,10 +4403,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(kdh15,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-photo.JPG')
             set_file_field(kdh15,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-15-nameplate.JPG')
 
             gyc01 = PackageUnit(name = 'GYC-01',
                                 equipment_type = 'Package Unit',
@@ -4486,10 +4486,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(gyc01,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-photo.JPG')
             set_file_field(gyc01,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-01-nameplate.JPG')
 
             gyc02 = PackageUnit(name = 'GYC-02',
                                 equipment_type = 'Package Unit',
@@ -4569,10 +4569,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(gyc02,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-photo.JPG')
             set_file_field(gyc02,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-02-nameplate.JPG')
 
             gyc03 = PackageUnit(name = 'GYC-03',
                                 equipment_type = 'Package Unit',
@@ -4651,10 +4651,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(gyc03,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-photo.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-photo.JPG')
             set_file_field(gyc03,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-nameplate.jpg')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/GYC-03-nameplate.JPG')
 
         except:
             print 'Failed to create new Equipment.'
