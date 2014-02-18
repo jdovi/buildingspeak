@@ -34,6 +34,7 @@ def set_file_field(model_instance, field_name, file_url):
             model_instance.__getattribute__(field_name).save(file_url.split('/')[-1],
                                             ContentFile(output_file.getvalue()),
                                             save=False)
+            model_instance.save()
         elif file_ext in ['PNG','png','GIF','gif','CSV','csv']:
             result = urllib.urlretrieve(file_url)
             file_obj = File(open(result[0],'rb'))

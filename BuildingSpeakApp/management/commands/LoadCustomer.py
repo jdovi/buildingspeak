@@ -2023,7 +2023,7 @@ class Command(BaseCommand):
                             STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-photo.JPG')
             set_file_field(ev102,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-nameplate.jp')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/EV1-02-nameplate.JPG')
 
             ev103 = PackageUnit(name = 'EV1-03',
                                 equipment_type = 'Package Unit',
