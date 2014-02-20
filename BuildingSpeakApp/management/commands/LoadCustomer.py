@@ -41,7 +41,9 @@ class Command(BaseCommand):
             user1.save()
         except:
             print 'Failed to create new Users.'
-        
+        else:
+            print 'Created new Users.'
+            
     ###---UserProfiles
         try:
             userprofile1 = UserProfile(
@@ -56,7 +58,9 @@ class Command(BaseCommand):
                             STATIC_URL + 'upload_files/NewAccount/UserImages/default_user_image.png')
         except:
             print 'Failed to create new UserProfiles.'
-        
+        else:
+            print 'Created new UserProfiles.'
+            
     ###---Account
         try:
             acct1 = Account(
@@ -89,6 +93,8 @@ class Command(BaseCommand):
                             STATIC_URL + 'upload_files/NewAccount/AccountImage_CityOfRefuge.gif')
         except:
             print 'Failed to create new Accounts.'
+        else:
+            print 'Created new Accounts.'
         
     ###---Buildings
         try:
@@ -153,6 +159,8 @@ class Command(BaseCommand):
                             STATIC_URL + 'upload_files/NewAccount/BuildingImages/BuildingImage_WestBldg.JPG')
         except:
             print 'Failed to create new Buildings.'
+        else:
+            print 'Created new Buildings.'
         
     ###---Spaces
         try:
@@ -381,6 +389,8 @@ class Command(BaseCommand):
                             STATIC_URL + 'upload_files/NewAccount/SpaceImages/default_space_image.png')
         except:
             print 'Failed to create new Spaces.'        
+        else:
+            print 'Created new Spaces.'
         
     ###---Meters
         try:
@@ -706,10 +716,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(gas1290,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastGas.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_EastGas.png')
             set_file_field(gas1290,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastGas.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_EastGas.png')
             #--load bill data file, possibly create meter models
             set_file_field(gas1290,
                             'bill_data_file',
@@ -768,7 +778,7 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(gas1300,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_WestGas.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_WestGas.png')
             set_file_field(gas1300,
                             'nameplate_file',
                             STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_WestGas.JPG')
@@ -830,10 +840,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(simpson1290,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1290.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1290.png')
             set_file_field(simpson1290,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1290.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1290.png')
             #--load bill data file, possibly create meter models
             set_file_field(simpson1290,
                             'bill_data_file',
@@ -876,10 +886,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(boone1300,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Boone1300.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Boone1300.png')
             set_file_field(boone1300,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Boone1300.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Boone1300.png')
             #--load bill data file, possibly create meter models
             set_file_field(boone1300,
                             'bill_data_file',
@@ -934,10 +944,10 @@ class Command(BaseCommand):
             #--load image files
             set_file_field(simpson1300,
                             'image_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1300.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterLocation_Simpson1300.png')
             set_file_field(simpson1300,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1300.JPG')
+                            STATIC_URL + 'upload_files/NewAccount/MeterImages/MeterNameplate_Simpson1300.png')
             #--load bill data file, possibly create meter models
             set_file_field(simpson1300,
                             'bill_data_file',
@@ -956,6 +966,8 @@ class Command(BaseCommand):
 
         except:
             print 'Failed to create new Meters.'
+        else:
+            print 'Created new Meters.'
 
     ###---Equipment
         try:
@@ -3415,7 +3427,7 @@ class Command(BaseCommand):
                             STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-photo.JPG')
             set_file_field(kdh03,
                             'nameplate_file',
-                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-nameplate.jp')
+                            STATIC_URL + 'upload_files/NewAccount/EquipmentImages/KDH-03-nameplate.JPG')
 
             kdh04 = PackageUnit(name = 'KDH-04',
                                 equipment_type = 'Package Unit',
@@ -4658,7 +4670,8 @@ class Command(BaseCommand):
 
         except:
             print 'Failed to create new Equipment.'
-
+        else:
+            print 'Created new Equipment.'
 
     ###---Measures
         try:
@@ -4739,3 +4752,5 @@ class Command(BaseCommand):
             
         except:
             print 'Failed to create new Measures.'
+        else:
+            print 'Created new Measures.'

@@ -263,7 +263,7 @@ function addChart(arr) {
 		 ['number','Consumption (actual)'],
 		 ['number','Consumption Savings (actual)']],
 		{{ consumption_by_month|safe }},
-        '{{ consumption_units|safe }}'
+        {{ consumption_units|safe }}
       ]);
       </script>
 	  {% endif %}
@@ -288,7 +288,7 @@ function addChart(arr) {
 		 ['number','Peak Demand (actual)'],
 		 ['number','Peak Demand Savings (actual)']],
 		{{ demand_by_month|safe }},
-        '{{ demand_units|safe }}'
+        {{ demand_units|safe }}
       ]);
       </script>
 	  {% endif %}
