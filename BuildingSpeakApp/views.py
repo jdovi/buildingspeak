@@ -213,7 +213,7 @@ def account_detail(request, account_id):
     t2 = timezone.now()
 
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
-    month_last = month_first + 40                            #final month in sequence
+    month_last = month_first + 40+24                            #final month in sequence
     acct_view_data = account.get_account_view_meter_data(month_first=month_first,
                                                          month_last=month_last)
     t3 = timezone.now()
@@ -298,7 +298,7 @@ def building_detail(request, account_id, building_id):
 
     building_attrs = get_model_key_value_pairs_as_nested_list(building)
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
-    month_last = month_first + 40                            #final month in sequence
+    month_last = month_first + 40+24                            #final month in sequence
     
     bldg_view_data = building.get_building_view_meter_data(month_first=month_first,
                                                            month_last=month_last)
@@ -351,7 +351,7 @@ def space_detail(request, account_id, space_id):
         
     space_attrs = get_model_key_value_pairs_as_nested_list(space)
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
-    month_last = month_first + 40                            #final month in sequence
+    month_last = month_first + 40 + 24                            #final month in sequence
     
     space_view_data = space.get_space_view_meter_data(month_first=month_first,
                                                       month_last=month_last)
@@ -434,14 +434,14 @@ def meter_detail(request, account_id, meter_id):
             latest_bill_data_file = meter.bill_data_file
         form = MeterDataUploadForm({}, {'bill_data_file': latest_bill_data_file})
         reloading = False
-
-
+        
+    
     meter_attrs = get_model_key_value_pairs_as_nested_list(meter)
-
+    
     try:
         this_month = pd.Period(timezone.now(),freq='M')
         month_first = this_month - 36       #link user selection here
-        month_last = this_month    #link user selection here
+        month_last = this_month +36+24   #link user selection here
         
         #this dataframe provides the foundational meter dataset; if no data, skip everything
         bill_data = meter.get_bill_data_period_dataframe(first_month = month_first.strftime('%m/%Y'), 

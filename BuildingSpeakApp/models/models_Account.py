@@ -155,7 +155,7 @@ class Account(models.Model):
             if bldg_df is not None:
                 bldg_df['Cost/SF'] = bldg_df['Cost (act)']/bldg.square_footage
                 bldg_df['kBtu/SF'] = bldg_df['kBtu Consumption (act)']/bldg.square_footage
-                bldg_df['Cost/kBtu'] = bldg_df['Cost (act)']/bldg_df['kBtu Consumption (act)']
+                bldg_df['Cost/kBtu'] = bldg_df['Cost (act)']/bldg_df['kBtu Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
                 bldg_df[['Cost (act)',
                           'kBtu Consumption (act)',
                           'CDD (consumption)',
@@ -205,7 +205,7 @@ class Account(models.Model):
             if space_df is not None:
                 space_df['Cost/SF'] = space_df['Cost (act)']/space.square_footage
                 space_df['kBtu/SF'] = space_df['kBtu Consumption (act)']/space.square_footage
-                space_df['Cost/kBtu'] = space_df['Cost (act)']/space_df['kBtu Consumption (act)']
+                space_df['Cost/kBtu'] = space_df['Cost (act)']/space_df['kBtu Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
                 space_df[['Cost (act)',
                           'kBtu Consumption (act)',
                           'CDD (consumption)',
@@ -256,7 +256,7 @@ class Account(models.Model):
             if utype_df is not None:
                 utype_df['Cost/SF'] = utype_df['Cost (act)']/total_SF
                 utype_df['kBtu/SF'] = utype_df['kBtu Consumption (act)']/total_SF
-                utype_df['Cost/kBtu'] = utype_df['Cost (act)']/utype_df['kBtu Consumption (act)']
+                utype_df['Cost/kBtu'] = utype_df['Cost (act)']/utype_df['kBtu Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
                 utype_df[['Cost (act)',
                           'kBtu Consumption (act)',
                           'CDD (consumption)',
@@ -307,14 +307,15 @@ class Account(models.Model):
             mistr = mi.strftime('%m/%Y')
             mfstr = mf.strftime('%m/%Y')
             total_SF = self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
+            account_meter_set = self.meter_set.all()
             
-            if len(self.meter_set.all()) < 1:
+            if len(account_meter_set) < 1:
                 five_year_data = None
             else:
                 #five year stacked_data is what will be passed to the template
                 five_year_data = []
                 utility_groups = ['Account Total']
-                utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meter_set.all()])))
+                utility_groups.extend(sorted(set([str(x.utility_type) for x in account_meter_set])))
                 
                 #meter_dict holds all info and dataframes for each utility group, starting with Total
                 #note that water is included for Cost, so Cons/PD can never be used here but kBtu/kBtuh can
@@ -326,13 +327,13 @@ class Account(models.Model):
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
                                                                 #self.meter_set.filter(~Q(utility_type = 'domestic water')), 
-                                                                self.meter_set.all(),
+                                                                account_meter_set,
                                                                 first_month=mistr, 
                                                                 last_month=mfstr )
                                                         } }
                 
                 #cycle through all utility types present in this account, get info and dataframes
-                for utype in sorted(set([str(x.utility_type) for x in self.meter_set.all()])):
+                for utype in sorted(set([str(x.utility_type) for x in account_meter_set])):
                     utype = str(utype)
                     meter_dict[utype] = {}
                     meter_dict[utype]['name'] = utype
@@ -535,6 +536,7 @@ class Account(models.Model):
             first_month = month_first.strftime('%m/%Y')
             last_month = month_last.strftime('%m/%Y')
             
+            total_SF = self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
             meter_set = self.meter_set.all()
             
             if len(meter_set) < 1:
@@ -619,7 +621,7 @@ class Account(models.Model):
                     meter_dict[utype]['df'] = convert_units_sum_meters(
                                                 utype,
                                                 get_default_units(utype),
-                                                self.meter_set.filter(utility_type=utype),
+                                                meter_set.filter(utility_type=utype),
                                                 first_month=first_month, 
                                                 last_month=last_month)
                 
@@ -643,11 +645,11 @@ class Account(models.Model):
                     #now we create the additional columns to manipulate the stored data for display to user
                     bill_data[cost] = bill_data['Cost (act)']
                     bill_data[cost_per_day] = bill_data['Cost (act)'] / bill_data['Days']
-                    bill_data[cost_per_sf] = bill_data['Cost (act)'] / self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
+                    bill_data[cost_per_sf] = bill_data['Cost (act)'] / total_SF
                     bill_data[consumption] = bill_data['Consumption (act)']
                     bill_data[consumption_per_day] = bill_data['Consumption (act)'] / bill_data['Days']
-                    bill_data[consumption_per_sf] = bill_data['Consumption (act)'] / self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
-                    bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)']
+                    bill_data[consumption_per_sf] = bill_data['Consumption (act)'] / total_SF
+                    bill_data[cost_per_consumption] = bill_data['Cost (act)'] / bill_data['Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
                     
                     #totals and useful ratios table calculations
                     #first we construct the dataframe we want
@@ -661,13 +663,24 @@ class Account(models.Model):
                     for m in bill_data_totals.index:
                         i = bill_data_totals['Month Integer'][m]
                         if i in [j.month for j in bill_data.index]:
-                            bill_data_totals[cost][m] = bill_data['Cost (act)'][[x.month==i for x in bill_data.index]].sum()
-                            bill_data_totals[cost_per_day][m] = bill_data['Cost (act)'][[x.month==i for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i for x in bill_data.index]].sum())
-                            bill_data_totals[cost_per_sf][m] = bill_data['Cost (act)'][[x.month==i for x in bill_data.index]].sum() / self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
-                            bill_data_totals[consumption][m] = bill_data['Consumption (act)'][[x.month==i for x in bill_data.index]].sum()
-                            bill_data_totals[consumption_per_day][m] = bill_data['Consumption (act)'][[x.month==i for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i for x in bill_data.index]].sum())
-                            bill_data_totals[consumption_per_sf][m] = bill_data['Consumption (act)'][[x.month==i for x in bill_data.index]].sum() / self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
-                            bill_data_totals[cost_per_consumption][m] = bill_data['Cost (act)'][[x.month==i for x in bill_data.index]].sum() / bill_data['Consumption (act)'][[x.month==i for x in bill_data.index]].sum()
+                            cost_months = [x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]
+                            cons_months = [x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]
+                            
+                            sum_cons =      bill_data['Consumption (act)'][cons_months].sum()
+                            sum_days_cost = Decimal(float(bill_data['Days'][cost_months].sum()))
+                            sum_days_cons = Decimal(float(bill_data['Days'][cons_months].sum()))
+                            
+                            if sum_cons ==      Decimal(0.0): sum_cons = Decimal(NaN)
+                            if sum_days_cost == Decimal(0.0): sum_days_cost = Decimal(NaN)
+                            if sum_days_cons == Decimal(0.0): sum_days_cons = Decimal(NaN)
+                            
+                            bill_data_totals[cost][m] = bill_data['Cost (act)'][cost_months].sum()
+                            bill_data_totals[cost_per_day][m] = bill_data['Cost (act)'][cost_months].sum() / sum_days_cost
+                            bill_data_totals[cost_per_sf][m] = bill_data['Cost (act)'][cost_months].sum() / total_SF
+                            bill_data_totals[consumption][m] = bill_data['Consumption (act)'][cons_months].sum()
+                            bill_data_totals[consumption_per_day][m] = bill_data['Consumption (act)'][cons_months].sum() / sum_days_cons
+                            bill_data_totals[consumption_per_sf][m] = bill_data['Consumption (act)'][cons_months].sum() / total_SF
+                            bill_data_totals[cost_per_consumption][m] = bill_data['Cost (act)'][cost_months].sum() / sum_cons
                         else:
                             bill_data_totals[cost][m] = Decimal(NaN)
                             bill_data_totals[cost_per_day][m] = Decimal(NaN)
@@ -678,19 +691,30 @@ class Account(models.Model):
                             bill_data_totals[cost_per_consumption][m] = Decimal(NaN)
                     bill_data_totals = bill_data_totals.sort(columns='Month Integer')
                     bill_data_totals.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual']
-        
+                    
                     #now we add the Annual row, which will be a column if and when we transpose
-                    bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'].sum()
-                    bill_data_totals[cost_per_day]['Annual'] =          bill_data['Cost (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
-                    bill_data_totals[cost_per_sf]['Annual'] =           bill_data['Cost (act)'].sum() / self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
-                    bill_data_totals[consumption]['Annual'] =           bill_data['Consumption (act)'].sum()
-                    bill_data_totals[consumption_per_day]['Annual'] =   bill_data['Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
-                    bill_data_totals[consumption_per_sf]['Annual'] =    bill_data['Consumption (act)'].sum() / self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
-                    bill_data_totals[cost_per_consumption]['Annual'] =  bill_data['Cost (act)'].sum() / bill_data['Consumption (act)'].sum()
+                    cost_months = [not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]
+                    cons_months = [not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]
+                    
+                    sum_cons =      bill_data['Consumption (act)'][cons_months].sum()
+                    sum_days_cost = Decimal(float(bill_data['Days'][cost_months].sum()))
+                    sum_days_cons = Decimal(float(bill_data['Days'][cons_months].sum()))
+                    
+                    if sum_cons ==      Decimal(0.0): sum_cons = Decimal(NaN)
+                    if sum_days_cost == Decimal(0.0): sum_days_cost = Decimal(NaN)
+                    if sum_days_cons == Decimal(0.0): sum_days_cons = Decimal(NaN)
+                    
+                    bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'][cost_months].sum()
+                    bill_data_totals[cost_per_day]['Annual'] =          bill_data['Cost (act)'][cost_months].sum() / sum_days_cost
+                    bill_data_totals[cost_per_sf]['Annual'] =           bill_data['Cost (act)'][cost_months].sum() / total_SF
+                    bill_data_totals[consumption]['Annual'] =           bill_data['Consumption (act)'][cons_months].sum()
+                    bill_data_totals[consumption_per_day]['Annual'] =   bill_data['Consumption (act)'][cons_months].sum() / sum_days_cons
+                    bill_data_totals[consumption_per_sf]['Annual'] =    bill_data['Consumption (act)'][cons_months].sum() / total_SF
+                    bill_data_totals[cost_per_consumption]['Annual'] =  bill_data['Cost (act)'][cost_months].sum() / sum_cons
                     
                     #no longer needed once we've sorted
                     bill_data_totals = bill_data_totals.drop(['Month Integer'],1)
-                
+                    
                     #totals table only has values as opposed to ratios, so we pull relevant columns and set format
                     totals_table_df = bill_data_totals[[cost,consumption]]
                     totals_column_dict = {cost: lambda x: '${:,.2f}'.format(x),
@@ -800,10 +824,11 @@ class Account(models.Model):
         return sorted(flat2, key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_messages(self, reverse_boolean):
         a = self.messages.all()
-        b = [x.messages.all() for x in self.building_set.all()]
+        bldg_set = self.building_set.all()
+        b = [x.messages.all() for x in bldg_set]
         e = [x.messages.all() for x in self.account_equipments()]
         m = [x.messages.all() for x in self.meter_set.all()]
-        f_0 = [x.space_set.all() for x in self.building_set.all()]
+        f_0 = [x.space_set.all() for x in bldg_set]
         f_0 = [item for sublist in f_0 for item in sublist]
         f = [x.messages.all() for x in f_0]
         layered_message_list = [a,b,e,m,f]

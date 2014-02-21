@@ -184,18 +184,31 @@ class Meter(models.Model):
             for m in bill_data_totals.index:
                 i = bill_data_totals['Month Integer'][m]
                 if i in [j.month for j in bill_data.index]:
-                    sum_cons = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
-                    if sum_cons == Decimal(0.0): sum_cons = Decimal(NaN)
-                    bill_data_totals[cost_per_consumption][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / sum_cons
-                    bill_data_totals[cost_per_day][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum())
-                    bill_data_totals[cost][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum()
-                    bill_data_totals[consumption_per_day][m] = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum())
-                    bill_data_totals[consumption][m] = bill_data['Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
-                    bill_data_totals[consumption_kBtu][m] = bill_data['kBtu Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum()
-                    sum_kbtu_cons = bill_data['kBtu Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum()
+                    cost_months = [x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]
+                    cons_months = [x.month==i and not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]
+                    kBtu_months = [x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]
+                    
+                    sum_cons =      bill_data['Consumption (act)'][cons_months].sum()
+                    sum_kbtu_cons = bill_data['kBtu Consumption (act)'][kBtu_months].sum()
+                    sum_days_cost = Decimal(float(bill_data['Days'][cost_months].sum()))
+                    sum_days_cons = Decimal(float(bill_data['Days'][cons_months].sum()))
+                    sum_days_kBtu = Decimal(float(bill_data['Days'][kBtu_months].sum()))
+                    
+                    if sum_cons ==      Decimal(0.0): sum_cons = Decimal(NaN)
+                    if sum_days_cost == Decimal(0.0): sum_days_cost = Decimal(NaN)
+                    if sum_days_cons == Decimal(0.0): sum_days_cons = Decimal(NaN)
+                    if sum_days_kBtu == Decimal(0.0): sum_days_kBtu = Decimal(NaN)
                     if sum_kbtu_cons == Decimal(0.0): sum_kbtu_cons = Decimal(NaN)
-                    bill_data_totals[cost_per_kBtu][m] = bill_data['Cost (act)'][[x.month==i and not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / sum_kbtu_cons
-                    bill_data_totals[kBtu_per_day][m] = bill_data['kBtu Consumption (act)'][[x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[x.month==i and not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum())
+                    
+                    bill_data_totals[cost_per_consumption][m] = bill_data['Cost (act)'][cost_months].sum() / sum_cons
+                    bill_data_totals[cost_per_day][m] =         bill_data['Cost (act)'][cost_months].sum() / sum_days_cost
+                    bill_data_totals[cost][m] =                 bill_data['Cost (act)'][cost_months].sum()
+                    bill_data_totals[consumption_per_day][m] =  bill_data['Consumption (act)'][cons_months].sum() / sum_days_cons
+                    bill_data_totals[consumption][m] =          bill_data['Consumption (act)'][cons_months].sum()
+                    bill_data_totals[consumption_kBtu][m] =     bill_data['kBtu Consumption (act)'][kBtu_months].sum()
+                    bill_data_totals[cost_per_kBtu][m] =        bill_data['Cost (act)'][cost_months].sum() / sum_kbtu_cons
+                    bill_data_totals[kBtu_per_day][m] =         bill_data['kBtu Consumption (act)'][kBtu_months].sum() / sum_days_kBtu
+                    
                 else:
                     bill_data_totals[cost_per_consumption][m] = Decimal(NaN)
                     bill_data_totals[cost_per_day][m] =         Decimal(NaN)
@@ -210,18 +223,30 @@ class Meter(models.Model):
             bill_data_totals.index = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'Annual']
             
             #now we add the Annual row, which will be a column if and when we transpose
-            sum_cons = bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
+            cost_months = [not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]
+            cons_months = [not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]
+            kBtu_months = [not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]
+            
+            sum_cons =      bill_data['Consumption (act)'][cons_months].sum()
+            sum_kbtu_cons = bill_data['kBtu Consumption (act)'][kBtu_months].sum()
+            sum_days_cost = Decimal(float(bill_data['Days'][cost_months].sum()))
+            sum_days_cons = Decimal(float(bill_data['Days'][cons_months].sum()))
+            sum_days_kBtu = Decimal(float(bill_data['Days'][kBtu_months].sum()))
+            
             if sum_cons == Decimal(0.0): sum_cons = Decimal(NaN)
-            bill_data_totals[cost_per_consumption]['Annual'] = bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / sum_cons
-            bill_data_totals[cost_per_day]['Annual'] =         bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum())
-            bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'][[not(decimal_isnan(bill_data['Cost (act)'][x])) for x in bill_data.index]].sum()
-            bill_data_totals[consumption_per_day]['Annual'] =  bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum() / Decimal(0.0 + bill_data['Days'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum())
-            bill_data_totals[consumption]['Annual'] =          bill_data['Consumption (act)'][[not(decimal_isnan(bill_data['Consumption (act)'][x])) for x in bill_data.index]].sum()
-            bill_data_totals[consumption_kBtu]['Annual'] =     bill_data['kBtu Consumption (act)'][[not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum()
-            sum_kbtu_cons = bill_data['kBtu Consumption (act)'][[not(decimal_isnan(bill_data['kBtu Consumption (act)'][x])) for x in bill_data.index]].sum()
             if sum_kbtu_cons == Decimal(0.0): sum_kbtu_cons = Decimal(NaN)
-            bill_data_totals[cost_per_kBtu]['Annual'] = bill_data['Cost (act)'].sum() / sum_kbtu_cons
-            bill_data_totals[kBtu_per_day]['Annual'] =  bill_data['kBtu Consumption (act)'].sum() / Decimal(0.0 + bill_data['Days'].sum())
+            if sum_days_cost == Decimal(0.0): sum_days_cost = Decimal(NaN)
+            if sum_days_cons == Decimal(0.0): sum_days_cons = Decimal(NaN)
+            if sum_days_kBtu == Decimal(0.0): sum_days_kBtu = Decimal(NaN)
+            
+            bill_data_totals[cost_per_consumption]['Annual'] =  bill_data['Cost (act)'][cost_months].sum() / sum_cons
+            bill_data_totals[cost_per_day]['Annual'] =          bill_data['Cost (act)'][cost_months].sum() / sum_days_cost
+            bill_data_totals[cost]['Annual'] =                  bill_data['Cost (act)'][cost_months].sum()
+            bill_data_totals[consumption_per_day]['Annual'] =   bill_data['Consumption (act)'][cons_months].sum() / sum_days_cons
+            bill_data_totals[consumption]['Annual'] =           bill_data['Consumption (act)'][cons_months].sum()
+            bill_data_totals[consumption_kBtu]['Annual'] =      bill_data['kBtu Consumption (act)'][kBtu_months].sum()
+            bill_data_totals[cost_per_kBtu]['Annual'] =         bill_data['Cost (act)'].sum() / sum_kbtu_cons
+            bill_data_totals[kBtu_per_day]['Annual'] =          bill_data['kBtu Consumption (act)'].sum() / sum_days_kBtu
             
             #no longer needed once we've sorted
             bill_data_totals = bill_data_totals.drop(['Month Integer'],1)
@@ -235,7 +260,7 @@ class Meter(models.Model):
                                                         columndict = totals_column_dict,
                                                         index_name = 'Metric',
                                                         transpose_bool = True)
-        
+            
             #ratios table only has ratios as opposed to totals, so we pull relevant columns and set format
             ratios_table_df = bill_data_totals[[cost_per_consumption,consumption_per_day,cost_per_day,cost_per_kBtu,kBtu_per_day]]
             ratios_column_dict = {cost_per_consumption: lambda x: '${:,.2f}'.format(x),
