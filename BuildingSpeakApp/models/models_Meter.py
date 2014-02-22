@@ -13,7 +13,7 @@ from storages.backends.s3boto import S3BotoStorage
 from models_functions import *
 from models_Message import Message
 from models_Reader_ing import Reader
-from models_monthlies import Monther
+from models_monthlies import Monther, Monthling
 from models_MeterModels import MeterConsumptionModel, MeterPeakDemandModel
 
 class Meter(models.Model):
@@ -274,15 +274,20 @@ class Meter(models.Model):
                                                         transpose_bool = True)
             
             #now create monthly charts if data exists; set to False for template if no data
-            cost_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Cost (base)','Cost (exp)','Cost (esave)','Cost (act)','Cost (asave)'])
+            cost_by_month = get_monthly_dataframe_as_table(df=bill_data[['Cost (base)','Cost (exp)','Cost (esave)','Cost (act)','Cost (asave)']].applymap(nan2zero),
+                                                           columnlist=['Month','Cost (base)','Cost (exp)','Cost (esave)','Cost (act)','Cost (asave)'])
             if len(cost_by_month) == 1: cost_by_month = False
-            consumption_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Consumption (base)','Consumption (exp)','Consumption (esave)','Consumption (act)','Consumption (asave)'])
+            consumption_by_month = get_monthly_dataframe_as_table(df=bill_data[['Consumption (base)','Consumption (exp)','Consumption (esave)','Consumption (act)','Consumption (asave)']].applymap(nan2zero),
+                                                                  columnlist=['Month','Consumption (base)','Consumption (exp)','Consumption (esave)','Consumption (act)','Consumption (asave)'])
             if len(consumption_by_month) == 1: consumption_by_month = False
-            demand_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','Peak Demand (base)','Peak Demand (exp)','Peak Demand (esave)','Peak Demand (act)','Peak Demand (asave)'])
+            demand_by_month = get_monthly_dataframe_as_table(df=bill_data[['Peak Demand (base)','Peak Demand (exp)','Peak Demand (esave)','Peak Demand (act)','Peak Demand (asave)']].applymap(nan2zero),
+                                                             columnlist=['Month','Peak Demand (base)','Peak Demand (exp)','Peak Demand (esave)','Peak Demand (act)','Peak Demand (asave)'])
             if len(demand_by_month) == 1: demand_by_month = False
-            kbtu_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','kBtu Consumption (base)','kBtu Consumption (exp)','kBtu Consumption (esave)','kBtu Consumption (act)','kBtu Consumption (asave)'])
+            kbtu_by_month = get_monthly_dataframe_as_table(df=bill_data[['kBtu Consumption (base)','kBtu Consumption (exp)','kBtu Consumption (esave)','kBtu Consumption (act)','kBtu Consumption (asave)']].applymap(nan2zero),
+                                                           columnlist=['Month','kBtu Consumption (base)','kBtu Consumption (exp)','kBtu Consumption (esave)','kBtu Consumption (act)','kBtu Consumption (asave)'])
             if len(kbtu_by_month) == 1: kbtu_by_month = False
-            kbtuh_by_month = get_monthly_dataframe_as_table(df=bill_data, columnlist=['Month','kBtuh Peak Demand (base)','kBtuh Peak Demand (exp)','kBtuh Peak Demand (esave)','kBtuh Peak Demand (act)','kBtuh Peak Demand (asave)'])
+            kbtuh_by_month = get_monthly_dataframe_as_table(df=bill_data[['kBtuh Peak Demand (base)','kBtuh Peak Demand (exp)','kBtuh Peak Demand (esave)','kBtuh Peak Demand (act)','kBtuh Peak Demand (asave)']].applymap(nan2zero),
+                                                            columnlist=['Month','kBtuh Peak Demand (base)','kBtuh Peak Demand (exp)','kBtuh Peak Demand (esave)','kBtuh Peak Demand (act)','kBtuh Peak Demand (asave)'])
             if len(kbtuh_by_month) == 1: kbtuh_by_month = False
             
         return [totals_table, ratios_table, cost_by_month, consumption_by_month, demand_by_month, kbtu_by_month, kbtuh_by_month]
@@ -1445,6 +1450,109 @@ class Meter(models.Model):
                 print m
         return df
         
+    def bill_data_update_calculated_values(self, df):
+        """function(df)
+        
+        Recalculates base, esave, exp, and asave
+        for Cost, Billing Demand, Peak Demand, 
+        and Consumption (inc. kBtu versions) for
+        the months provided in df, then resaves
+        them. Does not recalculate DDs.
+        """
+        try:
+            df = self.bill_data_calc_baseline(df = df)
+            df = self.bill_data_calc_savings(df = df)
+            df = self.bill_data_calc_dependents(df = df)
+            df = self.bill_data_calc_kbtu(df = df)
+            df = self.monther_set.get(name='BILLx').create_missing_required_columns(df = df)
+            df = self.bill_data_calc_costs(df = df)
+            
+            for i in range(0,len(df)):
+                try:
+                    month_i = None #setting here to avoid error in Except block
+                    month_i = df.index[i]
+                    per_date = UTC.localize(month_i.to_timestamp() + timedelta(days=10,hours=11,minutes=11,seconds=11))
+                    mlg = Monthling.objects.filter(monther=self.monther_set.get(name='BILLx')).get(when=per_date)
+                    if mlg is None: raise TypeError
+                    mlg.__setattr__('start_date',df['Start Date'][i])
+                    mlg.__setattr__('end_date',df['End Date'][i])
+                    
+                    mlg.__setattr__('act_billing_demand',df['Billing Demand (act)'][i])
+                    mlg.__setattr__('act_peak_demand',df['Peak Demand (act)'][i])
+                    mlg.__setattr__('act_consumption',df['Consumption (act)'][i])
+                    mlg.__setattr__('act_cost',df['Cost (act)'][i])
+                    mlg.__setattr__('act_kBtu_consumption',df['kBtu Consumption (act)'][i])
+                    mlg.__setattr__('act_kBtuh_peak_demand',df['kBtuh Peak Demand (act)'][i])
+                    
+                    mlg.__setattr__('exp_billing_demand',df['Billing Demand (exp)'][i])
+                    mlg.__setattr__('exp_peak_demand',df['Peak Demand (exp)'][i])
+                    mlg.__setattr__('exp_consumption',df['Consumption (exp)'][i])
+                    mlg.__setattr__('exp_cost',df['Cost (exp)'][i])
+                    mlg.__setattr__('exp_kBtu_consumption',df['kBtu Consumption (exp)'][i])
+                    mlg.__setattr__('exp_kBtuh_peak_demand',df['kBtuh Peak Demand (exp)'][i])
+                    
+                    mlg.__setattr__('exp_billing_demand_delta',df['Billing Demand (exp delta)'][i])
+                    mlg.__setattr__('exp_peak_demand_delta',df['Peak Demand (exp delta)'][i])
+                    mlg.__setattr__('exp_consumption_delta',df['Consumption (exp delta)'][i])
+                    mlg.__setattr__('exp_cost_delta',df['Cost (exp delta)'][i])
+                    mlg.__setattr__('exp_kBtu_consumption_delta',df['kBtu Consumption (exp delta)'][i])
+                    mlg.__setattr__('exp_kBtuh_peak_demand_delta',df['kBtuh Peak Demand (exp delta)'][i])
+                    
+                    mlg.__setattr__('base_billing_demand',df['Billing Demand (base)'][i])
+                    mlg.__setattr__('base_peak_demand',df['Peak Demand (base)'][i])
+                    mlg.__setattr__('base_consumption',df['Consumption (base)'][i])
+                    mlg.__setattr__('base_cost',df['Cost (base)'][i])
+                    mlg.__setattr__('base_kBtu_consumption',df['kBtu Consumption (base)'][i])
+                    mlg.__setattr__('base_kBtuh_peak_demand',df['kBtuh Peak Demand (base)'][i])
+                    
+                    mlg.__setattr__('base_billing_demand_delta',df['Billing Demand (base delta)'][i])
+                    mlg.__setattr__('base_peak_demand_delta',df['Peak Demand (base delta)'][i])
+                    mlg.__setattr__('base_consumption_delta',df['Consumption (base delta)'][i])
+                    mlg.__setattr__('base_cost_delta',df['Cost (base delta)'][i])
+                    mlg.__setattr__('base_kBtu_consumption_delta',df['kBtu Consumption (base delta)'][i])
+                    mlg.__setattr__('base_kBtuh_peak_demand_delta',df['kBtuh Peak Demand (base delta)'][i])
+                    
+                    mlg.__setattr__('esave_billing_demand',df['Billing Demand (esave)'][i])
+                    mlg.__setattr__('esave_peak_demand',df['Peak Demand (esave)'][i])
+                    mlg.__setattr__('esave_consumption',df['Consumption (esave)'][i])
+                    mlg.__setattr__('esave_cost',df['Cost (esave)'][i])
+                    mlg.__setattr__('esave_kBtu_consumption',df['kBtu Consumption (esave)'][i])
+                    mlg.__setattr__('esave_kBtuh_peak_demand',df['kBtuh Peak Demand (esave)'][i])
+                    
+                    mlg.__setattr__('esave_billing_demand_delta',df['Billing Demand (esave delta)'][i])
+                    mlg.__setattr__('esave_peak_demand_delta',df['Peak Demand (esave delta)'][i])
+                    mlg.__setattr__('esave_consumption_delta',df['Consumption (esave delta)'][i])
+                    mlg.__setattr__('esave_cost_delta',df['Cost (esave delta)'][i])
+                    mlg.__setattr__('esave_kBtu_consumption_delta',df['kBtu Consumption (esave delta)'][i])
+                    mlg.__setattr__('esave_kBtuh_peak_demand_delta',df['kBtuh Peak Demand (esave delta)'][i])
+                    
+                    mlg.__setattr__('asave_billing_demand',df['Billing Demand (asave)'][i])
+                    mlg.__setattr__('asave_peak_demand',df['Peak Demand (asave)'][i])
+                    mlg.__setattr__('asave_consumption',df['Consumption (asave)'][i])
+                    mlg.__setattr__('asave_cost',df['Cost (asave)'][i])
+                    mlg.__setattr__('asave_kBtu_consumption',df['kBtu Consumption (asave)'][i])
+                    mlg.__setattr__('asave_kBtuh_peak_demand',df['kBtuh Peak Demand (asave)'][i])
+                    
+                    mlg.save()
+                    month_i = None #resetting to avoid carrying over incorrectly
+                    
+                except:
+                    m = Message(when=timezone.now(),
+                                message_type='Code Error',
+                                subject='Model update failed.',
+                                comment='Meter %s bill_data_update_calculated_values failed to overwrite existing month %s, function aborted.' % (self.id, str(month_i)))
+                    m.save()
+                    self.messages.add(m)
+                    print m
+        except:
+            m = Message(when=timezone.now(),
+                        message_type='Code Error',
+                        subject='Model update failed.',
+                        comment='Meter %s bill_data_update_calculated_values failed, function aborted.' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+            
     def assign_period_datetime(self, time_series=[], dates=[]):
         """Inputs:
             time_series or

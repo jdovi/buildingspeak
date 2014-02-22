@@ -13,7 +13,6 @@ from models_Message import Message
 from models_Account import Account
 from models_Building import Building
 from models_Equipment import Equipment
-from models_Equipment_PackageUnit import PackageUnit
 from models_Space import Space
 from models_Meter import Meter
 from models_RateSchedules import RateSchedule
@@ -793,6 +792,6 @@ def update_readers(modelinstance):
 
 
 #################
-def temp_func(self, file_location=0):
+def temp_func():
     pass
 ####################

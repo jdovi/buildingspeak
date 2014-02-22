@@ -377,6 +377,8 @@ class GAPowerPandL(RateSchedule):
             df = df.sort_index()
             billxdf = billx.get_monther_period_dataframe()
             billxdf = billxdf.sort_index()
+            billxdf = billxdf[[not(i) for i in billxdf['Peak Demand (act)'].apply(decimal_isnan)]]
+            
             df_window = billxdf[max(0,len(billxdf)-int(self.billing_demand_sliding_month_window)):]
             
             for i in range(0,len(df)):

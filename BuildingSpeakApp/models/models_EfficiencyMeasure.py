@@ -346,9 +346,10 @@ class EfficiencyMeasure(models.Model):
             df['Peak Demand Savings'] = Decimal(0.0)
             df['Cost Savings'] = Decimal(0.0)
             for i in df.index:
-                df['Consumption Savings'][i:i+1] = d[str(i.month)]['Consumption Savings']
-                df['Peak Demand Savings'][i:i+1] = d[str(i.month)]['Peak Demand Savings']
-                df['Cost Savings'][i:i+1] = d[str(i.month)]['Cost Savings']
+                if self.when < df['End Date'][i]:
+                    df['Consumption Savings'][i:i+1] = d[str(i.month)]['Consumption Savings']
+                    df['Peak Demand Savings'][i:i+1] = d[str(i.month)]['Peak Demand Savings']
+                    df['Cost Savings'][i:i+1] = d[str(i.month)]['Cost Savings']
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
