@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils import simplejson
-import socket
 
 from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, WeatherStation, EfficiencyMeasure, Monthling
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm
@@ -11,9 +10,10 @@ from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, de
 from BuildingSpeakApp.models import get_monthly_dataframe_as_table, get_df_as_table_with_formats
 
 import json, stripe
-from numpy import NaN
 import numpy as np
 import pandas as pd
+import socket, logging
+from numpy import NaN
 from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth.models import User
@@ -31,6 +31,7 @@ if 'heroku' in settings.DJANGO_ROOT:
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe_pk = settings.STRIPE_PUBLISHABLE_KEY
+logger = logging.getLogger(__name__)
 
 class ResultsMessage(object):
     """Used for generating user
@@ -616,6 +617,12 @@ def equipment_detail(request, account_id, equipment_id):
 
 @login_required
 def measure_detail(request, account_id, measure_id):
+    logging.critical('hello world.')
+    logging.error('hello world.')
+    logging.warning('hello world.')
+    logging.info('hello world.')
+    logging.debug('hello world.')
+    print xyz
     #---check that we can access the account and meter and they go together
     account = get_object_or_404(Account, pk=account_id)
     measure = get_object_or_404(EfficiencyMeasure, pk=measure_id)

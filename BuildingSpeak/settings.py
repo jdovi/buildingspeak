@@ -7,7 +7,7 @@ DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 PROJECT_DIR = os.path.dirname(__file__)
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -150,6 +150,8 @@ EMAIL_HOST_PASSWORD = MANDRILL_APIKEY
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+SERVER_EMAIL = 'admin@buildingspeak.com'
+DEFAULT_FROM_EMAIL = 'admin@buildingspeak.com'
 
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
@@ -195,12 +197,29 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
     'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
@@ -208,6 +227,11 @@ LOGGING = {
         }
     },
     'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level': 'INFO',
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
@@ -215,59 +239,6 @@ LOGGING = {
         },
     }
 }
-
-#LOGGING = {
-#    'version': 1,
-#    'disable_existing_loggers': True,
-#    'formatters': {
-#        'verbose': {
-#            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-#        },
-#        'simple': {
-#            'format': '%(levelname)s %(message)s'
-#        },
-#    },
-#    'filters': {
-#        'special': {
-#            '()': 'project.logging.SpecialFilter',
-#            #'foo': 'bar',
-#        }
-#    },
-#    'handlers': {
-#        'null': {
-#            'level': 'DEBUG',
-#            'class': 'django.utils.log.NullHandler',
-#        },
-#        'console':{
-#            'level': 'DEBUG',
-#            'class': 'logging.StreamHandler',
-#            'formatter': 'simple'
-#        },
-#        'mail_admins': {
-#            'level': 'ERROR',
-#            'class': 'django.utils.log.AdminEmailHandler',
-#            'filters': ['special'],
-#            'include_html': True,
-#        }
-#    },
-#    'loggers': {
-#        'django': {
-#            'handlers': ['null'],
-#            'propagate': True,
-#            'level': 'INFO',
-#        },
-#        'django.request': {
-#            'handlers': ['mail_admins'],
-#            'level': 'ERROR',
-#            'propagate': False,
-#        },
-#        'myproject.custom': {
-#            'handlers': ['console', 'mail_admins'],
-#            'level': 'INFO',
-#            'filters': ['special']
-#        }
-#    }
-#}
 
 
 # Parse database configuration from $DATABASE_URL
