@@ -27,7 +27,7 @@ function addChart(arr) {
     </ul> <!-- .nav-tabs -->
 
     <div class="tab tab-summary">
-	{% for bldg, meter_data_curr, pie_data_curr, meter_data_prev, pie_data_prev in bldg_data %}
+	{% for bldg, meter_data_curr, pie_data_curr, month_curr, meter_data_prev, pie_data_prev, month_prev in bldg_data %}
     <h2><a href="/{{ account.id }}/buildings/{{ bldg.id }}" title="{{ bldg.name }}">{{ bldg.name }}</a></h2>
     <div class="row">
 		<div class="onecol-two prev">
@@ -40,7 +40,7 @@ function addChart(arr) {
 				'{{ bldg.id }}-pie-cost-by-meter-prev',
 				'PieChart',
 				{{ cost_by_meter|safe }},
-				{title: 'Cost by Meter - Previous Month'}
+				{title: 'Cost by Meter - Previous Month ({{ month_prev|safe }})'}
 			  ]);
 			  </script>
 			  {% empty %}
@@ -58,7 +58,7 @@ function addChart(arr) {
 				'{{ bldg.id }}-pie-cost-by-meter-curr',
 				'PieChart',
 				{{ cost_by_meter|safe }},
-				{title: 'Cost by Meter - Latest Month'}
+				{title: 'Cost by Meter - Latest Month ({{ month_curr|safe }})'}
 			  ]);
 			  </script>
 			  {% empty %}
@@ -76,7 +76,7 @@ function addChart(arr) {
 				'{{ bldg.id }}-pie-cost-by-type-prev',
 				'PieChart',
 				{{ cost_by_type|safe }},
-				{title: 'Cost by Type - Previous Month'}
+				{title: 'Cost by Type - Previous Month ({{ month_prev|safe }})'}
 			  ]);
 			  </script>
 			  {% empty %}
@@ -94,7 +94,7 @@ function addChart(arr) {
 				'{{ bldg.id }}-pie-cost-by-type-curr',
 				'PieChart',
 				{{ cost_by_type|safe }},
-				{title: 'Cost by Type - Latest Month'}
+				{title: 'Cost by Type - Latest Month ({{ month_curr|safe }})'}
 			  ]);
 			  </script>
 			  {% empty %}

@@ -190,13 +190,17 @@ def account_detail(request, account_id):
     total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
     
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
-    month_curr = pd.Period(timezone.now(),freq='M')-39 #current month, final month in sequence
-    month_prev = month_curr - 1                     #previous month, first in sequence
 
     t1 = timezone.now()
     
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
+        month_curr = pd.Period(Monthling.objects.exclude(act_cost = Decimal(NaN))
+                                                .filter(monther__meter__building = bldg)
+                                                .latest('when')
+                                                .when,
+                               freq='M')                #latest month with non-NaN 'Cost (act)' data
+        month_prev = month_curr - 1
         bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
                                                                 month_last = month_curr)
         if bldg_view_data_curr is None: bldg_view_data_curr = [False, False]
@@ -206,8 +210,10 @@ def account_detail(request, account_id):
         bldg_data.append([bldg,
                           bldg_view_data_curr[0],
                           bldg_view_data_curr[1],
+                          month_curr.strftime('%b-%Y'),
                           bldg_view_data_prev[0],
                           bldg_view_data_prev[1],
+                          month_prev.strftime('%b-%Y'),
                           ])
     
     t2 = timezone.now()
