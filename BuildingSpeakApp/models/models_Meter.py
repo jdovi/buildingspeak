@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 import numpy as np
 from pytz import UTC
@@ -15,6 +16,8 @@ from models_Message import Message
 from models_Reader_ing import Reader
 from models_monthlies import Monther, Monthling
 from models_MeterModels import MeterConsumptionModel, MeterPeakDemandModel
+
+logger = logging.getLogger(__name__)
 
 class Meter(models.Model):
     """Model for any fuel or water
@@ -134,6 +137,7 @@ class Meter(models.Model):
         Returns tables of totals, ratios,
         and monthly values.
         """
+        t0 = timezone.now()
         if bill_data is None:
             totals_table = False
             ratios_table = False
@@ -290,6 +294,8 @@ class Meter(models.Model):
                                                             columnlist=['Month','kBtuh Peak Demand (base)','kBtuh Peak Demand (exp)','kBtuh Peak Demand (esave)','kBtuh Peak Demand (act)','kBtuh Peak Demand (asave)'])
             if len(kbtuh_by_month) == 1: kbtuh_by_month = False
             
+        t1 = timezone.now()
+        logger.debug('get_meter_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return [totals_table, ratios_table, cost_by_month, consumption_by_month, demand_by_month, kbtu_by_month, kbtuh_by_month]
 
     def get_meter_view_meter_model_data(self, bill_data):
@@ -297,6 +303,7 @@ class Meter(models.Model):
         
         Returns tables of MeterModel statistics.
         """
+        t0 = timezone.now()
         if bill_data is None:
             consumption_residual_plots = None  #iterables in templates need None
             peak_demand_residual_plots = None  #iterables in templates need None
@@ -346,6 +353,8 @@ class Meter(models.Model):
                         peak_demand_residual_plots.append([peak_demand_model_residuals_table[0][i],[[x[i],x[0]] for x in peak_demand_model_residuals_table]])
                 else:
                     peak_demand_residual_plots = None
+        t1 = timezone.now()
+        logger.debug('get_meter_view_meter_model_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return [consumption_residual_plots, 
                 peak_demand_residual_plots, 
                 consumption_model_stats_table, 
@@ -358,6 +367,7 @@ class Meter(models.Model):
         
         Returns tables of five year data.
         """
+        t0 = timezone.now()
         if bill_data is None:
             five_year_table_cost = None
             five_year_table_cons = None
@@ -476,6 +486,8 @@ class Meter(models.Model):
                                     five_years['CDD (consumption)'][48:60].sum(),
                                     five_years['HDD (consumption)'][48:60].sum()
                                     ])
+        t1 = timezone.now()
+        logger.debug('get_meter_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return [five_year_table_cost, five_year_table_cons, five_year_table_kBtu]
         
     def get_meter_view_motion_table(self, bill_data):
@@ -486,6 +498,7 @@ class Meter(models.Model):
         with the following columns: MeterName,
         Date, Cost, kBtu, CDD, HDD.
         """
+        t0 = timezone.now()
         if bill_data is not None:
             bill_data[['Cost (act)',
                 'kBtu Consumption (act)',
@@ -500,6 +513,8 @@ class Meter(models.Model):
                                          ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)'])
         else:
             result = None
+        t1 = timezone.now()
+        logger.debug('get_meter_view_motion_table %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_all_events(self, reverse_boolean):
         return sorted(self.messages.filter(message_type='Event'), key=attrgetter('when'), reverse=reverse_boolean)
@@ -529,6 +544,7 @@ class Meter(models.Model):
         WARNING: only adds 
         measures with same
         utility type as Meter!"""
+        t0 = timezone.now()
         try:
             df['Consumption Savings_sum'] = Decimal(0.0)
             df['Peak Demand Savings_sum'] = Decimal(0.0)
@@ -565,6 +581,8 @@ class Meter(models.Model):
             m.save()
             self.messages.add(m)
             print m
+        t1 = timezone.now()
+        logger.debug('get_all_savings %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
     def get_bill_data_period_dataframe(self, first_month='', last_month=''):
         """function(first_month,last_month)
@@ -573,6 +591,7 @@ class Meter(models.Model):
         Takes mm/yyyy strings and returns
         a dataframe of bill data for that
         range."""
+        t0 = timezone.now()
         mdf = self.monther_set.get(name='BILLx').get_monther_period_dataframe(first_month=first_month, last_month=last_month)
         if mdf is None:
             m = Message(when=timezone.now(),
@@ -582,6 +601,8 @@ class Meter(models.Model):
             m.save()
             self.messages.add(m)
             print m
+        t1 = timezone.now()
+        logger.debug('get_bill_data_period_dataframe %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return mdf
     def upload_bill_data(self, file_location=0, create_models_if_nonexistent=True):
         """Input:
@@ -974,6 +995,8 @@ class Meter(models.Model):
                                             print m
                                             success_d = False
 
+        t1 = timezone.now()
+        logger.debug('upload_bill_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return max(success, success_a, success_b, success_c, success_d)
         
     def bill_data_calc_kbtu(self, df):
@@ -984,6 +1007,7 @@ class Meter(models.Model):
         Peak Demand columns for
         all groups (base, exp, etc.)
         of Meter's BILLx Monther."""
+        t0 = timezone.now()
         try:
             df.rename(columns={'Consumption (act)': 'Consumption',
                                'Peak Demand (act)': 'Peak Demand'}, inplace=True)
@@ -1144,6 +1168,8 @@ class Meter(models.Model):
             self.messages.add(m)
             print m
             
+        t1 = timezone.now()
+        logger.debug('bill_data_calc_kbtu %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
 
     def bill_data_calc_dd(self, df):
@@ -1152,6 +1178,7 @@ class Meter(models.Model):
         Computes degree days based
         on meter models attached
         to Meter's BILLx Monther."""
+        t0 = timezone.now()
         try:
             if self.monther_set.get(name='BILLx').consumption_model is None:
                 raise ValueError
@@ -1264,6 +1291,8 @@ class Meter(models.Model):
                 self.messages.add(m)
                 print m
                 
+        t1 = timezone.now()
+        logger.debug('bill_data_calc_dd %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
 
     def bill_data_calc_baseline(self, df, new_consumption_model_df = None, new_peak_demand_model_df = None):
@@ -1273,6 +1302,7 @@ class Meter(models.Model):
         delta) from meter models
         attached to Meter's BILLx
         Monther."""
+        t0 = timezone.now()
         try:
             check = (self.monther_set.get(name='BILLx').peak_demand_model is not None)
         except:
@@ -1325,6 +1355,8 @@ class Meter(models.Model):
                     self.messages.add(m)
                     print m
         df[['Consumption (base)','Consumption (base delta)','Peak Demand (base)','Peak Demand (base delta)']] = df[['Consumption (base)','Consumption (base delta)','Peak Demand (base)','Peak Demand (base delta)']].applymap(Decimal)
+        t1 = timezone.now()
+        logger.debug('bill_data_calc_baseline %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
 
     def bill_data_calc_savings(self, df):
@@ -1334,6 +1366,7 @@ class Meter(models.Model):
         from efficiency measures
         attached to Meter and
         stores on BILLx Monther."""
+        t0 = timezone.now()
         try:
             if 'Cost (esave)' in df.columns: df = df.drop(['Cost (esave)'], axis = 1)
             if 'Peak Demand (esave)' in df.columns: df = df.drop(['Peak Demand (esave)'], axis = 1)
@@ -1351,6 +1384,8 @@ class Meter(models.Model):
             m.save()
             self.messages.add(m)
             print m
+        t1 = timezone.now()
+        logger.debug('bill_data_calc_savings %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
         
     def bill_data_calc_dependents(self, df):
@@ -1361,6 +1396,7 @@ class Meter(models.Model):
         of BILLx Monther. Needs
         (base), (esave), and
         (act) to compute."""
+        t0 = timezone.now()
         try:
             df['Peak Demand (exp)'] = df['Peak Demand (base)'] - df['Peak Demand (esave)']
             df['Consumption (exp)'] = df['Consumption (base)'] - df['Consumption (esave)']
@@ -1384,6 +1420,8 @@ class Meter(models.Model):
             m.save()
             self.messages.add(m)
             print m
+        t1 = timezone.now()
+        logger.debug('bill_data_calc_dependents %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
 
     def bill_data_calc_costs(self, df):
@@ -1393,6 +1431,7 @@ class Meter(models.Model):
         Monther. Needs all
         Consumptions and Demands
         to compute."""
+        t0 = timezone.now()
         try:
             check = (self.rate_schedule is None)
         except:
@@ -1448,6 +1487,8 @@ class Meter(models.Model):
                 m.save()
                 self.messages.add(m)
                 print m
+        t1 = timezone.now()
+        logger.debug('bill_data_calc_costs %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
         
     def bill_data_update_calculated_values(self, df):
@@ -1459,6 +1500,7 @@ class Meter(models.Model):
         the months provided in df, then resaves
         them. Does not recalculate DDs.
         """
+        t0 = timezone.now()
         try:
             df = self.bill_data_calc_baseline(df = df)
             df = self.bill_data_calc_savings(df = df)
@@ -1552,6 +1594,8 @@ class Meter(models.Model):
             m.save()
             self.messages.add(m)
             print m
+        t1 = timezone.now()
+        logger.debug('bill_data_update_calculated_values %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
             
     def assign_period_datetime(self, time_series=[], dates=[]):
         """Inputs:
@@ -1563,6 +1607,7 @@ class Meter(models.Model):
         most frequently occurring month in
         a given time series spanning 25-35
         days to use as basis for Period."""
+        t0 = timezone.now()
         
         #raise error if empty inputs
         try:
@@ -1634,6 +1679,8 @@ class Meter(models.Model):
                     self.messages.add(m)
                     print m
                     answer = None
+        t1 = timezone.now()
+        logger.debug('assign_period_datetime %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return answer
     
     def add_kBtu_kBtuh(self, df, fuel_type, units):
@@ -1647,6 +1694,7 @@ class Meter(models.Model):
             
         Returns dataframe with columns of
         kBtuh and kBtu."""
+        t0 = timezone.now()
         fuels=['electricity','natural gas','domestic water','chilled water','hot water',
                  'steam','fuel oil (1,2,4), diesel','fuel oil (5,6)','kerosene',
                  'propane and liquid propane','coal (anthracite)','coal (bituminous)',
@@ -2006,6 +2054,8 @@ class Meter(models.Model):
             self.messages.add(m)
             print m
             result = None
+        t1 = timezone.now()
+        logger.debug('add_kBtu_kBtuh %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def __unicode__(self):
         return self.name

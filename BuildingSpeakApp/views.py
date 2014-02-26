@@ -191,8 +191,6 @@ def account_detail(request, account_id):
     total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
     
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
-
-    t1 = timezone.now()
     
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
@@ -217,15 +215,12 @@ def account_detail(request, account_id):
                           month_prev.strftime('%b-%Y'),
                           ])
     
-    t2 = timezone.now()
-
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40+24                            #final month in sequence
     acct_view_data = account.get_account_view_meter_data(month_first=month_first,
                                                          month_last=month_last)
-    t3 = timezone.now()
     five_year_data = account.get_account_view_five_year_data()
-    t4 = timezone.now()
+
     if acct_view_data is None:
         meter_data = None
         pie_data = None
@@ -233,7 +228,6 @@ def account_detail(request, account_id):
         meter_data = acct_view_data[0]
         pie_data = acct_view_data[1]
     #####Stripe testing
-    t5 = timezone.now()
     if request.method == 'POST':
         print request.POST['stripeToken']
         try:
@@ -248,7 +242,6 @@ def account_detail(request, account_id):
             account.__setattr__('stripe_customer_id', stripe_customer.id)
             account.save()
     #####Stripe testing
-    t6 = timezone.now()
     if (account.stripe_customer_id is not None) and (account.stripe_customer_id != ''):
         charge = stripe.Charge.create(
             amount = timezone.now().minute * 100,
@@ -256,7 +249,6 @@ def account_detail(request, account_id):
             customer = account.stripe_customer_id,
             description = 'Account ' + str(account.id) + ': test payment $' + str(timezone.now().minute * 100)
             )
-    t7 = timezone.now()
     context = {
         'user':           request.user,
         'account':        account,
@@ -280,20 +272,14 @@ def account_detail(request, account_id):
         'motion_data_buildings':    account.get_account_view_motion_table_buildings(),
         'motion_data_spaces':       account.get_account_view_motion_table_spaces(),
         'stripe_pk':                stripe_pk,
-        'results_set': [['get Account, SF, attrs',      '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0)],
-                        ['bldg data curr/prev',         '{0:,.0f}'.format((t2-t1).seconds*1000.0 + (t2-t1).microseconds/1000.0)],
-                        ['get Account view meter data', '{0:,.0f}'.format((t3-t2).seconds*1000.0 + (t3-t2).microseconds/1000.0)],
-                        ['get Account 5yr data',        '{0:,.0f}'.format((t4-t3).seconds*1000.0 + (t4-t3).microseconds/1000.0)],
-                        ['extracting results',          '{0:,.0f}'.format((t5-t4).seconds*1000.0 + (t5-t4).microseconds/1000.0)],
-                        ['Stripe get/create customer',  '{0:,.0f}'.format((t6-t5).seconds*1000.0 + (t6-t5).microseconds/1000.0)],
-                        ['Stripe create charge',        '{0:,.0f}'.format((t7-t6).seconds*1000.0 + (t7-t6).microseconds/1000.0)],
-                        ],
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
         template_name = 'buildingspeakapp/account_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
+    t1 = timezone.now()
+    logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)
 
 @login_required
@@ -617,12 +603,6 @@ def equipment_detail(request, account_id, equipment_id):
 
 @login_required
 def measure_detail(request, account_id, measure_id):
-    logging.critical('hello world.')
-    logging.error('hello world.')
-    logging.warning('hello world.')
-    logging.info('hello world.')
-    logging.debug('hello world.')
-    print xyz
     #---check that we can access the account and meter and they go together
     account = get_object_or_404(Account, pk=account_id)
     measure = get_object_or_404(EfficiencyMeasure, pk=measure_id)

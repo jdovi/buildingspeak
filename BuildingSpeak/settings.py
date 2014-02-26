@@ -7,7 +7,7 @@ DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 PROJECT_DIR = os.path.dirname(__file__)
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -194,10 +194,22 @@ INSTALLED_APPS = (
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+if 'dashley' in SITE_ROOT:
+    bsapp_handlers = ['console', 'logfile']
+else:
+    bsapp_handlers = []
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
+        'debug': {
+            'format' : "[%(asctime)s] %(levelname)s %(message)s",
+            'datefmt' : "%H:%M:%S"
+        },
+        'standard': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
@@ -211,6 +223,14 @@ LOGGING = {
         }
     },
     'handlers': {
+        'logfile': {
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': 'C:/Users/dashley/Box Sync/BuildingSpeak/BuildingSpeakApp/logfile.txt',
+            'maxBytes': 10000000,
+            'backupCount': 2,
+            'formatter': 'debug',
+        },
         'null': {
             'level': 'DEBUG',
             'class': 'django.utils.log.NullHandler',
@@ -218,7 +238,7 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'debug'
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -228,7 +248,7 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['null'],
             'propagate': True,
             'level': 'INFO',
         },
@@ -237,6 +257,17 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'BuildingSpeakApp': {
+            'handlers': bsapp_handlers,
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        
     }
 }
 
