@@ -399,7 +399,7 @@ def convert_units(n_utility, n_units, x_utility, x_units):
     t1 = timezone.now()
     logger.debug('convert_units %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return scaling_factor
-
+    
 def convert_units_sum_meters(utility_type, units, list_of_meters, first_month='', last_month=''):
     """function(utility_type, units, list_of_meters, first_month, last_month)
         utility_type/units = from Meter options
