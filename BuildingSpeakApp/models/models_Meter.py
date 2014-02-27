@@ -490,32 +490,32 @@ class Meter(models.Model):
         logger.debug('get_meter_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return [five_year_table_cost, five_year_table_cons, five_year_table_kBtu]
         
-    def get_meter_view_motion_table(self, bill_data):
-        """function(bill_data)
-        
-        Returns table for motion chart on
-        Meter's detail view.  List of lists
-        with the following columns: MeterName,
-        Date, Cost, kBtu, CDD, HDD.
-        """
-        t0 = timezone.now()
-        if bill_data is not None:
-            bill_data[['Cost (act)',
-                'kBtu Consumption (act)',
-                'CDD (consumption)',
-                'HDD (consumption)']] = bill_data[['Cost (act)',
-                                            'kBtu Consumption (act)',
-                                            'CDD (consumption)',
-                                            'HDD (consumption)']].applymap(nan2zero)
-            result = get_df_motion_table(bill_data,
-                                         ['Meter',str(self.name)],
-                                         lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
-                                         ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)'])
-        else:
-            result = None
-        t1 = timezone.now()
-        logger.debug('get_meter_view_motion_table %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
-        return result
+#    def get_meter_view_motion_table(self, bill_data):
+#        """function(bill_data)
+#        
+#        Returns table for motion chart on
+#        Meter's detail view.  List of lists
+#        with the following columns: MeterName,
+#        Date, Cost, kBtu, CDD, HDD.
+#        """
+#        t0 = timezone.now()
+#        if bill_data is not None:
+#            bill_data[['Cost (act)',
+#                'kBtu Consumption (act)',
+#                'CDD (consumption)',
+#                'HDD (consumption)']] = bill_data[['Cost (act)',
+#                                            'kBtu Consumption (act)',
+#                                            'CDD (consumption)',
+#                                            'HDD (consumption)']].applymap(nan2zero)
+#            result = get_df_motion_table(bill_data,
+#                                         ['Meter',str(self.name)],
+#                                         lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
+#                                         ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)'])
+#        else:
+#            result = None
+#        t1 = timezone.now()
+#        logger.debug('get_meter_view_motion_table %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+#        return result
     def get_all_events(self, reverse_boolean):
         return sorted(self.messages.filter(message_type='Event'), key=attrgetter('when'), reverse=reverse_boolean)
     def get_all_alerts(self, reverse_boolean):

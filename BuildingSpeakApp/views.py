@@ -187,13 +187,90 @@ def application_error(request):
 @login_required
 def account_detail(request, account_id):
     t0 = timezone.now()
+    tA = timezone.now()
     account = get_object_or_404(Account, pk=account_id)
     total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
     
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
+
+    columns_needing_nan2zero = ['Billing Demand (act)',
+                                'Billing Demand (asave)',
+                                'Billing Demand (base delta)',
+                                'Billing Demand (base)',
+                                'Billing Demand (esave delta)',
+                                'Billing Demand (esave)',
+                                'Billing Demand (exp delta)',
+                                'Billing Demand (exp)',
+                                'Consumption (act)',
+                                'Consumption (asave)',
+                                'Consumption (base delta)',
+                                'Consumption (base)',
+                                'Consumption (esave delta)',
+                                'Consumption (esave)',
+                                'Consumption (exp delta)',
+                                'Consumption (exp)',
+                                'Cost (act)',
+                                'Cost (asave)',
+                                'Cost (base delta)',
+                                'Cost (base)',
+                                'Cost (esave delta)',
+                                'Cost (esave)',
+                                'Cost (exp delta)',
+                                'Cost (exp)',
+                                'CDD (consumption)',
+                                'CDD (peak demand)',
+                                'HDD (consumption)',
+                                'HDD (peak demand)',
+                                'Peak Demand (act)',
+                                'Peak Demand (asave)',
+                                'Peak Demand (base delta)',
+                                'Peak Demand (base)',
+                                'Peak Demand (esave delta)',
+                                'Peak Demand (esave)',
+                                'Peak Demand (exp delta)',
+                                'Peak Demand (exp)',
+                                'kBtu Consumption (act)',
+                                'kBtu Consumption (asave)',
+                                'kBtu Consumption (base delta)',
+                                'kBtu Consumption (base)',
+                                'kBtu Consumption (esave delta)',
+                                'kBtu Consumption (esave)',
+                                'kBtu Consumption (exp delta)',
+                                'kBtu Consumption (exp)',
+                                'kBtuh Peak Demand (act)',
+                                'kBtuh Peak Demand (asave)',
+                                'kBtuh Peak Demand (base delta)',
+                                'kBtuh Peak Demand (base)',
+                                'kBtuh Peak Demand (esave delta)',
+                                'kBtuh Peak Demand (esave)',
+                                'kBtuh Peak Demand (exp delta)',
+                                'kBtuh Peak Demand (exp)']
+
+    tB = timezone.now()
+    logger.debug('account_detailA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
+    acct_meters = account.meter_set.all()
+    acct_meter_data = [[x.utility_type,
+                        x.units,
+                        x.get_bill_data_period_dataframe(),
+                        x.id,
+                        x.name,
+                        x,
+                        [bldg.id for bldg in x.building_set.all()], #building_set IDs
+                        [sp.id for sp in x.building_set.all()],     #space_set IDs
+                         ] for x in acct_meters]
+    for meter in acct_meter_data:
+        meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
     
+    tB = timezone.now()
+    logger.debug('account_detailB %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
+        bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
+
         month_curr = pd.Period(Monthling.objects.exclude(act_cost = Decimal(NaN))
                                                 .filter(monther__meter__building = bldg)
                                                 .latest('when')
@@ -201,10 +278,12 @@ def account_detail(request, account_id):
                                freq='M')                #latest month with non-NaN 'Cost (act)' data
         month_prev = month_curr - 1
         bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
-                                                                month_last = month_curr)
+                                                                month_last = month_curr,
+                                                                bldg_meter_data = bldg_meter_data)
         if bldg_view_data_curr is None: bldg_view_data_curr = [False, False]
         bldg_view_data_prev = bldg.get_building_view_meter_data(month_first = month_prev,
-                                                                month_last = month_prev)
+                                                                month_last = month_prev,
+                                                                bldg_meter_data = bldg_meter_data)
         if bldg_view_data_prev is None: bldg_view_data_prev = [False, False]
         bldg_data.append([bldg,
                           bldg_view_data_curr[0],
@@ -215,18 +294,28 @@ def account_detail(request, account_id):
                           month_prev.strftime('%b-%Y'),
                           ])
     
+    tB = timezone.now()
+    logger.debug('account_detailC %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40+24                            #final month in sequence
-    acct_view_data = account.get_account_view_meter_data(month_first=month_first,
-                                                         month_last=month_last)
-    five_year_data = account.get_account_view_five_year_data()
-
+    acct_view_data = account.get_account_view_meter_data(month_first = month_first,
+                                                         month_last = month_last,
+                                                         acct_meter_data = acct_meter_data)
+    five_year_data = account.get_account_view_five_year_data(acct_meter_data = acct_meter_data)
+    
     if acct_view_data is None:
         meter_data = None
         pie_data = None
     else:
         meter_data = acct_view_data[0]
         pie_data = acct_view_data[1]
+
+    tB = timezone.now()
+    logger.debug('account_detailD %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     #####Stripe testing
     if request.method == 'POST':
         print request.POST['stripeToken']
@@ -267,10 +356,10 @@ def account_detail(request, account_id):
         'pie_data':       pie_data,
         'total_SF':       total_SF,
         'five_year_data': five_year_data,
-        'motion_data_meters':       account.get_account_view_motion_table_meters(),
-        'motion_data_fuels':        account.get_account_view_motion_table_fuels(),
-        'motion_data_buildings':    account.get_account_view_motion_table_buildings(),
-        'motion_data_spaces':       account.get_account_view_motion_table_spaces(),
+        'motion_data_meters':       account.get_account_view_motion_table_meters(acct_meter_data = acct_meter_data),
+        'motion_data_fuels':        account.get_account_view_motion_table_fuels(acct_meter_data = acct_meter_data),
+        'motion_data_buildings':    account.get_account_view_motion_table_buildings(acct_meter_data = acct_meter_data),
+        'motion_data_spaces':       account.get_account_view_motion_table_spaces(acct_meter_data = acct_meter_data),
         'stripe_pk':                stripe_pk,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
@@ -278,6 +367,9 @@ def account_detail(request, account_id):
         template_name = 'buildingspeakapp/account_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
+    tB = timezone.now()
+    logger.debug('account_detailE %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
     t1 = timezone.now()
     logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)

@@ -114,6 +114,33 @@ def nan2zero(x):
     #logger.debug('nan2zero %s' % '{0:,.2f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return y
     
+def get_meter_view_motion_table(name, bill_data):
+    """function(bill_data)
+    
+    Returns table for motion chart on
+    Meter's detail view.  List of lists
+    with the following columns: MeterName,
+    Date, Cost, kBtu, CDD, HDD.
+    """
+    t0 = timezone.now()
+    if bill_data is not None:
+        bill_data[['Cost (act)',
+            'kBtu Consumption (act)',
+            'CDD (consumption)',
+            'HDD (consumption)']] = bill_data[['Cost (act)',
+                                        'kBtu Consumption (act)',
+                                        'CDD (consumption)',
+                                        'HDD (consumption)']].applymap(nan2zero)
+        result = get_df_motion_table(bill_data,
+                                     ['Meter',name],
+                                     lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
+                                     ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)'])
+    else:
+        result = None
+    t1 = timezone.now()
+    logger.debug('get_meter_view_motion_table %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+    return result
+
 def get_df_motion_table(df, col_0, index_func, column_list, column_dict=None):
     """function(df,col_0,index_func,column_list[,column_dict])
     df = DataFrame with monthly period index
@@ -232,6 +259,7 @@ def get_monthly_dataframe_as_table(df, columnlist):
     in first column as Month
     with isoformat."""
     t0 = timezone.now()
+    tA = timezone.now()
     r = []
     try:
         r.append(columnlist)
@@ -239,7 +267,7 @@ def get_monthly_dataframe_as_table(df, columnlist):
         print 'Code Error: Received non-list during get_monthly_dataframe_as_table function, aborting and returning empty list.'
     else:
         try:
-            df_dec = df
+            df_dec = df[columnlist[1:]]
         except:
             print 'Code Error: Failed to load dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
         else:
@@ -247,6 +275,9 @@ def get_monthly_dataframe_as_table(df, columnlist):
                 print 'Code Warning: Found no data to load during get_monthly_dataframe_as_table function, aborting and returning empty list.'
             else:
                 try:
+                    tB = timezone.now()
+                    logger.debug('get_monthly_dataframe_as_tableA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+                    tA = timezone.now()
                     if 'Start Date' in df_dec.columns and 'End Date' in df_dec.columns:
                         df_dec_numbers = df_dec.columns.drop(['Start Date','End Date'])
                     elif 'Start Date' in df_dec.columns:
@@ -255,7 +286,13 @@ def get_monthly_dataframe_as_table(df, columnlist):
                         df_dec_numbers = df_dec.columns.drop(['End Date'])
                     else:
                         df_dec_numbers = df_dec.columns
+                    tB = timezone.now()
+                    logger.debug('get_monthly_dataframe_as_tableB1 %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+                    tA = timezone.now()
                     df = df_dec[df_dec_numbers].applymap(lambda x: float(x)) #convert Decimal to float
+                    tB = timezone.now()
+                    logger.debug('get_monthly_dataframe_as_tableB2 %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+                    tA = timezone.now()
                 except:
                     print 'Code Error: Failed to convert decimals to floats during get_monthly_dataframe_as_table function, aborting and returning empty list.'
                 else:
@@ -263,6 +300,9 @@ def get_monthly_dataframe_as_table(df, columnlist):
                         print 'Code Error: Received request for columns that are not in dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
                     else:
                         try:
+                            tB = timezone.now()
+                            logger.debug('get_monthly_dataframe_as_tableB3 %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+                            tA = timezone.now()
                             df = df.sort_index()
                             for i in range(0,len(df)):
                                 #r_1 = [str(df.index[i])]
@@ -272,6 +312,8 @@ def get_monthly_dataframe_as_table(df, columnlist):
                                     r_j.append(df[j][i])
                                 r_1.extend(r_j)
                                 r.append(r_1)
+                            tB = timezone.now()
+                            logger.debug('get_monthly_dataframe_as_tableC %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
                         except:
                             print 'Code Error: Failed to create table during get_monthly_dataframe_as_table function, aborting and returning empty list.'
     t1 = timezone.now()
@@ -400,10 +442,16 @@ def convert_units(n_utility, n_units, x_utility, x_units):
     logger.debug('convert_units %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return scaling_factor
     
-def convert_units_sum_meters(utility_type, units, list_of_meters, first_month='', last_month=''):
-    """function(utility_type, units, list_of_meters, first_month, last_month)
+def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, first_month='', last_month=''):
+    """function(utility_type, units, nested_lists_meter_data, first_month, last_month)
         utility_type/units = from Meter options
-        list = Meter objects
+        list = [[utility_type,
+                 units,
+                 dataframe,
+                 id,
+                 name,
+                 meter] for each meter]
+            (prev. version: Meter objects)
         first/last_month = mm/yyyy strings for date range
         
     Given the type, units and mm/yyyy
@@ -421,7 +469,7 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
     t0 = timezone.now()
     tA = timezone.now()
     try:
-        if len([type(x.id) for x in list_of_meters if type(x.id) is not int]) > 0:
+        if len([type(x[3]) for x in nested_lists_meter_data if type(x[3]) is not int]) > 0:
             raise AttributeError
     except:
         print 'Code Error: Function convert_units_sum_meters given non-model input, aborting and returning None.'
@@ -545,7 +593,8 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
                 tB = timezone.now()
                 logger.debug('convert_units_sum_metersA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
                 tA = timezone.now()
-                meter_data_lists = [[x.utility_type,x.units,x.get_bill_data_period_dataframe(first_month=first_month,last_month=last_month)] for x in list_of_meters]
+#                meter_data_lists = [[x.utility_type,x.units,x.get_bill_data_period_dataframe(first_month=first_month,last_month=last_month)] for x in list_of_meters]
+                meter_data_lists = nested_lists_meter_data
                 meter_data_lists = [x for x in meter_data_lists if x[2] is not None]
                 if len(meter_data_lists) > 0:
                     tB = timezone.now()
@@ -563,15 +612,11 @@ def convert_units_sum_meters(utility_type, units, list_of_meters, first_month=''
                     for meter in meter_data_lists[1:]:
                         if meter[0] != 'domestic water':
                             df_sum[column_list_sum_non_water] = (df_sum[column_list_sum_non_water]
-                                                                    .applymap(nan2zero)
-                                                                    .add(meter[2][column_list_sum_non_water]
-                                                                            .applymap(nan2zero),fill_value=0) #must remove NaNs so addition works
+                                                                    .add(meter[2][column_list_sum_non_water],fill_value=0) #must remove NaNs so addition works
                                                                 )
                         elif meter[0] == 'domestic water':
                             df_sum[column_list_sum_water] = (df_sum[column_list_sum_water]
-                                            .applymap(nan2zero)
-                                            .add(meter[2][column_list_sum_water]
-                                                    .applymap(nan2zero),fill_value=0)#must remove NaNs so addition works
+                                            .add(meter[2][column_list_sum_water],fill_value=0) #must remove NaNs so addition works
                                           )
                 else:
                     df_sum = None

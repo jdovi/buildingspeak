@@ -530,7 +530,7 @@ class Building(models.Model):
         logger.debug('get_building_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return five_year_data
 
-    def get_building_view_meter_data(self, month_first, month_last):
+    def get_building_view_meter_data(self, month_first, month_last, bldg_meter_data):
         """
         Returns tables of summed meter data for a given date range.
         
@@ -547,7 +547,7 @@ class Building(models.Model):
             first_month = month_first.strftime('%m/%Y')
             last_month = month_last.strftime('%m/%Y')
             
-            if len(self.meters.all()) < 1:
+            if len(bldg_meter_data) < 1:
                 result = None
             else:
                 column_list_sum = ['Billing Demand (act)',
@@ -601,7 +601,8 @@ class Building(models.Model):
                 #meter_data is what will be passed to the template
                 meter_data = []
                 utility_groups = ['Building Total']
-                utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
+                utility_types = sorted(set([str(x[0]) for x in bldg_meter_data]))
+                utility_groups.extend(utility_types)
                 
                 #meter_dict holds all info and dataframes for each utility group, starting with Total
                 #note that water is included for Cost, so Cons/PD can never be used here but kBtu/kBtuh can
@@ -612,14 +613,13 @@ class Building(models.Model):
                                                         'df': convert_units_sum_meters(
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
-                                                                #self.meter_set.filter(~Q(utility_type = 'domestic water')), 
-                                                                self.meters.all(),
+                                                                bldg_meter_data,
                                                                 first_month=first_month, 
                                                                 last_month=last_month )
                                                         } }
                 
                 #cycle through all utility types present in this building, get info and dataframes
-                for utype in sorted(set([str(x.utility_type) for x in self.meters.all()])):
+                for utype in utility_types:
                     utype = str(utype)
                     meter_dict[utype] = {}
                     meter_dict[utype]['name'] = utype
@@ -629,7 +629,7 @@ class Building(models.Model):
                     meter_dict[utype]['df'] = convert_units_sum_meters(
                                                 utype,
                                                 get_default_units(utype),
-                                                self.meters.filter(utility_type=utype),
+                                                [m for m in bldg_meter_data if m[0] == utype],
                                                 first_month=first_month, 
                                                 last_month=last_month)
                 
@@ -778,15 +778,15 @@ class Building(models.Model):
                 pies_by_meter =         [['Meter','Cost','kBtu','Utility Type']]
                 
                 #for breakdown by Meter, cycle through all Meters and exclude domestic water from kBtu calcs
-                for meter in self.meters.all():
-                    cost_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_cost=Decimal(NaN)).aggregate(Sum('act_cost'))['act_cost__sum']
+                for meter in bldg_meter_data:
+                    cost_sum = Monthling.objects.filter(monther=meter[5].monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_cost=Decimal(NaN)).aggregate(Sum('act_cost'))['act_cost__sum']
                     if cost_sum is None or np.isnan(float(cost_sum)): cost_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
-                    pie_cost_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum)])
-                    if meter.utility_type != 'domestic water':
-                        kBtu_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_kBtu_consumption=Decimal(NaN)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
+                    pie_cost_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(cost_sum)])
+                    if meter[0] != 'domestic water':
+                        kBtu_sum = Monthling.objects.filter(monther=meter[5].monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_kBtu_consumption=Decimal(NaN)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
                         if kBtu_sum is None or np.isnan(float(kBtu_sum)): kBtu_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
-                        pie_kBtu_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(kBtu_sum)])
-                        pies_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum), float(kBtu_sum), str(meter.utility_type)])
+                        pie_kBtu_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(kBtu_sum)])
+                        pies_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(cost_sum), float(kBtu_sum), str(meter[0])])
                 
                 #for breakdown by utility type, cycle through all utility groups and exclude domestic water from kBtu calcs
                 for utype in meter_dict.keys():

@@ -10,7 +10,7 @@ from models_functions import load_monthly_csv, assign_period_datetime, convert_u
 from models_functions import get_default_units, get_monthly_dataframe_as_table
 from models_functions import nan2zero, get_df_as_table_with_formats, convert_units
 from models_functions import decimal_isnan, get_df_motion_table, cap_negatives_with_NaN, max_with_NaNs
-from models_functions import set_file_field
+from models_functions import set_file_field, get_meter_view_motion_table
 
 from models_Message import Message
 from models_Account import Account
