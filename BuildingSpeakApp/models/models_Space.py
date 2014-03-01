@@ -167,7 +167,7 @@ class Space(models.Model):
                                               ('Water Treatment and Distribution Utility', 'Water Treatment and Distribution Utility')])
     
     #functions
-    def get_space_view_motion_table_fuels(self):
+    def get_space_view_motion_table_fuels(self, space_meter_data):
         """No inputs.
         
         Returns table for motion chart on
@@ -190,26 +190,18 @@ class Space(models.Model):
             utype_df = convert_units_sum_meters(
                                         utype,
                                         get_default_units(utype),
-                                        self.meters.filter(utility_type=utype),
+                                        [m for m in space_meter_data if m[0] == utype],
                                         first_month = mistr, 
                                         last_month = mfstr)
             if utype_df is not None:
                 utype_df['Cost/SF'] = utype_df['Cost (act)']/total_SF
                 utype_df['kBtu/SF'] = utype_df['kBtu Consumption (act)']/total_SF
                 utype_df['Cost/kBtu'] = utype_df['Cost (act)']/utype_df['kBtu Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
-                utype_df[['Cost (act)',
-                          'kBtu Consumption (act)',
-                          'CDD (consumption)',
-                          'HDD (consumption)',
-                          'Cost/SF',
+                utype_df[['Cost/SF',
                           'kBtu/SF',
-                          'Cost/kBtu']] = utype_df[['Cost (act)',
-                                                            'kBtu Consumption (act)',
-                                                            'CDD (consumption)',
-                                                            'HDD (consumption)',
-                                                            'Cost/SF',
-                                                            'kBtu/SF',
-                                                            'Cost/kBtu']].applymap(nan2zero)
+                          'Cost/kBtu']] = utype_df[['Cost/SF',
+                                                    'kBtu/SF',
+                                                    'Cost/kBtu']].applymap(nan2zero)
                 utype_table = get_df_motion_table(utype_df,
                                                   ['Utility Type', str(utype)],
                                                   lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
@@ -219,7 +211,7 @@ class Space(models.Model):
         t1 = timezone.now()
         logger.debug('get_space_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
-    def get_space_view_motion_table_meters(self):
+    def get_space_view_motion_table_meters(self, space_meter_data):
         """No inputs.
         
         Returns table for motion chart on
@@ -229,16 +221,16 @@ class Space(models.Model):
         """
         t0 = timezone.now()
         result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
-        for meter in self.meters.all():
-            bill_data = meter.get_bill_data_period_dataframe(first_month = '', last_month = '')
-            meter_table = meter.get_meter_view_motion_table(bill_data = bill_data)
-            for i in meter_table[1:]:
-                i.append(str(meter.utility_type))
-                result.append(i)
+        for meter in space_meter_data:
+            meter_table = get_meter_view_motion_table(name = str(meter[4]), bill_data = meter[2])
+            if meter_table is not None and len(meter_table) > 1:
+                for i in meter_table[1:]:
+                    i.append(str(meter[0]))
+                    result.append(i)
         t1 = timezone.now()
         logger.debug('get_space_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
-    def get_space_view_five_year_data(self):
+    def get_space_view_five_year_data(self, space_meter_data):
         """No inputs.
         
         Returns meter data for Space's stacked
@@ -253,13 +245,14 @@ class Space(models.Model):
             mistr = mi.strftime('%m/%Y')
             mfstr = mf.strftime('%m/%Y')
             
-            if len(self.meters.all()) < 1:
+            if len(space_meter_data) < 1:
                 five_year_data = None
             else:
                 #five year stacked_data is what will be passed to the template
                 five_year_data = []
                 utility_groups = ['Space Total']
-                utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
+                utility_types = sorted(set([str(x[0]) for x in space_meter_data]))
+                utility_groups.extend(utility_types)
                 
                 #meter_dict holds all info and dataframes for each utility group, starting with Total non-water
                 meter_dict = {'Space Total': {'name': 'Space Total',
@@ -269,14 +262,13 @@ class Space(models.Model):
                                                         'df': convert_units_sum_meters(
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
-                                                                #self.meters.filter(~Q(utility_type = 'domestic water')), 
-                                                                self.meters.all(),
+                                                                space_meter_data,
                                                                 first_month=mistr, 
                                                                 last_month=mfstr )
                                                         } }
                 
                 #cycle through all utility types present in this space, get info and dataframes
-                for utype in sorted(set([str(x.utility_type) for x in self.meters.all()])):
+                for utype in utility_types:
                     utype = str(utype)
                     meter_dict[utype] = {}
                     meter_dict[utype]['name'] = utype
@@ -286,7 +278,7 @@ class Space(models.Model):
                     meter_dict[utype]['df'] = convert_units_sum_meters(
                                                 utype,
                                                 get_default_units(utype),
-                                                self.meters.filter(utility_type=utype),
+                                                [m for m in space_meter_data if m[0] == utype],
                                                 first_month=mistr, 
                                                 last_month=mfstr)
                 
@@ -465,7 +457,7 @@ class Space(models.Model):
         logger.debug('get_space_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return five_year_data
 
-    def get_space_view_meter_data(self, month_first, month_last):
+    def get_space_view_meter_data(self, month_first, month_last, space_meter_data):
         """
         Returns tables of summed meter data for a given date range.
         
@@ -482,7 +474,7 @@ class Space(models.Model):
             first_month = month_first.strftime('%m/%Y')
             last_month = month_last.strftime('%m/%Y')
             
-            if len(self.meters.all()) < 1:
+            if len(space_meter_data) < 1:
                 result = None
             else:
                 column_list_sum = ['Billing Demand (act)',
@@ -536,7 +528,8 @@ class Space(models.Model):
                 #meter_data is what will be passed to the template
                 meter_data = []
                 utility_groups = ['Space Total']
-                utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
+                utility_types = sorted(set([str(x[0]) for x in space_meter_data]))
+                utility_groups.extend(utility_types)
                 
                 #meter_dict holds all info and dataframes for each utility group, starting with Total
                 #note that water is included for Cost, so Cons/PD can never be used here but kBtu/kBtuh can
@@ -547,14 +540,13 @@ class Space(models.Model):
                                                         'df': convert_units_sum_meters(
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
-                                                                #self.meter_set.filter(~Q(utility_type = 'domestic water')), 
-                                                                self.meters.all(),
+                                                                space_meter_data,
                                                                 first_month=first_month, 
                                                                 last_month=last_month )
                                                         } }
                 
                 #cycle through all utility types present in this space, get info and dataframes
-                for utype in sorted(set([str(x.utility_type) for x in self.meters.all()])):
+                for utype in utility_types:
                     utype = str(utype)
                     meter_dict[utype] = {}
                     meter_dict[utype]['name'] = utype
@@ -564,7 +556,7 @@ class Space(models.Model):
                     meter_dict[utype]['df'] = convert_units_sum_meters(
                                                 utype,
                                                 get_default_units(utype),
-                                                self.meters.filter(utility_type=utype),
+                                                [m for m in space_meter_data if m[0] == utype],
                                                 first_month=first_month, 
                                                 last_month=last_month)
                 
@@ -713,15 +705,15 @@ class Space(models.Model):
                 pies_by_meter =         [['Meter','Cost','kBtu','Utility Type']]
                 
                 #for breakdown by Meter, cycle through all Meters and exclude domestic water from kBtu calcs
-                for meter in self.meters.all():
-                    cost_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_cost=Decimal(NaN)).aggregate(Sum('act_cost'))['act_cost__sum']
+                for meter in space_meter_data:
+                    cost_sum = Monthling.objects.filter(monther=meter[5].monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_cost=Decimal(NaN)).aggregate(Sum('act_cost'))['act_cost__sum']
                     if cost_sum is None or np.isnan(float(cost_sum)): cost_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
-                    pie_cost_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum)])
-                    if meter.utility_type != 'domestic water':
-                        kBtu_sum = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_kBtu_consumption=Decimal(NaN)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
+                    pie_cost_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(cost_sum)])
+                    if meter[0] != 'domestic water':
+                        kBtu_sum = Monthling.objects.filter(monther=meter[5].monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_kBtu_consumption=Decimal(NaN)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
                         if kBtu_sum is None or np.isnan(float(kBtu_sum)): kBtu_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
-                        pie_kBtu_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(kBtu_sum)])
-                        pies_by_meter.append([str(meter.name) + ' - ' + str(meter.utility_type), float(cost_sum), float(kBtu_sum), str(meter.utility_type)])
+                        pie_kBtu_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(kBtu_sum)])
+                        pies_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(cost_sum), float(kBtu_sum), str(meter[0])])
                 
                 #for breakdown by utility type, cycle through all utility groups and exclude domestic water from kBtu calcs
                 for utype in meter_dict.keys():

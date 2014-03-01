@@ -181,7 +181,7 @@ class Building(models.Model):
     
    
     #functions
-    def get_building_view_motion_table_spaces(self):
+    def get_building_view_motion_table_spaces(self, bldg_meter_data):
         """No inputs.
         
         Returns table for motion chart on
@@ -194,34 +194,26 @@ class Building(models.Model):
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
-        total_SF = self.square_footage
         
         result = [['Space Name','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu','Space Type']]
 
         for space in self.space_set.all():
+            space_meter_data = [m for m in bldg_meter_data if space.id in m[7]]
             space_df = convert_units_sum_meters(
                                         'other',
                                         'kBtuh,kBtu',
-                                        space.meters.all(),
+                                        space_meter_data,
                                         first_month = mistr, 
                                         last_month = mfstr)
             if space_df is not None:
-                space_df['Cost/SF'] = space_df['Cost (act)']/total_SF
-                space_df['kBtu/SF'] = space_df['kBtu Consumption (act)']/total_SF
+                space_df['Cost/SF'] = space_df['Cost (act)']/space.square_footage
+                space_df['kBtu/SF'] = space_df['kBtu Consumption (act)']/space.square_footage
                 space_df['Cost/kBtu'] = space_df['Cost (act)']/space_df['kBtu Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
-                space_df[['Cost (act)',
-                          'kBtu Consumption (act)',
-                          'CDD (consumption)',
-                          'HDD (consumption)',
-                          'Cost/SF',
+                space_df[['Cost/SF',
                           'kBtu/SF',
-                          'Cost/kBtu']] = space_df[['Cost (act)',
-                                                            'kBtu Consumption (act)',
-                                                            'CDD (consumption)',
-                                                            'HDD (consumption)',
-                                                            'Cost/SF',
-                                                            'kBtu/SF',
-                                                            'Cost/kBtu']].applymap(nan2zero)
+                          'Cost/kBtu']] = space_df[['Cost/SF',
+                                                    'kBtu/SF',
+                                                    'Cost/kBtu']].applymap(nan2zero)
                 space_table = get_df_motion_table(space_df,
                                                   ['Space', str(space.name)],
                                                   lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
@@ -232,7 +224,7 @@ class Building(models.Model):
         t1 = timezone.now()
         logger.debug('get_building_view_motion_table_spaces %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
-    def get_building_view_motion_table_fuels(self):
+    def get_building_view_motion_table_fuels(self, bldg_meter_data):
         """No inputs.
         
         Returns table for motion chart on
@@ -255,26 +247,18 @@ class Building(models.Model):
             utype_df = convert_units_sum_meters(
                                         utype,
                                         get_default_units(utype),
-                                        self.meters.filter(utility_type=utype),
+                                        [m for m in bldg_meter_data if m[0] == utype],
                                         first_month = mistr, 
                                         last_month = mfstr)
             if utype_df is not None:
                 utype_df['Cost/SF'] = utype_df['Cost (act)']/total_SF
                 utype_df['kBtu/SF'] = utype_df['kBtu Consumption (act)']/total_SF
                 utype_df['Cost/kBtu'] = utype_df['Cost (act)']/utype_df['kBtu Consumption (act)'].replace(to_replace = 0, value = Decimal(NaN)) #need to avoid DIV/0 error
-                utype_df[['Cost (act)',
-                          'kBtu Consumption (act)',
-                          'CDD (consumption)',
-                          'HDD (consumption)',
-                          'Cost/SF',
+                utype_df[['Cost/SF',
                           'kBtu/SF',
-                          'Cost/kBtu']] = utype_df[['Cost (act)',
-                                                            'kBtu Consumption (act)',
-                                                            'CDD (consumption)',
-                                                            'HDD (consumption)',
-                                                            'Cost/SF',
-                                                            'kBtu/SF',
-                                                            'Cost/kBtu']].applymap(nan2zero)
+                          'Cost/kBtu']] = utype_df[['Cost/SF',
+                                                    'kBtu/SF',
+                                                    'Cost/kBtu']].applymap(nan2zero)
                 utype_table = get_df_motion_table(utype_df,
                                                   ['Utility Type', str(utype)],
                                                   lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
@@ -284,7 +268,7 @@ class Building(models.Model):
         t1 = timezone.now()
         logger.debug('get_building_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
-    def get_building_view_motion_table_meters(self):
+    def get_building_view_motion_table_meters(self, bldg_meter_data):
         """No inputs.
         
         Returns table for motion chart on
@@ -294,16 +278,16 @@ class Building(models.Model):
         """
         t0 = timezone.now()
         result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
-        for meter in self.meters.all():
-            bill_data = meter.get_bill_data_period_dataframe(first_month = '', last_month = '')
-            meter_table = meter.get_meter_view_motion_table(bill_data = bill_data)
-            for i in meter_table[1:]:
-                i.append(str(meter.utility_type))
-                result.append(i)
+        for meter in bldg_meter_data:
+            meter_table = get_meter_view_motion_table(name = str(meter[4]), bill_data = meter[2])
+            if meter_table is not None and len(meter_table) > 1:
+                for i in meter_table[1:]:
+                    i.append(str(meter[0]))
+                    result.append(i)
         t1 = timezone.now()
         logger.debug('get_building_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
-    def get_building_view_five_year_data(self):
+    def get_building_view_five_year_data(self, bldg_meter_data):
         """No inputs.
         
         Returns meter data for Building's stacked
@@ -318,13 +302,14 @@ class Building(models.Model):
             mistr = mi.strftime('%m/%Y')
             mfstr = mf.strftime('%m/%Y')
             
-            if len(self.meters.all()) < 1:
+            if len(bldg_meter_data) < 1:
                 five_year_data = None
             else:
                 #five year stacked_data is what will be passed to the template
                 five_year_data = []
                 utility_groups = ['Building Total']
-                utility_groups.extend(sorted(set([str(x.utility_type) for x in self.meters.all()])))
+                utility_types = sorted(set([str(x[0]) for x in bldg_meter_data]))
+                utility_groups.extend(utility_types)
                 
                 #meter_dict holds all info and dataframes for each utility group, starting with Total non-water
                 meter_dict = {'Building Total': {'name': 'Building Total',
@@ -334,14 +319,13 @@ class Building(models.Model):
                                                         'df': convert_units_sum_meters(
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
-                                                                #self.meters.filter(~Q(utility_type = 'domestic water')),
-                                                                self.meters.all(),
+                                                                bldg_meter_data,
                                                                 first_month=mistr, 
                                                                 last_month=mfstr )
                                                         } }
                 
                 #cycle through all utility types present in this building, get info and dataframes
-                for utype in sorted(set([str(x.utility_type) for x in self.meters.all()])):
+                for utype in utility_types:
                     utype = str(utype)
                     meter_dict[utype] = {}
                     meter_dict[utype]['name'] = utype
@@ -351,7 +335,7 @@ class Building(models.Model):
                     meter_dict[utype]['df'] = convert_units_sum_meters(
                                                 utype,
                                                 get_default_units(utype),
-                                                self.meters.filter(utility_type=utype),
+                                                [m for m in bldg_meter_data if m[0] == utype],
                                                 first_month=mistr, 
                                                 last_month=mfstr)
                 

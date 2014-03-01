@@ -8,6 +8,7 @@ from BuildingSpeakApp.models import Account, Building, Space, Meter, Equipment, 
 from BuildingSpeakApp.models import UserSettingsForm, MeterDataUploadForm
 from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, decimal_isnan, nan2zero
 from BuildingSpeakApp.models import get_monthly_dataframe_as_table, get_df_as_table_with_formats
+from BuildingSpeakApp.models import get_monthling_columns_needing_nan2zero, get_meter_view_motion_table
 
 import json, stripe
 import numpy as np
@@ -193,58 +194,7 @@ def account_detail(request, account_id):
     
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
 
-    columns_needing_nan2zero = ['Billing Demand (act)',
-                                'Billing Demand (asave)',
-                                'Billing Demand (base delta)',
-                                'Billing Demand (base)',
-                                'Billing Demand (esave delta)',
-                                'Billing Demand (esave)',
-                                'Billing Demand (exp delta)',
-                                'Billing Demand (exp)',
-                                'Consumption (act)',
-                                'Consumption (asave)',
-                                'Consumption (base delta)',
-                                'Consumption (base)',
-                                'Consumption (esave delta)',
-                                'Consumption (esave)',
-                                'Consumption (exp delta)',
-                                'Consumption (exp)',
-                                'Cost (act)',
-                                'Cost (asave)',
-                                'Cost (base delta)',
-                                'Cost (base)',
-                                'Cost (esave delta)',
-                                'Cost (esave)',
-                                'Cost (exp delta)',
-                                'Cost (exp)',
-                                'CDD (consumption)',
-                                'CDD (peak demand)',
-                                'HDD (consumption)',
-                                'HDD (peak demand)',
-                                'Peak Demand (act)',
-                                'Peak Demand (asave)',
-                                'Peak Demand (base delta)',
-                                'Peak Demand (base)',
-                                'Peak Demand (esave delta)',
-                                'Peak Demand (esave)',
-                                'Peak Demand (exp delta)',
-                                'Peak Demand (exp)',
-                                'kBtu Consumption (act)',
-                                'kBtu Consumption (asave)',
-                                'kBtu Consumption (base delta)',
-                                'kBtu Consumption (base)',
-                                'kBtu Consumption (esave delta)',
-                                'kBtu Consumption (esave)',
-                                'kBtu Consumption (exp delta)',
-                                'kBtu Consumption (exp)',
-                                'kBtuh Peak Demand (act)',
-                                'kBtuh Peak Demand (asave)',
-                                'kBtuh Peak Demand (base delta)',
-                                'kBtuh Peak Demand (base)',
-                                'kBtuh Peak Demand (esave delta)',
-                                'kBtuh Peak Demand (esave)',
-                                'kBtuh Peak Demand (exp delta)',
-                                'kBtuh Peak Demand (exp)']
+    columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
 
     tB = timezone.now()
     logger.debug('account_detailA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
@@ -255,10 +205,10 @@ def account_detail(request, account_id):
                         x.units,
                         x.get_bill_data_period_dataframe(),
                         x.id,
-                        x.name,
+                        str(x.name),
                         x,
-                        [bldg.id for bldg in x.building_set.all()], #building_set IDs
-                        [sp.id for sp in x.building_set.all()],     #space_set IDs
+                        {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
+                        {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in acct_meters]
     for meter in acct_meter_data:
         meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
@@ -382,12 +332,29 @@ def building_detail(request, account_id, building_id):
         raise Http404
 
     building_attrs = get_model_key_value_pairs_as_nested_list(building)
+
+    columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
+
+    bldg_meters = building.meters.all()
+    bldg_meter_data = [[x.utility_type,
+                        x.units,
+                        x.get_bill_data_period_dataframe(),
+                        x.id,
+                        str(x.name),
+                        x,
+                        {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
+                        {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
+                         ] for x in bldg_meters]
+    for meter in bldg_meter_data:
+        meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
+
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40+24                            #final month in sequence
     
-    bldg_view_data = building.get_building_view_meter_data(month_first=month_first,
-                                                           month_last=month_last)
-    five_year_data = building.get_building_view_five_year_data()
+    bldg_view_data = building.get_building_view_meter_data(month_first = month_first,
+                                                           month_last = month_last,
+                                                           bldg_meter_data = bldg_meter_data)
+    five_year_data = building.get_building_view_five_year_data(bldg_meter_data = bldg_meter_data)
     
     if bldg_view_data is None:
         meter_data = None
@@ -415,14 +382,13 @@ def building_detail(request, account_id, building_id):
         'meter_data':           meter_data,
         'pie_data':             pie_data,
         'five_year_data':       five_year_data,
-        'motion_data_meters':   building.get_building_view_motion_table_meters(),
-        'motion_data_fuels':    building.get_building_view_motion_table_fuels(),
-        'motion_data_spaces':   building.get_building_view_motion_table_spaces(),
+        'motion_data_meters':   building.get_building_view_motion_table_meters(bldg_meter_data = bldg_meter_data),
+        'motion_data_fuels':    building.get_building_view_motion_table_fuels(bldg_meter_data = bldg_meter_data),
+        'motion_data_spaces':   building.get_building_view_motion_table_spaces(bldg_meter_data = bldg_meter_data),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
         template_name = 'buildingspeakapp/building_detail.html'
-        #template_name = 'buildingspeakapp/dashboard_test3.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     return render(request, template_name, context)
@@ -435,12 +401,29 @@ def space_detail(request, account_id, space_id):
         raise Http404
         
     space_attrs = get_model_key_value_pairs_as_nested_list(space)
+
+    columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
+
+    space_meters = space.meters.all()
+    space_meter_data = [[x.utility_type,
+                        x.units,
+                        x.get_bill_data_period_dataframe(),
+                        x.id,
+                        str(x.name),
+                        x,
+                        {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
+                        {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
+                         ] for x in space_meters]
+    for meter in space_meter_data:
+        meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
+
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40 + 24                            #final month in sequence
     
-    space_view_data = space.get_space_view_meter_data(month_first=month_first,
-                                                      month_last=month_last)
-    five_year_data = space.get_space_view_five_year_data()
+    space_view_data = space.get_space_view_meter_data(month_first = month_first,
+                                                      month_last = month_last,
+                                                      space_meter_data = space_meter_data)
+    five_year_data = space.get_space_view_five_year_data(space_meter_data = space_meter_data)
     
     if space_view_data is None:
         meter_data = None
@@ -467,8 +450,8 @@ def space_detail(request, account_id, space_id):
         'meter_data':     meter_data,
         'pie_data':       pie_data,
         'five_year_data': five_year_data,
-        'motion_data_meters':   space.get_space_view_motion_table_meters(),
-        'motion_data_fuels':    space.get_space_view_motion_table_fuels(),
+        'motion_data_meters':   space.get_space_view_motion_table_meters(space_meter_data = space_meter_data),
+        'motion_data_fuels':    space.get_space_view_motion_table_fuels(space_meter_data = space_meter_data),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -523,76 +506,17 @@ def meter_detail(request, account_id, meter_id):
     
     meter_attrs = get_model_key_value_pairs_as_nested_list(meter)
     
-    try:
-        this_month = pd.Period(timezone.now(),freq='M')
-        month_first = this_month - 36       #link user selection here
-        month_last = this_month +36+24   #link user selection here
-        
-        #this dataframe provides the foundational meter dataset; if no data, skip everything
-        bill_data = meter.get_bill_data_period_dataframe(first_month = month_first.strftime('%m/%Y'), 
-                                                         last_month = month_last.strftime('%m/%Y'))
-        if bill_data is None:
-            totals_table = False
-            ratios_table = False
-            cost_by_month = False
-            consumption_by_month = False
-            demand_by_month = False
-            kbtu_by_month = False
-            kbtuh_by_month = False
-            consumption_residual_plots = None  #iterables in templates need None
-            peak_demand_residual_plots = None  #iterables in templates need None
-            consumption_model_stats_table = False
-            peak_demand_model_stats_table = False
-            consumption_model_residuals_histogram = False
-            peak_demand_model_residuals_histogram = False
-            five_year_table_cost = None
-            five_year_table_cons = None
-            five_year_table_kBtu = None
-            motion_data = None
-        else:
-            meter_data =        meter.get_meter_view_meter_data(bill_data = bill_data)
-            model_data =        meter.get_meter_view_meter_model_data(bill_data = bill_data)
-            five_year_data =    meter.get_meter_view_five_year_data(bill_data = bill_data)
-            motion_data =       meter.get_meter_view_motion_table(bill_data = bill_data)
-            if meter_data is None:
-                totals_table = False
-                ratios_table = False
-                cost_by_month = False
-                consumption_by_month = False
-                demand_by_month = False
-                kbtu_by_month = False
-                kbtuh_by_month = False
-            else:
-                totals_table = meter_data[0]
-                ratios_table = meter_data[1]
-                cost_by_month = meter_data[2]
-                consumption_by_month = meter_data[3]
-                demand_by_month = meter_data[4]
-                kbtu_by_month = meter_data[5]
-                kbtuh_by_month = meter_data[6]
-            if model_data is None:
-                consumption_residual_plots = None  #iterables in templates need None
-                peak_demand_residual_plots = None  #iterables in templates need None
-                consumption_model_stats_table = False
-                peak_demand_model_stats_table = False
-                consumption_model_residuals_histogram = False
-                peak_demand_model_residuals_histogram = False
-            else:
-                consumption_residual_plots = model_data[0]
-                peak_demand_residual_plots = model_data[1]
-                consumption_model_stats_table = model_data[2]
-                peak_demand_model_stats_table = model_data[3]
-                consumption_model_residuals_histogram = model_data[4]
-                peak_demand_model_residuals_histogram = model_data[5]
-            if five_year_data is None:
-                five_year_table_cost = None
-                five_year_table_cons = None
-                five_year_table_kBtu = None
-            else:
-                five_year_table_cost = five_year_data[0]
-                five_year_table_cons = five_year_data[1]
-                five_year_table_kBtu = five_year_data[2]
-    except:
+    columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
+
+#    try:
+    this_month = pd.Period(timezone.now(),freq='M')
+    month_first = this_month - 36       #link user selection here
+    month_last = this_month +36+24   #link user selection here
+    
+    #this dataframe provides the foundational meter dataset; if no data, skip everything
+    bill_data = meter.get_bill_data_period_dataframe()
+    bill_data[columns_needing_nan2zero] = bill_data[columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
+    if bill_data is None:
         totals_table = False
         ratios_table = False
         cost_by_month = False
@@ -610,6 +534,68 @@ def meter_detail(request, account_id, meter_id):
         five_year_table_cons = None
         five_year_table_kBtu = None
         motion_data = None
+    else:
+        meter_data =        meter.get_meter_view_meter_data(bill_data = bill_data)
+        model_data =        meter.get_meter_view_meter_model_data(bill_data = bill_data)
+        five_year_data =    meter.get_meter_view_five_year_data(bill_data = bill_data)
+        motion_data =       get_meter_view_motion_table(name = str(meter.name),
+                                                        bill_data = bill_data)
+        if meter_data is None:
+            totals_table = False
+            ratios_table = False
+            cost_by_month = False
+            consumption_by_month = False
+            demand_by_month = False
+            kbtu_by_month = False
+            kbtuh_by_month = False
+        else:
+            totals_table = meter_data[0]
+            ratios_table = meter_data[1]
+            cost_by_month = meter_data[2]
+            consumption_by_month = meter_data[3]
+            demand_by_month = meter_data[4]
+            kbtu_by_month = meter_data[5]
+            kbtuh_by_month = meter_data[6]
+        if model_data is None:
+            consumption_residual_plots = None  #iterables in templates need None
+            peak_demand_residual_plots = None  #iterables in templates need None
+            consumption_model_stats_table = False
+            peak_demand_model_stats_table = False
+            consumption_model_residuals_histogram = False
+            peak_demand_model_residuals_histogram = False
+        else:
+            consumption_residual_plots = model_data[0]
+            peak_demand_residual_plots = model_data[1]
+            consumption_model_stats_table = model_data[2]
+            peak_demand_model_stats_table = model_data[3]
+            consumption_model_residuals_histogram = model_data[4]
+            peak_demand_model_residuals_histogram = model_data[5]
+        if five_year_data is None:
+            five_year_table_cost = None
+            five_year_table_cons = None
+            five_year_table_kBtu = None
+        else:
+            five_year_table_cost = five_year_data[0]
+            five_year_table_cons = five_year_data[1]
+            five_year_table_kBtu = five_year_data[2]
+#    except:
+#        totals_table = False
+#        ratios_table = False
+#        cost_by_month = False
+#        consumption_by_month = False
+#        demand_by_month = False
+#        kbtu_by_month = False
+#        kbtuh_by_month = False
+#        consumption_residual_plots = None  #iterables in templates need None
+#        peak_demand_residual_plots = None  #iterables in templates need None
+#        consumption_model_stats_table = False
+#        peak_demand_model_stats_table = False
+#        consumption_model_residuals_histogram = False
+#        peak_demand_model_residuals_histogram = False
+#        five_year_table_cost = None
+#        five_year_table_cons = None
+#        five_year_table_kBtu = None
+#        motion_data = None
         
     context = {
         'user':           request.user,

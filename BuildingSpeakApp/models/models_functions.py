@@ -15,6 +15,64 @@ from django.core.files.base import ContentFile
 
 logger = logging.getLogger(__name__)
 
+def get_monthling_columns_needing_nan2zero():
+    """Returns list of column names found in
+    monthling dataframes that nan2zero should
+    operate on to avoid NaNs when summing
+    mixtures of NaNs and non-NaNs."""
+    return     ['Billing Demand (act)',
+                'Billing Demand (asave)',
+                'Billing Demand (base delta)',
+                'Billing Demand (base)',
+                'Billing Demand (esave delta)',
+                'Billing Demand (esave)',
+                'Billing Demand (exp delta)',
+                'Billing Demand (exp)',
+                'Consumption (act)',
+                'Consumption (asave)',
+                'Consumption (base delta)',
+                'Consumption (base)',
+                'Consumption (esave delta)',
+                'Consumption (esave)',
+                'Consumption (exp delta)',
+                'Consumption (exp)',
+                'Cost (act)',
+                'Cost (asave)',
+                'Cost (base delta)',
+                'Cost (base)',
+                'Cost (esave delta)',
+                'Cost (esave)',
+                'Cost (exp delta)',
+                'Cost (exp)',
+                'CDD (consumption)',
+                'CDD (peak demand)',
+                'HDD (consumption)',
+                'HDD (peak demand)',
+                'Peak Demand (act)',
+                'Peak Demand (asave)',
+                'Peak Demand (base delta)',
+                'Peak Demand (base)',
+                'Peak Demand (esave delta)',
+                'Peak Demand (esave)',
+                'Peak Demand (exp delta)',
+                'Peak Demand (exp)',
+                'kBtu Consumption (act)',
+                'kBtu Consumption (asave)',
+                'kBtu Consumption (base delta)',
+                'kBtu Consumption (base)',
+                'kBtu Consumption (esave delta)',
+                'kBtu Consumption (esave)',
+                'kBtu Consumption (exp delta)',
+                'kBtu Consumption (exp)',
+                'kBtuh Peak Demand (act)',
+                'kBtuh Peak Demand (asave)',
+                'kBtuh Peak Demand (base delta)',
+                'kBtuh Peak Demand (base)',
+                'kBtuh Peak Demand (esave delta)',
+                'kBtuh Peak Demand (esave)',
+                'kBtuh Peak Demand (exp delta)',
+                'kBtuh Peak Demand (exp)']
+
 def set_file_field(model_instance, field_name, file_url):
     """function(model_instance, field_name, file_url)
     
@@ -450,7 +508,9 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, first
                  dataframe,
                  id,
                  name,
-                 meter] for each meter]
+                 meter,
+                 bldg_meter_apport_dict,
+                 space_meter_apport_dict] for each meter]
             (prev. version: Meter objects)
         first/last_month = mm/yyyy strings for date range
         
