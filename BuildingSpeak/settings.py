@@ -223,14 +223,14 @@ LOGGING = {
         }
     },
     'handlers': {
-        'logfile': {
-            'level':'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filename': 'C:/Users/dashley/Box Sync/BuildingSpeak/BuildingSpeakApp/logfile.txt',
-            'maxBytes': 10000000,
-            'backupCount': 2,
-            'formatter': 'debug',
-        },
+#        'logfile': {
+#            'level':'DEBUG',
+#            'class':'logging.handlers.RotatingFileHandler',
+#            'filename': 'C:/Users/dashley/Box Sync/BuildingSpeak/BuildingSpeakApp/logfile.txt',
+#            'maxBytes': 10000000,
+#            'backupCount': 2,
+#            'formatter': 'debug',
+#        },
         'null': {
             'level': 'DEBUG',
             'class': 'django.utils.log.NullHandler',

@@ -142,7 +142,7 @@ class Account(models.Model):
         columns: Building Name, Date, Cost, kBtu, CDD,
         HDD, Cost/SF, kBtu/SF, Cost/kBtu, Building Type.
         """
-        t0 = timezone.now()
+        #t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -173,8 +173,8 @@ class Account(models.Model):
                                                   {'Building Type': str(bldg.building_type)})
                 for i in bldg_table[1:]:
                     result.append(i)
-        t1 = timezone.now()
-        logger.debug('get_account_view_motion_table_buildings %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_account_view_motion_table_buildings %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_account_view_motion_table_spaces(self, acct_meter_data):
         """
@@ -187,7 +187,7 @@ class Account(models.Model):
         HDD, Cost/SF, kBtu/SF, Cost/kBtu, Space Type,
         Building Name.
         """
-        t0 = timezone.now()
+        #t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -219,8 +219,8 @@ class Account(models.Model):
                                                   {'Space Type': str(space.space_type),'Building': str(space.building.name)})
                 for i in space_table[1:]:
                     result.append(i)
-        t1 = timezone.now()
-        logger.debug('get_account_view_motion_table_spaces %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_account_view_motion_table_spaces %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_account_view_motion_table_fuels(self, acct_meter_data):
         """
@@ -232,7 +232,7 @@ class Account(models.Model):
         columns: Utility Type, Date, Cost, kBtu, CDD,
         HDD, Cost/SF, kBtu/SF, Cost/kBtu.
         """
-        t0 = timezone.now()
+        #t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -264,8 +264,8 @@ class Account(models.Model):
                                                   ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu'])
                 for i in utype_table[1:]:
                     result.append(i)
-        t1 = timezone.now()
-        logger.debug('get_account_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_account_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_account_view_motion_table_meters(self, acct_meter_data):
         """
@@ -274,30 +274,23 @@ class Account(models.Model):
         with the following columns: MeterName,
         Date, Cost, kBtu, CDD, HDD, UtilityType.
         """
-        t0 = timezone.now()
-        tA = timezone.now()
+        #t0 = timezone.now()
         result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
         for meter in acct_meter_data:
             meter_table = get_meter_view_motion_table(name = str(meter[4]), bill_data = meter[2])
-            tB = timezone.now()
-            logger.debug('get_account_view_motion_table_metersA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-            tA = timezone.now()
             if meter_table is not None and len(meter_table) > 1:
                 for i in meter_table[1:]:
                     i.append(str(meter[0]))
                     result.append(i)
-            tB = timezone.now()
-            logger.debug('get_account_view_motion_table_metersB %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-            tA = timezone.now()
-        t1 = timezone.now()
-        logger.debug('get_account_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_account_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_account_view_five_year_data(self, acct_meter_data):
         """No inputs.
         
         Returns meter data for Account's stacked
         5yr bar charts."""
-        t0 = timezone.now()
+        #t0 = timezone.now()
         #if there are no meters, skip all meter data calcs
         try:
             month_curr = pd.Period(timezone.now(), freq='M')
@@ -517,8 +510,8 @@ class Account(models.Model):
             self.messages.add(m)
             print m
             five_year_data = None
-        t1 = timezone.now()
-        logger.debug('get_account_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_account_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return five_year_data
 
     def get_account_view_meter_data(self, month_first, month_last, acct_meter_data):
@@ -532,8 +525,7 @@ class Account(models.Model):
         :returns: Meter data for Account's views in a list: [meter_data, pie_data].
         
         """
-        t0 = timezone.now()
-        tA = timezone.now()
+        #t0 = timezone.now()
         #if there are no meters, skip all meter data calcs
         try:
             first_month = month_first.strftime('%m/%Y')
@@ -541,10 +533,6 @@ class Account(models.Model):
             
             total_SF = self.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
             
-            tB = timezone.now()
-            logger.debug('get_account_view_meter_dataA1 %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-            tA = timezone.now()
-    
             if len(acct_meter_data) < 1:
                 result = None
             else:
@@ -602,9 +590,6 @@ class Account(models.Model):
                 utility_types = sorted(set([str(x[0]) for x in acct_meter_data]))
                 utility_groups.extend(utility_types)
                 
-                tB = timezone.now()
-                logger.debug('get_account_view_meter_dataA2 %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-                tA = timezone.now()
                 #meter_dict holds all info and dataframes for each utility group, starting with Total
                 #note that water is included for Cost, so Cons/PD can never be used here but kBtu/kBtuh can
                 meter_dict = {'Account Total': {'name': 'Account Total',
@@ -619,9 +604,6 @@ class Account(models.Model):
                                                                 last_month=last_month )
                                                         } }
                 
-                tB = timezone.now()
-                logger.debug('get_account_view_meter_dataA3 %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-                tA = timezone.now()
                 #cycle through all utility types present in this account, get info and dataframes
                 for utype in utility_types:
                     utype = str(utype)
@@ -639,9 +621,6 @@ class Account(models.Model):
                 
                 #remove all utility types for which no data was found (returned df is None)
                 temp = [meter_dict.__delitem__(x) for x in meter_dict.keys() if meter_dict[x]['df'] is None]
-                tB = timezone.now()
-                logger.debug('get_account_view_meter_dataB %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-                tA = timezone.now()
         
                 #now that dataframes are available, create data tables for each utility type, inc. Total
                 for utype in meter_dict.keys():
@@ -752,9 +731,6 @@ class Account(models.Model):
                                                                 transpose_bool = True)
                     meter_dict[utype]['totals'] = totals_table
                     meter_dict[utype]['ratios'] = ratios_table
-                tB = timezone.now()
-                logger.debug('get_account_view_meter_dataC %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-                tA = timezone.now()
                     
                 #cycle through the meter_dict and pass to list meter_data, converting dataframes to tables
                 for utype in meter_dict:
@@ -775,9 +751,6 @@ class Account(models.Model):
                                   meter_dict[utype]['ratios']])
                 
                 
-                tB = timezone.now()
-                logger.debug('get_account_view_meter_dataD %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-                tA = timezone.now()
                 if len(meter_data) < 1:
                     meter_data = None
                 else:
@@ -801,9 +774,6 @@ class Account(models.Model):
                         pie_kBtu_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(kBtu_sum)])
                         pies_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(cost_sum), float(kBtu_sum), str(meter[0])])
                 
-                tB = timezone.now()
-                logger.debug('get_account_view_meter_dataE %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-                tA = timezone.now()
                 #for breakdown by utility type, cycle through all utility groups and exclude domestic water from kBtu calcs
                 for utype in meter_dict.keys():
                     if utype != 'Account Total':
@@ -812,8 +782,6 @@ class Account(models.Model):
                             pie_kBtu_by_type.append([utype, float(meter_dict[utype]['df']['kBtu Consumption (act)'].sum())])
                 pie_data = [[pie_cost_by_meter, pie_cost_by_type, pie_kBtu_by_meter, pie_kBtu_by_type, pies_by_meter]]
                 result = [meter_data, pie_data]            
-                tB = timezone.now()
-                logger.debug('get_account_view_meter_dataF %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
         except:
             m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -823,8 +791,8 @@ class Account(models.Model):
             self.messages.add(m)
             print m
             result = None
-        t1 = timezone.now()
-        logger.debug('get_account_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_account_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_all_events(self, reverse_boolean):
         a = [self.messages.filter(message_type='Event')]

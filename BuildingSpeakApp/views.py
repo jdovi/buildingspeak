@@ -107,12 +107,12 @@ def ajax(request):
     if request.POST.has_key('client_response'):
         x = request.POST['client_response']
         if x == 'first_script':
-            sleep(10)
+            sleep(3)
             response_dict = {}
             response_dict.update({'server_response': request.user.username })
             return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
         elif x == 'second_script':
-            sleep(12)
+            sleep(6)
             response_dict = {}
             response_dict.update({'server_response': 'abcd' })
             return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
@@ -187,18 +187,13 @@ def application_error(request):
 
 @login_required
 def account_detail(request, account_id):
-    t0 = timezone.now()
-    tA = timezone.now()
+    #t0 = timezone.now()
     account = get_object_or_404(Account, pk=account_id)
     total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
     
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
 
     columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
-
-    tB = timezone.now()
-    logger.debug('account_detailA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-    tA = timezone.now()
 
     acct_meters = account.meter_set.all()
     acct_meter_data = [[x.utility_type,
@@ -213,10 +208,6 @@ def account_detail(request, account_id):
     for meter in acct_meter_data:
         meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
     
-    tB = timezone.now()
-    logger.debug('account_detailB %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-    tA = timezone.now()
-
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
         bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
@@ -244,10 +235,6 @@ def account_detail(request, account_id):
                           month_prev.strftime('%b-%Y'),
                           ])
     
-    tB = timezone.now()
-    logger.debug('account_detailC %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-    tA = timezone.now()
-
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40+24                            #final month in sequence
     acct_view_data = account.get_account_view_meter_data(month_first = month_first,
@@ -261,10 +248,6 @@ def account_detail(request, account_id):
     else:
         meter_data = acct_view_data[0]
         pie_data = acct_view_data[1]
-
-    tB = timezone.now()
-    logger.debug('account_detailD %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-    tA = timezone.now()
 
     #####Stripe testing
     if request.method == 'POST':
@@ -317,11 +300,8 @@ def account_detail(request, account_id):
         template_name = 'buildingspeakapp/account_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
-    tB = timezone.now()
-    logger.debug('account_detailE %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
-    tA = timezone.now()
-    t1 = timezone.now()
-    logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+    #t1 = timezone.now()
+    #logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)
 
 @login_required
@@ -507,16 +487,78 @@ def meter_detail(request, account_id, meter_id):
     meter_attrs = get_model_key_value_pairs_as_nested_list(meter)
     
     columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
-
-#    try:
-    this_month = pd.Period(timezone.now(),freq='M')
-    month_first = this_month - 36       #link user selection here
-    month_last = this_month +36+24   #link user selection here
     
-    #this dataframe provides the foundational meter dataset; if no data, skip everything
-    bill_data = meter.get_bill_data_period_dataframe()
-    bill_data[columns_needing_nan2zero] = bill_data[columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
-    if bill_data is None:
+    try:
+        this_month = pd.Period(timezone.now(),freq='M')
+        month_first = this_month - 36       #link user selection here
+        month_last = this_month +36+24   #link user selection here
+        
+        #this dataframe provides the foundational meter dataset; if no data, skip everything
+        bill_data = meter.get_bill_data_period_dataframe()
+        bill_data[columns_needing_nan2zero] = bill_data[columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
+        if bill_data is None:
+            totals_table = False
+            ratios_table = False
+            cost_by_month = False
+            consumption_by_month = False
+            demand_by_month = False
+            kbtu_by_month = False
+            kbtuh_by_month = False
+            consumption_residual_plots = None  #iterables in templates need None
+            peak_demand_residual_plots = None  #iterables in templates need None
+            consumption_model_stats_table = False
+            peak_demand_model_stats_table = False
+            consumption_model_residuals_histogram = False
+            peak_demand_model_residuals_histogram = False
+            five_year_table_cost = None
+            five_year_table_cons = None
+            five_year_table_kBtu = None
+            motion_data = None
+        else:
+            meter_data =        meter.get_meter_view_meter_data(bill_data = bill_data)
+            model_data =        meter.get_meter_view_meter_model_data(bill_data = bill_data)
+            five_year_data =    meter.get_meter_view_five_year_data(bill_data = bill_data)
+            motion_data =       get_meter_view_motion_table(name = str(meter.name),
+                                                            bill_data = bill_data)
+            if meter_data is None:
+                totals_table = False
+                ratios_table = False
+                cost_by_month = False
+                consumption_by_month = False
+                demand_by_month = False
+                kbtu_by_month = False
+                kbtuh_by_month = False
+            else:
+                totals_table = meter_data[0]
+                ratios_table = meter_data[1]
+                cost_by_month = meter_data[2]
+                consumption_by_month = meter_data[3]
+                demand_by_month = meter_data[4]
+                kbtu_by_month = meter_data[5]
+                kbtuh_by_month = meter_data[6]
+            if model_data is None:
+                consumption_residual_plots = None  #iterables in templates need None
+                peak_demand_residual_plots = None  #iterables in templates need None
+                consumption_model_stats_table = False
+                peak_demand_model_stats_table = False
+                consumption_model_residuals_histogram = False
+                peak_demand_model_residuals_histogram = False
+            else:
+                consumption_residual_plots = model_data[0]
+                peak_demand_residual_plots = model_data[1]
+                consumption_model_stats_table = model_data[2]
+                peak_demand_model_stats_table = model_data[3]
+                consumption_model_residuals_histogram = model_data[4]
+                peak_demand_model_residuals_histogram = model_data[5]
+            if five_year_data is None:
+                five_year_table_cost = None
+                five_year_table_cons = None
+                five_year_table_kBtu = None
+            else:
+                five_year_table_cost = five_year_data[0]
+                five_year_table_cons = five_year_data[1]
+                five_year_table_kBtu = five_year_data[2]
+    except:
         totals_table = False
         ratios_table = False
         cost_by_month = False
@@ -534,68 +576,6 @@ def meter_detail(request, account_id, meter_id):
         five_year_table_cons = None
         five_year_table_kBtu = None
         motion_data = None
-    else:
-        meter_data =        meter.get_meter_view_meter_data(bill_data = bill_data)
-        model_data =        meter.get_meter_view_meter_model_data(bill_data = bill_data)
-        five_year_data =    meter.get_meter_view_five_year_data(bill_data = bill_data)
-        motion_data =       get_meter_view_motion_table(name = str(meter.name),
-                                                        bill_data = bill_data)
-        if meter_data is None:
-            totals_table = False
-            ratios_table = False
-            cost_by_month = False
-            consumption_by_month = False
-            demand_by_month = False
-            kbtu_by_month = False
-            kbtuh_by_month = False
-        else:
-            totals_table = meter_data[0]
-            ratios_table = meter_data[1]
-            cost_by_month = meter_data[2]
-            consumption_by_month = meter_data[3]
-            demand_by_month = meter_data[4]
-            kbtu_by_month = meter_data[5]
-            kbtuh_by_month = meter_data[6]
-        if model_data is None:
-            consumption_residual_plots = None  #iterables in templates need None
-            peak_demand_residual_plots = None  #iterables in templates need None
-            consumption_model_stats_table = False
-            peak_demand_model_stats_table = False
-            consumption_model_residuals_histogram = False
-            peak_demand_model_residuals_histogram = False
-        else:
-            consumption_residual_plots = model_data[0]
-            peak_demand_residual_plots = model_data[1]
-            consumption_model_stats_table = model_data[2]
-            peak_demand_model_stats_table = model_data[3]
-            consumption_model_residuals_histogram = model_data[4]
-            peak_demand_model_residuals_histogram = model_data[5]
-        if five_year_data is None:
-            five_year_table_cost = None
-            five_year_table_cons = None
-            five_year_table_kBtu = None
-        else:
-            five_year_table_cost = five_year_data[0]
-            five_year_table_cons = five_year_data[1]
-            five_year_table_kBtu = five_year_data[2]
-#    except:
-#        totals_table = False
-#        ratios_table = False
-#        cost_by_month = False
-#        consumption_by_month = False
-#        demand_by_month = False
-#        kbtu_by_month = False
-#        kbtuh_by_month = False
-#        consumption_residual_plots = None  #iterables in templates need None
-#        peak_demand_residual_plots = None  #iterables in templates need None
-#        consumption_model_stats_table = False
-#        peak_demand_model_stats_table = False
-#        consumption_model_residuals_histogram = False
-#        peak_demand_model_residuals_histogram = False
-#        five_year_table_cost = None
-#        five_year_table_cons = None
-#        five_year_table_kBtu = None
-#        motion_data = None
         
     context = {
         'user':           request.user,

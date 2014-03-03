@@ -176,7 +176,7 @@ class Space(models.Model):
         Date, Cost, kBtu, CDD, HDD, Cost/SF,
         kBtu/SF, Cost/kBtu.
         """
-        t0 = timezone.now()
+        #t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -208,8 +208,8 @@ class Space(models.Model):
                                                   ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu'])
                 for i in utype_table[1:]:
                     result.append(i)
-        t1 = timezone.now()
-        logger.debug('get_space_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_space_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_space_view_motion_table_meters(self, space_meter_data):
         """No inputs.
@@ -219,7 +219,7 @@ class Space(models.Model):
         with the following columns: MeterName,
         Date, Cost, kBtu, CDD, HDD, UtilityType.
         """
-        t0 = timezone.now()
+        #t0 = timezone.now()
         result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
         for meter in space_meter_data:
             meter_table = get_meter_view_motion_table(name = str(meter[4]), bill_data = meter[2])
@@ -227,15 +227,15 @@ class Space(models.Model):
                 for i in meter_table[1:]:
                     i.append(str(meter[0]))
                     result.append(i)
-        t1 = timezone.now()
-        logger.debug('get_space_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_space_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_space_view_five_year_data(self, space_meter_data):
         """No inputs.
         
         Returns meter data for Space's stacked
         5yr bar charts."""
-        t0 = timezone.now()
+        #t0 = timezone.now()
         #if there are no meters, skip all meter data calcs
         try:
             month_curr = pd.Period(timezone.now(), freq='M')
@@ -453,8 +453,8 @@ class Space(models.Model):
             self.messages.add(m)
             print m
             five_year_data = None
-        t1 = timezone.now()
-        logger.debug('get_space_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_space_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return five_year_data
 
     def get_space_view_meter_data(self, month_first, month_last, space_meter_data):
@@ -468,7 +468,7 @@ class Space(models.Model):
         :returns: Meter data for Space's views in a list: [meter_data, pie_data].
         
         """
-        t0 = timezone.now()
+        #t0 = timezone.now()
         #if there are no meters, skip all meter data calcs
         try:
             first_month = month_first.strftime('%m/%Y')
@@ -732,8 +732,8 @@ class Space(models.Model):
             self.messages.add(m)
             print m
             result = None
-        t1 = timezone.now()
-        logger.debug('get_space_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        #t1 = timezone.now()
+        #logger.debug('get_space_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def __unicode__(self):
         return self.name
