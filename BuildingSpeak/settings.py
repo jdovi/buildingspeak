@@ -195,7 +195,7 @@ INSTALLED_APPS = (
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 if 'dashley' in SITE_ROOT:
-    bsapp_handlers = ['logfile'] #['console', 'logfile']
+    bsapp_handlers = []#['logfile'] #['console', 'logfile']
 else:
     bsapp_handlers = []
 LOGGING = {

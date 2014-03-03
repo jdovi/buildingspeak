@@ -93,7 +93,8 @@ def time_test(request):
     return render(request, 'buildingspeakapp/time_test.html', context)
     
 def main(request):
-    return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
+    context = {'test': 1}
+    return render(request, 'buildingspeakapp/ajaxexample.html', context)
     
 def ajax(request):
 #    if request.POST.has_key('client_response'):
@@ -117,7 +118,8 @@ def ajax(request):
             response_dict.update({'server_response': 'abcd' })
             return HttpResponse(simplejson.dumps(response_dict), mimetype='application/javascript')
     else:
-        return render_to_response('buildingspeakapp/ajaxexample.html', context_instance=RequestContext(request))
+        context = {'test': 1}
+        return render(request, 'buildingspeakapp/ajaxexample.html', context)
 
 @login_required
 def index(request):
@@ -186,6 +188,63 @@ def application_error(request):
     return render(request, 'buildingspeakapp/application_error.html', context)
 
 @login_required
+def account_detail_1(request, account_id):
+    #t0 = timezone.now()
+    account = get_object_or_404(Account, pk=account_id)
+    columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
+
+    acct_meters = account.meter_set.all()
+    acct_meter_data = [[x.utility_type,
+                        x.units,
+                        x.get_bill_data_period_dataframe(),
+                        x.id,
+                        str(x.name),
+                        x,
+                        {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
+                        {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
+                         ] for x in acct_meters]
+    for meter in acct_meter_data:
+        meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
+
+    bldg_data = []
+    for bldg in account.building_set.order_by('name'):
+        bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
+
+        month_curr = pd.Period(Monthling.objects.exclude(act_cost = Decimal(NaN))
+                                                .filter(monther__meter__building = bldg)
+                                                .latest('when')
+                                                .when,
+                               freq='M')                #latest month with non-NaN 'Cost (act)' data
+        month_prev = month_curr - 1
+        bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
+                                                                month_last = month_curr,
+                                                                bldg_meter_data = bldg_meter_data)
+        if bldg_view_data_curr is None: bldg_view_data_curr = [False, False]
+        bldg_view_data_prev = bldg.get_building_view_meter_data(month_first = month_prev,
+                                                                month_last = month_prev,
+                                                                bldg_meter_data = bldg_meter_data)
+        if bldg_view_data_prev is None: bldg_view_data_prev = [False, False]
+        bldg_data.append([bldg.id,
+                          bldg_view_data_curr[0],
+                          bldg_view_data_curr[1],
+                          month_curr.strftime('%b-%Y'),
+                          bldg_view_data_prev[0],
+                          bldg_view_data_prev[1],
+                          month_prev.strftime('%b-%Y'),
+                          bldg.name,
+                          ])
+    
+    context = {
+        'bldg_data':    bldg_data,
+        'bldg_name':    bldg.name,
+        'bldg_id':      bldg.id
+        }
+    user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
+    #t1 = timezone.now()
+    #logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+    return HttpResponse(simplejson.dumps(context), mimetype='application/javascript')
+
+@login_required
 def account_detail(request, account_id):
     #t0 = timezone.now()
     account = get_object_or_404(Account, pk=account_id)
@@ -208,32 +267,32 @@ def account_detail(request, account_id):
     for meter in acct_meter_data:
         meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
     
-    bldg_data = []
-    for bldg in account.building_set.order_by('name'):
-        bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
-
-        month_curr = pd.Period(Monthling.objects.exclude(act_cost = Decimal(NaN))
-                                                .filter(monther__meter__building = bldg)
-                                                .latest('when')
-                                                .when,
-                               freq='M')                #latest month with non-NaN 'Cost (act)' data
-        month_prev = month_curr - 1
-        bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
-                                                                month_last = month_curr,
-                                                                bldg_meter_data = bldg_meter_data)
-        if bldg_view_data_curr is None: bldg_view_data_curr = [False, False]
-        bldg_view_data_prev = bldg.get_building_view_meter_data(month_first = month_prev,
-                                                                month_last = month_prev,
-                                                                bldg_meter_data = bldg_meter_data)
-        if bldg_view_data_prev is None: bldg_view_data_prev = [False, False]
-        bldg_data.append([bldg,
-                          bldg_view_data_curr[0],
-                          bldg_view_data_curr[1],
-                          month_curr.strftime('%b-%Y'),
-                          bldg_view_data_prev[0],
-                          bldg_view_data_prev[1],
-                          month_prev.strftime('%b-%Y'),
-                          ])
+#    bldg_data = []
+#    for bldg in account.building_set.order_by('name'):
+#        bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
+#
+#        month_curr = pd.Period(Monthling.objects.exclude(act_cost = Decimal(NaN))
+#                                                .filter(monther__meter__building = bldg)
+#                                                .latest('when')
+#                                                .when,
+#                               freq='M')                #latest month with non-NaN 'Cost (act)' data
+#        month_prev = month_curr - 1
+#        bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
+#                                                                month_last = month_curr,
+#                                                                bldg_meter_data = bldg_meter_data)
+#        if bldg_view_data_curr is None: bldg_view_data_curr = [False, False]
+#        bldg_view_data_prev = bldg.get_building_view_meter_data(month_first = month_prev,
+#                                                                month_last = month_prev,
+#                                                                bldg_meter_data = bldg_meter_data)
+#        if bldg_view_data_prev is None: bldg_view_data_prev = [False, False]
+#        bldg_data.append([bldg,
+#                          bldg_view_data_curr[0],
+#                          bldg_view_data_curr[1],
+#                          month_curr.strftime('%b-%Y'),
+#                          bldg_view_data_prev[0],
+#                          bldg_view_data_prev[1],
+#                          month_prev.strftime('%b-%Y'),
+#                          ])
     
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40+24                            #final month in sequence
@@ -284,7 +343,7 @@ def account_detail(request, account_id):
         'alerts':         account.get_all_alerts(reverse_boolean=True),
         'events':         account.get_all_events(reverse_boolean=True),
         'account_attrs':  account_attrs,
-        'bldg_data':      bldg_data,
+#        'bldg_data':      bldg_data,
         'meter_data':     meter_data,
         'pie_data':       pie_data,
         'total_SF':       total_SF,
@@ -297,7 +356,7 @@ def account_detail(request, account_id):
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
-        template_name = 'buildingspeakapp/account_detail.html'
+        template_name = 'buildingspeakapp/account_detail_test.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     #t1 = timezone.now()

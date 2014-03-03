@@ -15,6 +15,8 @@ urlpatterns = patterns('',
     url(r'^application-error$', views.application_error, name='application_error'),
 
     url(r'^(?P<account_id>\d+)/$', views.account_detail, name='account_detail'),
+    url(r'^(?P<account_id>\d+)_1/$', views.account_detail_1, name='account_detail_1'),
+
     url(r'^(?P<account_id>\d+)/buildings/(?P<building_id>\d+)$', views.building_detail,
         name='building_detail'),
     url(r'^(?P<account_id>\d+)/spaces/(?P<space_id>\d+)$', views.space_detail,
