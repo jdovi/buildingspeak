@@ -27,81 +27,81 @@ function addChart(arr) {
     </ul> <!-- .nav-tabs -->
 
     <div class="tab tab-summary">
-	{% for bldg, meter_data_curr, pie_data_curr, month_curr, meter_data_prev, pie_data_prev, month_prev in bldg_data %}
-    <h2><a href="/{{ account.id }}/buildings/{{ bldg.id }}" title="{{ bldg.name }}">{{ bldg.name }}</a></h2>
+	{% for bldg_id, meter_data_curr, pie_data_curr, month_curr, meter_data_prev, pie_data_prev, month_prev, bldg_name in bldg_data %}
+    <h2><a href="/{{ account.id }}/buildings/{{ bldg_id }}" title="{{ bldg_name }}">{{ bldg_name }}</a></h2>
     <div class="row">
 		<div class="onecol-two prev">
 	    {% if pie_data_prev %}
 			  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data_prev %}
-			  <div id="{{ bldg.id }}-pie-cost-by-meter-prev" style="display: inline-block; width: 49%;"></div>
+			  <div id="{{ bldg_id }}-pie-cost-by-meter-prev" style="display: inline-block; width: 49%;"></div>
 			  <script>
 			  addChart([
 				'PieChart',
-				'{{ bldg.id }}-pie-cost-by-meter-prev',
+				'{{ bldg_id }}-pie-cost-by-meter-prev',
 				'PieChart',
 				{{ cost_by_meter|safe }},
 				{title: 'Cost by Meter - Previous Month ({{ month_prev|safe }})'}
 			  ]);
 			  </script>
 			  {% empty %}
-				<div id="{{ bldg.id }}-pie-cost-by-meter-prev">{{ bldg.id }}-pie-cost-by-meter-prev2</div>
+				<div id="{{ bldg_id }}-pie-cost-by-meter-prev">{{ bldg_id }}-pie-cost-by-meter-prev2</div>
 			  {% endfor %}
 	    {% else %}
-			<div id="{{ bldg.id }}-pie-cost-by-meter-prev" style="display: inline-block; width: 49%;">{{ bldg.id }}-pie-cost-by-meter-prev3</div>
+			<div id="{{ bldg_id }}-pie-cost-by-meter-prev" style="display: inline-block; width: 49%;">{{ bldg_id }}-pie-cost-by-meter-prev3</div>
 		{% endif %}
 	    {% if pie_data_curr %}
 			  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data_curr %}
-			  <div id="{{ bldg.id }}-pie-cost-by-meter-curr" style="display: inline-block; width: 49%;"></div>
+			  <div id="{{ bldg_id }}-pie-cost-by-meter-curr" style="display: inline-block; width: 49%;"></div>
 			  <script>
 			  addChart([
 				'PieChart',
-				'{{ bldg.id }}-pie-cost-by-meter-curr',
+				'{{ bldg_id }}-pie-cost-by-meter-curr',
 				'PieChart',
 				{{ cost_by_meter|safe }},
 				{title: 'Cost by Meter - Latest Month ({{ month_curr|safe }})'}
 			  ]);
 			  </script>
 			  {% empty %}
-				<div id="{{ bldg.id }}-pie-cost-by-meter-curr">{{ bldg.id }}-pie-cost-by-meter-curr2</div>
+				<div id="{{ bldg_id }}-pie-cost-by-meter-curr">{{ bldg_id }}-pie-cost-by-meter-curr2</div>
 			  {% endfor %}
 	    {% else %}
-			<div id="{{ bldg.id }}-pie-cost-by-meter-curr" style="display: inline-block; width: 49%;">{{ bldg.id }}-pie-cost-by-meter-curr3</div>
+			<div id="{{ bldg_id }}-pie-cost-by-meter-curr" style="display: inline-block; width: 49%;">{{ bldg_id }}-pie-cost-by-meter-curr3</div>
 		{% endif %}
 	    {% if pie_data_prev %}
 			  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data_prev %}
-			  <div id="{{ bldg.id }}-pie-cost-by-type-prev" style="display: inline-block; width: 49%;"></div>
+			  <div id="{{ bldg_id }}-pie-cost-by-type-prev" style="display: inline-block; width: 49%;"></div>
 			  <script>
 			  addChart([
 				'PieChart',
-				'{{ bldg.id }}-pie-cost-by-type-prev',
+				'{{ bldg_id }}-pie-cost-by-type-prev',
 				'PieChart',
 				{{ cost_by_type|safe }},
 				{title: 'Cost by Type - Previous Month ({{ month_prev|safe }})'}
 			  ]);
 			  </script>
 			  {% empty %}
-				<div id="{{ bldg.id }}-pie-cost-by-type-prev">{{ bldg.id }}-pie-cost-by-type-prev2</div>
+				<div id="{{ bldg_id }}-pie-cost-by-type-prev">{{ bldg_id }}-pie-cost-by-type-prev2</div>
 			  {% endfor %}
 	    {% else %}
-			<div id="{{ bldg.id }}-pie-cost-by-type-prev" style="display: inline-block; width: 49%;">{{ bldg.id }}-pie-cost-by-type-prev3</div>
+			<div id="{{ bldg_id }}-pie-cost-by-type-prev" style="display: inline-block; width: 49%;">{{ bldg_id }}-pie-cost-by-type-prev3</div>
 		{% endif %}
 	    {% if pie_data_curr %}
 			  {% for cost_by_meter, cost_by_type, kBtu_by_meter, kBtu_by_type in pie_data_curr %}
-			  <div id="{{ bldg.id }}-pie-cost-by-type-curr" style="display: inline-block; width: 49%;"></div>
+			  <div id="{{ bldg_id }}-pie-cost-by-type-curr" style="display: inline-block; width: 49%;"></div>
 			  <script>
 			  addChart([
 				'PieChart',
-				'{{ bldg.id }}-pie-cost-by-type-curr',
+				'{{ bldg_id }}-pie-cost-by-type-curr',
 				'PieChart',
 				{{ cost_by_type|safe }},
 				{title: 'Cost by Type - Latest Month ({{ month_curr|safe }})'}
 			  ]);
 			  </script>
 			  {% empty %}
-				<div id="{{ bldg.id }}-pie-cost-by-type-curr">{{ bldg.id }}-pie-cost-by-type-curr2</div>
+				<div id="{{ bldg_id }}-pie-cost-by-type-curr">{{ bldg_id }}-pie-cost-by-type-curr2</div>
 			  {% endfor %}
 	    {% else %}
-			<div id="{{ bldg.id }}-pie-cost-by-type-curr" style="display: inline-block; width: 49%;">{{ bldg.id }}-pie-cost-by-type-curr3</div>
+			<div id="{{ bldg_id }}-pie-cost-by-type-curr" style="display: inline-block; width: 49%;">{{ bldg_id }}-pie-cost-by-type-curr3</div>
 		{% endif %}
 
 		</div> <!-- .onecol-two -->
@@ -701,21 +701,6 @@ function addChart(arr) {
         {},
       ]);
       </script>
-
-		<table>
-		  <tbody>
-			  <tr>
-				<td>Test Name</td>
-				<td>Runtime (milliseconds)</td>
-			  </tr>
-			{% for name,result in results_set %}
-			  <tr>
-				<td>{{ name }}</td>
-				<td>{{ result }}</td>
-			  </tr>
-			{% endfor %}
-		  </tbody>
-		</table>
 	  
     </div> <!-- .tab-details -->
     <div class="tab tab-payment">

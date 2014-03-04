@@ -15,7 +15,6 @@ urlpatterns = patterns('',
     url(r'^application-error$', views.application_error, name='application_error'),
 
     url(r'^(?P<account_id>\d+)/$', views.account_detail, name='account_detail'),
-    url(r'^(?P<account_id>\d+)_1/$', views.account_detail_1, name='account_detail_1'),
 
     url(r'^(?P<account_id>\d+)/buildings/(?P<building_id>\d+)$', views.building_detail,
         name='building_detail'),
@@ -27,7 +26,6 @@ urlpatterns = patterns('',
         name='equipment_detail'),
     url(r'^(?P<account_id>\d+)/measures/(?P<measure_id>\d+)$', views.measure_detail,
         name='measure_detail'),
-    url(r'^management/$', views.management, name='management'),
 
     url(r'^tropo/index/$', views.tropo_index, name='tropo_index'),
     url(r'^tropo/user/(?P<caller_id>\d+)/$', views.tropo_user, name='tropo_user'),
@@ -44,7 +42,6 @@ urlpatterns = patterns('',
     
     url(r'^ajaxexample$', views.main, name='main'),
     url(r'^ajaxexample_json$', views.ajax, name='ajax'),
-    url(r'^time_test$', views.time_test, name='time_test'),
 
 )
 

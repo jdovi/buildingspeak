@@ -42,56 +42,7 @@ class ResultsMessage(object):
     id = 0
     subject = 'Success!'
     comment = ''
-    
-def time_test(request):
-    t0 = timezone.now()
-    account = Account.objects.all()[0] #get Account
-    t1 = timezone.now()
-    accounts = request.user.account_set.order_by('id') #get User's Accounts
-    t2 = timezone.now()
-    buildings = account.building_set.order_by('name') #get Account's Buildings
-    t3 = timezone.now()
-    spaces = Space.objects.filter(Q(building__account=account) | Q(meters__account=account)).distinct().order_by('name') #get Account's Spaces
-    t4 = timezone.now()
-    meters = account.meter_set.order_by('name') #get Account's Meters
-    t5 = timezone.now()
-    equipments = Equipment.objects.filter(Q(buildings__account=account) | Q(meters__account=account)).distinct().order_by('name') #get Account's Equipments
-    t6 = timezone.now()
-    measures = EfficiencyMeasure.objects.filter(Q(equipments__buildings__account=account) | Q(meters__account=account)).distinct().order_by('name') #get Account's Measures
-    t7 = timezone.now()
-    meter = Meter.objects.get(name='Eden I (electric)') #get Meter
-    t8 = timezone.now()
-    meter_df = meter.get_bill_data_period_dataframe() #get Meter's dataframe
-    t9 = timezone.now()
-    meter_monthlings = Monthling.objects.filter(monther=meter.monther_set.get(name='BILLx')) #get Meter's monthlings
-    t10 = timezone.now()
-    
-    context = {
-        'user':           request.user,
-        'account':        account,
-        'accounts':       accounts,
-        'buildings':      buildings,
-        'spaces':         spaces,
-        'meters':         meters,
-        'equipments':     equipments,
-        'measures':       measures,
-        'meter':          meter,
-        'meter_df':       meter_df,
-        'meter_monthlings': meter_monthlings,
-        'results_set': [['get Account',             '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0)],
-                        ["get User's Accounts",    '{0:,.0f}'.format((t2-t1).seconds*1000.0 + (t2-t1).microseconds/1000.0)],
-                        ["get Account's Buildings",   '{0:,.0f}'.format((t3-t2).seconds*1000.0 + (t3-t2).microseconds/1000.0)],
-                        ["get Account's Spaces",      '{0:,.0f}'.format((t4-t3).seconds*1000.0 + (t4-t3).microseconds/1000.0)],
-                        ["get Account's Meters",      '{0:,.0f}'.format((t5-t4).seconds*1000.0 + (t5-t4).microseconds/1000.0)],
-                        ["get Account's Equipments",  '{0:,.0f}'.format((t6-t5).seconds*1000.0 + (t6-t5).microseconds/1000.0)],
-                        ["get Account's Measures",    '{0:,.0f}'.format((t7-t6).seconds*1000.0 + (t7-t6).microseconds/1000.0)],
-                        ["get Meter",               '{0:,.0f}'.format((t8-t7).seconds*1000.0 + (t8-t7).microseconds/1000.0)],
-                        ["get Meter's monthlings in pandas dataframe",       '{0:,.0f}'.format((t9-t8).seconds*1000.0 + (t9-t8).microseconds/1000.0)],
-                        ["get Meter's monthlings directly",    '{0:,.0f}'.format((t10-t9).seconds*1000.0 + (t10-t9).microseconds/1000.0)],
-                         ]
-    }
-    return render(request, 'buildingspeakapp/time_test.html', context)
-    
+        
 def main(request):
     context = {'test': 1}
     return render(request, 'buildingspeakapp/ajaxexample.html', context)
@@ -187,10 +138,15 @@ def application_error(request):
     context  = {'user': request.user}
     return render(request, 'buildingspeakapp/application_error.html', context)
 
+
 @login_required
-def account_detail_1(request, account_id):
+def account_detail(request, account_id):
     #t0 = timezone.now()
     account = get_object_or_404(Account, pk=account_id)
+    total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
+    
+    account_attrs = get_model_key_value_pairs_as_nested_list(account)
+
     columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
 
     acct_meters = account.meter_set.all()
@@ -205,7 +161,7 @@ def account_detail_1(request, account_id):
                          ] for x in acct_meters]
     for meter in acct_meter_data:
         meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
-
+    
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
         bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
@@ -233,66 +189,6 @@ def account_detail_1(request, account_id):
                           month_prev.strftime('%b-%Y'),
                           bldg.name,
                           ])
-    
-    context = {
-        'bldg_data':    bldg_data,
-        'bldg_name':    bldg.name,
-        'bldg_id':      bldg.id
-        }
-    user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
-    #t1 = timezone.now()
-    #logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
-    return HttpResponse(simplejson.dumps(context), mimetype='application/javascript')
-
-@login_required
-def account_detail(request, account_id):
-    #t0 = timezone.now()
-    account = get_object_or_404(Account, pk=account_id)
-    total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
-    
-    account_attrs = get_model_key_value_pairs_as_nested_list(account)
-
-    columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
-
-    acct_meters = account.meter_set.all()
-    acct_meter_data = [[x.utility_type,
-                        x.units,
-                        x.get_bill_data_period_dataframe(),
-                        x.id,
-                        str(x.name),
-                        x,
-                        {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
-                        {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
-                         ] for x in acct_meters]
-    for meter in acct_meter_data:
-        meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
-    
-#    bldg_data = []
-#    for bldg in account.building_set.order_by('name'):
-#        bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
-#
-#        month_curr = pd.Period(Monthling.objects.exclude(act_cost = Decimal(NaN))
-#                                                .filter(monther__meter__building = bldg)
-#                                                .latest('when')
-#                                                .when,
-#                               freq='M')                #latest month with non-NaN 'Cost (act)' data
-#        month_prev = month_curr - 1
-#        bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
-#                                                                month_last = month_curr,
-#                                                                bldg_meter_data = bldg_meter_data)
-#        if bldg_view_data_curr is None: bldg_view_data_curr = [False, False]
-#        bldg_view_data_prev = bldg.get_building_view_meter_data(month_first = month_prev,
-#                                                                month_last = month_prev,
-#                                                                bldg_meter_data = bldg_meter_data)
-#        if bldg_view_data_prev is None: bldg_view_data_prev = [False, False]
-#        bldg_data.append([bldg,
-#                          bldg_view_data_curr[0],
-#                          bldg_view_data_curr[1],
-#                          month_curr.strftime('%b-%Y'),
-#                          bldg_view_data_prev[0],
-#                          bldg_view_data_prev[1],
-#                          month_prev.strftime('%b-%Y'),
-#                          ])
     
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40+24                            #final month in sequence
@@ -343,7 +239,7 @@ def account_detail(request, account_id):
         'alerts':         account.get_all_alerts(reverse_boolean=True),
         'events':         account.get_all_events(reverse_boolean=True),
         'account_attrs':  account_attrs,
-#        'bldg_data':      bldg_data,
+        'bldg_data':      bldg_data,
         'meter_data':     meter_data,
         'pie_data':       pie_data,
         'total_SF':       total_SF,
@@ -356,7 +252,7 @@ def account_detail(request, account_id):
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
-        template_name = 'buildingspeakapp/account_detail_test.html'
+        template_name = 'buildingspeakapp/account_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     #t1 = timezone.now()
@@ -752,33 +648,6 @@ def measure_detail(request, account_id, measure_id):
         template_name = 'buildingspeakapp/measure_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
-    return render(request, template_name, context)
-
-@login_required
-def management(request):
-    context = {
-        'weather_stations':     WeatherStation.objects.all(),
-        'accounts':             request.user.account_set.order_by('id'),
-    }
-    if request.user in User.objects.filter(is_active = True).filter(is_staff = True).filter(is_superuser = True):
-        template_name = 'buildingspeakapp/management.html'
-    else:
-        template_name = 'buildingspeakapp/access_denied.html'
-    return render(request, template_name, context)
-
-@login_required
-def docs(request):
-
-    context = {
-        'user':         request.user,
-#        'accounts':     request.user.account_set.order_by('id'),
-#        'meter_data':   meter_data,
-#        'pie_data':     pie_data,
-        'building':     Building.objects.get(pk=2),
-#        'mydata':       mydata2,
-#        'start_month':  start_month
-    }
-    template_name = 'buildingspeakapp/tropo_test.html'
     return render(request, template_name, context)
 
 

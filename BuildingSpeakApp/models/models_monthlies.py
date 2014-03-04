@@ -51,7 +51,7 @@ class Monther(models.Model):
                   as 'mm/yyyy'
         
         Returns Monther's dataframe."""
-        t0 = timezone.now()
+        #t0 = timezone.now()
         try:
             mlg_set = self.monthling_set.all()
             if mlg_set.count() == 0:
@@ -259,10 +259,10 @@ class Monther(models.Model):
                     self.messages.add(m)
                     print m
                     df = None
-        t1 = timezone.now()
-        logger.debug('get_monther_period_dataframe %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
-        
+        #t1 = timezone.now()
+        #logger.debug('get_monther_period_dataframe %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
+        
     def create_missing_required_columns(self, df):
         """Inputs:
             df
