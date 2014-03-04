@@ -461,7 +461,7 @@ def convert_units(n_utility, n_units, x_utility, x_units):
         scaling_factor = None
     return scaling_factor
     
-def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, first_month='', last_month=''):
+def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, apport_map, first_month='', last_month=''):
     """function(utility_type, units, nested_lists_meter_data, first_month, last_month)
         utility_type/units = from Meter options
         list = [[utility_type,
@@ -473,6 +473,9 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, first
                  bldg_meter_apport_dict,
                  space_meter_apport_dict] for each meter]
             (prev. version: Meter objects)
+        apport_map = [x,y] where
+                x = 6 for bldgs, 7 for spaces
+                y = the bldg or space ID
         first/last_month = mm/yyyy strings for date range
         
     Given the type, units and mm/yyyy
@@ -525,6 +528,54 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, first
             df_sum = None
         else:
             try:
+                column_list_apportion = ['Billing Demand (act)',
+                                'Billing Demand (asave)',
+                                'Billing Demand (base delta)',
+                                'Billing Demand (base)',
+                                'Billing Demand (esave delta)',
+                                'Billing Demand (esave)',
+                                'Billing Demand (exp delta)',
+                                'Billing Demand (exp)',
+                                'Consumption (act)',
+                                'Consumption (asave)',
+                                'Consumption (base delta)',
+                                'Consumption (base)',
+                                'Consumption (esave delta)',
+                                'Consumption (esave)',
+                                'Consumption (exp delta)',
+                                'Consumption (exp)',
+                                'Cost (act)',
+                                'Cost (asave)',
+                                'Cost (base delta)',
+                                'Cost (base)',
+                                'Cost (esave delta)',
+                                'Cost (esave)',
+                                'Cost (exp delta)',
+                                'Cost (exp)',
+                                'Peak Demand (act)',
+                                'Peak Demand (asave)',
+                                'Peak Demand (base delta)',
+                                'Peak Demand (base)',
+                                'Peak Demand (esave delta)',
+                                'Peak Demand (esave)',
+                                'Peak Demand (exp delta)',
+                                'Peak Demand (exp)',
+                                'kBtu Consumption (act)',
+                                'kBtu Consumption (asave)',
+                                'kBtu Consumption (base delta)',
+                                'kBtu Consumption (base)',
+                                'kBtu Consumption (esave delta)',
+                                'kBtu Consumption (esave)',
+                                'kBtu Consumption (exp delta)',
+                                'kBtu Consumption (exp)',
+                                'kBtuh Peak Demand (act)',
+                                'kBtuh Peak Demand (asave)',
+                                'kBtuh Peak Demand (base delta)',
+                                'kBtuh Peak Demand (base)',
+                                'kBtuh Peak Demand (esave delta)',
+                                'kBtuh Peak Demand (esave)',
+                                'kBtuh Peak Demand (exp delta)',
+                                'kBtuh Peak Demand (exp)']
                 column_list_convert =  ['Billing Demand (act)',
                                 'Billing Demand (asave)',
                                 'Billing Demand (base delta)',
@@ -616,6 +667,8 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, first
                         meter_df = meter[2]
                         if meter[0] != 'domestic water':
                             meter_df[column_list_convert] = meter_df[column_list_convert] * convert_units(meter[0],meter[1],utility_type,units)
+                            if apport_map is not None:
+                                meter_df[column_list_apportion] = meter_df[column_list_apportion] * meter[apport_map[0]][apport_map[1]]
                         meter_data_lists[i][2] = meter_df
                     df_sum = meter_data_lists[0][2]
                     for meter in meter_data_lists[1:]:

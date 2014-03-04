@@ -203,6 +203,7 @@ class Building(models.Model):
                                         'other',
                                         'kBtuh,kBtu',
                                         space_meter_data,
+                                        [7, space.id],
                                         first_month = mistr, 
                                         last_month = mfstr)
             if space_df is not None:
@@ -248,6 +249,7 @@ class Building(models.Model):
                                         utype,
                                         get_default_units(utype),
                                         [m for m in bldg_meter_data if m[0] == utype],
+                                        [6, self.id],
                                         first_month = mistr, 
                                         last_month = mfstr)
             if utype_df is not None:
@@ -320,6 +322,7 @@ class Building(models.Model):
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
                                                                 bldg_meter_data,
+                                                                [6, self.id],
                                                                 first_month=mistr, 
                                                                 last_month=mfstr )
                                                         } }
@@ -336,6 +339,7 @@ class Building(models.Model):
                                                 utype,
                                                 get_default_units(utype),
                                                 [m for m in bldg_meter_data if m[0] == utype],
+                                                [6, self.id],
                                                 first_month=mistr, 
                                                 last_month=mfstr)
                 
@@ -598,6 +602,7 @@ class Building(models.Model):
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
                                                                 bldg_meter_data,
+                                                                [6, self.id],
                                                                 first_month=first_month, 
                                                                 last_month=last_month )
                                                         } }
@@ -614,6 +619,7 @@ class Building(models.Model):
                                                 utype,
                                                 get_default_units(utype),
                                                 [m for m in bldg_meter_data if m[0] == utype],
+                                                [6, self.id],
                                                 first_month=first_month, 
                                                 last_month=last_month)
                 

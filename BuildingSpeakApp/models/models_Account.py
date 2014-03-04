@@ -155,6 +155,7 @@ class Account(models.Model):
                                         'other',
                                         'kBtuh,kBtu',
                                         bldg_meter_data,
+                                        [6, bldg.id],
                                         first_month = mistr, 
                                         last_month = mfstr)
             if bldg_df is not None:
@@ -201,6 +202,7 @@ class Account(models.Model):
                                         'other',
                                         'kBtuh,kBtu',
                                         space_meter_data,
+                                        [7, space.id],
                                         first_month = mistr, 
                                         last_month = mfstr)
             if space_df is not None:
@@ -247,6 +249,7 @@ class Account(models.Model):
                                         utype,
                                         get_default_units(utype),
                                         [m for m in acct_meter_data if m[0] == utype],
+                                        None,
                                         first_month = mistr, 
                                         last_month = mfstr)
             if utype_df is not None:
@@ -320,6 +323,7 @@ class Account(models.Model):
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
                                                                 acct_meter_data,
+                                                                None,
                                                                 first_month=mistr, 
                                                                 last_month=mfstr )
                                                         } }
@@ -336,6 +340,7 @@ class Account(models.Model):
                                                 utype,
                                                 get_default_units(utype),
                                                 [m for m in acct_meter_data if m[0] == utype],
+                                                None,
                                                 first_month=mistr, 
                                                 last_month=mfstr)
                 
@@ -600,6 +605,7 @@ class Account(models.Model):
                                                                 'other', 
                                                                 'kBtuh,kBtu', 
                                                                 acct_meter_data,
+                                                                None,
                                                                 first_month=first_month, 
                                                                 last_month=last_month )
                                                         } }
@@ -616,6 +622,7 @@ class Account(models.Model):
                                                 utype,
                                                 get_default_units(utype),
                                                 [m for m in acct_meter_data if m[0] == utype],
+                                                None,
                                                 first_month=first_month, 
                                                 last_month=last_month)
                 
