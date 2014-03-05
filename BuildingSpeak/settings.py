@@ -195,7 +195,7 @@ INSTALLED_APPS = (
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 if 'dashley' in SITE_ROOT:
-    bsapp_handlers = []#['logfile'] #['console', 'logfile']
+    bsapp_handlers = ['logfile'] #['console', 'logfile']  []  
 else:
     bsapp_handlers = []
 LOGGING = {
@@ -223,14 +223,14 @@ LOGGING = {
         }
     },
     'handlers': {
-#        'logfile': {
-#            'level':'DEBUG',
-#            'class':'logging.handlers.RotatingFileHandler',
-#            'filename': 'C:/Users/dashley/Box Sync/BuildingSpeak/BuildingSpeakApp/logfile.txt',
-#            'maxBytes': 10000000,
-#            'backupCount': 2,
-#            'formatter': 'debug',
-#        },
+        'logfile': {
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': 'C:/Users/dashley/Box Sync/BuildingSpeak/BuildingSpeakApp/logfile.txt',
+            'maxBytes': 10000000,
+            'backupCount': 2,
+            'formatter': 'debug',
+        },
         'null': {
             'level': 'DEBUG',
             'class': 'django.utils.log.NullHandler',

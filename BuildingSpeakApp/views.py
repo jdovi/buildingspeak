@@ -141,13 +141,18 @@ def application_error(request):
 
 @login_required
 def account_detail(request, account_id):
-    #t0 = timezone.now()
+    t0 = timezone.now()
+    tA = timezone.now()
     account = get_object_or_404(Account, pk=account_id)
     total_SF = account.building_set.all().aggregate(Sum('square_footage'))['square_footage__sum']
     
     account_attrs = get_model_key_value_pairs_as_nested_list(account)
 
     columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
+
+    tB = timezone.now()
+    logger.debug('account_detail_A %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
 
     acct_meters = account.meter_set.all()
     acct_meter_data = [[x.utility_type,
@@ -162,6 +167,10 @@ def account_detail(request, account_id):
     for meter in acct_meter_data:
         meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
     
+    tB = timezone.now()
+    logger.debug('account_detail_B %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     bldg_data = []
     for bldg in account.building_set.order_by('name'):
         bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
@@ -190,11 +199,20 @@ def account_detail(request, account_id):
                           bldg.name,
                           ])
     
+    tB = timezone.now()
+    logger.debug('account_detail_C %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40+24                            #final month in sequence
     acct_view_data = account.get_account_view_meter_data(month_first = month_first,
                                                          month_last = month_last,
                                                          acct_meter_data = acct_meter_data)
+
+    tB = timezone.now()
+    logger.debug('account_detail_D %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     five_year_data = account.get_account_view_five_year_data(acct_meter_data = acct_meter_data)
     
     if acct_view_data is None:
@@ -203,6 +221,10 @@ def account_detail(request, account_id):
     else:
         meter_data = acct_view_data[0]
         pie_data = acct_view_data[1]
+
+    tB = timezone.now()
+    logger.debug('account_detail_E %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
 
     #####Stripe testing
     if request.method == 'POST':
@@ -255,12 +277,16 @@ def account_detail(request, account_id):
         template_name = 'buildingspeakapp/account_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
-    #t1 = timezone.now()
-    #logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+    tB = timezone.now()
+    logger.debug('account_detail_F %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    t1 = timezone.now()
+    logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)
 
 @login_required
 def building_detail(request, account_id, building_id):
+    t0 = timezone.now()
+    tA = timezone.now()
     account = get_object_or_404(Account, pk=account_id)
     building = get_object_or_404(Building, pk=building_id)
     if account.pk <> building.account.pk:
@@ -269,6 +295,10 @@ def building_detail(request, account_id, building_id):
     building_attrs = get_model_key_value_pairs_as_nested_list(building)
 
     columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
+
+    tB = timezone.now()
+    logger.debug('building_detail_A %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
 
     bldg_meters = building.meters.all()
     bldg_meter_data = [[x.utility_type,
@@ -283,12 +313,21 @@ def building_detail(request, account_id, building_id):
     for meter in bldg_meter_data:
         meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
 
+    tB = timezone.now()
+    logger.debug('building_detail_B %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40+24                            #final month in sequence
     
     bldg_view_data = building.get_building_view_meter_data(month_first = month_first,
                                                            month_last = month_last,
                                                            bldg_meter_data = bldg_meter_data)
+
+    tB = timezone.now()
+    logger.debug('building_detail_C %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     five_year_data = building.get_building_view_five_year_data(bldg_meter_data = bldg_meter_data)
     
     if bldg_view_data is None:
@@ -298,6 +337,10 @@ def building_detail(request, account_id, building_id):
         meter_data = bldg_view_data[0]
         pie_data = bldg_view_data[1]
         
+    tB = timezone.now()
+    logger.debug('building_detail_D %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     context = {
         'user':           request.user,
         'account':        account,
@@ -326,10 +369,16 @@ def building_detail(request, account_id, building_id):
         template_name = 'buildingspeakapp/building_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
+    tB = timezone.now()
+    logger.debug('building_detail_E %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    t1 = timezone.now()
+    logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)
 
 @login_required
 def space_detail(request, account_id, space_id):
+    t0 = timezone.now()
+    tA = timezone.now()
     account = get_object_or_404(Account, pk=account_id)
     space = get_object_or_404(Space, pk=space_id)
     if account.pk <> space.building.account.pk:
@@ -338,6 +387,10 @@ def space_detail(request, account_id, space_id):
     space_attrs = get_model_key_value_pairs_as_nested_list(space)
 
     columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
+
+    tB = timezone.now()
+    logger.debug('space_detail_A %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
 
     space_meters = space.meters.all()
     space_meter_data = [[x.utility_type,
@@ -352,12 +405,20 @@ def space_detail(request, account_id, space_id):
     for meter in space_meter_data:
         meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
 
+    tB = timezone.now()
+    logger.debug('space_detail_B %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     month_first = pd.Period(timezone.now(),freq='M')-40     #first month in sequence
     month_last = month_first + 40 + 24                            #final month in sequence
     
     space_view_data = space.get_space_view_meter_data(month_first = month_first,
                                                       month_last = month_last,
                                                       space_meter_data = copy.deepcopy(space_meter_data))
+    tB = timezone.now()
+    logger.debug('space_detail_C %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     five_year_data = space.get_space_view_five_year_data(space_meter_data = copy.deepcopy(space_meter_data))
     
     if space_view_data is None:
@@ -367,6 +428,10 @@ def space_detail(request, account_id, space_id):
         meter_data = space_view_data[0]
         pie_data = space_view_data[1]
     
+    tB = timezone.now()
+    logger.debug('space_detail_D %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     context = {
         'user':           request.user,
         'account':        account,
@@ -393,10 +458,16 @@ def space_detail(request, account_id, space_id):
         template_name = 'buildingspeakapp/space_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
+    tB = timezone.now()
+    logger.debug('space_detail_E %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    t1 = timezone.now()
+    logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)
 
 @login_required
 def meter_detail(request, account_id, meter_id):
+    t0 = timezone.now()
+    tA = timezone.now()
     #---check that we can access the account and meter and they go together
     account = get_object_or_404(Account, pk=account_id)
     meter = get_object_or_404(Meter, pk=meter_id)
@@ -443,6 +514,10 @@ def meter_detail(request, account_id, meter_id):
     
     columns_needing_nan2zero = get_monthling_columns_needing_nan2zero()
     
+    tB = timezone.now()
+    logger.debug('meter_detail_A %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    tA = timezone.now()
+
     try:
         this_month = pd.Period(timezone.now(),freq='M')
         month_first = this_month - 36       #link user selection here
@@ -471,8 +546,17 @@ def meter_detail(request, account_id, meter_id):
             motion_data = None
         else:
             meter_data =        meter.get_meter_view_meter_data(bill_data = copy.deepcopy(bill_data))
+            tB = timezone.now()
+            logger.debug('meter_detail_B %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+            tA = timezone.now()
             model_data =        meter.get_meter_view_meter_model_data(bill_data = copy.deepcopy(bill_data))
+            tB = timezone.now()
+            logger.debug('meter_detail_C %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+            tA = timezone.now()
             five_year_data =    meter.get_meter_view_five_year_data(bill_data = copy.deepcopy(bill_data))
+            tB = timezone.now()
+            logger.debug('meter_detail_D %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+            tA = timezone.now()
             motion_data =       get_meter_view_motion_table(name = str(meter.name),
                                                             bill_data = copy.deepcopy(bill_data))
             if meter_data is None:
@@ -578,10 +662,15 @@ def meter_detail(request, account_id, meter_id):
     else:
         template_name = 'buildingspeakapp/access_denied.html'
     if reloading: context['alerts'] = [m]
+    tB = timezone.now()
+    logger.debug('meter_detail_E %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+    t1 = timezone.now()
+    logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)
 
 @login_required
 def equipment_detail(request, account_id, equipment_id):
+    t0 = timezone.now()
     account = get_object_or_404(Account, pk=account_id)
     equipment = get_object_or_404(Equipment, pk=equipment_id)
     if account.pk <> equipment.meters.all()[0].account.pk: 
@@ -612,10 +701,13 @@ def equipment_detail(request, account_id, equipment_id):
         template_name = 'buildingspeakapp/equipment_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
+    t1 = timezone.now()
+    logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)
 
 @login_required
 def measure_detail(request, account_id, measure_id):
+    t0 = timezone.now()
     #---check that we can access the account and meter and they go together
     account = get_object_or_404(Account, pk=account_id)
     measure = get_object_or_404(EfficiencyMeasure, pk=measure_id)
@@ -648,6 +740,8 @@ def measure_detail(request, account_id, measure_id):
         template_name = 'buildingspeakapp/measure_detail.html'
     else:
         template_name = 'buildingspeakapp/access_denied.html'
+    t1 = timezone.now()
+    logger.debug('account_detail %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return render(request, template_name, context)
 
 

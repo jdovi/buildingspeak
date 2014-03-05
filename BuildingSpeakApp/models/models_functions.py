@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 #----place code like this for tracking timing of various functions and code snippets
-#tA = timezone.now()
-#tB = timezone.now()
-#logger.debug('convert_units_sum_metersA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+#t0 = timezone.now()
+#t1 = timezone.now()
+#logger.debug('convert_units_sum_metersA %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
 
 def get_monthling_columns_needing_nan2zero():
     """Returns list of column names found in
@@ -173,6 +173,7 @@ def get_meter_view_motion_table(name, bill_data):
     with the following columns: MeterName,
     Date, Cost, kBtu, CDD, HDD.
     """
+    t0 = timezone.now()
     if bill_data is not None:
         bill_data_copy = bill_data.copy()
         bill_data_copy[['Cost (act)',
@@ -188,6 +189,8 @@ def get_meter_view_motion_table(name, bill_data):
                                      ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)'])
     else:
         result = None
+    t1 = timezone.now()
+    logger.debug('get_meter_view_motion_table %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return result
 
 def get_df_motion_table(df, col_0, index_func, column_list, column_dict=None):
@@ -209,6 +212,7 @@ def get_df_motion_table(df, col_0, index_func, column_list, column_dict=None):
     pulled from df expected to be Decimals and are
     converted to floats for output table.
     """
+    t0 = timezone.now()
     try:
         r = []
         r_1 = [col_0[0], 'Date']
@@ -236,6 +240,8 @@ def get_df_motion_table(df, col_0, index_func, column_list, column_dict=None):
                     r.append(r_1)
             except:
                 print 'Code Error: Failed to create table during get_df_motion_table function, aborting and returning empty list.'
+    t1 = timezone.now()
+    logger.debug('get_df_motion_table %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return r
 
 def get_df_as_table_with_formats(df, columndict, index_name, transpose_bool):
@@ -248,6 +254,7 @@ def get_df_as_table_with_formats(df, columndict, index_name, transpose_bool):
     transposed prior to converting into a list
     of lists.
     """
+    t0 = timezone.now()
     r = []
     try:
         if transpose_bool:
@@ -293,6 +300,8 @@ def get_df_as_table_with_formats(df, columndict, index_name, transpose_bool):
                             
                     except:
                         print 'Code Error: Failed to create table during get_df_as_table_with_formats function, aborting and returning empty list.'
+    t1 = timezone.now()
+    logger.debug('get_df_as_table_with_formats %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return r
 
 def get_monthly_dataframe_as_table(df, columnlist):
@@ -303,6 +312,9 @@ def get_monthly_dataframe_as_table(df, columnlist):
     in the output.  Index put
     in first column as Month
     with isoformat."""
+    t0 = timezone.now()
+    tA = timezone.now()
+
     r = []
     try:
         r.append(columnlist)
@@ -334,6 +346,10 @@ def get_monthly_dataframe_as_table(df, columnlist):
                         print 'Code Error: Received request for columns that are not in dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
                     else:
                         try:
+                            tB = timezone.now()
+                            logger.debug('get_monthly_dataframe_as_tableA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+                            tA = timezone.now()
+
                             df = df.sort_index()
                             for i in range(0,len(df)):
                                 #r_1 = [str(df.index[i])]
@@ -343,8 +359,13 @@ def get_monthly_dataframe_as_table(df, columnlist):
                                     r_j.append(df[j][i])
                                 r_1.extend(r_j)
                                 r.append(r_1)
+
+                            tB = timezone.now()
+                            logger.debug('get_monthly_dataframe_as_tableB %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
                         except:
                             print 'Code Error: Failed to create table during get_monthly_dataframe_as_table function, aborting and returning empty list.'
+    t1 = timezone.now()
+    logger.debug('get_monthly_dataframe_as_table %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return r
 
 def get_default_units(utility_type):
@@ -353,6 +374,7 @@ def get_default_units(utility_type):
         
     Given the utility type, returns
     the default units for that type."""
+    t0 = timezone.now()
     try:
         sf = {
                     'electricity':      'kW,kWh',
@@ -374,6 +396,8 @@ def get_default_units(utility_type):
     except:
         print 'Code Error: Function get_default_units failed, aborting and returning None.'
         units = None
+    t1 = timezone.now()
+    logger.debug('get_default_units %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return units
     
 def convert_units(n_utility, n_units, x_utility, x_units):
@@ -390,6 +414,7 @@ def convert_units(n_utility, n_units, x_utility, x_units):
     are assumed energy with basis 'kBtuh,kBtu'.
     Units options are those available to Meter
     models."""
+    t0 = timezone.now()
     try:
         sf = {
             'electricity':              {'kBtuh,kBtu': Decimal(1),
@@ -461,6 +486,8 @@ def convert_units(n_utility, n_units, x_utility, x_units):
     except:
         print 'Code Error: Function convert_units failed, aborting and returning None.'
         scaling_factor = None
+    t1 = timezone.now()
+    logger.debug('convert_units %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return scaling_factor
     
 def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, apport_map, first_month='', last_month=''):
@@ -492,6 +519,8 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, appor
     Domestic water meters are excluded
     from all conversions and summations
     other than Cost."""
+    t0 = timezone.now()
+    tA = timezone.now()
     try:
         if len([type(x[3]) for x in nested_lists_meter_data if type(x[3]) is not int]) > 0:
             raise AttributeError
@@ -663,6 +692,11 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, appor
                                 'Cost (exp delta)',
                                 'Cost (exp)']
                 meter_data_lists = copy.deepcopy([x for x in nested_lists_meter_data if x[2] is not None])
+                
+                tB = timezone.now()
+                logger.debug('convert_units_sum_metersA %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+                tA = timezone.now()
+                
                 if len(meter_data_lists) > 0:
                     for i,meter in enumerate(meter_data_lists):
                         meter_df = meter[2]
@@ -672,6 +706,11 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, appor
                             meter_df[column_list_apportion] = meter_df[column_list_apportion] * meter[apport_map[0]][apport_map[1]]
                         meter_data_lists[i][2] = meter_df
                     df_sum = meter_data_lists[0][2]
+                    
+                    tB = timezone.now()
+                    logger.debug('convert_units_sum_metersB %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+                    tA = timezone.now()
+                    
                     for meter in meter_data_lists[1:]:
                         if meter[0] != 'domestic water':
                             df_sum[column_list_sum_non_water] = (df_sum[column_list_sum_non_water]
@@ -681,11 +720,17 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, appor
                             df_sum[column_list_sum_water] = (df_sum[column_list_sum_water]
                                             .add(meter[2][column_list_sum_water],fill_value=0) #must remove NaNs so addition works
                                           )
+                                          
+                    tB = timezone.now()
+                    logger.debug('convert_units_sum_metersC %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
+                    
                 else:
                     df_sum = None
             except:
                 print 'Code Error: Function convert_units_sum_meters failed to compute sum, aborting and returning None.'
                 df_sum = None
+    t1 = timezone.now()
+    logger.debug('convert_units_sum_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
     return df_sum
 
 def make_pandas_data_frame(list_of_series, series_names=[]):

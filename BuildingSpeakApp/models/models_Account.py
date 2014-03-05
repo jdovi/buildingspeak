@@ -143,7 +143,7 @@ class Account(models.Model):
         columns: Building Name, Date, Cost, kBtu, CDD,
         HDD, Cost/SF, kBtu/SF, Cost/kBtu, Building Type.
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -175,8 +175,8 @@ class Account(models.Model):
                                                   {'Building Type': str(bldg.building_type)})
                 for i in bldg_table[1:]:
                     result.append(i)
-        #t1 = timezone.now()
-        #logger.debug('get_account_view_motion_table_buildings %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_account_view_motion_table_buildings %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_account_view_motion_table_spaces(self, acct_meter_data):
         """
@@ -189,7 +189,7 @@ class Account(models.Model):
         HDD, Cost/SF, kBtu/SF, Cost/kBtu, Space Type,
         Building Name.
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -222,8 +222,8 @@ class Account(models.Model):
                                                   {'Space Type': str(space.space_type),'Building': str(space.building.name)})
                 for i in space_table[1:]:
                     result.append(i)
-        #t1 = timezone.now()
-        #logger.debug('get_account_view_motion_table_spaces %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_account_view_motion_table_spaces %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_account_view_motion_table_fuels(self, acct_meter_data):
         """
@@ -235,7 +235,7 @@ class Account(models.Model):
         columns: Utility Type, Date, Cost, kBtu, CDD,
         HDD, Cost/SF, kBtu/SF, Cost/kBtu.
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -268,8 +268,8 @@ class Account(models.Model):
                                                   ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu'])
                 for i in utype_table[1:]:
                     result.append(i)
-        #t1 = timezone.now()
-        #logger.debug('get_account_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_account_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_account_view_motion_table_meters(self, acct_meter_data):
         """
@@ -278,7 +278,7 @@ class Account(models.Model):
         with the following columns: MeterName,
         Date, Cost, kBtu, CDD, HDD, UtilityType.
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
         for meter in acct_meter_data:
             meter_table = get_meter_view_motion_table(name = str(meter[4]), bill_data = meter[2])
@@ -286,15 +286,15 @@ class Account(models.Model):
                 for i in meter_table[1:]:
                     i.append(str(meter[0]))
                     result.append(i)
-        #t1 = timezone.now()
-        #logger.debug('get_account_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_account_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_account_view_five_year_data(self, acct_meter_data):
         """No inputs.
         
         Returns meter data for Account's stacked
         5yr bar charts."""
-        #t0 = timezone.now()
+        t0 = timezone.now()
         #if there are no meters, skip all meter data calcs
         try:
             month_curr = pd.Period(timezone.now(), freq='M')
@@ -516,8 +516,8 @@ class Account(models.Model):
             self.messages.add(m)
             print m
             five_year_data = None
-        #t1 = timezone.now()
-        #logger.debug('get_account_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_account_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return five_year_data
 
     def get_account_view_meter_data(self, month_first, month_last, acct_meter_data):
@@ -531,7 +531,7 @@ class Account(models.Model):
         :returns: Meter data for Account's views in a list: [meter_data, pie_data].
         
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         #if there are no meters, skip all meter data calcs
         try:
             first_month = month_first.strftime('%m/%Y')
@@ -799,8 +799,8 @@ class Account(models.Model):
             self.messages.add(m)
             print m
             result = None
-        #t1 = timezone.now()
-        #logger.debug('get_account_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_account_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_all_events(self, reverse_boolean):
         a = [self.messages.filter(message_type='Event')]

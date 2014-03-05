@@ -191,7 +191,7 @@ class Building(models.Model):
         Date, Cost, kBtu, CDD, HDD, Cost/SF,
         kBtu/SF, Cost/kBtu, SpaceType.
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -223,8 +223,8 @@ class Building(models.Model):
                                                   {'Space Type': str(space.space_type)})
                 for i in space_table[1:]:
                     result.append(i)
-        #t1 = timezone.now()
-        #logger.debug('get_building_view_motion_table_spaces %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_building_view_motion_table_spaces %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_building_view_motion_table_fuels(self, bldg_meter_data):
         """No inputs.
@@ -235,7 +235,7 @@ class Building(models.Model):
         Date, Cost, kBtu, CDD, HDD, Cost/SF,
         kBtu/SF, Cost/kBtu.
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         month_curr = pd.Period(timezone.now(), freq='M')
         mistr = (month_curr-120).strftime('%m/%Y')
         mfstr = month_curr.strftime('%m/%Y')
@@ -268,8 +268,8 @@ class Building(models.Model):
                                                   ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Cost/SF','kBtu/SF','Cost/kBtu'])
                 for i in utype_table[1:]:
                     result.append(i)
-        #t1 = timezone.now()
-        #logger.debug('get_building_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_building_view_motion_table_fuels %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_building_view_motion_table_meters(self, bldg_meter_data):
         """No inputs.
@@ -279,7 +279,7 @@ class Building(models.Model):
         with the following columns: MeterName,
         Date, Cost, kBtu, CDD, HDD, UtilityType.
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         result = [['Meter','Date','Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)','Utility Type']]
         for meter in bldg_meter_data:
             meter_table = get_meter_view_motion_table(name = str(meter[4]), bill_data = meter[2])
@@ -287,15 +287,15 @@ class Building(models.Model):
                 for i in meter_table[1:]:
                     i.append(str(meter[0]))
                     result.append(i)
-        #t1 = timezone.now()
-        #logger.debug('get_building_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_building_view_motion_table_meters %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
     def get_building_view_five_year_data(self, bldg_meter_data):
         """No inputs.
         
         Returns meter data for Building's stacked
         5yr bar charts."""
-        #t0 = timezone.now()
+        t0 = timezone.now()
         #if there are no meters, skip all meter data calcs
         try:
             month_curr = pd.Period(timezone.now(), freq='M')
@@ -515,8 +515,8 @@ class Building(models.Model):
             self.messages.add(m)
             print m
             five_year_data = None
-        #t1 = timezone.now()
-        #logger.debug('get_building_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_building_view_five_year_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return five_year_data
 
     def get_building_view_meter_data(self, month_first, month_last, bldg_meter_data):
@@ -530,7 +530,7 @@ class Building(models.Model):
         :returns: Meter data for Building's views in a list: [meter_data, pie_data].
         
         """
-        #t0 = timezone.now()
+        t0 = timezone.now()
         #if there are no meters, skip all meter data calcs
         try:
             first_month = month_first.strftime('%m/%Y')
@@ -796,8 +796,8 @@ class Building(models.Model):
             self.messages.add(m)
             print m
             result = None
-        #t1 = timezone.now()
-        #logger.debug('get_building_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+        t1 = timezone.now()
+        logger.debug('get_building_view_meter_data %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return result
 
     def get_all_events(self, reverse_boolean):
