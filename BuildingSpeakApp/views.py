@@ -10,7 +10,7 @@ from BuildingSpeakApp.models import get_model_key_value_pairs_as_nested_list, de
 from BuildingSpeakApp.models import get_monthly_dataframe_as_table, get_df_as_table_with_formats
 from BuildingSpeakApp.models import get_monthling_columns_needing_nan2zero, get_meter_view_motion_table
 
-import json, stripe
+import json, stripe, copy
 import numpy as np
 import pandas as pd
 import socket, logging
@@ -155,7 +155,7 @@ def account_detail(request, account_id):
                         x.get_bill_data_period_dataframe(),
                         x.id,
                         str(x.name),
-                        x,
+                        None, #previously contained meter object itself, unnecessary given x.id being passed
                         {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in acct_meters]
@@ -276,7 +276,7 @@ def building_detail(request, account_id, building_id):
                         x.get_bill_data_period_dataframe(),
                         x.id,
                         str(x.name),
-                        x,
+                        None, #previously contained meter object itself, unnecessary given x.id being passed
                         {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in bldg_meters]
@@ -345,7 +345,7 @@ def space_detail(request, account_id, space_id):
                         x.get_bill_data_period_dataframe(),
                         x.id,
                         str(x.name),
-                        x,
+                        None, #previously contained meter object itself, unnecessary given x.id being passed
                         {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in space_meters]
@@ -357,8 +357,8 @@ def space_detail(request, account_id, space_id):
     
     space_view_data = space.get_space_view_meter_data(month_first = month_first,
                                                       month_last = month_last,
-                                                      space_meter_data = space_meter_data)
-    five_year_data = space.get_space_view_five_year_data(space_meter_data = space_meter_data)
+                                                      space_meter_data = copy.deepcopy(space_meter_data))
+    five_year_data = space.get_space_view_five_year_data(space_meter_data = copy.deepcopy(space_meter_data))
     
     if space_view_data is None:
         meter_data = None
@@ -385,8 +385,8 @@ def space_detail(request, account_id, space_id):
         'meter_data':     meter_data,
         'pie_data':       pie_data,
         'five_year_data': five_year_data,
-        'motion_data_meters':   space.get_space_view_motion_table_meters(space_meter_data = space_meter_data),
-        'motion_data_fuels':    space.get_space_view_motion_table_fuels(space_meter_data = space_meter_data),
+        'motion_data_meters':   space.get_space_view_motion_table_meters(space_meter_data = copy.deepcopy(space_meter_data)),
+        'motion_data_fuels':    space.get_space_view_motion_table_fuels(space_meter_data = copy.deepcopy(space_meter_data)),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -470,11 +470,11 @@ def meter_detail(request, account_id, meter_id):
             five_year_table_kBtu = None
             motion_data = None
         else:
-            meter_data =        meter.get_meter_view_meter_data(bill_data = bill_data)
-            model_data =        meter.get_meter_view_meter_model_data(bill_data = bill_data)
-            five_year_data =    meter.get_meter_view_five_year_data(bill_data = bill_data)
+            meter_data =        meter.get_meter_view_meter_data(bill_data = copy.deepcopy(bill_data))
+            model_data =        meter.get_meter_view_meter_model_data(bill_data = copy.deepcopy(bill_data))
+            five_year_data =    meter.get_meter_view_five_year_data(bill_data = copy.deepcopy(bill_data))
             motion_data =       get_meter_view_motion_table(name = str(meter.name),
-                                                            bill_data = bill_data)
+                                                            bill_data = copy.deepcopy(bill_data))
             if meter_data is None:
                 totals_table = False
                 ratios_table = False

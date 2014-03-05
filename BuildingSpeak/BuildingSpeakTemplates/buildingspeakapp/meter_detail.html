@@ -135,6 +135,27 @@ function addChart(arr) {
         </div>
       {% endif %}
 
+      {% if meter.spacemeterapportionment_set.all %}
+        <table>
+          <tbody>
+              <tr>
+                <td>Space Served</td>
+                <td>Fraction of Meter Assigned</td>
+              </tr>
+            {% for sma in meter.spacemeterapportionment_set.all %}
+              <tr>
+                <td><a href="/{{ account.id }}/spaces/{{ sma.space.id }}">{{ sma.space.name }}</a></td>
+                <td>{{ sma.assigned_fraction }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="clear">
+          <div class="woo-sc-hr"></div>
+        </div>
+      {% endif %}
+
       {% if meter.equipment_set.all %}
         <table>
           <tbody>

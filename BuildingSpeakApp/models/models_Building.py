@@ -16,6 +16,7 @@ from models_functions import *
 from models_Message import Message
 from models_Reader_ing import Reader
 from models_monthlies import Monthling
+from models_Meter import Meter
 
 logger = logging.getLogger(__name__)
 
@@ -769,11 +770,11 @@ class Building(models.Model):
                 
                 #for breakdown by Meter, cycle through all Meters and exclude domestic water from kBtu calcs
                 for meter in bldg_meter_data:
-                    cost_sum = Monthling.objects.filter(monther=meter[5].monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_cost=Decimal(NaN)).aggregate(Sum('act_cost'))['act_cost__sum']
+                    cost_sum = Monthling.objects.filter(monther=Meter.objects.get(id=meter[3]).monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_cost=Decimal(NaN)).aggregate(Sum('act_cost'))['act_cost__sum']
                     if cost_sum is None or np.isnan(float(cost_sum)): cost_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
                     pie_cost_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(cost_sum)])
                     if meter[0] != 'domestic water':
-                        kBtu_sum = Monthling.objects.filter(monther=meter[5].monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_kBtu_consumption=Decimal(NaN)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
+                        kBtu_sum = Monthling.objects.filter(monther=Meter.objects.get(id=meter[3]).monther_set.get(name='BILLx')).filter(when__gte=month_first.to_timestamp(how='S').tz_localize(tz=UTC)).filter(when__lte=month_last.to_timestamp(how='E').tz_localize(tz=UTC)).exclude(act_kBtu_consumption=Decimal(NaN)).aggregate(Sum('act_kBtu_consumption'))['act_kBtu_consumption__sum']
                         if kBtu_sum is None or np.isnan(float(kBtu_sum)): kBtu_sum = Decimal('0.0') #pulling directly from db may return None, whereas df's return zeros
                         pie_kBtu_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(kBtu_sum)])
                         pies_by_meter.append([str(meter[4]) + ' - ' + str(meter[0]), float(cost_sum), float(kBtu_sum), str(meter[0])])

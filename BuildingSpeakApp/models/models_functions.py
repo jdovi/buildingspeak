@@ -1,5 +1,4 @@
-import math
-import logging
+import math, logging, copy
 import numpy as np
 import pandas as pd
 import urllib, urllib2
@@ -175,14 +174,15 @@ def get_meter_view_motion_table(name, bill_data):
     Date, Cost, kBtu, CDD, HDD.
     """
     if bill_data is not None:
-        bill_data[['Cost (act)',
+        bill_data_copy = bill_data.copy()
+        bill_data_copy[['Cost (act)',
             'kBtu Consumption (act)',
             'CDD (consumption)',
-            'HDD (consumption)']] = bill_data[['Cost (act)',
+            'HDD (consumption)']] = bill_data_copy[['Cost (act)',
                                         'kBtu Consumption (act)',
                                         'CDD (consumption)',
                                         'HDD (consumption)']].applymap(nan2zero)
-        result = get_df_motion_table(bill_data,
+        result = get_df_motion_table(bill_data_copy,
                                      ['Meter',name],
                                      lambda x:(x.to_timestamp(how='S')+timedelta(hours=11)).tz_localize(tz=UTC).to_datetime().isoformat(),
                                      ['Cost (act)','kBtu Consumption (act)','CDD (consumption)','HDD (consumption)'])
@@ -221,14 +221,15 @@ def get_df_motion_table(df, col_0, index_func, column_list, column_dict=None):
             print 'Code Warning: Found no data to load during get_df_motion_table function, aborting and returning empty list.'
         else:
             try:
-                df['mapped_index'] = df.index
-                df['mapped_index'] = df['mapped_index'].apply(index_func)
-                for i in range(0,len(df)):
-                    r_1 = [col_0[1], df['mapped_index'][i]]
+                df_copy = df.copy()
+                df_copy['mapped_index'] = df_copy.index
+                df_copy['mapped_index'] = df_copy['mapped_index'].apply(index_func)
+                for i in range(0,len(df_copy)):
+                    r_1 = [col_0[1], df_copy['mapped_index'][i]]
                     r_j = []
                     for j in column_list:
-                        if j in df.columns:
-                            r_j.append(float(df[j][i]))
+                        if j in df_copy.columns:
+                            r_j.append(float(df_copy[j][i]))
                         else:
                             r_j.append(column_dict[j])
                     r_1.extend(r_j)
@@ -262,30 +263,31 @@ def get_df_as_table_with_formats(df, columndict, index_name, transpose_bool):
             print 'Code Warning: Found no data to load during get_df_as_table_with_formats function, aborting and returning empty list.'
         else:
             try:
+                df_copy = df.copy()
                 for col in columndict:
-                    df[col] = df[col].apply(columndict[col])
+                    df_copy[col] = df_copy[col].apply(columndict[col])
             except:
                 print 'Code Error: Failed to apply functions during get_df_as_table_with_formats function, aborting and returning empty list.'
             else:
-                if not(min([x in df.columns for x in columndict])):
+                if not(min([x in df_copy.columns for x in columndict])):
                     print 'Code Error: Received request for columns that are not in dataframe during get_df_as_table_with_formats function, aborting and returning empty list.'
                 else:
                     try:
                         if transpose_bool: 
-                            df = df.transpose()
+                            df_copy = df_copy.transpose()
                             for i in range(0,len(columndict)):
-                                r_1 = [str(df.index[i])]
+                                r_1 = [str(df_copy.index[i])]
                                 r_j = []
-                                for j in df.columns:
-                                    r_j.append(df[j][i])
+                                for j in df_copy.columns:
+                                    r_j.append(df_copy[j][i])
                                 r_1.extend(r_j)
                                 r.append(r_1)
                         else:
-                            for i in range(0,len(df)):
-                                r_1 = [str(df.index[i])]
+                            for i in range(0,len(df_copy)):
+                                r_1 = [str(df_copy.index[i])]
                                 r_j = []
                                 for j in columndict:
-                                    r_j.append(df[j][i])
+                                    r_j.append(df_copy[j][i])
                                 r_1.extend(r_j)
                                 r.append(r_1)
                             
@@ -308,7 +310,7 @@ def get_monthly_dataframe_as_table(df, columnlist):
         print 'Code Error: Received non-list during get_monthly_dataframe_as_table function, aborting and returning empty list.'
     else:
         try:
-            df_dec = df[columnlist[1:]]
+            df_dec = df[columnlist[1:]].copy()
         except:
             print 'Code Error: Failed to load dataframe during get_monthly_dataframe_as_table function, aborting and returning empty list.'
         else:
@@ -324,7 +326,7 @@ def get_monthly_dataframe_as_table(df, columnlist):
                         df_dec_numbers = df_dec.columns.drop(['End Date'])
                     else:
                         df_dec_numbers = df_dec.columns
-                    df = df_dec[df_dec_numbers].applymap(lambda x: float(x)) #convert Decimal to float
+                    df = df_dec[df_dec_numbers].applymap(lambda x: float(x)).copy() #convert Decimal to float
                 except:
                     print 'Code Error: Failed to convert decimals to floats during get_monthly_dataframe_as_table function, aborting and returning empty list.'
                 else:
@@ -660,15 +662,14 @@ def convert_units_sum_meters(utility_type, units, nested_lists_meter_data, appor
                                 'Cost (esave)',
                                 'Cost (exp delta)',
                                 'Cost (exp)']
-                meter_data_lists = nested_lists_meter_data
-                meter_data_lists = [x for x in meter_data_lists if x[2] is not None]
+                meter_data_lists = copy.deepcopy([x for x in nested_lists_meter_data if x[2] is not None])
                 if len(meter_data_lists) > 0:
                     for i,meter in enumerate(meter_data_lists):
                         meter_df = meter[2]
                         if meter[0] != 'domestic water':
                             meter_df[column_list_convert] = meter_df[column_list_convert] * convert_units(meter[0],meter[1],utility_type,units)
-                            if apport_map is not None:
-                                meter_df[column_list_apportion] = meter_df[column_list_apportion] * meter[apport_map[0]][apport_map[1]]
+                        if apport_map is not None:
+                            meter_df[column_list_apportion] = meter_df[column_list_apportion] * meter[apport_map[0]][apport_map[1]]
                         meter_data_lists[i][2] = meter_df
                     df_sum = meter_data_lists[0][2]
                     for meter in meter_data_lists[1:]:
