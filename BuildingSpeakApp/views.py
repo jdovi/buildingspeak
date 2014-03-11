@@ -165,7 +165,7 @@ def account_detail(request, account_id):
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in acct_meters]
     for meter in acct_meter_data:
-        meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
+        if meter[2] is not None: meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
     
     tB = timezone.now()
     logger.debug('account_detail_B %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
@@ -175,11 +175,12 @@ def account_detail(request, account_id):
     for bldg in account.building_set.order_by('name'):
         bldg_meter_data = [m for m in acct_meter_data if bldg.id in m[6]]
 
-        month_curr = pd.Period(Monthling.objects.exclude(act_cost = Decimal(NaN))
-                                                .filter(monther__meter__building = bldg)
-                                                .latest('when')
-                                                .when,
-                               freq='M')                #latest month with non-NaN 'Cost (act)' data
+        monthling_set = Monthling.objects.exclude(act_cost = Decimal(NaN)).filter(monther__meter__building = bldg)
+        if monthling_set.count() == 0:
+            month_curr = pd.Period(timezone.now(), freq='M')
+        else:
+            month_curr = pd.Period(monthling_set.latest('when').when,
+                                   freq='M')                #latest month with non-NaN 'Cost (act)' data
         month_prev = month_curr - 1
         bldg_view_data_curr = bldg.get_building_view_meter_data(month_first = month_curr,
                                                                 month_last = month_curr,
@@ -311,7 +312,7 @@ def building_detail(request, account_id, building_id):
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in bldg_meters]
     for meter in bldg_meter_data:
-        meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
+        if meter[2] is not None: meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
 
     tB = timezone.now()
     logger.debug('building_detail_B %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
@@ -403,7 +404,7 @@ def space_detail(request, account_id, space_id):
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in space_meters]
     for meter in space_meter_data:
-        meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
+        if meter[2] is not None: meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
 
     tB = timezone.now()
     logger.debug('space_detail_B %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
