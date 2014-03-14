@@ -221,13 +221,13 @@ class GAPowerPandL(RateSchedule):
             if self.use_input_billing_demand and ('Billing Demand' not in df.columns): raise TypeError
             if self.use_input_billing_demand:
                 if Decimal(NaN) not in df['Billing Demand']:
-                    df['Calculated Billing Demand'] = df['Billing Demand']  #if using input, this is 1st choice
+                    df['Calculated Billing Demand'] = df['Billing Demand'].copy()  #if using input, this is 1st choice
                 else:
-                    df['Calculated Billing Demand'] = df['Peak Demand']     #if NaNs, then this is 2nd choice
+                    df['Calculated Billing Demand'] = df['Peak Demand'].copy()     #if NaNs, then this is 2nd choice
             else:
-                df = self.get_billing_demand_df(df = df, billx = billx)     #if not using input, must calculate it with historical data from billx
+                df = self.get_billing_demand_df(df = df.copy(), billx = billx)     #if not using input, must calculate it with historical data from billx
             if 'Calculated Billing Demand' not in df.columns: raise TypeError
-            df['Billing Demand'] = df['Calculated Billing Demand']
+            df['Billing Demand'] = df['Calculated Billing Demand'].copy()
 
             df['Billing Demand'] = df['Billing Demand'].apply(Decimal)
             df['Peak Demand'] = df['Peak Demand'].apply(Decimal)
@@ -376,18 +376,20 @@ class GAPowerPandL(RateSchedule):
             df['Calculated Billing Demand'] = Decimal(0.0)
             df = df.sort_index()
             billxdf = billx.get_monther_period_dataframe()
-            billxdf = billxdf.sort_index()
-            billxdf = billxdf[[not(i) for i in billxdf['Peak Demand (act)'].apply(decimal_isnan)]]
+            if billxdf is not None: billxdf = billxdf.sort_index()
+            combined_df = pd.concat([df, billxdf])
+            combined_df = combined_df[[not(i) for i in combined_df['Peak Demand'].apply(decimal_isnan)]]
+            combined_df = combined_df.sort_index()
             
-            df_window = billxdf[max(0,len(billxdf)-int(self.billing_demand_sliding_month_window)):]
+            df_window = combined_df[max(0,len(combined_df)-int(self.billing_demand_sliding_month_window)):]
             
             for i in range(0,len(df)):
-                summer_peaks = df_window['Peak Demand (act)'][[x.month in summer_months for x in df_window['End Date']]]
+                summer_peaks = df_window['Peak Demand'][[x.month in summer_months for x in df_window['End Date']]]
                 if len(summer_peaks)==0:
                     summer_max = 0
                 else:
                     summer_max = summer_peaks.max()
-                winter_peaks = df_window['Peak Demand (act)'][[x.month in winter_months for x in df_window['End Date']]]
+                winter_peaks = df_window['Peak Demand'][[x.month in winter_months for x in df_window['End Date']]]
                 if len(winter_peaks)==0:
                     winter_max = 0
                 else:
@@ -395,7 +397,7 @@ class GAPowerPandL(RateSchedule):
                 
                 if df['End Date'][i].month in summer_months: #might normally use df.index[i].month but GAPower uses meter read date
                     df['Calculated Billing Demand'][i:i+1] = max_with_NaNs([
-                            df['Peak Demand (act)'][i],
+                            df['Peak Demand'][i],
                             self.summer_summer_threshold * summer_max,
                             self.summer_winter_threshold * winter_max,
                             self.contract_minimum_demand,

@@ -697,16 +697,16 @@ class Meter(models.Model):
                                 
                                 #ignore data that Exists but not(Overwrite)
                                 #load data that not(Exists)
-                                readbd_a = readbd[readbd['Exists']==0]
+                                readbd_a = readbd[readbd['Exists']==0].copy()
                                 if len(readbd_a)>0:
                                     new_consumption_model_df = new_peak_demand_model_df = None
                                     if (create_models_if_nonexistent and 
                                         self.monther_set.get(name='BILLx').consumption_model is None and
                                         readbd_a['Consumption (act)'].apply(float).max() is not NaN):
-                                            new_consumption_model_df = readbd_a
+                                            new_consumption_model_df = readbd_a.copy()
                                             new_consumption_model = MeterConsumptionModel(
-                                                first_month = readbd_a.index[0].strftime('%m/%Y'),
-                                                last_month = readbd_a.index[-1].strftime('%m/%Y'),
+                                                first_month = new_consumption_model_df.index[0].strftime('%m/%Y'),
+                                                last_month = new_consumption_model_df.index[-1].strftime('%m/%Y'),
                                                 prediction_alpha = 0.10,
                                                 meter = self)
                                             new_consumption_model.save()
@@ -717,10 +717,10 @@ class Meter(models.Model):
                                     if (create_models_if_nonexistent and 
                                         self.monther_set.get(name='BILLx').peak_demand_model is None and
                                         readbd_a['Peak Demand (act)'].apply(float).max() is not NaN):
-                                            new_peak_demand_model_df = readbd_a
+                                            new_peak_demand_model_df = readbd_a.copy()
                                             new_peak_demand_model = MeterPeakDemandModel(
-                                                first_month = readbd_a.index[0].strftime('%m/%Y'),
-                                                last_month = readbd_a.index[-1].strftime('%m/%Y'),
+                                                first_month = new_peak_demand_model_df.index[0].strftime('%m/%Y'),
+                                                last_month = new_peak_demand_model_df.index[-1].strftime('%m/%Y'),
                                                 prediction_alpha = 0.10,
                                                 meter = self)
                                             new_peak_demand_model.save()
@@ -729,15 +729,15 @@ class Meter(models.Model):
                                             billx.save()
                                             track_runs, track_Tccp, track_Thcp, best_run_results = new_peak_demand_model.set_best_model(df_new_meter = new_peak_demand_model_df)
                                     
-                                    readbd_a = self.bill_data_calc_dd(df = readbd_a)
-                                    readbd_a = self.bill_data_calc_baseline(df = readbd_a, 
+                                    readbd_a = self.bill_data_calc_dd(df = readbd_a.copy())
+                                    readbd_a = self.bill_data_calc_baseline(df = readbd_a.copy(), 
                                                                             new_consumption_model_df = new_consumption_model_df,
                                                                             new_peak_demand_model_df = new_peak_demand_model_df)
-                                    readbd_a = self.bill_data_calc_savings(df = readbd_a)
-                                    readbd_a = self.bill_data_calc_dependents(df = readbd_a)
-                                    readbd_a = self.bill_data_calc_kbtu(df = readbd_a)
-                                    readbd_a = self.bill_data_calc_costs(df = readbd_a)
-                                    readbd_a = self.monther_set.get(name='BILLx').create_missing_required_columns(df = readbd_a)
+                                    readbd_a = self.bill_data_calc_savings(df = readbd_a.copy())
+                                    readbd_a = self.bill_data_calc_dependents(df = readbd_a.copy())
+                                    readbd_a = self.bill_data_calc_kbtu(df = readbd_a.copy())
+                                    readbd_a = self.bill_data_calc_costs(df = readbd_a.copy())
+                                    readbd_a = self.monther_set.get(name='BILLx').create_missing_required_columns(df = readbd_a.copy())
                                     success_a = self.monther_set.get(name='BILLx').load_monther_period_dataframe(readbd_a)
                                     if not success_a: raise TypeError
                             except:
@@ -774,15 +774,15 @@ class Meter(models.Model):
                                         readbd['IsForecasted'] = readbd.index
                                         readbd['IsForecasted'] = readbd['IsForecasted'].apply(lambda lamvar: lamvar in storedbd_is_forecasted.index)
                                         
-                                        readbd_b = readbd[(readbd['Exists']==1) & (readbd['Overwrite']==1 | readbd['IsForecasted'])]
+                                        readbd_b = readbd[(readbd['Exists']==1) & (readbd['Overwrite']==1 | readbd['IsForecasted'])].copy()
                                         if len(readbd_b)>0:
-                                            readbd_b = self.bill_data_calc_dd(df = readbd_b)
-                                            readbd_b = self.bill_data_calc_baseline(df = readbd_b)
-                                            readbd_b = self.bill_data_calc_savings(df = readbd_b)
-                                            readbd_b = self.bill_data_calc_dependents(df = readbd_b)
-                                            readbd_b = self.bill_data_calc_kbtu(df = readbd_b)
-                                            readbd_b = self.monther_set.get(name='BILLx').create_missing_required_columns(df = readbd_b)
-                                            readbd_b = self.bill_data_calc_costs(df = readbd_b)
+                                            readbd_b = self.bill_data_calc_dd(df = readbd_b.copy())
+                                            readbd_b = self.bill_data_calc_baseline(df = readbd_b.copy())
+                                            readbd_b = self.bill_data_calc_savings(df = readbd_b.copy())
+                                            readbd_b = self.bill_data_calc_dependents(df = readbd_b.copy())
+                                            readbd_b = self.bill_data_calc_kbtu(df = readbd_b.copy())
+                                            readbd_b = self.monther_set.get(name='BILLx').create_missing_required_columns(df = readbd_b.copy())
+                                            readbd_b = self.bill_data_calc_costs(df = readbd_b.copy())
                                             for i in range(0,len(readbd_b)):
                                                 try:
                                                     month_i = None #setting here to avoid error in Except block
@@ -883,7 +883,7 @@ class Meter(models.Model):
                                                     storedbd_with_newly_added_months['Consumption (act) is NaN'][i],
                                                     storedbd_with_newly_added_months['Peak Demand (act) is NaN'][i]] for i in range(0,len(storedbd_with_newly_added_months))]
                                             storedbd_with_newly_added_months['IsForecasted'] = [i[0] and i[1] and i[2] for i in temp]
-                                            storedbd_with_newly_added_months_is_forecasted = storedbd_with_newly_added_months[storedbd_with_newly_added_months['IsForecasted']]
+                                            storedbd_with_newly_added_months_is_forecasted = storedbd_with_newly_added_months[storedbd_with_newly_added_months['IsForecasted']].copy()
                                             for i in range(0,len(storedbd_with_newly_added_months_is_forecasted)):
                                                 try:
                                                     month_i = None #setting here to avoid error in Except block
@@ -916,7 +916,7 @@ class Meter(models.Model):
                                     else:
                                         try:
                                             if storedbd_with_newly_added_months is not None and len(storedbd_with_newly_added_months)>=1:
-                                                storedbd_with_updates_act = storedbd_with_newly_added_months[storedbd_with_newly_added_months['IsForecasted'].apply(lambda ff: not(ff))]
+                                                storedbd_with_updates_act = storedbd_with_newly_added_months[storedbd_with_newly_added_months['IsForecasted'].apply(lambda ff: not(ff))].copy()
                                             if storedbd_with_updates_act is not None and len(storedbd_with_updates_act)>=1:
                                                 storedbd_with_updates_act = storedbd_with_updates_act.sort_index()
                                                 last_day = storedbd_with_updates_act['End Date'][-1]
@@ -1470,15 +1470,19 @@ class Meter(models.Model):
             try:
                 df.rename(columns={'Consumption (base)': 'Consumption',
                                    'Peak Demand (base)': 'Peak Demand',
-                                   'Billing Demand (base)': 'Billing Demand'},inplace=True)
+                                   'Billing Demand (base)': 'Billing Demand',
+                                   'Cost (base)': 'Cost'},inplace=True)
                 df['Cost (base)'] = self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost']
+                df = df.drop(['Cost'],1)
                 df.rename(columns={'Consumption': 'Consumption (base)',
                                    'Peak Demand': 'Peak Demand (base)',
                                    'Billing Demand': 'Billing Demand (base)'},inplace=True)
                 df.rename(columns={'Consumption (exp)': 'Consumption',
                                    'Peak Demand (exp)': 'Peak Demand',
-                                   'Billing Demand (exp)': 'Billing Demand'},inplace=True)
+                                   'Billing Demand (exp)': 'Billing Demand',
+                                   'Cost (exp)': 'Cost'},inplace=True)
                 df['Cost (exp)'] = self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost']
+                df = df.drop(['Cost'],1)
                 df.rename(columns={'Consumption': 'Consumption (exp)',
                                    'Peak Demand': 'Peak Demand (exp)',
                                    'Billing Demand': 'Billing Demand (exp)'},inplace=True)
@@ -1490,12 +1494,16 @@ class Meter(models.Model):
                 df['Consumption'] = df['Consumption (base)'] - df['Consumption (base delta)']
                 df['Peak Demand'] = df['Peak Demand (base)'] - df['Peak Demand (base delta)']
                 df['Billing Demand'] = df['Peak Demand']
+                df['Cost'] = df['Cost (base delta)'].copy() #some universal rate schedules use historical cost and need an incoming Cost column
+                
                 df['Cost (base delta)'] = (df['Cost (base)'] -
                                             self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
                 
                 df['Consumption'] = df['Consumption (esave)'] - df['Consumption (esave delta)']
                 df['Peak Demand'] = df['Peak Demand (esave)'] - df['Peak Demand (esave delta)']
                 df['Billing Demand'] = df['Peak Demand']
+                df['Cost'] = df['Cost (esave delta)'].copy() #some universal rate schedules use historical cost and need an incoming Cost column
+
                 df['Cost (esave delta)'] = (df['Cost (esave)'] -
                                             self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
                 df['Cost (esave delta)'] = df['Cost (esave delta)'].apply(lambda x: cap_negatives_with_NaN(x))

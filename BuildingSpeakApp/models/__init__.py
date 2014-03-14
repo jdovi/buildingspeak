@@ -26,6 +26,7 @@ from models_RateSchedules import KnowsChild, RateSchedule, RateScheduleRider
 from models_RatesGeorgiaPower import GAPowerPandL, GAPowerRider
 from models_RatesInfiniteEnergy import InfiniteEnergyGAGas
 from models_RatesCityofAtlantaDWM import CityOfATLWWW
+from models_RatesUniversals import GeneralConsumption
 from models_Reader_ing import Reader, Reading
 from models_schedules import UnitSchedule, OperatingSchedule
 from models_Utility import Utility
