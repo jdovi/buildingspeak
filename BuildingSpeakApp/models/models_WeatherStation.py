@@ -234,6 +234,11 @@ class WeatherStation(models.Model):
                 self.messages.add(m)
                 print m
             else:
+                #removing the 11:11:11 added to the month start/end dates to align with
+                #weather data points stored on the hour mark
+                if df['Start Date'][0].hour == df['Start Date'][0].minute == df['Start Date'][0].second == 11:
+                    df['Start Date'] = df['Start Date'] - timedelta(hours=11,minutes=11,seconds=11)
+                    df['End Date'] = df['End Date'] - timedelta(hours=11,minutes=11,seconds=11)
                 for i in range(0,len(df)):
                     try:
                         df['HDD'][i:i+1] = self.get_HDD(start_date = df['Start Date'][i],

@@ -71,8 +71,11 @@ class GeneralConsumption(RateSchedule):
                 
                 avg_rates = {}
                 for i in range(1,13):
-                    avg_rates[i] = (combined_df['Cost'][[m.month==i for m in combined_df.index]].sum() /
-                                    combined_df['Consumption'][[m.month==i for m in combined_df.index]].sum() )
+                    avg_rates[i] = (combined_df['Cost (act)'][[m.month==i for m in combined_df.index]].sum() /
+                                    combined_df['Consumption (act)'][[m.month==i for m in combined_df.index]].sum() )
+                    #actuals used to calculate rates, but generic Consumption used elsewhere as it will
+                    #be various versions (base, exp, etc.) as Meter cycles through them to calculate
+                    #costs on all of them
                 
                 df['month number'] = df.index.map(lambda i: i.month)
                 df['avg rate'] = df['month number'].apply(lambda i: avg_rates[i])
@@ -85,10 +88,30 @@ class GeneralConsumption(RateSchedule):
                 if billxdf is not None: billxdf = billxdf.sort_index()
                 combined_df = pd.concat([df, billxdf])
                 combined_df = combined_df.sort_index()
-                combined_df = combined_df[max(0,len(combined_df)-self.moving_average_window_length):]
-                if len(combined_df) < 1: raise ValueError
                 
-                df['Calculated Cost'] = df['Consumption'] * combined_df['Cost'].sum() / combined_df['Consumption'].sum()
+                #need to remove forecasted months first in order to use Consumption(act) and Cost(act)
+                combined_df['Cost (act) is NaN'] = combined_df['Cost (act)'].apply(decimal_isnan)
+                combined_df['Consumption (act) is NaN'] = combined_df['Consumption (act)'].apply(decimal_isnan)
+                temp = [[combined_df['Cost (act) is NaN'][i],
+                         combined_df['Consumption (act) is NaN'][i]] for i in range(0,len(combined_df))]
+                combined_df['IsNotForecasted'] = [not(i[0] and i[1]) for i in temp]
+                combined_df = combined_df[combined_df['IsNotForecasted']]
+
+                combined_df = combined_df[max(0,len(combined_df)-self.moving_average_window_length):]
+                if len(combined_df) < 1:
+                    m = Message(when=timezone.now(),
+                            message_type='Code Warning',
+                            subject='Calculation failed.',
+                            comment='GeneralConsumption %s get_cost_df found no data in moving average window, costs set to NaNs.' % self.id)
+                    m.save()
+                    self.messages.add(m)
+                    print m
+                    df['Calculated Cost'] = Decimal(NaN)
+                else:
+                    df['Calculated Cost'] = df['Consumption'] * combined_df['Cost (act)'].sum() / combined_df['Consumption (act)'].sum()
+                    #actuals used to calculate rates, but generic Consumption used elsewhere as it will
+                    #be various versions (base, exp, etc.) as Meter cycles through them to calculate
+                    #costs on all of them
                 
         except:
             m = Message(when=timezone.now(),

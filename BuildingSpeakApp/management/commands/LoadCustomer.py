@@ -97,7 +97,7 @@ class Command(BaseCommand):
         
     ###---Buildings
         try:
-            ws = WeatherStation.objects.get(name = 'Cortland, NY')
+            ws = WeatherStation.objects.get(name = 'ATL - downtown west')
             
             bldg1 = Building(
                 name = 'Main Building',
@@ -181,7 +181,7 @@ class Command(BaseCommand):
             
             space2 = Space(
                 name = 'Repair Shop',
-                building = bldg1,
+                building = bldg2,
                 square_footage = Decimal(4401),
                 max_occupancy = None,
                 space_type = 'Automotive Facility',

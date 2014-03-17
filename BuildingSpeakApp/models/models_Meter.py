@@ -939,38 +939,49 @@ class Meter(models.Model):
                                                 forecast_df['Cost (act)'] = Decimal(NaN)
                                                 
                                                 if self.monther_set.get(name='BILLx').consumption_model is None:
-                                                    raise ValueError
-                                                elif self.monther_set.get(name='BILLx').consumption_model.Tccp is None:
-                                                    raise ValueError
-                                                elif self.monther_set.get(name='BILLx').consumption_model.Thcp is None:
-                                                    raise ValueError
-                                                if self.monther_set.get(name='BILLx').peak_demand_model is None:
-                                                    raise ValueError
-                                                elif self.monther_set.get(name='BILLx').peak_demand_model.Tccp is None:
-                                                    raise ValueError
-                                                elif self.monther_set.get(name='BILLx').peak_demand_model.Thcp is None:
-                                                    raise ValueError
-    
-                                                dd_cons = self.weather_station.get_average_monthly_degree_days(Tccp = self.monther_set.get(name='BILLx').consumption_model.Tccp,
-                                                                                                               Thcp = self.monther_set.get(name='BILLx').consumption_model.Thcp)
+                                                    Tccp_cons = 65.0
+                                                    Thcp_cons = 65.0
+                                                else:
+                                                    if self.monther_set.get(name='BILLx').consumption_model.Tccp is None:
+                                                        Tccp_cons = 65.0
+                                                    else:
+                                                        Tccp_cons = self.monther_set.get(name='BILLx').consumption_model.Tccp
+                                                    if self.monther_set.get(name='BILLx').consumption_model.Thcp is None:
+                                                        Thcp_cons = 65.0
+                                                    else:
+                                                        Thcp_cons = self.monther_set.get(name='BILLx').consumption_model.Thcp
+                                                dd_cons = self.weather_station.get_average_monthly_degree_days(Tccp = Tccp_cons, Thcp = Thcp_cons)
+                                                
                                                 forecast_df['CDD (consumption)'] = forecast_df.index
                                                 forecast_df['CDD (consumption)'] = forecast_df['CDD (consumption)'].apply(lambda ii: dd_cons['CDD'][ii.strftime('%b')])
                                                 forecast_df['HDD (consumption)'] = forecast_df.index
                                                 forecast_df['HDD (consumption)'] = forecast_df['HDD (consumption)'].apply(lambda ii: dd_cons['HDD'][ii.strftime('%b')])
                                                 
-                                                dd_pd = self.weather_station.get_average_monthly_degree_days(Tccp = self.monther_set.get(name='BILLx').peak_demand_model.Tccp,
-                                                                                                             Thcp = self.monther_set.get(name='BILLx').peak_demand_model.Thcp)
+                                                if self.monther_set.get(name='BILLx').peak_demand_model is None:
+                                                    Tccp_pd = 65.0
+                                                    Thcp_pd = 65.0
+                                                else:
+                                                    if self.monther_set.get(name='BILLx').peak_demand_model.Tccp is None:
+                                                        Tccp_pd = 65.0
+                                                    else:
+                                                        Tccp_pd = self.monther_set.get(name='BILLx').peak_demand_model.Tccp
+                                                    if self.monther_set.get(name='BILLx').peak_demand_model.Thcp is None:
+                                                        Thcp_pd = 65.0
+                                                    else:
+                                                        Thcp_pd = self.monther_set.get(name='BILLx').peak_demand_model.Thcp
+                                                dd_pd = self.weather_station.get_average_monthly_degree_days(Tccp = Tccp_pd, Thcp = Thcp_pd)
+                                                
                                                 forecast_df['CDD (peak demand)'] = forecast_df.index
                                                 forecast_df['CDD (peak demand)'] = forecast_df['CDD (peak demand)'].apply(lambda ii: dd_pd['CDD'][ii.strftime('%b')])
                                                 forecast_df['HDD (peak demand)'] = forecast_df.index
                                                 forecast_df['HDD (peak demand)'] = forecast_df['HDD (peak demand)'].apply(lambda ii: dd_pd['HDD'][ii.strftime('%b')])
                                                 
-                                                forecast_df = self.bill_data_calc_baseline(df = forecast_df)
-                                                forecast_df = self.bill_data_calc_savings(df = forecast_df)
-                                                forecast_df = self.bill_data_calc_dependents(df = forecast_df)
-                                                forecast_df = self.bill_data_calc_kbtu(df = forecast_df)
-                                                forecast_df = self.monther_set.get(name='BILLx').create_missing_required_columns(df = forecast_df)
-                                                forecast_df = self.bill_data_calc_costs(df = forecast_df)
+                                                forecast_df = self.bill_data_calc_baseline(df = forecast_df.copy())
+                                                forecast_df = self.bill_data_calc_savings(df = forecast_df.copy())
+                                                forecast_df = self.bill_data_calc_dependents(df = forecast_df.copy())
+                                                forecast_df = self.bill_data_calc_kbtu(df = forecast_df.copy())
+                                                forecast_df = self.monther_set.get(name='BILLx').create_missing_required_columns(df = forecast_df.copy())
+                                                forecast_df = self.bill_data_calc_costs(df = forecast_df.copy())
                                                 
                                                 success_d = self.monther_set.get(name='BILLx').load_monther_period_dataframe(forecast_df)
                                                 if not success_d: raise TypeError
@@ -1458,6 +1469,7 @@ class Meter(models.Model):
         t0 = timezone.now()
         try:
             check = (self.rate_schedule is None)
+            if check: raise ValueError
         except:
             m = Message(when=timezone.now(),
                     message_type='Code Warning',
@@ -1468,49 +1480,99 @@ class Meter(models.Model):
             print m
         else:
             try:
+                ##---base = CostFunc(Consumption(base))
+                if 'Cost (base)' not in df.columns: df['Cost (base)'] = Decimal(NaN)
                 df.rename(columns={'Consumption (base)': 'Consumption',
                                    'Peak Demand (base)': 'Peak Demand',
                                    'Billing Demand (base)': 'Billing Demand',
                                    'Cost (base)': 'Cost'},inplace=True)
-                df['Cost (base)'] = self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost']
-                df = df.drop(['Cost'],1)
-                df.rename(columns={'Consumption': 'Consumption (base)',
-                                   'Peak Demand': 'Peak Demand (base)',
-                                   'Billing Demand': 'Billing Demand (base)'},inplace=True)
+                temp_df = self.rate_schedule.as_child().get_cost_df(df=df.copy(),billx=self.monther_set.get(name='BILLx'))
+                if 'Calculated Cost' not in temp_df.columns:
+                    df.rename(columns={'Consumption': 'Consumption (base)',
+                                       'Peak Demand': 'Peak Demand (base)',
+                                       'Billing Demand': 'Billing Demand (base)',
+                                       'Cost': 'Cost (base)'},inplace=True)
+                else:
+                    df['Cost (base)'] = temp_df['Calculated Cost'].copy()
+                    df = df.drop(['Cost'],1)
+                    df.rename(columns={'Consumption': 'Consumption (base)',
+                                       'Peak Demand': 'Peak Demand (base)',
+                                       'Billing Demand': 'Billing Demand (base)'},inplace=True)
+                
+                ##---exp = CostFunc(Consumption(exp))
+                if 'Cost (exp)' not in df.columns: df['Cost (exp)'] = Decimal(NaN)
                 df.rename(columns={'Consumption (exp)': 'Consumption',
                                    'Peak Demand (exp)': 'Peak Demand',
                                    'Billing Demand (exp)': 'Billing Demand',
                                    'Cost (exp)': 'Cost'},inplace=True)
-                df['Cost (exp)'] = self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost']
-                df = df.drop(['Cost'],1)
-                df.rename(columns={'Consumption': 'Consumption (exp)',
-                                   'Peak Demand': 'Peak Demand (exp)',
-                                   'Billing Demand': 'Billing Demand (exp)'},inplace=True)
+                temp_df = self.rate_schedule.as_child().get_cost_df(df=df.copy(),billx=self.monther_set.get(name='BILLx'))
+                if 'Calculated Cost' not in temp_df.columns:
+                    df.rename(columns={'Consumption': 'Consumption (exp)',
+                                       'Peak Demand': 'Peak Demand (exp)',
+                                       'Billing Demand': 'Billing Demand (exp)',
+                                       'Cost': 'Cost (exp)'},inplace=True)
+                else:
+                    df['Cost (exp)'] = temp_df['Calculated Cost'].copy()
+                    df = df.drop(['Cost'],1)
+                    df.rename(columns={'Consumption': 'Consumption (exp)',
+                                       'Peak Demand': 'Peak Demand (exp)',
+                                       'Billing Demand': 'Billing Demand (exp)'},inplace=True)
+                
+                ##---esave = CostFunc(Consumption(base)) - CostFunc(Consumption(exp))
+                ##---asave = CostFunc(Consumption(base)) - CostFunc(Consumption(act))
                 df['Cost (esave)'] = df['Cost (base)'] - df['Cost (exp)']
                 df['Cost (asave)'] = df['Cost (base)'] - df['Cost (act)']
                 df['Cost (esave)'] = df['Cost (esave)'].apply(lambda x: cap_negatives_with_NaN(x))
                 df['Cost (asave)'] = df['Cost (asave)'].apply(lambda x: cap_negatives_with_NaN(x))
                 
+                ##---base delta = CostFunc(Consumption(base)) - CostFunc(Consumption(base)-Consumption(base delta))
+                ##---the cost must be based on a full consumption and not a delta amount, due to possible price tiering
                 df['Consumption'] = df['Consumption (base)'] - df['Consumption (base delta)']
                 df['Peak Demand'] = df['Peak Demand (base)'] - df['Peak Demand (base delta)']
-                df['Billing Demand'] = df['Peak Demand']
-                df['Cost'] = df['Cost (base delta)'].copy() #some universal rate schedules use historical cost and need an incoming Cost column
+                df['Billing Demand'] = df['Peak Demand'].copy()
+                if 'Cost (base delta)' not in df.columns: df['Cost (base delta)'] = Decimal(NaN)
+                df['Cost'] = df['Cost (base delta)'].copy()
+                temp_df = self.rate_schedule.as_child().get_cost_df(df=df.copy(),billx=self.monther_set.get(name='BILLx'))
+                if 'Calculated Cost' not in temp_df.columns:
+                    df['Cost (base delta)'] = Decimal(NaN)
+                else:
+                    df['Cost (base delta)'] = (df['Cost (base)'] - temp_df['Calculated Cost'])
+                df['Cost (base delta)'] = df['Cost (base delta)'].apply(lambda x: cap_negatives_with_NaN(x))
                 
-                df['Cost (base delta)'] = (df['Cost (base)'] -
-                                            self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
-                
-                df['Consumption'] = df['Consumption (esave)'] - df['Consumption (esave delta)']
-                df['Peak Demand'] = df['Peak Demand (esave)'] - df['Peak Demand (esave delta)']
-                df['Billing Demand'] = df['Peak Demand']
-                df['Cost'] = df['Cost (esave delta)'].copy() #some universal rate schedules use historical cost and need an incoming Cost column
-
-                df['Cost (esave delta)'] = (df['Cost (esave)'] -
-                                            self.rate_schedule.as_child().get_cost_df(df=df,billx=self.monther_set.get(name='BILLx'))['Calculated Cost'])
+                ##---esave delta = CostFunc(Consumption(base)) - CostFunc(Consumption(base)-Consumption(esave delta))
+                ##---the cost must be based on a full consumption and not a delta amount, due to possible price tiering
+                ##---here, base or exp could probably be used...somewhat arbitrary choice, so the larger was chosen
+                df['Consumption'] = df['Consumption (base)'] - df['Consumption (esave delta)']
+                df['Peak Demand'] = df['Peak Demand (base)'] - df['Peak Demand (esave delta)']
+                df['Billing Demand'] = df['Peak Demand'].copy()
+                if 'Cost (esave delta)' not in df.columns: df['Cost (esave delta)'] = Decimal(NaN)
+                df['Cost'] = df['Cost (esave delta)'].copy()
+                temp_df = self.rate_schedule.as_child().get_cost_df(df=df.copy(),billx=self.monther_set.get(name='BILLx'))
+                if 'Calculated Cost' not in temp_df.columns:
+                    df['Cost (esave delta)'] = Decimal(NaN)
+                else:
+                    df['Cost (esave delta)'] = (df['Cost (base)'] - temp_df['Calculated Cost'])
                 df['Cost (esave delta)'] = df['Cost (esave delta)'].apply(lambda x: cap_negatives_with_NaN(x))
                 
-                df = df.drop(['Consumption', 'Peak Demand', 'Billing Demand'], axis = 1)
+                ##---exp delta = CostFunc(Consumption(exp)) - CostFunc(Consumption(exp)-Consumption(exp delta))
+                ##---the cost must be based on a full consumption and not a delta amount, due to possible price tiering
+                df['Consumption'] = df['Consumption (exp)'] - df['Consumption (exp delta)']
+                df['Peak Demand'] = df['Peak Demand (exp)'] - df['Peak Demand (exp delta)']
+                df['Billing Demand'] = df['Peak Demand'].copy()
+                if 'Cost (exp delta)' not in df.columns: df['Cost (exp delta)'] = Decimal(NaN)
+                df['Cost'] = df['Cost (exp delta)'].copy()
+                temp_df = self.rate_schedule.as_child().get_cost_df(df=df.copy(),billx=self.monther_set.get(name='BILLx'))
+                if 'Calculated Cost' not in temp_df.columns:
+                    df['Cost (exp delta)'] = Decimal(NaN)
+                else:
+                    df['Cost (exp delta)'] = (df['Cost (exp)'] - temp_df['Calculated Cost'])
+                df['Cost (exp delta)'] = df['Cost (exp delta)'].apply(lambda x: cap_negatives_with_NaN(x))
                 
-                df['Cost (exp delta)'] = df['Cost (base delta)'] - df['Cost (esave delta)']
+                if 'Consumption' in df.columns: df = df.drop(['Consumption'], axis = 1)
+                if 'Peak Demand' in df.columns: df = df.drop(['Peak Demand'], axis = 1)
+                if 'Billing Demand' in df.columns: df = df.drop(['Billing Demand'], axis = 1)
+                if 'Cost' in df.columns: df = df.drop(['Cost'], axis = 1)
+                
             except:
                 m = Message(when=timezone.now(),
                         message_type='Code Warning',
