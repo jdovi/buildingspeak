@@ -627,7 +627,7 @@ class WeatherStation(models.Model):
         if len(dplist)<1:
             result = 'no weather data'
         else:
-            datapoint = self.weatherdatapoint_set.order_by('time')[-1]
+            datapoint = dplist.latest('time')
             result = '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_weatherdatapoint_change',args=(datapoint.id,)), str(datapoint.time))
         return result
     newest_data_point_for_admin.allow_tags = True
@@ -638,7 +638,7 @@ class WeatherStation(models.Model):
         if len(dplist)<1:
             result = 'no weather data'
         else:
-            datapoint = self.weatherdatapoint_set.order_by('time')[0]
+            datapoint = dplist[0]
             result = '<a href="%s">%s</a>' % (urlresolvers.reverse('admin:BuildingSpeakApp_weatherdatapoint_change',args=(datapoint.id,)), str(datapoint.time))
         return result
     oldest_data_point_for_admin.allow_tags = True
