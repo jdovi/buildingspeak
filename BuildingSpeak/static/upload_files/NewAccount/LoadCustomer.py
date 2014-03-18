@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
 
-import pdb
 from pytz import UTC
 from decimal import Decimal
 from datetime import datetime
@@ -14,7 +13,7 @@ from BuildingSpeakApp.models import UserProfile, Account, Building, Space, Meter
 from BuildingSpeakApp.models import SpaceMeterApportionment, BuildingMeterApportionment
 from BuildingSpeakApp.models import EfficiencyMeasure, EMMeterApportionment, EMEquipmentApportionment
 from BuildingSpeakApp.models import WeatherStation, Utility
-from BuildingSpeakApp.models import GeneralConsumption
+from BuildingSpeakApp.models import GAPowerPandL, InfiniteEnergyGAGas, CityOfATLWWW
 from BuildingSpeakApp.models import set_file_field
 
 
@@ -102,9 +101,9 @@ class Command(BaseCommand):
             
             bldg1 = Building(
                 name = 'Main Building',
-                building_type = 'Automotive Facility',
-                EIA_type = 'Mercantile - Retail (Other Than Mall)',
-                ESPM_type = 'Retail Store',
+                building_type = 'Multi-Purpose',
+                EIA_type = 'Other',
+                ESPM_type = 'Other',
                 account = acct1,
                 weather_station = ws,
                 street_address = '263 Tompkins St',
@@ -131,9 +130,9 @@ class Command(BaseCommand):
             
             bldg2 = Building(
                 name = 'Body Shop',
-                building_type = 'Automotive Facility',
-                EIA_type = 'Warehouse and Storage',
-                ESPM_type = 'Warehouse (Refrigerated or Unrefrigerated)',
+                building_type = 'Multi-Purpose',
+                EIA_type = 'Other',
+                ESPM_type = 'Other',
                 account = acct1,
                 weather_station = ws,
                 street_address = '263 Tompkins St',
@@ -165,13 +164,13 @@ class Command(BaseCommand):
     ###---Spaces
         try:
             space1 = Space(
-                name = 'Showroom',
+                name = 'Showroon',
                 building = bldg1,
                 square_footage = Decimal(4000),
                 max_occupancy = None,
-                space_type = 'Automotive Facility',
-                EIA_type = 'Mercantile - Retail (Other Than Mall)',
-                ESPM_type = 'Retail Store',
+                space_type = 'Dormitory',
+                EIA_type = 'Lodging',
+                ESPM_type = 'Dormitory / Residence Hall',
                 )
             space1.save()
             #post-creation actions:
@@ -182,12 +181,12 @@ class Command(BaseCommand):
             
             space2 = Space(
                 name = 'Repair Shop',
-                building = bldg2,
+                building = bldg1,
                 square_footage = Decimal(4401),
                 max_occupancy = None,
-                space_type = 'Automotive Facility',
-                EIA_type = 'Warehouse and Storage',
-                ESPM_type = 'Warehouse (Refrigerated or Unrefrigerated)',
+                space_type = 'Dining: Family',
+                EIA_type = 'Food Service',
+                ESPM_type = 'Other',
                 )
             space2.save()
             #post-creation actions:
@@ -203,32 +202,13 @@ class Command(BaseCommand):
             
     ###---Meters
         try:
-            #pdb.set_trace()
-            u1 = Utility.objects.get(name = 'National Grid')
-            u2 = Utility.objects.get(name = 'Hess Energy Marketing')
-            u3 = Utility.objects.get(name = 'NYSEG')
-            u4 = Utility.objects.get(name = 'NY Water')
+            gpc = Utility.objects.get(name = 'Georgia Power Company')
+            infe = Utility.objects.get(name = 'Infinite Energy')
+            atlw = Utility.objects.get(name = 'City of Atlanta, Dept. of Watershed Mgmt.')
             
-            r1 = GeneralConsumption(name = 'National Grid - Dovi Motors',
-                                    utility = u1,
-                                    rate_type = 'moving average',
-                                    moving_average_window_length = 6)
-            r1.save()
-            r2 = GeneralConsumption(name = 'Hess Energy Marketing - Dovi Motors',
-                                    utility = u2,
-                                    rate_type = 'moving average',
-                                    moving_average_window_length = 6)
-            r2.save()
-            r3 = GeneralConsumption(name = 'NYSEG - Dovi Motors',
-                                    utility = u3,
-                                    rate_type = 'moving average',
-                                    moving_average_window_length = 6)
-            r3.save()
-            r4 = GeneralConsumption(name = 'NY Water - Dovi Motors',
-                                    utility = u4,
-                                    rate_type = 'moving average',
-                                    moving_average_window_length = 6)
-            r4.save()
+            atlwww = CityOfATLWWW.objects.get(name = 'Water and Wastewater 2012')
+            infebizgas = InfiniteEnergyGAGas.objects.get(name = 'Fixed Business Rate')
+            gpc_plm8_sec_in = GAPowerPandL.objects.get(name = 'GPC-PLM-8-secondary-inside')
             
             meter1 = Meter(
                 name = 'Main Building (electric)',
@@ -237,8 +217,8 @@ class Command(BaseCommand):
                 serves = 'all of main building',
                 units = 'kW,kWh',
                 weather_station = ws,
-                utility = u2,
-                rate_schedule = r2,
+                utility = gpc,
+                rate_schedule = gpc_plm8_sec_in,
                 account = acct1,
                 make = 'unknown',
                 model = 'unknown',
@@ -286,8 +266,8 @@ class Command(BaseCommand):
                 serves = 'Body Shop',
                 units = 'kW,kWh',
                 weather_station = ws,
-                utility = u2,
-                rate_schedule = r2,
+                utility = gpc,
+                rate_schedule = gpc_plm8_sec_in,
                 account = acct1,
                 make = 'unknown',
                 model = 'unknown',
@@ -322,14 +302,14 @@ class Command(BaseCommand):
             
             
             meter3 = Meter(
-                name = 'Main Building (natural gas)',
+                name = 'Main Bilding (natural gas)',
                 utility_type = 'natural gas',
                 location = 'unknown',
                 serves = 'Main bldg heating and domestic hot water',
                 units = 'ccf/h,ccf',
                 weather_station = ws,
-                utility = u3,
-                rate_schedule = r3,
+                utility = infe,
+                rate_schedule = infebizgas,
                 account = acct1,
                 make = 'unknown',
                 model = 'unknown',
@@ -377,8 +357,8 @@ class Command(BaseCommand):
                 serves = 'Body Shop heating and domestic hot water',
                 units = 'ccf/h,ccf',
                 weather_station = ws,
-                utility = u3,
-                rate_schedule = r3,
+                utility = infe,
+                rate_schedule = infebizgas,
                 account = acct1,
                 make = 'unknown',
                 model = 'unknown',
@@ -418,8 +398,8 @@ class Command(BaseCommand):
                 serves = 'unknown',
                 units = 'gpm,gal',
                 weather_station = ws,
-                utility = u4,
-                rate_schedule = r4,
+                utility = atlw,
+                rate_schedule = atlwww,
                 account = acct1,
                 make = 'unknown',
                 model = 'unknown',
@@ -467,8 +447,8 @@ class Command(BaseCommand):
                 serves = 'unknown',
                 units = 'gpm,gal',
                 weather_station = ws,
-                utility = u4,
-                rate_schedule = r4,
+                utility = atlw,
+                rate_schedule = atlwww,
                 account = acct1,
                 make = 'unknown',
                 model = 'unknown',

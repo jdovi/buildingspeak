@@ -66,6 +66,13 @@ class Command(BaseCommand):
             util3.__setattr__('image_file', file_obj)
             util3.save()
 
+            util4 = Utility(
+                name = 'NY Water',
+                )
+            util4.save()
+            #post-creation actions
+            #--load image file
+
         except:
             print 'Failed to create new Utilities.'
         else:
