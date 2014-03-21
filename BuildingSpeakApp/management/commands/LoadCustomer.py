@@ -98,7 +98,7 @@ class Command(BaseCommand):
         
     ###---Buildings
         try:
-            ws = WeatherStation.objects.get(name = 'ATL - downtown west')
+            ws = WeatherStation.objects.get(name = 'Cortland, NY')
             
             bldg1 = Building(
                 name = 'Main Building',

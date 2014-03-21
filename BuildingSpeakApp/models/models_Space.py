@@ -293,8 +293,17 @@ class Space(models.Model):
                 for utype in meter_dict.keys():
                     five_years = pd.DataFrame(meter_dict[utype]['df'], index = pd.period_range(start = mi, end = mf, freq = 'M'))
                     five_years = five_years.sort_index()
-                    first_calc_month = five_years.index[five_years['Cost (act)'].apply(decimal_isnan)][0]
-                    last_act_month = first_calc_month - 1
+                    
+                    for i in range(len(five_years)-1,-1,-1):
+                        if not(decimal_isnan(five_years['Cost (act)'][i])):
+                            last_act_month_cost = five_years.index[i]
+                            first_calc_month_cost = last_act_month_cost + 1
+                            break
+                    for i in range(len(five_years)-1,-1,-1):
+                        if not(decimal_isnan(five_years['Consumption (act)'][i])):
+                            last_act_month_cons = five_years.index[i]
+                            first_calc_month_cons = last_act_month_cons + 1
+                            break
                     
                     five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
                                              'CDD (consumption)','HDD (consumption)']].applymap(nan2zero)
@@ -322,8 +331,8 @@ class Space(models.Model):
                                             five_years['HDD (consumption)'][24:36].sum()
                                             ])
                     five_year_table_cost.append([str(five_years.index[36].year),
-                                            five_years['Cost (act)'][36:last_act_month].sum(),
-                                            five_years['Cost (exp)'][first_calc_month:48].sum(),
+                                            five_years['Cost (act)'][five_years.index[36]:last_act_month_cost].sum(),
+                                            five_years['Cost (exp)'][first_calc_month_cost:five_years.index[47]].sum(),
                                             five_years['CDD (consumption)'][36:48].sum(),
                                             five_years['HDD (consumption)'][36:48].sum()
                                             ])
@@ -355,8 +364,8 @@ class Space(models.Model):
                                             five_years['HDD (consumption)'][24:36].sum()
                                             ])
                     five_year_table_costSF.append([str(five_years.index[36].year),
-                                            five_years['Cost (act)'][36:last_act_month].sum()/self.square_footage,
-                                            five_years['Cost (exp)'][first_calc_month:48].sum()/self.square_footage,
+                                            five_years['Cost (act)'][five_years.index[36]:last_act_month_cost].sum()/self.square_footage,
+                                            five_years['Cost (exp)'][first_calc_month_cost:five_years.index[47]].sum()/self.square_footage,
                                             five_years['CDD (consumption)'][36:48].sum(),
                                             five_years['HDD (consumption)'][36:48].sum()
                                             ])
@@ -388,8 +397,8 @@ class Space(models.Model):
                                             five_years['HDD (consumption)'][24:36].sum()
                                             ])
                     five_year_table_cons.append([str(five_years.index[36].year),
-                                            five_years['Consumption (act)'][36:last_act_month].sum(),
-                                            five_years['Consumption (exp)'][first_calc_month:48].sum(),
+                                            five_years['Consumption (act)'][five_years.index[36]:last_act_month_cons].sum(),
+                                            five_years['Consumption (exp)'][first_calc_month_cons:five_years.index[47]].sum(),
                                             five_years['CDD (consumption)'][36:48].sum(),
                                             five_years['HDD (consumption)'][36:48].sum()
                                             ])
@@ -421,8 +430,8 @@ class Space(models.Model):
                                             five_years['HDD (consumption)'][24:36].sum()
                                             ])
                     five_year_table_consSF.append([str(five_years.index[36].year),
-                                            five_years['Consumption (act)'][36:last_act_month].sum()/self.square_footage,
-                                            five_years['Consumption (exp)'][first_calc_month:48].sum()/self.square_footage,
+                                            five_years['Consumption (act)'][five_years.index[36]:last_act_month_cons].sum()/self.square_footage,
+                                            five_years['Consumption (exp)'][first_calc_month_cons:five_years.index[47]].sum()/self.square_footage,
                                             five_years['CDD (consumption)'][36:48].sum(),
                                             five_years['HDD (consumption)'][36:48].sum()
                                             ])

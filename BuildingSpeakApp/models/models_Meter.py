@@ -381,8 +381,22 @@ class Meter(models.Model):
             
             five_years = pd.DataFrame(bill_data, index = pd.period_range(start = mi, end = mf, freq = 'M'))
             five_years = five_years.sort_index()
-            first_calc_month = five_years.index[five_years['Cost (act)'].apply(decimal_isnan)][0]
-            last_act_month = first_calc_month - 1
+            
+            for i in range(len(five_years)-1,-1,-1):
+                if not(decimal_isnan(five_years['Cost (act)'][i])):
+                    last_act_month_cost = five_years.index[i]
+                    first_calc_month_cost = last_act_month_cost + 1
+                    break
+            for i in range(len(five_years)-1,-1,-1):
+                if not(decimal_isnan(five_years['Consumption (act)'][i])):
+                    last_act_month_cons = five_years.index[i]
+                    first_calc_month_cons = last_act_month_cons + 1
+                    break
+            for i in range(len(five_years)-1,-1,-1):
+                if not(decimal_isnan(five_years['kBtu Consumption (act)'][i])):
+                    last_act_month_kbtu = five_years.index[i]
+                    first_calc_month_kbtu = last_act_month_kbtu + 1
+                    break
             
             five_years = five_years[['Cost (act)','Cost (exp)','Consumption (act)','Consumption (exp)',
                                      'kBtu Consumption (act)','kBtu Consumption (exp)','CDD (consumption)',
@@ -411,8 +425,8 @@ class Meter(models.Model):
                                     five_years['HDD (consumption)'][24:36].sum()
                                     ])
             five_year_table_cost.append([str(five_years.index[36].year),
-                                    five_years['Cost (act)'][36:last_act_month].sum(),
-                                    five_years['Cost (exp)'][first_calc_month:48].sum(),
+                                    five_years['Cost (act)'][five_years.index[36]:last_act_month_cost].sum(),
+                                    five_years['Cost (exp)'][first_calc_month_cost:five_years.index[47]].sum(),
                                     five_years['CDD (consumption)'][36:48].sum(),
                                     five_years['HDD (consumption)'][36:48].sum()
                                     ])
@@ -443,8 +457,8 @@ class Meter(models.Model):
                                     five_years['HDD (consumption)'][24:36].sum()
                                     ])
             five_year_table_cons.append([str(five_years.index[36].year),
-                                    five_years['Consumption (act)'][36:last_act_month].sum(),
-                                    five_years['Consumption (exp)'][first_calc_month:48].sum(),
+                                    five_years['Consumption (act)'][five_years.index[36]:last_act_month_cons].sum(),
+                                    five_years['Consumption (exp)'][first_calc_month_cons:five_years.index[47]].sum(),
                                     five_years['CDD (consumption)'][36:48].sum(),
                                     five_years['HDD (consumption)'][36:48].sum()
                                     ])
@@ -475,8 +489,8 @@ class Meter(models.Model):
                                     five_years['HDD (consumption)'][24:36].sum()
                                     ])
             five_year_table_kBtu.append([str(five_years.index[36].year),
-                                    five_years['kBtu Consumption (act)'][36:last_act_month].sum(),
-                                    five_years['kBtu Consumption (exp)'][first_calc_month:48].sum(),
+                                    five_years['kBtu Consumption (act)'][five_years.index[36]:last_act_month_kbtu].sum(),
+                                    five_years['kBtu Consumption (exp)'][first_calc_month_kbtu:five_years.index[47]].sum(),
                                     five_years['CDD (consumption)'][36:48].sum(),
                                     five_years['HDD (consumption)'][36:48].sum()
                                     ])
@@ -919,19 +933,38 @@ class Meter(models.Model):
                                                 storedbd_with_updates_act = storedbd_with_newly_added_months[storedbd_with_newly_added_months['IsForecasted'].apply(lambda ff: not(ff))].copy()
                                             if storedbd_with_updates_act is not None and len(storedbd_with_updates_act)>=1:
                                                 storedbd_with_updates_act = storedbd_with_updates_act.sort_index()
-                                                last_day = storedbd_with_updates_act['End Date'][-1]
-                                                forecast_df = pd.DataFrame({'Start Date': last_day + timedelta(days=1),
-                                                                            'End Date': last_day + timedelta(days=30)},
-                                                                           index = pd.period_range(last_day + timedelta(days = 1),
-                                                                                                   last_day + timedelta(days = 30 * (12 + 12 - storedbd_with_updates_act.index[-1].month)),
-                                                                                                   freq = 'M'))
-                                                forecast_df['Start Date'] = forecast_df.index
-                                                forecast_df['Start Date'] = forecast_df['Start Date'].apply(lambda ii: ii - forecast_df['Start Date'][0])
-                                                forecast_df['Start Date'] = forecast_df['Start Date'].apply(lambda ii: last_day + timedelta(days = 30 * float(ii) + 1))
                                                 
-                                                forecast_df['End Date'] = forecast_df.index
-                                                forecast_df['End Date'] = forecast_df['End Date'].apply(lambda ii: ii - forecast_df['End Date'][0])
-                                                forecast_df['End Date'] = forecast_df['End Date'].apply(lambda ii: last_day + timedelta(days = float(29) + 30 * float(ii) + 1))
+                                                #the original approach of creating the forecast Start/End Dates and Periods
+                                                #was a simple adding of 30 days, but this creates problems of assign_period
+                                                #function skipping months and duplicating months (generally around Start/End
+                                                #Dates near the middle of the month and around February), so this approach
+                                                #may seem complex but was deemed a way to lock in dates to avoid the day
+                                                #shifting that happens when adding a fixed number of days to a starting date
+                                                last_end_day = storedbd_with_updates_act['End Date'][-1]
+                                                last_start_day = storedbd_with_updates_act['Start Date'][-1]
+                                                last_month = storedbd_with_updates_act.index[-1] #important to use assigned month, not month of last End Date
+                                                
+                                                forecast_range = range(0,12+12-last_month.month)
+                                                forecast_periods = [last_month+i+1 for i in forecast_range]
+                                                month_ints_end = [remainder(i+last_end_day.month,12)+1 for i in forecast_range]
+                                                month_ints_start = [remainder(i+last_start_day.month,12)+1 for i in forecast_range]
+                                                date_info = [[forecast_periods[i],month_ints_start[i],month_ints_end[i]] for i in forecast_range]
+                                                start_dates = [datetime(i[0].year,
+                                                                        i[1],
+                                                                        last_end_day.day+1,
+                                                                        11,
+                                                                        11,
+                                                                        11) for i in date_info]
+                                                end_dates = [datetime(i[0].year,
+                                                                        i[2],
+                                                                        last_end_day.day,
+                                                                        11,
+                                                                        11,
+                                                                        11) for i in date_info]
+                                                
+                                                forecast_df = pd.DataFrame({'Start Date': start_dates,
+                                                                            'End Date': end_dates},
+                                                                            index = forecast_periods)
                                                 
                                                 forecast_df['Billing Demand (act)'] = Decimal(NaN)
                                                 forecast_df['Peak Demand (act)'] = Decimal(NaN)
@@ -1333,6 +1366,8 @@ class Meter(models.Model):
                 df['Peak Demand (base delta)'] = predicted - lower_bound
                 df['Billing Demand (base)'] = predicted
                 df['Billing Demand (base delta)'] = predicted - lower_bound
+
+                
             except:
                 m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -1364,6 +1399,7 @@ class Meter(models.Model):
                 predicted,stderror,lower_bound,upper_bound = self.monther_set.get(name='BILLx').consumption_model.current_model_predict_df(df = df, df_new_meter = new_consumption_model_df)
                 df['Consumption (base)'] = predicted
                 df['Consumption (base delta)'] = predicted - lower_bound
+
             except:
                 m = Message(when=timezone.now(),
                         message_type='Code Error',
@@ -1375,7 +1411,29 @@ class Meter(models.Model):
                 df['Consumption (base)'] = Decimal(NaN)
                 df['Consumption (base delta)'] = Decimal(NaN)
                     
-        df[['Consumption (base)','Consumption (base delta)','Peak Demand (base)','Peak Demand (base delta)']] = df[['Consumption (base)','Consumption (base delta)','Peak Demand (base)','Peak Demand (base delta)']].applymap(Decimal)
+        try:
+            df[['Consumption (base)','Consumption (base delta)','Peak Demand (base)','Peak Demand (base delta)']] = df[['Consumption (base)','Consumption (base delta)','Peak Demand (base)','Peak Demand (base delta)']].applymap(Decimal)
+            df['Peak Demand (base)'] = df['Peak Demand (base)'].apply(cap_negatives_with_NaN)
+            df['Peak Demand (base delta)'] = df['Peak Demand (base delta)'].apply(cap_negatives_with_NaN)
+            df['Billing Demand (base)'] = df['Billing Demand (base)'].apply(cap_negatives_with_NaN)
+            df['Billing Demand (base delta)'] = df['Billing Demand (base delta)'].apply(cap_negatives_with_NaN)
+            df['Consumption (base)'] = df['Consumption (base)'].apply(cap_negatives_with_NaN)
+            df['Consumption (base delta)'] = df['Consumption (base delta)'].apply(cap_negatives_with_NaN)
+        except:
+            m = Message(when=timezone.now(),
+                    message_type='Code Error',
+                    subject='Calculation failed.',
+                    comment='Meter %s bill_data_calc_baseline unable to calculate Consumption (base, base delta).' % self.id)
+            m.save()
+            self.messages.add(m)
+            print m
+            df['Peak Demand (base)'] = Decimal(NaN)
+            df['Peak Demand (base delta)'] = Decimal(NaN)
+            df['Billing Demand (base)'] = Decimal(NaN)
+            df['Billing Demand (base delta)'] = Decimal(NaN)
+            df['Consumption (base)'] = Decimal(NaN)
+            df['Consumption (base delta)'] = Decimal(NaN)
+            
         t1 = timezone.now()
         logger.debug('bill_data_calc_baseline %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
         return df
@@ -1699,6 +1757,33 @@ class Meter(models.Model):
         t1 = timezone.now()
         logger.debug('bill_data_update_calculated_values %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
             
+#    def set_period_index_df(self, df):
+#        """Inputs: dataframe with Start/End Date
+#            
+#        Returns df with index of monthly Periods,
+#        ensuring index uniqueness."""
+#        t0 = timezone.now()
+#        
+#        try:
+#            if 'Start Date' not in df.columns or 'End Date' not in df.columns
+#        except:
+#            m = Message(when=timezone.now(),
+#                        message_type='Code Error',
+#                        subject='Function received bad arguments.',
+#                        comment='Unexpected inputs passed to assign_period_datetime function on meter %s.' % self.id)
+#            m.save()
+#            self.messages.add(m)
+#            print m
+#            answer = None
+#        else:
+#            try:
+#                
+#            except:
+#                
+#        t1 = timezone.now()
+#        logger.debug('assign_period_datetime %s' % '{0:,.0f}'.format((t1-t0).seconds*1000.0 + (t1-t0).microseconds/1000.0))
+#        return answer
+
     def assign_period_datetime(self, time_series=[], dates=[]):
         """Inputs:
             time_series or

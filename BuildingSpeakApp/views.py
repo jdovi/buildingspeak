@@ -164,6 +164,7 @@ def account_detail(request, account_id):
                         {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in acct_meters]
+    acct_meter_data_with_nans = copy.deepcopy(acct_meter_data)
     for meter in acct_meter_data:
         if meter[2] is not None: meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
     
@@ -208,13 +209,13 @@ def account_detail(request, account_id):
     month_last = month_first + 40+24                            #final month in sequence
     acct_view_data = account.get_account_view_meter_data(month_first = month_first,
                                                          month_last = month_last,
-                                                         acct_meter_data = acct_meter_data)
+                                                         acct_meter_data = copy.deepcopy(acct_meter_data))
 
     tB = timezone.now()
     logger.debug('account_detail_D %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
     tA = timezone.now()
 
-    five_year_data = account.get_account_view_five_year_data(acct_meter_data = acct_meter_data)
+    five_year_data = account.get_account_view_five_year_data(acct_meter_data = copy.deepcopy(acct_meter_data_with_nans))
     
     if acct_view_data is None:
         meter_data = None
@@ -267,10 +268,10 @@ def account_detail(request, account_id):
         'pie_data':       pie_data,
         'total_SF':       total_SF,
         'five_year_data': five_year_data,
-        'motion_data_meters':       account.get_account_view_motion_table_meters(acct_meter_data = acct_meter_data),
-        'motion_data_fuels':        account.get_account_view_motion_table_fuels(acct_meter_data = acct_meter_data),
-        'motion_data_buildings':    account.get_account_view_motion_table_buildings(acct_meter_data = acct_meter_data),
-        'motion_data_spaces':       account.get_account_view_motion_table_spaces(acct_meter_data = acct_meter_data),
+        'motion_data_meters':       account.get_account_view_motion_table_meters(acct_meter_data = copy.deepcopy(acct_meter_data)),
+        'motion_data_fuels':        account.get_account_view_motion_table_fuels(acct_meter_data = copy.deepcopy(acct_meter_data)),
+        'motion_data_buildings':    account.get_account_view_motion_table_buildings(acct_meter_data = copy.deepcopy(acct_meter_data)),
+        'motion_data_spaces':       account.get_account_view_motion_table_spaces(acct_meter_data = copy.deepcopy(acct_meter_data)),
         'stripe_pk':                stripe_pk,
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
@@ -311,6 +312,7 @@ def building_detail(request, account_id, building_id):
                         {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in bldg_meters]
+    bldg_meter_data_with_nans = copy.deepcopy(bldg_meter_data)
     for meter in bldg_meter_data:
         if meter[2] is not None: meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
 
@@ -323,13 +325,13 @@ def building_detail(request, account_id, building_id):
     
     bldg_view_data = building.get_building_view_meter_data(month_first = month_first,
                                                            month_last = month_last,
-                                                           bldg_meter_data = bldg_meter_data)
+                                                           bldg_meter_data = copy.deepcopy(bldg_meter_data))
 
     tB = timezone.now()
     logger.debug('building_detail_C %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
     tA = timezone.now()
 
-    five_year_data = building.get_building_view_five_year_data(bldg_meter_data = bldg_meter_data)
+    five_year_data = building.get_building_view_five_year_data(bldg_meter_data = copy.deepcopy(bldg_meter_data_with_nans))
     
     if bldg_view_data is None:
         meter_data = None
@@ -361,9 +363,9 @@ def building_detail(request, account_id, building_id):
         'meter_data':           meter_data,
         'pie_data':             pie_data,
         'five_year_data':       five_year_data,
-        'motion_data_meters':   building.get_building_view_motion_table_meters(bldg_meter_data = bldg_meter_data),
-        'motion_data_fuels':    building.get_building_view_motion_table_fuels(bldg_meter_data = bldg_meter_data),
-        'motion_data_spaces':   building.get_building_view_motion_table_spaces(bldg_meter_data = bldg_meter_data),
+        'motion_data_meters':   building.get_building_view_motion_table_meters(bldg_meter_data = copy.deepcopy(bldg_meter_data)),
+        'motion_data_fuels':    building.get_building_view_motion_table_fuels(bldg_meter_data = copy.deepcopy(bldg_meter_data)),
+        'motion_data_spaces':   building.get_building_view_motion_table_spaces(bldg_meter_data = copy.deepcopy(bldg_meter_data)),
     }
     user_account_IDs = [str(x.pk) for x in request.user.account_set.all()]
     if account_id in user_account_IDs:
@@ -403,6 +405,7 @@ def space_detail(request, account_id, space_id):
                         {y.building.id:y.assigned_fraction for y in x.buildingmeterapportionment_set.all()},    #building_set dict w/ ID:fraction pairs
                         {y.space.id:y.assigned_fraction for y in x.spacemeterapportionment_set.all()},          #space_set dict w/ ID:fraction pairs
                          ] for x in space_meters]
+    space_meter_data_with_nans = copy.deepcopy(space_meter_data)
     for meter in space_meter_data:
         if meter[2] is not None: meter[2][columns_needing_nan2zero] = meter[2][columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
 
@@ -420,7 +423,7 @@ def space_detail(request, account_id, space_id):
     logger.debug('space_detail_C %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
     tA = timezone.now()
 
-    five_year_data = space.get_space_view_five_year_data(space_meter_data = copy.deepcopy(space_meter_data))
+    five_year_data = space.get_space_view_five_year_data(space_meter_data = copy.deepcopy(space_meter_data_with_nans))
     
     if space_view_data is None:
         meter_data = None
@@ -526,6 +529,7 @@ def meter_detail(request, account_id, meter_id):
         
         #this dataframe provides the foundational meter dataset; if no data, skip everything
         bill_data = meter.get_bill_data_period_dataframe()
+        bill_data_with_nans = copy.deepcopy(bill_data)
         bill_data[columns_needing_nan2zero] = bill_data[columns_needing_nan2zero].applymap(nan2zero) #nan2zero needed in convert_units_sum_meters
         if bill_data is None:
             totals_table = False
@@ -554,7 +558,7 @@ def meter_detail(request, account_id, meter_id):
             tB = timezone.now()
             logger.debug('meter_detail_C %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
             tA = timezone.now()
-            five_year_data =    meter.get_meter_view_five_year_data(bill_data = copy.deepcopy(bill_data))
+            five_year_data =    meter.get_meter_view_five_year_data(bill_data = copy.deepcopy(bill_data_with_nans)) #need df with NaNs to identify forecasted months
             tB = timezone.now()
             logger.debug('meter_detail_D %s' % '{0:,.0f}'.format((tB-tA).seconds*1000.0 + (tB-tA).microseconds/1000.0))
             tA = timezone.now()
